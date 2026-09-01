@@ -1,6 +1,7 @@
-
 class Habilidad {
+    static #contadorid = 0; 
     constructor(titulo, descripcion) {
+        this.id = Habilidad.#contadorid++;
         this.titulo = titulo;
         this.codigo = this.normalizarTitulo(titulo);
         this.descripcion = descripcion;
@@ -17,3 +18,5 @@ class Habilidad {
     }
 
 }
+
+export default Habilidad;
