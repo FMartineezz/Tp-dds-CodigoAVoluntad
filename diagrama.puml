@@ -1,0 +1,50 @@
+@startuml CodigoAVoluntad
+class Colectivo{
+    -nombre
+    -descripcion
+    -ubicacion
+    -tipoDeColectivo
+    -proyectos
+
+    +cargarProyecto()
+}
+
+class Proyecto{
+    -titulo
+    -descripcion
+    -habilidadesRequeridas
+    -horas
+    -tipoDeHoras
+    -modalidadDeColaboracion
+    -colectivo
+    -finalizado
+}
+
+class Colaboracion{
+    -personaColaboradora
+    -proyecto
+}
+
+class Habilidad{
+    -titulo
+    -codigo
+    -descripcion
+
+    +normalizarTitulo()
+}
+
+class PersonaColaboradora{
+    -nombreFantasia
+    -git
+    -nombre
+    -apellido
+    -habilidades
+    -presentacion
+}
+
+Colectivo --> Proyecto
+PersonaColaboradora -> Habilidad
+Colaboracion --> Proyecto
+Colaboracion --> PersonaColaboradora
+
+@enduml
