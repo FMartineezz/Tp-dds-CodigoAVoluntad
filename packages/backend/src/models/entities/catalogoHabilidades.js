@@ -1,3 +1,6 @@
+import { Habilidad } from "./habilidad.js";
+
+//para mi esto va al repository
 class CatalogoHabilidades {
     constructor() {
         this.habilidades = [];

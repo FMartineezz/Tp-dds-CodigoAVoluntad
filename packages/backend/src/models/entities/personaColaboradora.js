@@ -9,4 +9,4 @@ class PersonaColaboradora {
     }
 } 
 
-module.exports = {PersonaColaboradora};
+export default {PersonaColaboradora};

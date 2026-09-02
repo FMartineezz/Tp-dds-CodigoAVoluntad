@@ -5,4 +5,4 @@ class Colaboracion{
     }
 }
 
-module.exports = {Colaboracion};
+export default {Colaboracion};

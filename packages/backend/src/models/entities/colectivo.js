@@ -2,7 +2,7 @@ const UBICACION_VALIDA = new Set["argentina", "caba", "buenos aires", "catamarca
                             "jujuy", "la pampa", "la rioja", "mendoza", "misiones", "neuquen", "rio negro", "salta", "san juan", 
                             "san luis", "santa cruz", "santa fe", "santiago del estero", "tierra del fuego", "tucuman"];
 
-const TIPOS_COLECTIVO = Object.freeze({
+const TipoColectivo = Object.freeze({
                                        FUNDACION : "fundacion",                                   
                                        ONG : "ong",
                                        ASOCIACION_BARRIAL : "asociacion barrial",
@@ -28,8 +28,8 @@ class Colectivo{
 
 }
 
-module.exports = {UBICACION_VALIDA, 
-                  TIPOS_COLECTIVO, 
+export default {UBICACION_VALIDA, 
+                  TipoColectivo, 
                   Colectivo 
                 };
 

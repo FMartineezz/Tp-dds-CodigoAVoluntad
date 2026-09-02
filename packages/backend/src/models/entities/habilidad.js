@@ -1,3 +1,4 @@
+//el id conviene que lo tenga el repo
 class Habilidad {
     static #contadorid = 0; 
     constructor(titulo, descripcion) {

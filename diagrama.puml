@@ -1,50 +1,73 @@
 @startuml CodigoAVoluntad
 class Colectivo{
-    -nombre
-    -descripcion
-    -ubicacion
-    -tipoDeColectivo
-    -proyectos
+    -nombre : String
+    -descripcion : String
+    -ubicacion : String
+    -tipoDeColectivo : TipoDeColectivo
+    -proyectos : [Proyecto]
 
     +cargarProyecto()
 }
 
 class Proyecto{
-    -titulo
-    -descripcion
-    -habilidadesRequeridas
-    -horas
-    -tipoDeHoras
-    -modalidadDeColaboracion
-    -colectivo
-    -finalizado
+    -titulo : String
+    -descripcion : String
+    -habilidadesRequeridas : [Habilidad]
+    -horas : Number
+    -tipoDeCompromiso : TipoCompromiso
+    -modalidadDeColaboracion : ModalidadColaboracion
+    -colectivo : Colectivo
+    -finalizado : Boolean
 }
 
 class Colaboracion{
-    -personaColaboradora
-    -proyecto
+    -personaColaboradora : PersonaColaboradora
+    -proyecto : Proyecto
 }
 
 class Habilidad{
-    -titulo
-    -codigo
-    -descripcion
+    -titulo : String
+    -codigo : String
+    -descripcion : String
 
     +normalizarTitulo()
 }
 
 class PersonaColaboradora{
-    -nombreFantasia
-    -git
-    -nombre
-    -apellido
-    -habilidades
-    -presentacion
+    -nombreFantasia : String
+    -git : String
+    -nombre : String
+    -apellido : String
+    -habilidades : [Habilidad]
+    -presentacion : String
 }
 
-Colectivo --> Proyecto
-PersonaColaboradora -> Habilidad
+enum ModalidadColaboracion {
+    GRATUITA
+    INCENTIVO_ECONOMICO
+    CONTRATACION_EVENTUAL
+}
+
+enum TipoCompromiso {
+    TOTAL
+    SEMANAL
+    MENSUAL
+}
+
+enum TipoColectivo {
+    FUNDACION                                 
+    ONG
+    ASOCIACION_BARRIAL
+    ASAMBLEAS
+}
+
+Colectivo --> "*" Proyecto
+PersonaColaboradora -> "*" Habilidad
+Habilidad "*" <- Proyecto
 Colaboracion --> Proyecto
 Colaboracion --> PersonaColaboradora
+Colectivo -> TipoColectivo
+Proyecto --> ModalidadColaboracion
+Proyecto --> TipoCompromiso
 
 @enduml

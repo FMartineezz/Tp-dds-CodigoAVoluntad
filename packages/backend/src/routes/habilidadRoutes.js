@@ -1,9 +1,14 @@
 import { Router } from 'express';
 import habilidadController from '../controllers/habilidadController.js';
-const router = Router();
 
-router.get("/habilidades", habilidadController.obtenerHabilidades);
-router.get("/habilidades/:id", habilidadController.obtenerHabilidadPorId);
-router.post("/habilidades", habilidadController.crearHabilidad);
+const pathHabilidades = "/habilidades"
 
-export default router;
+export default function habilidadRoutes() {
+    const router = Router() 
+    
+    router.get(pathHabilidades, habilidadController.obtenerHabilidades);
+    router.get(pathHabilidades + "/id", habilidadController.obtenerHabilidadPorId);
+    router.post(pathHabilidades, habilidadController.crearHabilidad);
+
+    return router 
+}

@@ -1,5 +1,9 @@
 import HabilidadService from '../services/habilidadService.js';
 
+// no acoplar el service
+// constructor(habilidadService) {
+//     this.habilidadService = habilidadService
+// }
 class HabilidadController {
     crearHabilidad(req, res) {
         try{
