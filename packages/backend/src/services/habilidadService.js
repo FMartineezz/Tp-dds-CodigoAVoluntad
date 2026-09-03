@@ -1,9 +1,7 @@
-import Habilidad from '../models/entities/habilidad.js';
-
-// el service debe tener al repo y el repo es el que tiene la lista de habilidades
-class HabilidadService {
-    constructor(){
-        this.habilidades = [];
+import Habilidad from '../models/entities/habilidad.js';;
+export class HabilidadService {
+    constructor(repository){
+        this.repository = repository
     }
     
     crearHabilidad(titulo, descripcion) {
@@ -14,26 +12,15 @@ class HabilidadService {
             throw new Error('El titulo y/o la descripcion deben ser cadenas de texto');
         }
             const habilidad = new Habilidad(titulo, descripcion);
-            this.habilidades.push(habilidad);
+            this.repository.agregarHabilidad(habilidad);
             return habilidad;
     }
 
     obtenerHabilidades(){
-        return this.habilidades;
+        return this.repository.obtenerHabilidades();
     }
 
     obtenerHabilidadPorId(id){
-        if (Number.isNaN(id)) {
-            throw new Error("El id debe ser numérico");
-        }
-        
-        for(const habilidad of this.habilidades){
-            if(habilidad.id == id ){
-                return habilidad;
-            }
-        }
-        return null;
+      return this.repository.obtenerHabilidadPorId(id);
     }
 }
-
-export default new HabilidadService();
