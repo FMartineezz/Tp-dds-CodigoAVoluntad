@@ -1,16 +1,23 @@
-import Habilidad from '../models/entities/habilidad.js';;
+import Habilidad from '../models/habilidad.js';;
 export class HabilidadService {
     constructor(repository){
         this.repository = repository
     }
     
     crearHabilidad(titulo, descripcion) {
-        if (!titulo || !descripcion) {
-            throw new Error('El título y la descripción son obligatorios');
+        if (!titulo) {
+            throw new Error('El título es obligatoria');
         }
-        if (typeof titulo !== 'string' || typeof descripcion !== 'string') {
-            throw new Error('El titulo y/o la descripcion deben ser cadenas de texto');
+        if(!descripcion){
+            throw new Error('La descripción es obligatoria');
         }
+        if(typeof titulo !== 'string'){
+            throw new Error('El titulo debe ser cadena de texto');
+        }
+        if (typeof descripcion !== 'string') {
+            throw new Error('La descripcion debe ser cadena de texto');
+        }
+
             const habilidad = new Habilidad(titulo, descripcion);
             this.repository.agregarHabilidad(habilidad);
             return habilidad;
@@ -21,6 +28,9 @@ export class HabilidadService {
     }
 
     obtenerHabilidadPorId(id){
-      return this.repository.obtenerHabilidadPorId(id);
+        if (Number.isNaN(id)) {
+            throw new Error("El id debe ser numérico");
+        }  
+        return this.repository.obtenerHabilidadPorId(id);
     }
 }

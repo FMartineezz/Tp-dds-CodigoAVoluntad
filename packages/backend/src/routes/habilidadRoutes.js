@@ -1,10 +1,11 @@
 import { Router } from 'express';
 
-import {HabilidadRespository} from '../models/repositories/habilidadRepository.js';
-const habilidadRepository = new HabilidadRespository();
+import {HabilidadRespository} from '../repositories/habilidadRepository.js';
 import {HabilidadService} from '../services/habilidadService.js';
-const habilidadService = new HabilidadService(habilidadRepository);
 import {HabilidadController} from '../controllers/habilidadController.js';
+
+const habilidadRepository = new HabilidadRespository();
+const habilidadService = new HabilidadService(habilidadRepository);
 const habilidadController = new HabilidadController(habilidadService);
 
 
