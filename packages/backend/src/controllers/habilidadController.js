@@ -1,13 +1,12 @@
-import HabilidadService from '../services/habilidadService.js';
+//En vez de escribir muchos trycatch se puede hacer un middleware de manejo de errores
+export class HabilidadController {
+    constructor(habilidadService){
+        this.habilidadService = habilidadService;
+    }
 
-// no acoplar el service
-// constructor(habilidadService) {
-//     this.habilidadService = habilidadService
-// }
-class HabilidadController {
-    crearHabilidad(req, res) {
+    crearHabilidad = (req, res) => {
         try{
-            const respuesta = HabilidadService.crearHabilidad(req.body.titulo, req.body.descripcion);
+            const respuesta = this.habilidadService.crearHabilidad(req.body.titulo, req.body.descripcion);
             res.status(201).json(respuesta);
             return; 
         }
@@ -16,9 +15,9 @@ class HabilidadController {
         }
     }
 
-    obtenerHabilidades(req,res){
+    obtenerHabilidades = (req,res) => {
         try{
-            const respuesta = HabilidadService.obtenerHabilidades();
+            const respuesta = this.habilidadService.obtenerHabilidades();
             res.status(200).json(respuesta);
             return;
         }
@@ -27,11 +26,11 @@ class HabilidadController {
         }   
     }
 
-    obtenerHabilidadPorId(req,res){
+    obtenerHabilidadPorId = (req,res) => {
         const id = Number(req.params.id);
             
         try{
-            const respuesta = HabilidadService.obtenerHabilidadPorId(id);    
+            const respuesta = this.habilidadService.obtenerHabilidadPorId(id);    
             if(!respuesta){
                 res.status(404).json("No se encontro la habilidad id : " + id);
                 return;
@@ -45,5 +44,3 @@ class HabilidadController {
     }
 
 }
-
-export default new HabilidadController();
