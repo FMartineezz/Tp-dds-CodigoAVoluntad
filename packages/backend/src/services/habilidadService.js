@@ -1,4 +1,4 @@
-import Habilidad from '../models/entities/habilidad.js';
+import Habilidad from '../models/habilidad.js';
 
 // el service debe tener al repo y el repo es el que tiene la lista de habilidades
 class HabilidadService {

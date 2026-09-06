@@ -1,4 +1,4 @@
-import { Habilidad } from "./habilidad.js";
+import { Habilidad } from "./entities/habilidad.js";
 
 //para mi esto va al repository
 class CatalogoHabilidades {

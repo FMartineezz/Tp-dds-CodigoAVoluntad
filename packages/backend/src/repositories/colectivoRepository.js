@@ -1,4 +1,4 @@
-import Colectivo from "../entities/colectivo.js";
+import Colectivo from "../colectivo.js";
 
 class ColectivoRepository {
     constructor(){
