@@ -9,15 +9,25 @@ class Habilidad {
     }
 
     normalizarTitulo(titulo){
-        return titulo
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") //quita tildes
-        .replace(/\W+/g, " ")                             //quita caracteres especiales
-        .trim()                                           
-        .split(/ |\B(?=[A-Z])/)                           
-        .map(word => word.toLowerCase())                  
-        .join('_');
-    }
-
+        titulo = titulo.trim().toLowerCase();
+        const palabras = [];
+        let palabraActual = "";
+        for(let i = 0 ; i < titulo.length ; i++){
+            if(titulo[i] === " " || titulo[i] === "," || titulo[i] === "-" || titulo[i] === "."){
+                if(palabraActual != ""){
+                palabras.push(palabraActual);
+                palabraActual = "";
+                }
+            }
+            else{
+                palabraActual += titulo[i];
+            }
+        }
+        if(palabraActual != ""){
+            palabras.push(palabraActual);
+        }
+    return palabras.join('_');
+    }    
 }
 
 export default Habilidad;
