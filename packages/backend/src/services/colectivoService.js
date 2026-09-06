@@ -1,25 +1,25 @@
-import TipoColectivo from '../models/entities/colectivo.js';
+import { TipoColectivo } from '../models/colectivo.js';
 
 class ColectivoService {
     constructor(repository){
         this.repository = repository;
     }
     
-    crearColectivo(nombre, descripcion, ubcacion, tipoDeColectivo, proyectos) {
-        if (!titulo || !descripcion || !tipoDeColectivo) {
+    crearColectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos) {
+        if (!nombre || !descripcion || !tipoDeColectivo) {
             throw new Error('El título, la descripción y el tipo de colectivo son obligatorios');
         }
-        if (typeof titulo !== 'string' || typeof descripcion !== 'string') {
+        if (typeof nombre !== 'string' || typeof descripcion !== 'string') {
             throw new Error('El titulo y/o la descripcion deben ser cadenas de texto');
         }
-        if (typeof tipoDeColectivo !== TipoColectivo) {
+        if (!Object.values(TipoColectivo).includes(tipoDeColectivo)) {
             throw new Error('El tipo de colectivo deben ser TipoColectivo');
         }
         // if (typeof proyectos !== Array) {
         //     throw new Error('El tipo de colectivo deben ser TipoColectivo');
         // }
 
-        return this.repository.crearColectivo(nombre, descripcion, ubcacion, tipoDeColectivo, proyectos)
+        return this.repository.crearColectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos)
 
     }
 
@@ -36,4 +36,4 @@ class ColectivoService {
     }
 }
 
-export default new ColectivoService();
+export default ColectivoService;

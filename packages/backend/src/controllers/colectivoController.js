@@ -5,7 +5,7 @@ class ColectivoController {
 
     crearColectivo(req, res) {
         try{
-            const respuesta = service.crearColectivo(
+            const respuesta = this.service.crearColectivo(
                 req.body.nombre, 
                 req.body.descripcion, 
                 req.body.ubicacion, 
@@ -22,7 +22,7 @@ class ColectivoController {
 
     obtenerColectivos(req,res){
         try{
-            const respuesta = service.obtenerColectivos();
+            const respuesta = this.service.obtenerColectivos();
             res.status(200).json(respuesta);
             return;
         }
@@ -35,7 +35,7 @@ class ColectivoController {
         const id = Number(req.params.id);
             
         try{
-            const respuesta = service.obtenerColectivoPorId(id);    
+            const respuesta = this.service.obtenerColectivoPorId(id);    
             if(!respuesta){
                 res.status(404).json("No se encontro el colectivo id : " + id);
                 return;
@@ -50,4 +50,4 @@ class ColectivoController {
 
 }
 
-export default new ColectivoController();
+export default ColectivoController;
