@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 //import habilidadRoutes from "./src/routes/habilidadRoutes.js";
 import routes from "./src/routes/routes.js";
-import errorHandler from "./middlewares/errorHandler.js";
+import errorHandler from "./src/middlewares/errorHandler.js";
 
 
 const port = process.env.SERVER_PORT || 3000

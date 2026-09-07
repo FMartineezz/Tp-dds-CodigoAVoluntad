@@ -1,5 +1,5 @@
-import appError from "../errors/appError.js";
-import errorCatalog from "../errors/errorCatalog.js";
+import { AppError } from "../errors/appError.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
 
 const errorHandler = (error, req, res, next) => {
 
