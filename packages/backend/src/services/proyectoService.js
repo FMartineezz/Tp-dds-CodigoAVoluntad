@@ -1,9 +1,15 @@
 import ProyectoModel from "../models/proyecto.js";
-import proyectoRepository from "../repositories/proyectoRepository.js";
+import proyectoRepositoryDefault from "../repositories/proyectoRepository.js";
+import habilidadServiceDefault from "./habilidadService.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
 class ProyectoService {
+
+    constructor(proyectoRepository = proyectoRepositoryDefault, habilidadService = habilidadServiceDefault){
+        this.proyectoRepository = proyectoRepository;
+        this.habilidadService = habilidadService;
+    }
 
     crearProyecto(
         titulo,
@@ -15,26 +21,34 @@ class ProyectoService {
         colectivo
     ) {
 
-        const proyecto = new ProyectoModel.Proyecto(
+        const proyecto = this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
+        
+        if(proyecto){
+            throw new AppError(ErrorCatalog.PROYECTO_YA_EXISTENTE, 409)
+        }   
+
+        const habilidadesEncontradas = habilidadesRequeridas.map((codigo) => this.habilidadService.obtenerHabilidadPorCodigo(codigo));
+    
+        const proyectoNuevo = new ProyectoModel.Proyecto(
             titulo,
             descripcion,
-            habilidadesRequeridas,
+            habilidadesEncontradas,
             horas,
             tipoDeCompromiso,
             modalidadDeColaboracion,
             colectivo
         );
 
-        return proyectoRepository.guardar(proyecto);
+        return this.proyectoRepository.guardar(proyectoNuevo);
     }
 
     obtenerProyectos() {
-        return proyectoRepository.obtenerTodos();
+        return this.proyectoRepository.obtenerTodos();
     }
 
     obtenerProyectoPorId(id) {
 
-        const proyecto = proyectoRepository.obtenerPorId(id);
+        const proyecto = this.proyectoRepository.obtenerPorId(id);
 
         if (!proyecto) {
             throw new AppError(
@@ -47,7 +61,7 @@ class ProyectoService {
     }
 
     finalizarProyecto(id) {
-    const proyecto = proyectoRepository.obtenerPorId(id);
+    const proyecto = this.proyectoRepository.obtenerPorId(id);
 
     if (!proyecto) {
         throw new AppError(
