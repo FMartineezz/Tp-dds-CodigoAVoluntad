@@ -1,7 +1,7 @@
-import ProyectoModel from "../models/entities/proyecto.js";
+import ProyectoModel from "../models/proyecto.js";
 import proyectoRepository from "../repositories/proyectoRepository.js";
-import AppError from "../errors/AppError.js";
-import ErrorCatalog from "../errors/ErrorCatalog.js";
+import { AppError } from "../errors/appError.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
 
 class ProyectoService {
 

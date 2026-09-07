@@ -1,4 +1,4 @@
-import ErrorCatalog from "../../errors/ErrorCatalog.js";
+import ErrorCatalog from "../../errors/errorCatalog.js";
 import { UBICACION_VALIDA, TipoColectivo } from "../../models/entities/colectivo.js";
 
 const validarColectivo = (req, res, next) => {

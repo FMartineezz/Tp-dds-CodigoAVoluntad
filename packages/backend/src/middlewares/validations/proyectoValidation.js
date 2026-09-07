@@ -1,4 +1,4 @@
-import ErrorCatalog from "../../errors/ErrorCatalog.js";
+import ErrorCatalog from "../../errors/errorCatalog.js";
 
 const validarProyecto = (req, res, next) => {
 

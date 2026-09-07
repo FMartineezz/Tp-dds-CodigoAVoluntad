@@ -20,4 +20,10 @@ export class HabilidadRespository{
         return null;
     }
 
+        buscarPorTituloYDescripcion(titulo, descripcion){
+            return this.habilidades.find(
+                (habilidad) => habilidad.titulo.trim().toLowerCase() === titulo.trim().toLowerCase() 
+                && habilidad.descripcion.trim().toLowerCase() === descripcion.trim().toLowerCase()) || null;
+    }
+
 }

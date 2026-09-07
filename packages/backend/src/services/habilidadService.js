@@ -1,21 +1,17 @@
+import { AppError } from '../errors/appError.js';
+import ErrorCatalog from '../errors/errorCatalog.js';
 import Habilidad from '../models/habilidad.js';;
+
 export class HabilidadService {
     constructor(repository){
         this.repository = repository
     }
     
     crearHabilidad(titulo, descripcion) {
-        if (!titulo) {
-            throw new Error('El título es obligatoria');
-        }
-        if(!descripcion){
-            throw new Error('La descripción es obligatoria');
-        }
-        if(typeof titulo !== 'string'){
-            throw new Error('El titulo debe ser cadena de texto');
-        }
-        if (typeof descripcion !== 'string') {
-            throw new Error('La descripcion debe ser cadena de texto');
+        //Valido que no exista la habilidad
+        const habilidadExistente = this.repository.buscarPorTituloYDescripcion(titulo, descripcion);
+        if(habilidadExistente){
+            throw new AppError(ErrorCatalog.HABILIDAD_YA_EXISTE ,409);
         }
 
             const habilidad = new Habilidad(titulo, descripcion);
@@ -29,8 +25,15 @@ export class HabilidadService {
 
     obtenerHabilidadPorId(id){
         if (Number.isNaN(id)) {
-            throw new Error("El id debe ser numérico");
+            throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
         }  
-        return this.repository.obtenerHabilidadPorId(id);
+        
+        const habilidad = this.repository.obtenerHabilidadPorId(id);
+
+        if (!habilidad) {
+            throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA, 404);
+        }
+
+        return habilidad;
     }
 }

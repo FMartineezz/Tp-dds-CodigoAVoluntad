@@ -88,6 +88,11 @@ const ErrorCatalog = Object.freeze({
         message: "La habilidad no fue encontrada"
     },
 
+    HABILIDAD_YA_EXISTE: {
+    code: "ERR-CSR-204",
+    message: "Ya existe una habilidad con ese título y descripción."
+},
+
 
     // =========================
     // COLECTIVOS
