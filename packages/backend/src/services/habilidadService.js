@@ -1,9 +1,11 @@
 import { AppError } from '../errors/appError.js';
 import ErrorCatalog from '../errors/errorCatalog.js';
-import Habilidad from '../models/habilidad.js';;
+import Habilidad from '../models/habilidad.js';
+import habilidadRepository from "../repositories/habilidadRepository.js";
+
 
 export class HabilidadService {
-    constructor(repository){
+    constructor(repository = habilidadRepository){
         this.repository = repository
     }
     
@@ -20,7 +22,7 @@ export class HabilidadService {
     }
 
     obtenerHabilidades(){
-        return this.repository.obtenerHabilidades();
+        return this.repository.findAll();
     }
 
     obtenerHabilidadPorId(id){
@@ -28,7 +30,7 @@ export class HabilidadService {
             throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
         }  
         
-        const habilidad = this.repository.obtenerHabilidadPorId(id);
+        const habilidad = this.repository.findById(id);
 
         if (!habilidad) {
             throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA, 404);
@@ -36,4 +38,14 @@ export class HabilidadService {
 
         return habilidad;
     }
+
+    obtenerHabilidadPorCodigo(codigo){
+        const habilidad = this.repository.buscarPorCodigo(codigo);
+        if(!habilidad){
+            throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA, 404);
+        }
+        return habilidad;
+    }
 }
+
+export default new HabilidadService();

@@ -1,9 +1,15 @@
-import proyectoService from "../services/proyectoService.js";
+import proyectoServiceDefault from "../services/proyectoService.js";
+
+//ARREGLAR varias cosas del proyecto (Hay que validar que exista la habilidad y el proyecto)
 
 class ProyectoController {
-    crearProyecto(req, res, next) {
+    constructor(proyectoService = proyectoServiceDefault){
+        this.proyectoService = proyectoService;
+    }
+
+    crearProyecto = (req, res, next) => {
         try {
-            const proyecto = proyectoService.crearProyecto(
+            const proyecto = this.proyectoService.crearProyecto(
                 req.body.titulo,
                 req.body.descripcion,
                 req.body.habilidadesRequeridas,
@@ -19,10 +25,10 @@ class ProyectoController {
         }
     }
 
-    obtenerProyectos(req, res, next) {
+    obtenerProyectos = (req, res, next) => {
         try {
             const proyectos =
-                proyectoService.obtenerProyectos();
+                this.proyectoService.obtenerProyectos();
 
             res.status(200).json(proyectos);
 
@@ -31,12 +37,12 @@ class ProyectoController {
         }
     }
 
-    obtenerProyectoPorId(req, res, next) {
+    obtenerProyectoPorId = (req, res, next) => {
         try {
             const id = Number(req.params.id);
 
             const proyecto =
-                proyectoService.obtenerProyectoPorId(id);
+                this.proyectoService.obtenerProyectoPorId(id);
 
             res.status(200).json(proyecto);
 

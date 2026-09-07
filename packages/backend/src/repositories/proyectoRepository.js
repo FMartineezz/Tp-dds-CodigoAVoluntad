@@ -17,6 +17,10 @@ class ProyectoRepository {
             proyecto => proyecto.id === id
         );
     }
+
+    obtenerPorTituloYColectivo(titulo, colectivo){
+        return this.proyectos.find(proyecto => proyecto.titulo === titulo && proyecto.colectivo === colectivo);
+    }
 }
 
 export default new ProyectoRepository();

@@ -1,6 +1,7 @@
-//En vez de escribir muchos trycatch se puede hacer un middleware de manejo de errores
+import habilidadServiceDefault from "../services/habilidadService.js";
+
 export class HabilidadController {
-    constructor(habilidadService){
+    constructor(habilidadService = habilidadServiceDefault){
         this.habilidadService = habilidadService;
     }
 
@@ -22,3 +23,5 @@ export class HabilidadController {
     }
 
 }
+
+export default new HabilidadController();

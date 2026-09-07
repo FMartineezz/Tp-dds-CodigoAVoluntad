@@ -69,6 +69,11 @@ const ErrorCatalog = Object.freeze({
         message: "El proyecto se encuentra finalizado"
     },
 
+    PROYECTO_YA_EXISTENTE: {
+        code: "ERR-CSR-110",
+        message : "Ya existe un proyecto con ese titulo para ese colectivo"
+    },
+
     // =========================
     // HABILIDADES
     // =========================

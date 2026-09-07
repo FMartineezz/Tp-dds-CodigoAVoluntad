@@ -1,4 +1,5 @@
 import ErrorCatalog from "../../errors/errorCatalog.js";
+import { AppError } from "../../errors/appError.js";
 
 const validarHabilidad = (req, res, next) => {
 
