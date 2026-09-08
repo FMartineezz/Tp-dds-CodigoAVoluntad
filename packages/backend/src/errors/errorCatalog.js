@@ -79,6 +79,11 @@ const ErrorCatalog = Object.freeze({
         message : "Las habilidades requeridas deben ser un array del codigo de la habilidad" 
     },
 
+    PROYECTO_COLECTIVO_FORMATO:{
+        code : "ERR-VAL-112",
+        message : "El colectivo debe ser el nombre del mismo"
+    },
+
     // =========================
     // HABILIDADES
     // =========================

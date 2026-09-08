@@ -66,6 +66,12 @@ const validarProyecto = (req, res, next) => {
         );
     }
 
+    if(typeof colectivo === 'object'){
+        return res.status(400).json(
+            ErrorCatalog.PROYECTO_COLECTIVO_FORMATO
+        );
+    }
+
     next();
 };
 

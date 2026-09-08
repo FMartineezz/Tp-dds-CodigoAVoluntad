@@ -1,14 +1,16 @@
 import ProyectoModel from "../models/proyecto.js";
 import proyectoRepositoryDefault from "../repositories/proyectoRepository.js";
 import habilidadServiceDefault from "./habilidadService.js";
+import colectivoServiceDefault from "./colectivoService.js"
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
 class ProyectoService {
 
-    constructor(proyectoRepository = proyectoRepositoryDefault, habilidadService = habilidadServiceDefault){
+    constructor(proyectoRepository = proyectoRepositoryDefault, habilidadService = habilidadServiceDefault, colectivoService = colectivoServiceDefault){
         this.proyectoRepository = proyectoRepository;
         this.habilidadService = habilidadService;
+        this.colectivoService = colectivoService
     }
 
     crearProyecto(
@@ -29,6 +31,8 @@ class ProyectoService {
 
         const habilidadesEncontradas = habilidadesRequeridas.map((codigo) => this.habilidadService.obtenerHabilidadPorCodigo(codigo));
     
+        const colectivoEncontrado = this.colectivoService.obtenerColectivoPorNombre(colectivo);
+
         const proyectoNuevo = new ProyectoModel.Proyecto(
             titulo,
             descripcion,
@@ -36,7 +40,7 @@ class ProyectoService {
             horas,
             tipoDeCompromiso,
             modalidadDeColaboracion,
-            colectivo
+            colectivoEncontrado
         );
 
         return this.proyectoRepository.guardar(proyectoNuevo);
