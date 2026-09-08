@@ -1,6 +1,6 @@
 //el id conviene que lo tenga el repo
 class Habilidad {
-    static #contadorid = 0; 
+    static #contadorid = 1; 
     constructor(titulo, descripcion) {
         this.id = Habilidad.#contadorid++;
         this.titulo = titulo;

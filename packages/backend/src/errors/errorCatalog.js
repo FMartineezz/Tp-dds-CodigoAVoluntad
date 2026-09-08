@@ -74,6 +74,11 @@ const ErrorCatalog = Object.freeze({
         message : "Ya existe un proyecto con ese titulo para ese colectivo"
     },
 
+    PROYECTO_HABILIDADES_REQUERIDAS_FORMATO: {
+        code : "ERR-VAL-111",
+        message : "Las habilidades requeridas deben ser un array del codigo de la habilidad" 
+    },
+
     // =========================
     // HABILIDADES
     // =========================
@@ -138,8 +143,13 @@ const ErrorCatalog = Object.freeze({
         message: (id) => `El colectivo de id ${id} no fue encontrado`
     },
 
+    COLECTIVO_NO_ENCONTRADO_POR_NOMBRE: {
+        code: "ERR-CSR-306",
+        message: (nombre) => `El colectivo de nombre ${nombre} no fue encontrado`
+    },
+
     COLECTIVO_TIPO_INVALIDO:{
-        code: "ERR-VAL-306",
+        code: "ERR-VAL-307",
         message: "El tipo de colectivo tiene formato invalido, debe ser TipoColectivo"
     },
 

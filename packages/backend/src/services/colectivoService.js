@@ -38,8 +38,19 @@ class ColectivoService {
             throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
         }
 
-        return this.repository.obtenerColectivoPorId(id);
+        return colectivo;
     }
+
+    obtenerColectivoPorNombre(nombre){
+        const colectivo = this.repository.obtenerColectivoPorNombre(nombre);
+
+        if(!colectivo){
+            throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE, 404, nombre);
+        }
+
+        return colectivo;
+    }
+
 }
 
 export default new ColectivoService();
