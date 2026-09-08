@@ -10,8 +10,8 @@ const TipoColectivo = Object.freeze({
                                     })
 
 class Colectivo{
-    constructor(id, nombre, descripcion, ubicacion = null, tipoDeColectivo){
-        this.id = id;
+    constructor(nombre, descripcion, ubicacion = null, tipoDeColectivo){
+        this.id = null;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.ubicacion = ubicacion;

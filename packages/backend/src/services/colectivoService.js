@@ -1,25 +1,26 @@
+import { AppError } from "../errors/appError.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
+import { Colectivo } from "../models/colectivo.js";
 import { TipoColectivo } from '../models/colectivo.js';
+import colectivoRepositoryDefault from '../repositories/colectivoRepository.js';
 
 class ColectivoService {
-    constructor(repository){
+    constructor(repository = colectivoRepositoryDefault){
         this.repository = repository;
     }
     
     crearColectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos) {
-        if (!nombre || !descripcion || !tipoDeColectivo) {
-            throw new Error('El título, la descripción y el tipo de colectivo son obligatorios');
-        }
-        if (typeof nombre !== 'string' || typeof descripcion !== 'string') {
-            throw new Error('El titulo y/o la descripcion deben ser cadenas de texto');
-        }
-        if (!Object.values(TipoColectivo).includes(tipoDeColectivo)) {
-            throw new Error('El tipo de colectivo deben ser TipoColectivo');
-        }
-        // if (typeof proyectos !== Array) {
-        //     throw new Error('El tipo de colectivo deben ser TipoColectivo');
-        // }
 
-        return this.repository.crearColectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos)
+        const colectivo = this.repository.obtenerColectivoPorNombre(nombre);
+
+        if(colectivo){
+            throw new Error('El colectivo ya existe');
+        }
+
+        const nuevoColectivo = new Colectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos);
+        this.repository.agregarColectivo(nuevoColectivo);
+        
+        return nuevoColectivo;
 
     }
 
@@ -31,9 +32,14 @@ class ColectivoService {
         if (Number.isNaN(id)) {
             throw new Error("El id debe ser numérico");
         }
-        
+        const colectivo =  this.repository.obtenerColectivoPorId(id);
+
+        if(!colectivo){
+            throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
+        }
+
         return this.repository.obtenerColectivoPorId(id);
     }
 }
 
-export default ColectivoService;
+export default new ColectivoService();
