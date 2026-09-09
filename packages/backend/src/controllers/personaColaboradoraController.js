@@ -1,4 +1,4 @@
-import personaColaboradoraServiceDefault from "../services/PersonaColaboradoraService.js";
+import personaColaboradoraServiceDefault from "../services/personaColaboradoraService.js";
 
 class PersonaColaboradoraController {
     constructor(personaColaboradoraService = personaColaboradoraServiceDefault) {
@@ -17,7 +17,7 @@ class PersonaColaboradoraController {
                     req.body.pronombres,
                     req.body.presentacion);
 
-        res.status(201).json(persona);
+        res.status(201).location(`/colaboradoras/${persona.id}`).json(persona);
     }
 
     obtenerPersonasColaboradoras = (req, res) => {

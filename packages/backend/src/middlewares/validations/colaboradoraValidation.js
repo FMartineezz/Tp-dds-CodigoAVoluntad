@@ -27,6 +27,18 @@ const validarColaboradora = (req, res, next) => {
         );
     }
 
+    if (!Array.isArray(habilidades)) {
+        return res.status(400).json(
+            ErrorCatalog.COLABORADORA_HABILIDADES_FORMATO
+        );
+    }
+
+    if (!habilidades.every(habilidad => typeof habilidad === "string")) {
+        return res.status(400).json(
+            ErrorCatalog.COLABORADORA_HABILIDADES_FORMATO
+        );
+    }
+
     if (presentacion === undefined || presentacion === null || presentacion === "") {
         return res.status(400).json(
             ErrorCatalog.COLABORADORA_PRESENTACION_REQUERIDA

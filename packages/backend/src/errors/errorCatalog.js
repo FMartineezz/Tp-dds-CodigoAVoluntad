@@ -158,6 +158,11 @@ const ErrorCatalog = Object.freeze({
         message: "El tipo de colectivo tiene formato invalido, debe ser TipoColectivo"
     },
 
+    COLECTIVO_YA_EXISTE: {
+        code: "ERR-CSR-308",
+        message: (nombre) => `Ya existe un colectivo con el nombre ${nombre}`
+    },
+
 
     // =========================
     // COLABORADORAS
@@ -186,6 +191,11 @@ const ErrorCatalog = Object.freeze({
     COLABORADORA_NO_ENCONTRADA: {
         code: "ERR-CSR-405",
         message: "La colaboradora no fue encontrada"
+    },
+
+    COLABORADORA_HABILIDADES_FORMATO: {
+        code: "ERR-VAL-406",
+        message: "Las habilidades de la colaboradora deben ser un array del codigo de la habilidad"
     },
 
 

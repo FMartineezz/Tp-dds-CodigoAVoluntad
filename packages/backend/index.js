@@ -3,14 +3,13 @@ import express from "express";
 import cors from "cors";
 import routes from "./src/routes/routes.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
+import ErrorCatalog from "./src/errors/errorCatalog.js";
 
 
 const port = process.env.SERVER_PORT || 3000
 
 const app = express();
 app.use(express.json());
-
-routes.forEach(route => app.use(route))
 
 app.use(
   cors({
@@ -21,6 +20,11 @@ app.use(
 );
 
 routes.forEach(route => app.use(route));
+
+app.use((req, res) => {
+  res.status(404).json(ErrorCatalog.RECURSO_NO_ENCONTRADO);
+});
+
 app.use(errorHandler);
 
 app.listen(port , () => {

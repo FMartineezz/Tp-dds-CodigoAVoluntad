@@ -13,7 +13,7 @@ class ColectivoController {
                 req.body.tipoDeColectivo, 
                 req.body.proyectos
             );
-        res.status(201).json(respuesta);
+        res.status(201).location(`/colectivos/${respuesta.id}`).json(respuesta);
     }
 
     obtenerColectivos(req,res){

@@ -1,7 +1,8 @@
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
-const errorHandler = (error, res) => {
+// eslint-disable-next-line no-unused-vars -- Express solo reconoce un middleware de errores si declara exactamente 4 parámetros
+const errorHandler = (error, req, res, next) => {
 
     if (error instanceof AppError) {
         return res.status(error.statusCode).json({

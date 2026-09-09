@@ -14,7 +14,7 @@ class ColectivoService {
         const colectivo = this.repository.obtenerColectivoPorNombre(nombre);
 
         if(colectivo){
-            throw new Error('El colectivo ya existe');
+            throw new AppError(ErrorCatalog.COLECTIVO_YA_EXISTE, 409, nombre);
         }
 
         const nuevoColectivo = new Colectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos);
@@ -30,7 +30,7 @@ class ColectivoService {
 
     obtenerColectivoPorId(id){
         if (Number.isNaN(id)) {
-            throw new Error("El id debe ser numérico");
+            throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
         }
         const colectivo =  this.repository.obtenerColectivoPorId(id);
 

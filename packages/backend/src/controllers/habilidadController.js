@@ -7,7 +7,7 @@ export class HabilidadController {
 
     crearHabilidad = (req, res) => {
         const respuesta = this.habilidadService.crearHabilidad(req.body.titulo, req.body.descripcion);
-        res.status(201).json(respuesta);
+        res.status(201).location(`/habilidades/${respuesta.id}`).json(respuesta);
     }
 
     obtenerHabilidades = (req,res) => {

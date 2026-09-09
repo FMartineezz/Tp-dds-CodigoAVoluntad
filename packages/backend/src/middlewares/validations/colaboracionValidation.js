@@ -3,17 +3,17 @@ import ErrorCatalog from "../../errors/errorCatalog.js";
 const validarColaboracion = (req, res, next) => {
 
     const {
-        personaColaboradora,
-        proyecto
+        personaColaboradoraId,
+        proyectoId
     } = req.body;
 
-    if (personaColaboradora === undefined || personaColaboradora === null) {
+    if (personaColaboradoraId === undefined || personaColaboradoraId === null) {
         return res.status(400).json(
             ErrorCatalog.COLABORACION_PERSONA_REQUERIDA
         );
     }
 
-    if (proyecto === undefined || proyecto === null) {
+    if (proyectoId === undefined || proyectoId === null) {
         return res.status(400).json(
             ErrorCatalog.COLABORACION_PROYECTO_REQUERIDO
         );
