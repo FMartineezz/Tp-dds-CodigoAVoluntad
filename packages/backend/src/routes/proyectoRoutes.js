@@ -16,5 +16,8 @@ export default function proyectoRoutes() {
 
     router.patch(pathProyectos + "/:id/finalizar", proyectoController.finalizarProyecto);
 
+    // Alternativa recurso-céntrica: PATCH /proyectos/:id con body { finalizado: true }
+    router.patch(pathProyectos + "/:id", proyectoController.actualizarProyecto);
+
     return router;
 }

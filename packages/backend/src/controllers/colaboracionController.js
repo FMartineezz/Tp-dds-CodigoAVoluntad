@@ -9,7 +9,7 @@ class ColaboracionController {
         const colaboracion =
                 this.colaboracionService.crearColaboracion(req.body.personaColaboradoraId, req.body.proyectoId);
 
-        res.status(201).json(colaboracion); 
+        res.status(201).location(`/colaboraciones/${colaboracion.id}`).json(colaboracion);
     }
 
     obtenerColaboraciones = (req, res) => {

@@ -67,15 +67,32 @@ class ProyectoService {
     finalizarProyecto(id) {
         if (Number.isNaN(id)) {
             throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
-            }
+        }
         const proyecto = this.proyectoRepository.obtenerPorId(id);
 
         if (!proyecto) {
             throw new AppError(ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
         }
 
+        if (proyecto.finalizado) {
+            throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, id);
+        }
+
         proyecto.finalizado = true;
 
+        return proyecto;
+    }
+
+    actualizarProyecto(id, cambios = {}) {
+        const campos = Object.keys(cambios);
+
+        // Por ahora la única actualización parcial soportada es marcar el proyecto como finalizado.
+        if (campos.length !== 1 || campos[0] !== "finalizado" || cambios.finalizado !== true) {
+            throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+        }
+
+        return this.finalizarProyecto(id);
+    }
 }
 
 export default new ProyectoService();
