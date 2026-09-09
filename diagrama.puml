@@ -1,6 +1,6 @@
 @startuml CodigoAVoluntad
 class Colectivo{
-    -id : UUID
+    -id : Number
     -nombre : String
     -descripcion : String
     -ubicacion : String
@@ -11,7 +11,7 @@ class Colectivo{
 }
 
 class Proyecto{
-    -id : UUID
+    -id : Number
     -titulo : String
     -descripcion : String
     -habilidadesRequeridas : [Habilidad]
@@ -28,7 +28,7 @@ class Colaboracion{
 }
 
 class Habilidad{
-    -id : UUID
+    -id : Number
     -titulo : String
     -codigo : String
     -descripcion : String
@@ -44,11 +44,13 @@ class CatalogoHabilidades{
 }
 
 class PersonaColaboradora{
+    -id : Number
     -nombreFantasia : String
     -git : String
     -nombre : String
     -apellido : String
     -habilidades : [Habilidad]
+    -pronombres : String
     -presentacion : String
 }
 
