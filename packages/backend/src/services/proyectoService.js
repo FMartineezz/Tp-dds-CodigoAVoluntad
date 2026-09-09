@@ -26,7 +26,7 @@ class ProyectoService {
         const proyecto = this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
         
         if(proyecto){
-            throw new AppError(ErrorCatalog.PROYECTO_YA_EXISTENTE, 409)
+            throw new AppError(ErrorCatalog.PROYECTO_YA_EXISTENTE, 409, proyecto.id);
         }   
 
         const habilidadesEncontradas = habilidadesRequeridas.map((codigo) => this.habilidadService.obtenerHabilidadPorCodigo(codigo));
@@ -76,9 +76,6 @@ class ProyectoService {
 
         proyecto.finalizado = true;
 
-        return proyecto;
-
-        }
 }
 
 export default new ProyectoService();

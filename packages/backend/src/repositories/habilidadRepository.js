@@ -1,9 +1,12 @@
 export class HabilidadRespository{
     constructor(){
          this.habilidades = [];
+         this.id = 1;
     }
 
     agregarHabilidad(habilidad){
+        habilidad.id = this.id;
+        this.id++;
         this.habilidades.push(habilidad);
     }
 
