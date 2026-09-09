@@ -285,9 +285,9 @@ Documentación de los endpoints implementados en `packages/backend`.
 
 ---
 
-## Colaboraciones 🚧
+## Colaboraciones
 
-**Estado:** en desarrollo, implementado en la [PR #13](https://github.com/FMartineezz/Tp-dds-CodigoAVoluntad/pull/13) (`feature/colaboracion`), **todavía no mergeada a `main`** — no disponible en producción todavía. Se documenta acá como referencia de lo que traerá, pero puede cambiar antes del merge.
+**Estado:** implementado.
 
 | Método | Path | Descripción |
 |---|---|---|
@@ -323,11 +323,3 @@ Reglas de negocio: el proyecto no puede estar finalizado, y la persona debe tene
 | `TipoColectivo` | `fundacion`, `ong`, `asociacion barrial`, `asambleas` |
 | `TipoCompromiso` | `total`, `semanal`, `mensual` |
 | `ModalidadColaboracion` | `gratuita`, `incentivo_economico`, `contratacion_eventual` |
-
----
-
-## Pendiente / fuera de alcance actual
-
-- `Colaboracion` todavía no está disponible en `main` — ver sección "Colaboraciones 🚧" arriba (PR #13, abierta).
-- Sin `PUT`/`DELETE` para ningún recurso.
-- Sin paginación en los listados (`GET /colectivos`, `/proyectos`, `/habilidades`, `/colaboradoras` devuelven el array completo).
