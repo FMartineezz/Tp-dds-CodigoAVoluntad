@@ -26,7 +26,7 @@ class ProyectoService {
         const proyecto = this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
         
         if(proyecto){
-            throw new AppError(ErrorCatalog.PROYECTO_YA_EXISTENTE, 409)
+            throw new AppError(ErrorCatalog.PROYECTO_YA_EXISTENTE, 409, proyecto.id);
         }   
 
         const habilidadesEncontradas = habilidadesRequeridas.map((codigo) => this.habilidadService.obtenerHabilidadPorCodigo(codigo));
@@ -51,36 +51,30 @@ class ProyectoService {
     }
 
     obtenerProyectoPorId(id) {
+        if (Number.isNaN(id)) {
+        throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+        }
 
         const proyecto = this.proyectoRepository.obtenerPorId(id);
 
         if (!proyecto) {
-            throw new AppError(
-                ErrorCatalog.PROYECTO_NO_ENCONTRADO,
-                404
-            );
+            throw new AppError(ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
         }
 
         return proyecto;
     }
 
     finalizarProyecto(id) {
-    const proyecto = this.proyectoRepository.obtenerPorId(id);
+        if (Number.isNaN(id)) {
+            throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+            }
+        const proyecto = this.proyectoRepository.obtenerPorId(id);
 
-    if (!proyecto) {
-        throw new AppError(
-            ErrorCatalog.PROYECTO_NO_ENCONTRADO,
-            404
-        );
-    }
+        if (!proyecto) {
+            throw new AppError(ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
+        }
 
-    proyecto.finalizado = true;
-
-    return proyecto;
-
-    }
-
-    
+        proyecto.finalizado = true;
 
 }
 

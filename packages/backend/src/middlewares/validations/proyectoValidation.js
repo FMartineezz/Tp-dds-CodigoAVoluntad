@@ -12,19 +12,31 @@ const validarProyecto = (req, res, next) => {
         colectivo
     } = req.body;
 
-    if (!titulo) {
+    if (titulo === undefined || titulo === null || titulo === "") {
         return res.status(400).json(
             ErrorCatalog.PROYECTO_TITULO_REQUERIDO
         );
     }
 
-    if (!descripcion) {
+    if (typeof titulo !== "string") {
+    return res.status(400).json(
+        ErrorCatalog.ARGUMENTO_INVALIDO
+    );
+}
+
+    if (descripcion === undefined || descripcion === null || descripcion === "") {
         return res.status(400).json(
             ErrorCatalog.PROYECTO_DESCRIPCION_REQUERIDA
         );
     }
 
-    if (!habilidadesRequeridas) {
+    if (typeof descripcion !== "string") {
+    return res.status(400).json(
+        ErrorCatalog.ARGUMENTO_INVALIDO
+    );
+}
+
+    if (habilidadesRequeridas === undefined || habilidadesRequeridas === null) {
         return res.status(400).json(
             ErrorCatalog.PROYECTO_HABILIDADES_REQUERIDAS
         );
@@ -42,25 +54,31 @@ const validarProyecto = (req, res, next) => {
         );
     }
 
-    if (!horas) {
+    if (horas === undefined || horas === null) {
         return res.status(400).json(
             ErrorCatalog.PROYECTO_HORAS_REQUERIDAS
         );
     }
 
-    if (!tipoDeCompromiso) {
+    if (typeof horas !== "number") {
+        return res.status(400).json(
+            ErrorCatalog.ARGUMENTO_INVALIDO
+        );
+    }
+
+    if (tipoDeCompromiso === undefined || tipoDeCompromiso === null) {
         return res.status(400).json(
             ErrorCatalog.PROYECTO_TIPO_COMPROMISO_REQUERIDO
         );
     }
 
-    if (!modalidadDeColaboracion) {
+    if (modalidadDeColaboracion === undefined || modalidadDeColaboracion === null) {
         return res.status(400).json(
             ErrorCatalog.PROYECTO_MODALIDAD_REQUERIDA
         );
     }
 
-    if (!colectivo) {
+    if (colectivo === undefined || colectivo === null) {
         return res.status(400).json(
             ErrorCatalog.PROYECTO_COLECTIVO_REQUERIDO
         );

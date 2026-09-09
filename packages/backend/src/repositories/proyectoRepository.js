@@ -1,9 +1,12 @@
 class ProyectoRepository {
     constructor() {
         this.proyectos = []; 
+        this.id = 1;
     }
 
     guardar(proyecto) {
+        proyecto.id = this.id;
+        this.id++;
         this.proyectos.push(proyecto);
         return proyecto;
     }
@@ -13,9 +16,7 @@ class ProyectoRepository {
     }
 
     obtenerPorId(id) {
-        return this.proyectos.find(
-            proyecto => proyecto.id === id
-        );
+        return this.proyectos.find(proyecto => proyecto.id === id);
     }
 
     obtenerPorTituloYColectivo(titulo, colectivo){
