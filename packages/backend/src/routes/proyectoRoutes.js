@@ -24,5 +24,10 @@ export default function proyectoRoutes() {
         proyectoController.crearProyecto
     );
 
+    router.patch(
+        pathProyectos + "/:id/finalizar",
+        proyectoController.finalizarProyecto
+    );
+
     return router;
 }

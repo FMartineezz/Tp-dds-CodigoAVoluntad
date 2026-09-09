@@ -50,6 +50,21 @@ class ProyectoController {
             next(error);
         }
     }
+
+    finalizarProyecto = (req, res, next) =>{
+
+        try{
+            const id = Number(req.params.id);
+            const proyecto = this.proyectoService.finalizarProyecto(id);
+
+            res.status(200).json(proyecto);
+
+        }catch(error){
+            next(error);
+        }
+    }
+
+
 }
 
 export default new ProyectoController();

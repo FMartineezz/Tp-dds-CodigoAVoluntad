@@ -1,6 +1,6 @@
 class ProyectoRepository {
     constructor() {
-        this.proyectos = [];
+        this.proyectos = []; 
     }
 
     guardar(proyecto) {
