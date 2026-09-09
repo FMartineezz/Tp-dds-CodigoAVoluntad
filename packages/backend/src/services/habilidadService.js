@@ -13,7 +13,7 @@ export class HabilidadService {
         //Valido que no exista la habilidad
         const habilidadExistente = this.repository.buscarPorTituloYDescripcion(titulo, descripcion);
         if(habilidadExistente){
-            throw new AppError(ErrorCatalog.HABILIDAD_YA_EXISTE ,409);
+            throw new AppError(ErrorCatalog.HABILIDAD_YA_EXISTE ,409, habilidadExistente.id);
         }
 
             const habilidad = new Habilidad(titulo, descripcion);
@@ -33,7 +33,7 @@ export class HabilidadService {
         const habilidad = this.repository.findById(id);
 
         if (!habilidad) {
-            throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA, 404);
+            throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_ID, 404, id);
         }
 
         return habilidad;
@@ -42,7 +42,7 @@ export class HabilidadService {
     obtenerHabilidadPorCodigo(codigo){
         const habilidad = this.repository.buscarPorCodigo(codigo);
         if(!habilidad){
-            throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA, 404);
+            throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_CODIGO, 404, codigo);
         }
         return habilidad;
     }

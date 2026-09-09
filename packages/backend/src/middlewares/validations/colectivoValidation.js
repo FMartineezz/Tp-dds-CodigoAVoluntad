@@ -1,5 +1,6 @@
+import { AppError } from "../../errors/appError.js";
 import ErrorCatalog from "../../errors/errorCatalog.js";
-import { UBICACION_VALIDA, TipoColectivo } from "../../models/entities/colectivo.js";
+import { UBICACION_VALIDA, TipoColectivo } from "../../models/colectivo.js";
 
 const validarColectivo = (req, res, next) => {
 
@@ -11,31 +12,35 @@ const validarColectivo = (req, res, next) => {
     } = req.body;
 
     if (nombre === undefined || nombre === null || nombre === "") {
-        return res.status(400).json(
-            ErrorCatalog.COLECTIVO_NOMBRE_REQUERIDO
-        );
+        throw new AppError(ErrorCatalog.COLECTIVO_NOMBRE_REQUERIDO,400);
+    }
+
+    if (typeof nombre !== "string") {
+        throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
 
     if (descripcion === undefined || descripcion === null || descripcion === "") {
-        return res.status(400).json(
-            ErrorCatalog.COLECTIVO_DESCRIPCION_REQUERIDA
-        );
+        throw new AppError(ErrorCatalog.COLECTIVO_DESCRIPCION_REQUERIDA,400);
     }
 
-    if (
-        ubicacion !== undefined &&
-        ubicacion !== null &&
-        !UBICACION_VALIDA.has(ubicacion.toLowerCase())
-    ) {
-        return res.status(400).json(
-            ErrorCatalog.COLECTIVO_UBICACION_INVALIDA
-        );
+     if (typeof descripcion !== "string") {
+        throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
 
+/*  if (ubicacion !== undefined && ubicacion !== null && !UBICACION_VALIDA.has(ubicacion.toLowerCase())) {
+        return res.status(400).json(ErrorCatalog.COLECTIVO_UBICACION_INVALIDA);
+    }
+*/
     if (tipoDeColectivo === undefined || tipoDeColectivo === null || tipoDeColectivo === "") {
-        return res.status(400).json(
-            ErrorCatalog.COLECTIVO_TIPO_REQUERIDO
-        );
+        throw new AppError(ErrorCatalog.COLECTIVO_TIPO_REQUERIDO,400);
+    }
+
+    if (typeof tipoDeColectivo !== "string") {
+        throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+    }
+
+    if (!Object.values(TipoColectivo).includes(tipoDeColectivo)) {
+        throw new AppError(ErrorCatalog.COLECTIVO_TIPO_INVALIDO, 400);
     }
 
     next();

@@ -74,6 +74,11 @@ const ErrorCatalog = Object.freeze({
         message : "Ya existe un proyecto con ese titulo para ese colectivo"
     },
 
+    PROYECTO_HABILIDADES_REQUERIDAS_FORMATO: {
+        code : "ERR-VAL-111",
+        message : "Las habilidades requeridas deben ser un array del codigo de la habilidad" 
+    },
+
     // =========================
     // HABILIDADES
     // =========================
@@ -88,15 +93,25 @@ const ErrorCatalog = Object.freeze({
         message: "La descripción de la habilidad es requerida"
     },
 
-    HABILIDAD_NO_ENCONTRADA: {
+    HABILIDAD_NO_ENCONTRADA:{
         code: "ERR-CSR-203",
-        message: "La habilidad no fue encontrada"
+        message:"La habilidad no fue encontrado"
+    },
+
+    HABILIDAD_NO_ENCONTRADA_POR_ID: {
+        code: "ERR-CSR-204",
+        message: (id) => `La habilidad de id ${id} no fue encontrado`
+    },
+
+    HABILIDAD_NO_ENCONTRADA_POR_CODIGO: {
+        code: "ERR-CSR-205",
+        message: (codigo) => `La habilidad de codigo ${codigo} no fue encontrado`
     },
 
     HABILIDAD_YA_EXISTE: {
-    code: "ERR-CSR-204",
-    message: "Ya existe una habilidad con ese título y descripción."
-},
+    code: "ERR-CSR-206",
+    message: (id) => `Ya existe una habilidad con ese título y descripción, y su id es: ${id}`
+    },
 
 
     // =========================
@@ -125,7 +140,17 @@ const ErrorCatalog = Object.freeze({
 
     COLECTIVO_NO_ENCONTRADO: {
         code: "ERR-CSR-305",
-        message: "El colectivo no fue encontrado"
+        message: (id) => `El colectivo de id ${id} no fue encontrado`
+    },
+
+    COLECTIVO_NO_ENCONTRADO_POR_NOMBRE: {
+        code: "ERR-CSR-306",
+        message: (nombre) => `El colectivo de nombre ${nombre} no fue encontrado`
+    },
+
+    COLECTIVO_TIPO_INVALIDO:{
+        code: "ERR-VAL-307",
+        message: "El tipo de colectivo tiene formato invalido, debe ser TipoColectivo"
     },
 
 
