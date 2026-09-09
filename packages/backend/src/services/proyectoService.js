@@ -43,7 +43,11 @@ class ProyectoService {
             colectivoEncontrado
         );
 
-        return this.proyectoRepository.guardar(proyectoNuevo);
+        const proyectoGuardado = this.proyectoRepository.guardar(proyectoNuevo);
+        
+        this.colectivoService.agregarProyecto(colectivoEncontrado, proyectoGuardado);
+
+        return proyectoGuardado;
     }
 
     obtenerProyectos() {

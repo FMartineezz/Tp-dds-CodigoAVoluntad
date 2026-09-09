@@ -51,6 +51,10 @@ class ColectivoService {
         return colectivo;
     }
 
+    agregarProyecto(colectivo, proyecto){
+        colectivo.proyectos.push(proyecto.id);
+    }
+
 }
 
 export default new ColectivoService();
