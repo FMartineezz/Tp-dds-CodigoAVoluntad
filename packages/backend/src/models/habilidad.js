@@ -1,8 +1,6 @@
-//el id conviene que lo tenga el repo
 class Habilidad {
-    static #contadorid = 1; 
     constructor(titulo, descripcion) {
-        this.id = Habilidad.#contadorid++;
+        this.id = null;
         this.titulo = titulo;
         this.codigo = this.normalizarTitulo(titulo);
         this.descripcion = descripcion;
