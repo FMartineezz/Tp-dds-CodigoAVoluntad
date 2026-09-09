@@ -80,6 +80,8 @@ class ProyectoService {
 
     }
 
+    
+
 }
 
 export default new ProyectoService();

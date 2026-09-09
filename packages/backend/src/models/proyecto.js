@@ -12,7 +12,9 @@ const ModalidadColaboracion = Object.freeze({
 });
 
 class Proyecto{
+    static #contadorid = 1; 
     constructor(titulo, descripcion, habilidadesRequeridas, horas, tipoDeCompromiso, modalidadDeColaboracion, colectivo){
+        this.id = Proyecto.#contadorid++;
         this.titulo = titulo;
         this.descripcion = descripcion;
         if (!Array.isArray(habilidadesRequeridas)) {
