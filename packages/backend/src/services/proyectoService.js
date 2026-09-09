@@ -51,30 +51,30 @@ class ProyectoService {
     }
 
     obtenerProyectoPorId(id) {
+        if (Number.isNaN(id)) {
+        throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+        }
 
         const proyecto = this.proyectoRepository.obtenerPorId(id);
 
         if (!proyecto) {
-            throw new AppError(
-                ErrorCatalog.PROYECTO_NO_ENCONTRADO,404, id);
+            throw new AppError(ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
         }
 
         return proyecto;
     }
 
     finalizarProyecto(id) {
-    const proyecto = this.proyectoRepository.obtenerPorId(id);
+        if (Number.isNaN(id)) {
+            throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+            }
+        const proyecto = this.proyectoRepository.obtenerPorId(id);
 
-    if (!proyecto) {
-        throw new AppError(
-            ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
-    }
+        if (!proyecto) {
+            throw new AppError(ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
+        }
 
-    proyecto.finalizado = true;
-
-    return proyecto;
-
-    }
+        proyecto.finalizado = true;
 
 }
 

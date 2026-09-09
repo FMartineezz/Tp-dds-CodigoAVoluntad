@@ -8,26 +8,13 @@ export default function proyectoRoutes() {
 
     const router = Router();
 
-    router.get(
-        pathProyectos,
-        proyectoController.obtenerProyectos
-    );
+    router.get(pathProyectos, proyectoController.obtenerProyectos);
 
-    router.get(
-        pathProyectos + "/:id",
-        proyectoController.obtenerProyectoPorId
-    );
+    router.get(pathProyectos + "/:id", proyectoController.obtenerProyectoPorId);
 
-    router.post(
-        pathProyectos,
-        proyectoValidation,
-        proyectoController.crearProyecto
-    );
+    router.post(pathProyectos, proyectoValidation, proyectoController.crearProyecto);
 
-    router.patch(
-        pathProyectos + "/:id/finalizar",
-        proyectoController.finalizarProyecto
-    );
+    router.patch(pathProyectos + "/:id/finalizar", proyectoController.finalizarProyecto);
 
     return router;
 }
