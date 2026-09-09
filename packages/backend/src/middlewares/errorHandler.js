@@ -1,7 +1,7 @@
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
-const errorHandler = (error, req, res, next) => {
+const errorHandler = (error, res) => {
 
     if (error instanceof AppError) {
         return res.status(error.statusCode).json({
