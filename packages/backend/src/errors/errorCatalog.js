@@ -211,8 +211,12 @@ const ErrorCatalog = Object.freeze({
     COLABORACION_PROYECTO_FINALIZADO: {
         code: "ERR-EST-504",
         message: "No se puede colaborar en un proyecto finalizado"
-    }
+    },
 
+    COLABORACION_NO_ENCONTRADA: {
+    code: "ERR-NOT-505",
+    message: "La colaboración no fue encontrada"
+    }
 
 });
 
