@@ -1,15 +1,17 @@
 @startuml CodigoAVoluntad
 class Colectivo{
+    -id : UUID
     -nombre : String
     -descripcion : String
     -ubicacion : String
-    -tipoDeColectivo : TipoDeColectivo
+    -tipoDeColectivo : TipoColectivo
     -proyectos : [Proyecto]
 
     +cargarProyecto()
 }
 
 class Proyecto{
+    -id : UUID
     -titulo : String
     -descripcion : String
     -habilidadesRequeridas : [Habilidad]
@@ -26,11 +28,19 @@ class Colaboracion{
 }
 
 class Habilidad{
+    -id : UUID
     -titulo : String
     -codigo : String
     -descripcion : String
 
     +normalizarTitulo()
+}
+
+
+class CatalogoHabilidades{
+    -habilidades : [Habilidad]
+
+    +agregarHabilidad(habilidad)
 }
 
 class PersonaColaboradora{
@@ -55,7 +65,7 @@ enum TipoCompromiso {
 }
 
 enum TipoColectivo {
-    FUNDACION                                 
+    FUNDACION
     ONG
     ASOCIACION_BARRIAL
     ASAMBLEAS
@@ -63,6 +73,7 @@ enum TipoColectivo {
 
 Colectivo --> "*" Proyecto
 PersonaColaboradora -> "*" Habilidad
+CatalogoHabilidades -> "*" Habilidad
 Habilidad "*" <- Proyecto
 Colaboracion --> Proyecto
 Colaboracion --> PersonaColaboradora
