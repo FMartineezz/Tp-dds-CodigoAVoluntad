@@ -1,12 +1,14 @@
 import habilidadRoutes from "./habilidadRoutes.js"
 import proyectoRoutes from "./proyectoRoutes.js"
 import colectivoRoutes from "./colectivoRoutes.js"
-// import colaboracionRoutes from "./colaboracionRoutes.js";
+import personaColaboradoraRoutes from "./personaColaboradoraRoutes.js"
+//import colaboracionRoutes from "./colaboracionRoutes.js";
 
 const routes = [
     habilidadRoutes(),
     proyectoRoutes(),
-    colectivoRoutes()
+    colectivoRoutes(),
+    personaColaboradoraRoutes()
 ]
 
 export default routes
