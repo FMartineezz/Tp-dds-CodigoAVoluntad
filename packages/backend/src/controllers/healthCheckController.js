@@ -1,9 +1,4 @@
-import healthServiceDefault from "../services/healthCheckService.js";
-
 export class HealthCheckController {
-    constructor(healthService = healthServiceDefault){
-        this.healthService = healthService;
-    }
 
     check = (req, res) => {
         res.status(200).json({
