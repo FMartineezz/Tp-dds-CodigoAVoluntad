@@ -1,7 +1,6 @@
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Colectivo } from "../models/colectivo.js";
-import { TipoColectivo } from '../models/colectivo.js';
 import colectivoRepositoryDefault from '../repositories/colectivoRepository.js';
 
 class ColectivoService {

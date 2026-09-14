@@ -7,9 +7,9 @@ const pathColectivos = "/colectivos"
 export default function colectivoRoutes() {
     const router = Router() 
     
-    router.get(pathColectivos, (req, res) => {ColectivoController.obtenerColectivos(req, res)});
-    router.get(pathColectivos + "/:id", (req, res) => {ColectivoController.obtenerColectivoPorId(req, res)});
-    router.post(pathColectivos,validarColectivo , (req, res) => {ColectivoController.crearColectivo(req, res)});
+    router.get(pathColectivos, ColectivoController.obtenerColectivos);
+    router.get(pathColectivos + "/:id", ColectivoController.obtenerColectivoPorId);
+    router.post(pathColectivos,validarColectivo, ColectivoController.crearColectivo);
 
     return router 
 }
