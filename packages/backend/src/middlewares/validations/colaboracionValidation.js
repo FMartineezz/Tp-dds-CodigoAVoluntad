@@ -1,25 +1,17 @@
 import ErrorCatalog from "../../errors/errorCatalog.js";
+import validacion from "./funcionesDeValidacion.js";
 
 const validarColaboracion = (req, res, next) => {
+  const { personaColaboradoraId, proyectoId } = req.body;
 
-    const {
-        personaColaboradoraId,
-        proyectoId
-    } = req.body;
+  validacion.esNil(
+    personaColaboradoraId,
+    ErrorCatalog.COLABORACION_PERSONA_REQUERIDA,
+  );
 
-    if (personaColaboradoraId === undefined || personaColaboradoraId === null) {
-        return res.status(400).json(
-            ErrorCatalog.COLABORACION_PERSONA_REQUERIDA
-        );
-    }
+  validacion.esNil(proyectoId, ErrorCatalog.COLABORACION_PROYECTO_REQUERIDO);
 
-    if (proyectoId === undefined || proyectoId === null) {
-        return res.status(400).json(
-            ErrorCatalog.COLABORACION_PROYECTO_REQUERIDO
-        );
-    }
-
-    next();
+  next();
 };
 
 export default validarColaboracion;

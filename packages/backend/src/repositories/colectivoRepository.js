@@ -6,13 +6,6 @@ class ColectivoRepository {
         this.id = 1;
     }
     
-   // crearColectivo(nombre, descripcion, ubicacion, tipoDeColectivo, proyectos) {
-     //   const colectivo = new Colectivo(this.id, nombre, descripcion, ubicacion, tipoDeColectivo, proyectos);
-     //   this.id++;
-     //   this.colectivos.push(colectivo);
-     //   return colectivo;
-   // }
-
     agregarColectivo(colectivo){
         colectivo.id = this.id;
         this.id++;

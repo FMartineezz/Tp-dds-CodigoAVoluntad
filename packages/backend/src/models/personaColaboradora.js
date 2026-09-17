@@ -1,5 +1,4 @@
 class PersonaColaboradora {
-    static #contadorid = 1;
     
     constructor(nombreFantasia, git, nombre = null, apellido = null, habilidades=[], pronombres = null, presentacion= null) {
         this.id = null

@@ -1,6 +1,7 @@
 import { AppError } from "../../errors/appError.js";
 import ErrorCatalog from "../../errors/errorCatalog.js";
-import { UBICACION_VALIDA, TipoColectivo } from "../../models/colectivo.js";
+import {TipoColectivo } from "../../models/colectivo.js";
+import validacion from "./funcionesDeValidacion.js"; 
 
 const validarColectivo = (req, res, next) => {
 
@@ -11,27 +12,23 @@ const validarColectivo = (req, res, next) => {
         tipoDeColectivo
     } = req.body;
 
-    if (nombre === undefined || nombre === null || nombre === "") {
+    if (Lodash.isEmpty(nombre)) {
         throw new AppError(ErrorCatalog.COLECTIVO_NOMBRE_REQUERIDO,400);
     }
 
-    if (typeof nombre !== "string") {
+    if (!Lodash.isString(nombre)) {
         throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
 
-    if (descripcion === undefined || descripcion === null || descripcion === "") {
+    if (Lodash.isEmpty(descripcion)) {
         throw new AppError(ErrorCatalog.COLECTIVO_DESCRIPCION_REQUERIDA,400);
     }
 
-     if (typeof descripcion !== "string") {
+     if (!Lodash.isString(descripcion)) {
         throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
 
-/*  if (ubicacion !== undefined && ubicacion !== null && !UBICACION_VALIDA.has(ubicacion.toLowerCase())) {
-        return res.status(400).json(ErrorCatalog.COLECTIVO_UBICACION_INVALIDA);
-    }
-*/
-    if (tipoDeColectivo === undefined || tipoDeColectivo === null || tipoDeColectivo === "") {
+    if (Lodash.isEmpty(tipoDeColectivo)) {
         throw new AppError(ErrorCatalog.COLECTIVO_TIPO_REQUERIDO,400);
     }
 

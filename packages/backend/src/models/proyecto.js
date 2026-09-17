@@ -15,9 +15,6 @@ class Proyecto{
         this.id = null;
         this.titulo = titulo;
         this.descripcion = descripcion;
-        if (!Array.isArray(habilidadesRequeridas)) {
-            throw new Error("habilidadesRequeridas debe ser un array");
-        }
         this.habilidadesRequeridas = habilidadesRequeridas;
         //Separo el campo compromiso esperado en dos campos: horas y tipo de horas
         this.horas = horas;

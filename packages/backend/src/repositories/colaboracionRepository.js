@@ -5,9 +5,9 @@ class ColaboracionRepository {
     }
 
     guardar(colaboracion) {
+        
         colaboracion.id = this.id;
         this.id++;
-
         this.colaboraciones.push(colaboracion);
 
         return colaboracion;

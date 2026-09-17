@@ -20,9 +20,6 @@ class Colectivo{
     }
 
     cargarProyecto(proyecto){
-        if (!proyecto instanceof Proyecto ){
-            throw new Error ("El proyecto debe ser una instancia de la clase Proyecto");
-        }
         proyecto.colectivo = this;
         this.proyectos.push(proyecto);
     }
