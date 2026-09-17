@@ -1,28 +1,18 @@
 import ErrorCatalog from "../../errors/errorCatalog.js";
-import { AppError } from "../../errors/appError.js";
+import validacion from "./funcionesDeValidacion.js";
 
 const validarHabilidad = (req, res, next) => {
+  const { titulo, descripcion } = req.body;
 
-    const { titulo, descripcion } = req.body;
+  validacion.esEmpty(titulo, ErrorCatalog.HABILIDAD_TITULO_REQUERIDO);
 
-    if (titulo === undefined || titulo === null || titulo === "") {
-        throw new AppError(ErrorCatalog.HABILIDAD_TITULO_REQUERIDO, 400);
-    }
+  validacion.esString(titulo, "titulo");
 
-    if (typeof titulo !== "string") {
-        throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
-    }
+  validacion.esEmpty(descripcion, ErrorCatalog.HABILIDAD_DESCRIPCION_REQUERIDA);
 
-    if (descripcion === undefined || descripcion === null || descripcion === "") {
-        throw new AppError(ErrorCatalog.HABILIDAD_DESCRIPCION_REQUERIDA, 400);
-    }
+  validacion.esString(descripcion, "descripcion");
 
-      if (typeof descripcion !== "string") {
-        throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
-    }
-
-
-    next();
+  next();
 };
 
 export default validarHabilidad;
