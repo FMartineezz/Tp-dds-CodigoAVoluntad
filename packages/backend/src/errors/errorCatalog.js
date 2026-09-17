@@ -1,5 +1,4 @@
 const ErrorCatalog = Object.freeze({
-
     // =========================
     // GENERALES
     // =========================
@@ -61,17 +60,17 @@ const ErrorCatalog = Object.freeze({
 
     PROYECTO_NO_ENCONTRADO: {
         code: "ERR-CSR-108",
-        message: "El proyecto no fue encontrado"
+        message: (id) => `El proyecto ${id} no fue encontrado`
     },
 
     PROYECTO_FINALIZADO: {
         code: "ERR-EST-109",
-        message: "El proyecto se encuentra finalizado"
+        message: (id) => `El proyecto ${id} se encuentra finalizado`
     },
 
     PROYECTO_YA_EXISTENTE: {
         code: "ERR-CSR-110",
-        message : "Ya existe un proyecto con ese titulo para ese colectivo"
+        message : (titulo,id) => `Ya existe un proyecto con titulo ${titulo} para el colectivo ${id}`
     },
 
     PROYECTO_HABILIDADES_REQUERIDAS_FORMATO: {
@@ -225,7 +224,7 @@ const ErrorCatalog = Object.freeze({
 
     COLABORACION_NO_ENCONTRADA: {
     code: "ERR-NOT-505",
-    message: "La colaboración no fue encontrada"
+    message:(id) => `La colaboración ${id} no fue encontrada`
     }
 
 });
