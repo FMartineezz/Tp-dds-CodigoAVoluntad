@@ -1,27 +1,32 @@
-import { AppError } from "../../errors/appError.js";
 import ErrorCatalog from "../../errors/errorCatalog.js";
-import { TipoColectivoEnum } from "../../models/colectivo.js";
 import validacion from "./funcionesDeValidacion.js";
-import Lodash from "lodash";
+import { TipoColectivo } from "../../models/colectivo.js";
 
 const validarColectivo = (req, res, next) => {
   const { nombre, descripcion, ubicacion, tipoDeColectivo } = req.body;
 
-  validacion.esEmpty(nombre, ErrorCatalog.COLECTIVO_NOMBRE_REQUERIDO);
+  validacion.esStringRequerido(
+    nombre,
+    ErrorCatalog.COLECTIVO_NOMBRE_REQUERIDO,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "nombre",
+  );
 
-  validacion.esString(nombre, "nombre");
+  validacion.esStringRequerido(
+    descripcion,
+    ErrorCatalog.COLECTIVO_DESCRIPCION_REQUERIDO,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "descripcion",
+  );
 
-  validacion.esEmpty(descripcion, ErrorCatalog.COLECTIVO_DESCRIPCION_REQUERIDA);
+  validacion.esStringRequerido(
+    tipoDeColectivo,
+    ErrorCatalog.COLECTIVO_TIPO_REQUERIDO,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "tipo de colectivo",
+  );
 
-  validacion.esString(descripcion, "descripcion");
-
-  validacion.esEmpty(tipoDeColectivo, ErrorCatalog.COLECTIVO_TIPO_REQUERIDO);
-
-  validacion.esString(tipoDeColectivo, "tipo de colectivo");
-
-  if (!Lodash.includes(TipoColectivoEnum, tipoDeColectivo)) {
-    throw new AppError(ErrorCatalog.COLECTIVO_TIPO_INVALIDO, 400);
-  }
+  validacion.esValorPermitido(tipoDeColectivo, TipoColectivo, ErrorCatalog.COLECTIVO_TIPO_INVALIDO);
 
   next();
 };

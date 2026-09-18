@@ -1,33 +1,52 @@
-const UBICACION_VALIDA = new Set(["argentina", "caba", "buenos aires", "catamarca", "chaco", "chubut", "cordoba", "corrientes", "entre rios", "formosa", 
-                            "jujuy", "la pampa", "la rioja", "mendoza", "misiones", "neuquen", "rio negro", "salta", "san juan", 
-                            "san luis", "santa cruz", "santa fe", "santiago del estero", "tierra del fuego", "tucuman"]);
+const UBICACION_VALIDA = new Set([
+  "argentina",
+  "caba",
+  "buenos aires",
+  "catamarca",
+  "chaco",
+  "chubut",
+  "cordoba",
+  "corrientes",
+  "entre rios",
+  "formosa",
+  "jujuy",
+  "la pampa",
+  "la rioja",
+  "mendoza",
+  "misiones",
+  "neuquen",
+  "rio negro",
+  "salta",
+  "san juan",
+  "san luis",
+  "santa cruz",
+  "santa fe",
+  "santiago del estero",
+  "tierra del fuego",
+  "tucuman",
+]);
 
 const TipoColectivo = Object.freeze({
-                                       FUNDACION : "fundacion",                                   
-                                       ONG : "ong",
-                                       ASOCIACION_BARRIAL : "asociacion barrial",
-                                       ASAMBLEAS : "asambleas"
-                                    })
+  FUNDACION: "fundacion",
+  ONG: "ong",
+  ASOCIACION_BARRIAL: "asociacion barrial",
+  ASAMBLEAS: "asambleas",
+});
 
-class Colectivo{
-    constructor(nombre, descripcion, ubicacion = null, tipoDeColectivo){
-        this.id = null;
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.ubicacion = ubicacion;
-        this.tipoDeColectivo = tipoDeColectivo;
-        this.proyectos = [];
-    }
+class Colectivo {
+  constructor(nombre, descripcion, ubicacion = null, tipoDeColectivo) {
+    this.id = null;
+    this.nombre = nombre;
+    this.descripcion = descripcion;
+    this.ubicacion = ubicacion;
+    this.tipoDeColectivo = tipoDeColectivo;
+    this.proyectos = [];
+  }
 
-    cargarProyecto(proyecto){
-        proyecto.colectivo = this;
-        this.proyectos.push(proyecto);
-    }
-
+  cargarProyecto(proyecto) {
+    proyecto.colectivo = this;
+    this.proyectos.push(proyecto);
+  }
 }
 
-export {UBICACION_VALIDA, 
-        TipoColectivo, 
-        Colectivo 
-        };
-
+export { UBICACION_VALIDA, TipoColectivo, Colectivo };

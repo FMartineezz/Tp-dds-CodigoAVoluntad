@@ -1,32 +1,32 @@
 import ErrorCatalog from "../../errors/errorCatalog.js";
-import Lodash from "lodash";
 import validacion from "./funcionesDeValidacion.js";
 
 const validarColaboradora = (req, res, next) => {
   const { nombreFantasia, git, habilidades, presentacion } = req.body;
 
-  validacion.esEmpty(
+  validacion.esStringRequerido(
     nombreFantasia,
     ErrorCatalog.COLABORADORA_NOMBRE_FANTASIA_REQUERIDO,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "nombre fantasia",
   );
 
-  validacion.esEmpty(git, ErrorCatalog.COLABORADORA_GIT_REQUERIDO);
-
-  validacion.esNil(
-    habilidades,
-    ErrorCatalog.COLABORADORA_HABILIDADES_REQUERIDAS,
+  validacion.esStringRequerido(
+    git,
+    ErrorCatalog.COLABORADORA_GIT_REQUERIDO,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "git",
   );
 
-  if (
-    !Lodash.isArray(habilidades) &&
-    Lodash.every(habilidades, Lodash.isString)
-  ) {
-    throw new AppError(ErrorCatalog.COLABORADORA_HABILIDADES_FORMATO, 400);
-  }
+  validacion.esNil(habilidades, ErrorCatalog.COLABORADORA_HABILIDADES_REQUERIDAS);
 
-  validacion.esEmpty(
+  validacion.esArrayDeStrings(habilidades, ErrorCatalog.COLABORADORA_HABILIDADES_FORMATO);
+
+  validacion.esStringRequerido(
     presentacion,
     ErrorCatalog.COLABORADORA_PRESENTACION_REQUERIDA,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "presentacion",
   );
 
   next();

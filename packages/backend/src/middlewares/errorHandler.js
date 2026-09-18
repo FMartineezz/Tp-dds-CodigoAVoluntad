@@ -3,22 +3,21 @@ import ErrorCatalog from "../errors/errorCatalog.js";
 
 // eslint-disable-next-line no-unused-vars -- Express solo reconoce un middleware de errores si declara exactamente 4 parámetros
 const errorHandler = (error, req, res, next) => {
-
-    if (error instanceof AppError) {
-        return res.status(error.statusCode).json({
-            code: error.code,
-            message: error.message
-        });
-    }
-
-    console.error(error);
-
-    const errorInterno = ErrorCatalog.ERROR_INTERNO;
-
-    return res.status(500).json({
-        code: errorInterno.code,
-        message: errorInterno.message
+  if (error instanceof AppError) {
+    return res.status(error.statusCode).json({
+      code: error.code,
+      message: error.message,
     });
+  }
+
+  console.error(error);
+
+  const errorInterno = ErrorCatalog.ERROR_INTERNO;
+
+  return res.status(500).json({
+    code: errorInterno.code,
+    message: errorInterno.message,
+  });
 };
 
 export default errorHandler;

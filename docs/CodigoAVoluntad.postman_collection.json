@@ -16,12 +16,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colectivos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos"]
             }
           },
           "response": []
@@ -42,12 +38,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colectivos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos"]
             }
           },
           "response": []
@@ -59,13 +51,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colectivos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -88,12 +75,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/habilidades",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "habilidades"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["habilidades"]
             }
           },
           "response": []
@@ -114,12 +97,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/habilidades",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "habilidades"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["habilidades"]
             }
           },
           "response": []
@@ -131,13 +110,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/habilidades/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "habilidades",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["habilidades", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -160,12 +134,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboraciones",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboraciones"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones"]
             }
           },
           "response": []
@@ -186,12 +156,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboraciones",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboraciones"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones"]
             }
           },
           "response": []
@@ -203,13 +169,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboraciones/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboraciones",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -232,12 +193,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos"]
             }
           },
           "response": []
@@ -258,12 +215,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos"]
             }
           },
           "response": []
@@ -275,13 +228,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -308,13 +256,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -337,12 +280,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras"]
             }
           },
           "response": []
@@ -363,12 +302,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboradoras",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras"]
             }
           },
           "response": []
@@ -380,13 +315,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", ":id"],
               "variable": [
                 {
                   "key": "id",

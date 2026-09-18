@@ -4,13 +4,19 @@ import validacion from "./funcionesDeValidacion.js";
 const validarHabilidad = (req, res, next) => {
   const { titulo, descripcion } = req.body;
 
-  validacion.esEmpty(titulo, ErrorCatalog.HABILIDAD_TITULO_REQUERIDO);
+  validacion.esStringRequerido(
+    titulo,
+    ErrorCatalog.HABILIDAD_TITULO_REQUERIDO,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "titulo",
+  );
 
-  validacion.esString(titulo, "titulo");
-
-  validacion.esEmpty(descripcion, ErrorCatalog.HABILIDAD_DESCRIPCION_REQUERIDA);
-
-  validacion.esString(descripcion, "descripcion");
+  validacion.esStringRequerido(
+    descripcion,
+    ErrorCatalog.HABILIDAD_DESCRIPCION_REQUERIDA,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "descripcion",
+  );
 
   next();
 };

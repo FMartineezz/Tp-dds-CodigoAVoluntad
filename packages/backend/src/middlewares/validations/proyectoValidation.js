@@ -1,5 +1,5 @@
 import ErrorCatalog from "../../errors/errorCatalog.js";
-import validacion from "./funcionesDeValidacion.js"
+import validacion from "./funcionesDeValidacion.js";
 
 const validarProyecto = (req, res, next) => {
   const {
@@ -12,57 +12,39 @@ const validarProyecto = (req, res, next) => {
     colectivo,
   } = req.body;
 
-  validacion.esEmpty(titulo, ErrorCatalog.PROYECTO_TITULO_REQUERIDO);
+  validacion.esStringRequerido(
+    titulo,
+    ErrorCatalog.PROYECTO_TITULO_REQUERIDO,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "titulo",
+  );
 
-  validacion.esString(titulo, "titulo");
+  validacion.esStringRequerido(
+    descripcion,
+    ErrorCatalog.PROYECTO_DESCRIPCION_REQUERIDA,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "descripcion",
+  );
 
-  validacion.esEmpty(descripcion, ErrorCatalog.PROYECTO_DESCRIPCION_REQUERIDA);
+  validacion.esNil(habilidadesRequeridas, ErrorCatalog.PROYECTO_HABILIDADES_REQUERIDAS);
 
-  validacion.esString(descripcion, "descripcion");
+  validacion.esArrayDeStrings(
+    habilidadesRequeridas,
+    ErrorCatalog.PROYECTO_HABILIDADES_REQUERIDAS_FORMATO,
+  );
 
+  validacion.esNumeroRequerido(
+    horas,
+    ErrorCatalog.PROYECTO_HORAS_REQUERIDAS,
+    ErrorCatalog.ARGUMENTO_INVALIDO,
+    "horas",
+  );
 
-  if (habilidadesRequeridas === undefined || habilidadesRequeridas === null) {
-    return res.status(400).json(ErrorCatalog.PROYECTO_HABILIDADES_REQUERIDAS);
-  }
+  validacion.esNil(tipoDeCompromiso, ErrorCatalog.PROYECTO_TIPO_COMPROMISO_REQUERIDO);
 
-  if (!Array.isArray(habilidadesRequeridas)) {
-    return res
-      .status(400)
-      .json(ErrorCatalog.PROYECTO_HABILIDADES_REQUERIDAS_FORMATO);
-  }
+  validacion.esNil(modalidadDeColaboracion, ErrorCatalog.PROYECTO_MODALIDAD_REQUERIDA);
 
-  if (
-    !habilidadesRequeridas.every((habilidad) => typeof habilidad === "string")
-  ) {
-    return res
-      .status(400)
-      .json(ErrorCatalog.PROYECTO_HABILIDADES_REQUERIDAS_FORMATO);
-  }
-
-  if (horas === undefined || horas === null) {
-    return res.status(400).json(ErrorCatalog.PROYECTO_HORAS_REQUERIDAS);
-  }
-
-  if (typeof horas !== "number") {
-    return res.status(400).json(ErrorCatalog.ARGUMENTO_INVALIDO);
-  }
-
-  if (tipoDeCompromiso === undefined || tipoDeCompromiso === null) {
-    return res
-      .status(400)
-      .json(ErrorCatalog.PROYECTO_TIPO_COMPROMISO_REQUERIDO);
-  }
-
-  if (
-    modalidadDeColaboracion === undefined ||
-    modalidadDeColaboracion === null
-  ) {
-    return res.status(400).json(ErrorCatalog.PROYECTO_MODALIDAD_REQUERIDA);
-  }
-
-  if (colectivo === undefined || colectivo === null) {
-    return res.status(400).json(ErrorCatalog.PROYECTO_COLECTIVO_REQUERIDO);
-  }
+  validacion.esNil(colectivo, ErrorCatalog.PROYECTO_COLECTIVO_REQUERIDO);
 
   if (typeof colectivo === "object") {
     return res.status(400).json(ErrorCatalog.PROYECTO_COLECTIVO_FORMATO);
