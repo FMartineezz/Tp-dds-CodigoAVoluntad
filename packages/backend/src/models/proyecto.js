@@ -1,16 +1,16 @@
-const TipoCompromiso = Object.freeze({
+export const TipoCompromiso = Object.freeze({
   TOTAL: "total",
   SEMANAL: "semanal",
   MENSUAL: "mensual",
 });
 
-const ModalidadColaboracion = Object.freeze({
+export const ModalidadColaboracion = Object.freeze({
   GRATUITA: "gratuita",
   INCENTIVO_ECONOMICO: "incentivo_economico",
   CONTRATACION_EVENTUAL: "contratacion_eventual",
 });
 
-class Proyecto {
+export class Proyecto {
   constructor(
     titulo,
     descripcion,
@@ -32,5 +32,3 @@ class Proyecto {
     this.finalizado = false;
   }
 }
-
-export default { TipoCompromiso, ModalidadColaboracion, Proyecto };

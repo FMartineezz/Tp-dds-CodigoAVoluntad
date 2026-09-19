@@ -82,6 +82,11 @@ const ErrorCatalog = Object.freeze({
     message: "El colectivo debe ser el nombre del mismo",
   },
 
+  PROYECTO_HABILIDAD_INEXISTENTE: {
+    code: "ERR-VAL-113",
+    message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
+  },
+
   // =========================
   // HABILIDADES
   // =========================
@@ -194,6 +199,11 @@ const ErrorCatalog = Object.freeze({
     message: "Las habilidades de la colaboradora deben ser un array del codigo de la habilidad",
   },
 
+  COLABORADORA_HABILIDAD_INEXISTENTE: {
+    code: "ERR-VAL-407",
+    message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
+  },
+
   // =========================
   // COLABORACIONES
   // =========================
@@ -210,7 +220,8 @@ const ErrorCatalog = Object.freeze({
 
   COLABORACION_HABILIDAD_REQUERIDA: {
     code: "ERR-VAL-503",
-    message: "La colaboradora debe tener al menos una habilidad requerida por el proyecto",
+    message: (colaboradora, proyecto, colectivo) =>
+      `La colaboradora: ${colaboradora} ,debe tener al menos una habilidad requerida por el proyecto: ${proyecto} del colectivo: ${colectivo}`,
   },
 
   COLABORACION_PROYECTO_FINALIZADO: {

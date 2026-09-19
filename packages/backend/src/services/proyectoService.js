@@ -1,4 +1,4 @@
-import ProyectoModel from "../models/proyecto.js";
+import { Proyecto } from "../models/proyecto.js";
 import proyectoRepositoryDefault from "../repositories/proyectoRepository.js";
 import habilidadServiceDefault from "./habilidadService.js";
 import colectivoServiceDefault from "./colectivoService.js";
@@ -31,13 +31,17 @@ class ProyectoService {
       throw new AppError(ErrorCatalog.PROYECTO_YA_EXISTENTE, 409, proyecto.id);
     }
 
-    const habilidadesEncontradas = habilidadesRequeridas.map((codigo) =>
-      this.habilidadService.obtenerHabilidadPorCodigo(codigo),
-    );
+    const habilidadesEncontradas = habilidadesRequeridas.map((codigo) => {
+      const habilidad = this.habilidadService.obtenerHabilidadPorCodigo(codigo);
+      if (!habilidad) {
+        throw new AppError(ErrorCatalog.PROYECTO_HABILIDAD_INEXISTENTE, 400, codigo);
+      }
+      return habilidad;
+    });
 
     const colectivoEncontrado = this.colectivoService.obtenerColectivoPorNombre(colectivo);
 
-    const proyectoNuevo = new ProyectoModel.Proyecto(
+    const proyectoNuevo = new Proyecto(
       titulo,
       descripcion,
       habilidadesEncontradas,
@@ -59,10 +63,6 @@ class ProyectoService {
   }
 
   obtenerProyectoPorId(id) {
-    if (Number.isNaN(id)) {
-      throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
-    }
-
     const proyecto = this.proyectoRepository.obtenerPorId(id);
 
     if (!proyecto) {
@@ -73,9 +73,6 @@ class ProyectoService {
   }
 
   finalizarProyecto(id) {
-    if (Number.isNaN(id)) {
-      throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
-    }
     const proyecto = this.proyectoRepository.obtenerPorId(id);
 
     if (!proyecto) {
@@ -100,6 +97,10 @@ class ProyectoService {
     }
 
     return this.finalizarProyecto(id);
+  }
+
+  estaFinalizado(proyecto) {
+    return proyecto.finalizado;
   }
 }
 

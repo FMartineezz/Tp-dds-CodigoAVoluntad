@@ -1,6 +1,6 @@
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
-import Habilidad from "../models/habilidad.js";
+import { Habilidad } from "../models/habilidad.js";
 import habilidadRepository from "../repositories/habilidadRepository.js";
 
 export class HabilidadService {
@@ -10,7 +10,7 @@ export class HabilidadService {
 
   crearHabilidad(titulo, descripcion) {
     //Valido que no exista la habilidad
-    const habilidadExistente = this.repository.buscarPorTituloYDescripcion(titulo, descripcion);
+    const habilidadExistente = this.repository.buscarPorTitulo(titulo);
     if (habilidadExistente) {
       throw new AppError(ErrorCatalog.HABILIDAD_YA_EXISTE, 409, habilidadExistente.id);
     }
@@ -25,10 +25,6 @@ export class HabilidadService {
   }
 
   obtenerHabilidadPorId(id) {
-    if (Number.isNaN(id)) {
-      throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
-    }
-
     const habilidad = this.repository.findById(id);
 
     if (!habilidad) {
@@ -40,9 +36,6 @@ export class HabilidadService {
 
   obtenerHabilidadPorCodigo(codigo) {
     const habilidad = this.repository.buscarPorCodigo(codigo);
-    if (!habilidad) {
-      throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_CODIGO, 404, codigo);
-    }
     return habilidad;
   }
 }

@@ -1,4 +1,4 @@
-import ColaboracionModel from "../models/colaboracion.js";
+import { Colaboracion } from "../models/colaboracion.js";
 import colaboracionRepositoryDefault from "../repositories/colaboracionRepository.js";
 import personaColaboradoraServiceDefault from "./personaColaboradoraService.js";
 import proyectoServiceDefault from "./proyectoService.js";
@@ -18,11 +18,10 @@ class ColaboracionService {
 
   crearColaboracion(personaId, proyectoId) {
     const persona = this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
-
     const proyecto = this.proyectoService.obtenerProyectoPorId(proyectoId);
 
-    if (proyecto.finalizado) {
-      throw new AppError(ErrorCatalog.COLABORACION_PROYECTO_FINALIZADO, 400, proyectoId);
+    if (this.proyectoService.estaFinalizado(proyecto)) {
+      throw new AppError(ErrorCatalog.COLABORACION_PROYECTO_FINALIZADO, 409, proyectoId);
     }
 
     const tieneHabilidadRequerida = persona.habilidades.some((habilidadPersona) =>
@@ -32,10 +31,16 @@ class ColaboracionService {
     );
 
     if (!tieneHabilidadRequerida) {
-      throw new AppError(ErrorCatalog.COLABORACION_HABILIDAD_REQUERIDA, 400);
+      throw new AppError(
+        ErrorCatalog.COLABORACION_HABILIDAD_REQUERIDA,
+        400,
+        persona.nombreFantasia,
+        proyecto.titulo,
+        proyecto.colectivo.nombre,
+      );
     }
 
-    const colaboracion = new ColaboracionModel.Colaboracion(persona, proyecto);
+    const colaboracion = new Colaboracion(persona, proyecto);
 
     return this.colaboracionRepository.guardar(colaboracion);
   }

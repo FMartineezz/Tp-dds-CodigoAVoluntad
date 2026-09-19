@@ -1,4 +1,4 @@
-import PersonaColaboradoraModel from "../models/personaColaboradora.js";
+import { PersonaColaboradora } from "../models/personaColaboradora.js";
 import personaColaboradoraRepositoryDefault from "../repositories/personaColaboradoraRepository.js";
 import habilidadServiceDefault from "./habilidadService.js";
 import { AppError } from "../errors/appError.js";
@@ -23,11 +23,15 @@ class PersonaColaboradoraService {
     pronombres,
     presentacion,
   ) {
-    const habilidadesEncontradas = habilidades.map((codigo) =>
-      this.habilidadService.obtenerHabilidadPorCodigo(codigo),
-    );
+    const habilidadesEncontradas = habilidades.map((codigo) => {
+      const habilidad = this.habilidadService.obtenerHabilidadPorCodigo(codigo);
+      if (!habilidad) {
+        throw new AppError(ErrorCatalog.COLABORADORA_HABILIDAD_INEXISTENTE, 400, codigo);
+      }
+      return habilidad;
+    });
 
-    const personaColaboradora = new PersonaColaboradoraModel.PersonaColaboradora(
+    const personaColaboradora = new PersonaColaboradora(
       nombreFantasia,
       git,
       nombre,

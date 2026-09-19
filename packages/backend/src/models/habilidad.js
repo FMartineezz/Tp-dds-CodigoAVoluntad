@@ -1,6 +1,6 @@
 import Lodash from "lodash";
 
-class Habilidad {
+export class Habilidad {
   constructor(titulo, descripcion) {
     this.id = null;
     this.titulo = titulo;
@@ -8,5 +8,3 @@ class Habilidad {
     this.descripcion = descripcion;
   }
 }
-
-export default Habilidad;

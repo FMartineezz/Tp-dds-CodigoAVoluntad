@@ -1,4 +1,4 @@
-class PersonaColaboradora {
+export class PersonaColaboradora {
   constructor(
     nombreFantasia,
     git,
@@ -18,5 +18,3 @@ class PersonaColaboradora {
     this.presentacion = presentacion;
   }
 }
-
-export default { PersonaColaboradora };

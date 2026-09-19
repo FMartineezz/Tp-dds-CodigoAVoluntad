@@ -14,7 +14,7 @@ const validarColectivo = (req, res, next) => {
 
   validacion.esStringRequerido(
     descripcion,
-    ErrorCatalog.COLECTIVO_DESCRIPCION_REQUERIDO,
+    ErrorCatalog.COLECTIVO_DESCRIPCION_REQUERIDA,
     ErrorCatalog.ARGUMENTO_INVALIDO,
     "descripcion",
   );

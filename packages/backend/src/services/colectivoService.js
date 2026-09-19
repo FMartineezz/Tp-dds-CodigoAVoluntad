@@ -33,9 +33,6 @@ class ColectivoService {
   }
 
   obtenerColectivoPorId(id) {
-    if (Number.isNaN(id)) {
-      throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
-    }
     const colectivo = this.repository.obtenerColectivoPorId(id);
 
     if (!colectivo) {
@@ -49,7 +46,7 @@ class ColectivoService {
     const colectivo = this.repository.obtenerColectivoPorNombre(nombre);
 
     if (!colectivo) {
-      throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE, 404, nombre);
+      throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE, 400, nombre);
     }
 
     return colectivo;
