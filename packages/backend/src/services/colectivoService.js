@@ -5,7 +5,7 @@ import { TipoColectivo } from "../models/colectivo.js";
 import colectivoRepositoryDefault from "../repositories/colectivoRepository.js";
 
 class ColectivoService {
-  constructor(repository = colectivoRepositoryDefault) {
+  constructor({ repository = colectivoRepositoryDefault } = {}) {
     this.repository = repository;
   }
 

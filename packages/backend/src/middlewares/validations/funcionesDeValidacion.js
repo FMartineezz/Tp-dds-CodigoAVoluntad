@@ -62,6 +62,26 @@ function esNumeroRequerido(arg, errorRequerido, errorFormato, nombreCampo) {
   esNumero(arg, errorFormato, nombreCampo);
 }
 
+/**
+ * @param {*} arg
+ * @param {object} valoresPermitidos - Valores que se permiten que tenga el arg.
+ * @param {object} errorFormato - Error si el campo no es un número (normalmente ARGUMENTO_INVALIDO).
+ * @param {string} nombreCampo - Nombre del campo, para el mensaje de errorFormato.
+ */
+
+function esValorPermitidoRequerido(arg, valoresPermitidos, errorRequerido, errorFormato) {
+  esNil(arg, errorRequerido);
+  esValorPermitido(arg, valoresPermitidos, errorFormato);
+}
+
+function esArrayDeStringsConMinimo(arg, minimo, errorRequerido, errorFormato) {
+  esNil(arg, errorRequerido);
+  esArrayDeStrings(arg, errorFormato);
+  if (arg.length < minimo) {
+    throw new AppError(errorRequerido, STATUS_VALIDACION);
+  }
+}
+
 export default {
   esNil,
   esEmpty,
@@ -71,4 +91,6 @@ export default {
   esValorPermitido,
   esStringRequerido,
   esNumeroRequerido,
+  esValorPermitidoRequerido,
+  esArrayDeStringsConMinimo,
 };

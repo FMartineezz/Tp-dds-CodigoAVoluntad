@@ -6,11 +6,11 @@ import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
 class ColaboracionService {
-  constructor(
+  constructor({
     colaboracionRepository = colaboracionRepositoryDefault,
     personaColaboradoraService = personaColaboradoraServiceDefault,
     proyectoService = proyectoServiceDefault,
-  ) {
+  } = {}) {
     this.colaboracionRepository = colaboracionRepository;
     this.personaColaboradoraService = personaColaboradoraService;
     this.proyectoService = proyectoService;

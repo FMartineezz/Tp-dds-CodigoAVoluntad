@@ -4,6 +4,7 @@ import colectivoRoutes from "./colectivoRoutes.js";
 import personaColaboradoraRoutes from "./personaColaboradoraRoutes.js";
 import colaboracionRoutes from "./colaboracionRoutes.js";
 import healthCheckRoutes from "./healthCheckRoutes.js";
+import perfilRoutes from "./perfilRoutes.js";
 
 const routes = [
   habilidadRoutes(),
@@ -12,6 +13,7 @@ const routes = [
   personaColaboradoraRoutes(),
   colaboracionRoutes(),
   healthCheckRoutes(),
+  perfilRoutes(),
 ];
 
 export default routes;

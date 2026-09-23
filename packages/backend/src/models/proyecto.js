@@ -11,23 +11,11 @@ export const ModalidadColaboracion = Object.freeze({
 });
 
 export class Proyecto {
-  constructor(
-    titulo,
-    descripcion,
-    habilidadesRequeridas,
-    horas,
-    tipoDeCompromiso,
-    modalidadDeColaboracion,
-    colectivo,
-  ) {
+  constructor(titulo, descripcion, perfiles, colectivo) {
     this.id = null;
     this.titulo = titulo;
     this.descripcion = descripcion;
-    this.habilidadesRequeridas = habilidadesRequeridas;
-    //Separo el campo compromiso esperado en dos campos: horas y tipo de horas
-    this.horas = horas;
-    this.tipoDeCompromiso = tipoDeCompromiso; // puede ser "semanales","mensuales" o "totales"
-    this.modalidadDeColaboracion = modalidadDeColaboracion;
+    this.perfiles = perfiles;
     this.colectivo = colectivo;
     this.finalizado = false;
   }

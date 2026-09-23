@@ -32,24 +32,9 @@ const ErrorCatalog = Object.freeze({
     message: "La descripción del proyecto es requerida",
   },
 
-  PROYECTO_HABILIDADES_REQUERIDAS: {
+  PROYECTO_PERFILES_REQUERIDOS: {
     code: "ERR-VAL-103",
-    message: "Las habilidades requeridas son obligatorias",
-  },
-
-  PROYECTO_HORAS_REQUERIDAS: {
-    code: "ERR-VAL-104",
-    message: "Las horas son requeridas",
-  },
-
-  PROYECTO_TIPO_COMPROMISO_REQUERIDO: {
-    code: "ERR-VAL-105",
-    message: "El tipo de compromiso es requerido",
-  },
-
-  PROYECTO_MODALIDAD_REQUERIDA: {
-    code: "ERR-VAL-106",
-    message: "La modalidad de colaboración es requerida",
+    message: "Los perfiles son obligatorios",
   },
 
   PROYECTO_COLECTIVO_REQUERIDO: {
@@ -72,19 +57,9 @@ const ErrorCatalog = Object.freeze({
     message: (titulo, id) => `Ya existe un proyecto con titulo ${titulo} para el colectivo ${id}`,
   },
 
-  PROYECTO_HABILIDADES_REQUERIDAS_FORMATO: {
-    code: "ERR-VAL-111",
-    message: "Las habilidades requeridas deben ser un array del codigo de la habilidad",
-  },
-
   PROYECTO_COLECTIVO_FORMATO: {
     code: "ERR-VAL-112",
     message: "El colectivo debe ser el nombre del mismo",
-  },
-
-  PROYECTO_HABILIDAD_INEXISTENTE: {
-    code: "ERR-VAL-113",
-    message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
   },
 
   // =========================
@@ -119,6 +94,11 @@ const ErrorCatalog = Object.freeze({
   HABILIDAD_YA_EXISTE: {
     code: "ERR-CSR-206",
     message: (id) => `Ya existe una habilidad con ese título y descripción, y su id es: ${id}`,
+  },
+
+  HABILIDAD_INEXISTENTE_GENERICO: {
+    code: "ERR-VAL-207",
+    message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
   },
 
   // =========================
@@ -199,11 +179,6 @@ const ErrorCatalog = Object.freeze({
     message: "Las habilidades de la colaboradora deben ser un array del codigo de la habilidad",
   },
 
-  COLABORADORA_HABILIDAD_INEXISTENTE: {
-    code: "ERR-VAL-407",
-    message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
-  },
-
   // =========================
   // COLABORACIONES
   // =========================
@@ -232,6 +207,66 @@ const ErrorCatalog = Object.freeze({
   COLABORACION_NO_ENCONTRADA: {
     code: "ERR-NOT-505",
     message: (id) => `La colaboración ${id} no fue encontrada`,
+  },
+
+  // =========================
+  // Perfiles
+  // =========================
+
+  PERFIL_DESCRIPCION_REQUERIDO: {
+    code: "ERR-VAL-601",
+    message: "La descripcion del perfil es requerida",
+  },
+
+  PERFIL_HABILIDADES_REQUERIDAS: {
+    code: "ERR-VAL-602",
+    message: "Las habilidades requeridas son obligatorias",
+  },
+
+  PERFIL_HABILIDADES_OPCIONALES: {
+    code: "ERR-VAL-603",
+    message: "Las habilidades opcionales son obligatorias",
+  },
+
+  PERFIL_HORAS_REQUERIDAS: {
+    code: "ERR-VAL-604",
+    message: "Las horas son requeridas",
+  },
+
+  PERFIL_TIPO_COMPROMISO_REQUERIDO: {
+    code: "ERR-VAL-605",
+    message: "El tipo de compromiso es requerido",
+  },
+
+  PERFIL_MODALIDAD_REQUERIDA: {
+    code: "ERR-VAL-606",
+    message: "La modalidad de colaboración es requerida",
+  },
+
+  PERFIL_HABILIDADES_REQUERIDAS_FORMATO: {
+    code: "ERR-VAL-607",
+    message: "Las habilidades requeridas deben ser un array del codigo de la habilidad",
+  },
+
+  PERFIL_HABILIDADES_OPCIONALES_FORMATO: {
+    code: "ERR-VAL-608",
+    message: "Las habilidades opcionales deben ser un array del codigo de la habilidad",
+  },
+
+  PERFIL_TIPO_COMPROMISO_FORMATO: {
+    code: "ERR-VAL-609",
+    message: "El tipo de compromiso debe ser : total, mensual o semanal",
+  },
+
+  PERFIL_MODALIDAD_FORMATO: {
+    code: "ERR-VAL-610",
+    message:
+      "La modalidad de colaboracion debe ser : gratuita, incentivo_economico o contratacion_eventual",
+  },
+
+  PERFIL_NO_ENCONTRADO: {
+    code: "ERR-NOT-611",
+    message: (id) => `El perfil ${id} no fue encontrado`,
   },
 });
 

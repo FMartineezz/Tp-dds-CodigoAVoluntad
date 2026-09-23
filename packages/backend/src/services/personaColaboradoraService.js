@@ -5,10 +5,10 @@ import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
 class PersonaColaboradoraService {
-  constructor(
+  constructor({
     personaColaboradoraRepository = personaColaboradoraRepositoryDefault,
     habilidadService = habilidadServiceDefault,
-  ) {
+  } = {}) {
     this.personaColaboradoraRepository = personaColaboradoraRepository;
 
     this.habilidadService = habilidadService;
@@ -24,11 +24,7 @@ class PersonaColaboradoraService {
     presentacion,
   ) {
     const habilidadesEncontradas = habilidades.map((codigo) => {
-      const habilidad = this.habilidadService.obtenerHabilidadPorCodigo(codigo);
-      if (!habilidad) {
-        throw new AppError(ErrorCatalog.COLABORADORA_HABILIDAD_INEXISTENTE, 400, codigo);
-      }
-      return habilidad;
+      return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
     });
 
     const personaColaboradora = new PersonaColaboradora(

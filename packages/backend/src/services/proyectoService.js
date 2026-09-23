@@ -1,55 +1,42 @@
 import { Proyecto } from "../models/proyecto.js";
 import proyectoRepositoryDefault from "../repositories/proyectoRepository.js";
-import habilidadServiceDefault from "./habilidadService.js";
+import perfilServiceDefault from "./perfilService.js";
 import colectivoServiceDefault from "./colectivoService.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
 class ProyectoService {
-  constructor(
+  constructor({
     proyectoRepository = proyectoRepositoryDefault,
-    habilidadService = habilidadServiceDefault,
+    perfilService = perfilServiceDefault,
     colectivoService = colectivoServiceDefault,
-  ) {
+  } = {}) {
     this.proyectoRepository = proyectoRepository;
-    this.habilidadService = habilidadService;
+    this.perfilService = perfilService;
     this.colectivoService = colectivoService;
   }
 
-  crearProyecto(
-    titulo,
-    descripcion,
-    habilidadesRequeridas,
-    horas,
-    tipoDeCompromiso,
-    modalidadDeColaboracion,
-    colectivo,
-  ) {
+  crearProyecto(titulo, descripcion, perfiles, colectivo) {
     const proyecto = this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
 
     if (proyecto) {
       throw new AppError(ErrorCatalog.PROYECTO_YA_EXISTENTE, 409, proyecto.id);
     }
 
-    const habilidadesEncontradas = habilidadesRequeridas.map((codigo) => {
-      const habilidad = this.habilidadService.obtenerHabilidadPorCodigo(codigo);
-      if (!habilidad) {
-        throw new AppError(ErrorCatalog.PROYECTO_HABILIDAD_INEXISTENTE, 400, codigo);
-      }
-      return habilidad;
-    });
-
     const colectivoEncontrado = this.colectivoService.obtenerColectivoPorNombre(colectivo);
 
-    const proyectoNuevo = new Proyecto(
-      titulo,
-      descripcion,
-      habilidadesEncontradas,
-      horas,
-      tipoDeCompromiso,
-      modalidadDeColaboracion,
-      colectivoEncontrado,
+    const perfilesCreados = perfiles.map((perfil) =>
+      this.perfilService.crearPerfil(
+        perfil.descripcion,
+        perfil.habilidadesRequeridas,
+        perfil.habilidadesOpcionales,
+        perfil.horas,
+        perfil.tipoDeCompromiso,
+        perfil.modalidadDeColaboracion,
+      ),
     );
+
+    const proyectoNuevo = new Proyecto(titulo, descripcion, perfilesCreados, colectivoEncontrado);
 
     const proyectoGuardado = this.proyectoRepository.guardar(proyectoNuevo);
 
@@ -101,6 +88,41 @@ class ProyectoService {
 
   estaFinalizado(proyecto) {
     return proyecto.finalizado;
+  }
+
+  agregarPerfil(
+    proyectoId,
+    descripcion,
+    habilidadesRequeridas,
+    habilidadesOpcionales,
+    horas,
+    tipoDeCompromiso,
+    modalidadDeColaboracion,
+  ) {
+    const perfil = this.perfilService.crearPerfil(
+      descripcion,
+      habilidadesRequeridas,
+      habilidadesOpcionales,
+      horas,
+      tipoDeCompromiso,
+      modalidadDeColaboracion,
+    );
+    const perfilGuardado = this.proyectoRepository.guardarPerfil(proyectoId, perfil);
+    return perfilGuardado;
+  }
+
+  obtenerPerfiles(proyectoId) {
+    const proyecto = this.obtenerProyectoPorId(proyectoId);
+    return proyecto.perfiles;
+  }
+
+  obtenerPerfilPorId(proyectoId, perfilId) {
+    this.obtenerProyectoPorId(proyectoId);
+    const perfil = this.proyectoRepository.obtenerPerfilPorId(proyectoId, perfilId);
+    if (!perfil) {
+      throw new AppError(ErrorCatalog.PERFIL_NO_ENCONTRADO, 404, perfilId);
+    }
+    return perfil;
   }
 }
 

@@ -4,7 +4,7 @@ import { Habilidad } from "../models/habilidad.js";
 import habilidadRepository from "../repositories/habilidadRepository.js";
 
 export class HabilidadService {
-  constructor(repository = habilidadRepository) {
+  constructor({ repository = habilidadRepository } = {}) {
     this.repository = repository;
   }
 
@@ -36,6 +36,10 @@ export class HabilidadService {
 
   obtenerHabilidadPorCodigo(codigo) {
     const habilidad = this.repository.buscarPorCodigo(codigo);
+
+    if (!habilidad) {
+      throw new AppError(ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO, 400, codigo);
+    }
     return habilidad;
   }
 }

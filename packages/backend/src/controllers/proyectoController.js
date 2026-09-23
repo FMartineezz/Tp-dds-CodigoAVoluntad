@@ -9,10 +9,7 @@ class ProyectoController {
     const proyecto = this.proyectoService.crearProyecto(
       req.body.titulo,
       req.body.descripcion,
-      req.body.habilidadesRequeridas,
-      req.body.horas,
-      req.body.tipoDeCompromiso,
-      req.body.modalidadDeColaboracion,
+      req.body.perfiles,
       req.body.colectivo,
     );
     res.status(201).location(`/proyectos/${proyecto.id}`).json(proyecto);
