@@ -20,7 +20,12 @@ class ProyectoService {
     const proyecto = this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
 
     if (proyecto) {
-      throw new AppError(ErrorCatalog.PROYECTO_YA_EXISTENTE, 409, proyecto.id);
+      throw new AppError(
+        ErrorCatalog.PROYECTO_YA_EXISTENTE,
+        409,
+        proyecto.titulo,
+        proyecto.colectivo.nombre,
+      );
     }
 
     const colectivoEncontrado = this.colectivoService.obtenerColectivoPorNombre(colectivo);

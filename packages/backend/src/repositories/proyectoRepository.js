@@ -25,7 +25,7 @@ class ProyectoRepository {
 
   obtenerPorTituloYColectivo(titulo, colectivo) {
     return this.proyectos.find(
-      (proyecto) => proyecto.titulo === titulo && proyecto.colectivo === colectivo,
+      (proyecto) => proyecto.titulo === titulo && proyecto.colectivo.nombre === colectivo,
     );
   }
 
