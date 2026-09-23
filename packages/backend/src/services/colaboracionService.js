@@ -24,9 +24,11 @@ class ColaboracionService {
       throw new AppError(ErrorCatalog.COLABORACION_PROYECTO_FINALIZADO, 409, proyectoId);
     }
 
-    const tieneHabilidadRequerida = persona.habilidades.some((habilidadPersona) =>
-      proyecto.habilidadesRequeridas.some(
-        (habilidadProyecto) => habilidadPersona.codigo === habilidadProyecto.codigo,
+    const tieneHabilidadRequerida = proyecto.perfiles.some((perfil) =>
+      perfil.habilidadesRequeridas.some((habilidadPerfil) =>
+        persona.habilidades.some(
+          (habilidadPersona) => habilidadPersona.codigo === habilidadPerfil.codigo,
+        ),
       ),
     );
 
