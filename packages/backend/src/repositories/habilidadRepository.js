@@ -34,5 +34,3 @@ export class HabilidadRespository{
     }
 
 }
-
-export default new HabilidadRespository();

@@ -1,7 +1,5 @@
-import colaboracionServiceDefault from "../services/colaboracionService.js";
-
-class ColaboracionController {
-    constructor(colaboracionService = colaboracionServiceDefault) {
+export class ColaboracionController {
+    constructor({ colaboracionService }) {
         this.colaboracionService = colaboracionService;
     }
 
@@ -27,5 +25,3 @@ class ColaboracionController {
         res.status(200).json(colaboracion);
     }
 }
-
-export default new ColaboracionController();

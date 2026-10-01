@@ -1,4 +1,4 @@
-class PersonaColaboradoraRepository {
+export class PersonaColaboradoraRepository {
 
     constructor() {
         this.personasColaboradoras = [];
@@ -20,5 +20,3 @@ class PersonaColaboradoraRepository {
         return this.personasColaboradoras.find(persona => persona.id === id);
     }
 }
-
-export default new PersonaColaboradoraRepository();

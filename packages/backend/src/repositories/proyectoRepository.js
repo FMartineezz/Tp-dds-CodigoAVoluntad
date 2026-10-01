@@ -1,4 +1,4 @@
-class ProyectoRepository {
+export class ProyectoRepository {
     constructor() {
         this.proyectos = []; 
         this.id = 1;
@@ -23,5 +23,3 @@ class ProyectoRepository {
         return this.proyectos.find(proyecto => proyecto.titulo === titulo && proyecto.colectivo === colectivo);
     }
 }
-
-export default new ProyectoRepository();

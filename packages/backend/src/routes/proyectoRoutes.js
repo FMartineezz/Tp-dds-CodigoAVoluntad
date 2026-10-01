@@ -1,5 +1,5 @@
 import { Router } from "express";
-import proyectoController from "../controllers/proyectoController.js";
+import { proyectoController } from "../container.js";
 import proyectoValidation from "../middlewares/validations/proyectoValidation.js"
 
 const pathProyectos = "/proyectos";

@@ -1,13 +1,10 @@
 import ProyectoModel from "../models/proyecto.js";
-import proyectoRepositoryDefault from "../repositories/proyectoRepository.js";
-import habilidadServiceDefault from "./habilidadService.js";
-import colectivoServiceDefault from "./colectivoService.js"
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
-class ProyectoService {
+export class ProyectoService {
 
-    constructor(proyectoRepository = proyectoRepositoryDefault, habilidadService = habilidadServiceDefault, colectivoService = colectivoServiceDefault){
+    constructor({ proyectoRepository, habilidadService, colectivoService }){
         this.proyectoRepository = proyectoRepository;
         this.habilidadService = habilidadService;
         this.colectivoService = colectivoService
@@ -98,5 +95,3 @@ class ProyectoService {
         return this.finalizarProyecto(id);
     }
 }
-
-export default new ProyectoService();

@@ -1,6 +1,6 @@
 import { Colectivo } from "../models/colectivo.js";
 
-class ColectivoRepository {
+export class ColectivoRepository {
     constructor(){
         this.colectivos = [];
         this.id = 1;
@@ -31,6 +31,4 @@ class ColectivoRepository {
         return this.colectivos.find((colectivo) => colectivo.nombre === nombre) || null;
     }
 }
-
-export default new ColectivoRepository();
 
