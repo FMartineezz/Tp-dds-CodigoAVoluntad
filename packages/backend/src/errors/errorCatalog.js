@@ -84,6 +84,16 @@ const ErrorCatalog = Object.freeze({
         message : "El colectivo debe ser el nombre del mismo"
     },
 
+    PROYECTO_TIPO_COMPROMISO_INVALIDO: {
+        code: "ERR-VAL-113",
+        message: "El tipo de compromiso tiene formato invalido, debe ser TipoCompromiso"
+    },
+
+    PROYECTO_MODALIDAD_INVALIDA: {
+        code: "ERR-VAL-114",
+        message: "La modalidad de colaboración tiene formato invalido, debe ser ModalidadColaboracion"
+    },
+
     // =========================
     // HABILIDADES
     // =========================
