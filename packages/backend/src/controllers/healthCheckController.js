@@ -8,5 +8,3 @@ export class HealthCheckController {
         });
         }
     }
-
-export default new HealthCheckController();

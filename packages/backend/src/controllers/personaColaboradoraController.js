@@ -1,7 +1,5 @@
-import personaColaboradoraServiceDefault from "../services/personaColaboradoraService.js";
-
-class PersonaColaboradoraController {
-    constructor(personaColaboradoraService = personaColaboradoraServiceDefault) {
+export class PersonaColaboradoraController {
+    constructor({ personaColaboradoraService }) {
         this.personaColaboradoraService = personaColaboradoraService;
     }
 
@@ -34,5 +32,3 @@ class PersonaColaboradoraController {
         res.status(200).json(persona);
     }
 }
-
-export default new PersonaColaboradoraController();
