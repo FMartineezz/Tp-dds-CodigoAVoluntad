@@ -11,7 +11,8 @@
     "start:frontend": "npm start --workspace=frontend",
     "start:dev": "concurrently \"npm run dev:backend\" \"npm run start:frontend\"",
     "lint": "eslint .",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "format:check": "prettier --check ."
   },
   "keywords": [],
   "author": "",
@@ -23,6 +24,6 @@
     "eslint": "^9.31.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.3.0",
-    "prettier": "3.6.2"
+    "prettier": "^3.6.2"
   }
 }

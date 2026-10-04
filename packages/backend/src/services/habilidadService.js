@@ -1,47 +1,44 @@
-import { AppError } from '../errors/appError.js';
-import ErrorCatalog from '../errors/errorCatalog.js';
-import Habilidad from '../models/habilidad.js';
+import { AppError } from "../errors/appError.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
+import { Habilidad } from "../models/habilidad.js";
 
 export class HabilidadService {
-    constructor({ repository }){
-        this.repository = repository
-    }
-    
-    crearHabilidad(titulo, descripcion) {
-        //Valido que no exista la habilidad
-        const habilidadExistente = this.repository.buscarPorTituloYDescripcion(titulo, descripcion);
-        if(habilidadExistente){
-            throw new AppError(ErrorCatalog.HABILIDAD_YA_EXISTE ,409, habilidadExistente.id);
-        }
+  constructor({ repository }) {
+    this.repository = repository;
+  }
 
-            const habilidad = new Habilidad(titulo, descripcion);
-            this.repository.agregarHabilidad(habilidad);
-            return habilidad;
+  crearHabilidad(titulo, descripcion) {
+    //Valido que no exista la habilidad
+    const habilidadExistente = this.repository.buscarPorTitulo(titulo);
+    if (habilidadExistente) {
+      throw new AppError(ErrorCatalog.HABILIDAD_YA_EXISTE, 409, habilidadExistente.id);
     }
 
-    obtenerHabilidades(){
-        return this.repository.findAll();
+    const habilidad = new Habilidad(titulo, descripcion);
+    this.repository.agregarHabilidad(habilidad);
+    return habilidad;
+  }
+
+  obtenerHabilidades() {
+    return this.repository.findAll();
+  }
+
+  obtenerHabilidadPorId(id) {
+    const habilidad = this.repository.findById(id);
+
+    if (!habilidad) {
+      throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_ID, 404, id);
     }
 
-    obtenerHabilidadPorId(id){
-        if (Number.isNaN(id)) {
-            throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
-        }  
-        
-        const habilidad = this.repository.findById(id);
+    return habilidad;
+  }
 
-        if (!habilidad) {
-            throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_ID, 404, id);
-        }
+  obtenerHabilidadPorCodigo(codigo) {
+    const habilidad = this.repository.buscarPorCodigo(codigo);
 
-        return habilidad;
+    if (!habilidad) {
+      throw new AppError(ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO, 400, codigo);
     }
-
-    obtenerHabilidadPorCodigo(codigo){
-        const habilidad = this.repository.buscarPorCodigo(codigo);
-        if(!habilidad){
-            throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_CODIGO, 404, codigo);
-        }
-        return habilidad;
-    }
+    return habilidad;
+  }
 }

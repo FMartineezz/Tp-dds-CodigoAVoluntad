@@ -9,6 +9,7 @@ import { ColectivoService } from "./services/colectivoService.js";
 import { HabilidadService } from "./services/habilidadService.js";
 import { ColaboracionService } from "./services/colaboracionService.js";
 import { PersonaColaboradoraService } from "./services/personaColaboradoraService.js";
+import { PerfilService } from "./services/perfilService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -16,6 +17,7 @@ import { HabilidadController } from "./controllers/habilidadController.js";
 import { ColaboracionController } from "./controllers/colaboracionController.js";
 import { PersonaColaboradoraController } from "./controllers/personaColaboradoraController.js";
 import { HealthCheckController } from "./controllers/healthCheckController.js";
+import { PerfilController } from "./controllers/perfilController.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
@@ -26,16 +28,21 @@ const personaColaboradoraRepository = new PersonaColaboradoraRepository();
 
 // Services: dependen de repositorios y de otros services ya creados.
 const habilidadService = new HabilidadService({ repository: habilidadRepository });
+const perfilService = new PerfilService({ habilidadService });
 const colectivoService = new ColectivoService({ repository: colectivoRepository });
-const proyectoService = new ProyectoService({ proyectoRepository, habilidadService, colectivoService });
+const proyectoService = new ProyectoService({
+  proyectoRepository,
+  perfilService,
+  colectivoService,
+});
 const personaColaboradoraService = new PersonaColaboradoraService({
-    personaColaboradoraRepository,
-    habilidadService,
+  personaColaboradoraRepository,
+  habilidadService,
 });
 const colaboracionService = new ColaboracionService({
-    colaboracionRepository,
-    personaColaboradoraService,
-    proyectoService,
+  colaboracionRepository,
+  personaColaboradoraService,
+  proyectoService,
 });
 
 // Controllers: dependen de services.
@@ -43,5 +50,8 @@ export const proyectoController = new ProyectoController({ proyectoService });
 export const colectivoController = new ColectivoController({ service: colectivoService });
 export const habilidadController = new HabilidadController({ habilidadService });
 export const colaboracionController = new ColaboracionController({ colaboracionService });
-export const personaColaboradoraController = new PersonaColaboradoraController({ personaColaboradoraService });
+export const personaColaboradoraController = new PersonaColaboradoraController({
+  personaColaboradoraService,
+});
 export const healthCheckController = new HealthCheckController();
+export const perfilController = new PerfilController({ proyectoService });

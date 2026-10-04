@@ -1,34 +1,31 @@
-import { Colectivo } from "../models/colectivo.js";
-
 export class ColectivoRepository {
-    constructor(){
-        this.colectivos = [];
-        this.id = 1;
-    }
-    
-   // crearColectivo(nombre, descripcion, ubicacion, tipoDeColectivo, proyectos) {
-     //   const colectivo = new Colectivo(this.id, nombre, descripcion, ubicacion, tipoDeColectivo, proyectos);
-     //   this.id++;
-     //   this.colectivos.push(colectivo);
-     //   return colectivo;
-   // }
+  constructor() {
+    this.colectivos = [];
+    this.id = 1;
+  }
 
-    agregarColectivo(colectivo){
-        colectivo.id = this.id;
-        this.id++;
-        this.colectivos.push(colectivo);
-    }
+  // crearColectivo(nombre, descripcion, ubicacion, tipoDeColectivo, proyectos) {
+  //   const colectivo = new Colectivo(this.id, nombre, descripcion, ubicacion, tipoDeColectivo, proyectos);
+  //   this.id++;
+  //   this.colectivos.push(colectivo);
+  //   return colectivo;
+  // }
 
-    obtenerColectivos(){
-        return this.colectivos;
-    }
+  agregarColectivo(colectivo) {
+    colectivo.id = this.id;
+    this.id++;
+    this.colectivos.push(colectivo);
+  }
 
-    obtenerColectivoPorId(id){
-        return this.colectivos.find(c => c.id === id) ?? null;
-    }
+  obtenerColectivos() {
+    return this.colectivos;
+  }
 
-    obtenerColectivoPorNombre(nombre){
-        return this.colectivos.find((colectivo) => colectivo.nombre === nombre) || null;
-    }
+  obtenerColectivoPorId(id) {
+    return this.colectivos.find((c) => c.id === id) ?? null;
+  }
+
+  obtenerColectivoPorNombre(nombre) {
+    return this.colectivos.find((colectivo) => colectivo.nombre === nombre) || null;
+  }
 }
-

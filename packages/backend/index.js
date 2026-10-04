@@ -5,8 +5,7 @@ import routes from "./src/routes/routes.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 import ErrorCatalog from "./src/errors/errorCatalog.js";
 
-
-const port = process.env.SERVER_PORT || 3000
+const port = process.env.SERVER_PORT || 3000;
 
 const app = express();
 app.use(express.json());
@@ -19,7 +18,7 @@ app.use(
   }),
 );
 
-routes.forEach(route => app.use(route));
+routes.forEach((route) => app.use(route));
 
 app.use((req, res) => {
   res.status(404).json(ErrorCatalog.RECURSO_NO_ENCONTRADO);
@@ -27,6 +26,6 @@ app.use((req, res) => {
 
 app.use(errorHandler);
 
-app.listen(port , () => {
+app.listen(port, () => {
   console.log("Backend escuchando en puerto " + port);
 });
