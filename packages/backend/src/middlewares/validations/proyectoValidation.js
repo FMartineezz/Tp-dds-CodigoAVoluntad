@@ -1,81 +1,80 @@
+import { z as zod } from "zod";
+import { AppError } from "../../errors/appError.js";
 import ErrorCatalog from "../../errors/errorCatalog.js";
-import validacion from "./funcionesDeValidacion.js";
-import { TipoCompromiso } from "../../models/proyecto.js";
-import { ModalidadColaboracion } from "../../models/proyecto.js";
+import { TipoCompromiso, ModalidadColaboracion } from "../../models/proyecto.js";
 
-function validarPerfilData(perfil) {
-  validacion.esStringRequerido(
-    perfil.descripcion,
-    ErrorCatalog.PERFIL_DESCRIPCION_REQUERIDO,
-    ErrorCatalog.ARGUMENTO_INVALIDO,
-    "descripcion del perfil",
-  );
+// NUEVO: lo que antes estaba en validarPerfilData, ahora como schema de un perfil
+export const perfilSchema = zod.object({
+  descripcion: zod
+    .string({
+      required_error: "PERFIL_DESCRIPCION_REQUERIDO",
+      invalid_type_error: "ARGUMENTO_INVALIDO",
+    })
+    .min(1, "PERFIL_DESCRIPCION_REQUERIDO"),
+  habilidadesRequeridas: zod
+    .array(zod.string({ invalid_type_error: "PERFIL_HABILIDADES_REQUERIDAS_FORMATO" }), {
+      required_error: "PERFIL_HABILIDADES_REQUERIDAS",
+      invalid_type_error: "PERFIL_HABILIDADES_REQUERIDAS_FORMATO",
+    })
+    .min(1, "PERFIL_HABILIDADES_REQUERIDAS"),
+  habilidadesOpcionales: zod
+    .array(zod.string({ invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO" }), {
+      required_error: "PERFIL_HABILIDADES_OPCIONALES",
+      invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO",
+    })
+    .min(1, "PERFIL_HABILIDADES_OPCIONALES"),
+  horas: zod.number({
+    required_error: "PERFIL_HORAS_REQUERIDAS",
+    invalid_type_error: "ARGUMENTO_INVALIDO",
+  }),
+  tipoDeCompromiso: zod.nativeEnum(TipoCompromiso, {
+    errorMap: (issue) => ({
+      message:
+        issue.code === "invalid_type"
+          ? "PERFIL_TIPO_COMPROMISO_REQUERIDO"
+          : "PERFIL_TIPO_COMPROMISO_FORMATO",
+    }),
+  }),
+  modalidadDeColaboracion: zod.nativeEnum(ModalidadColaboracion, {
+    errorMap: (issue) => ({
+      message:
+        issue.code === "invalid_type" ? "PERFIL_MODALIDAD_REQUERIDA" : "PERFIL_MODALIDAD_FORMATO",
+    }),
+  }),
+});
 
-  validacion.esArrayDeStringsConMinimo(
-    perfil.habilidadesRequeridas,
-    1,
-    ErrorCatalog.PERFIL_HABILIDADES_REQUERIDAS,
-    ErrorCatalog.PERFIL_HABILIDADES_REQUERIDAS_FORMATO,
-  );
-
-  validacion.esArrayDeStringsConMinimo(
-    perfil.habilidadesOpcionales,
-    1,
-    ErrorCatalog.PERFIL_HABILIDADES_OPCIONALES,
-    ErrorCatalog.PERFIL_HABILIDADES_OPCIONALES_FORMATO,
-  );
-
-  validacion.esNumeroRequerido(
-    perfil.horas,
-    ErrorCatalog.PERFIL_HORAS_REQUERIDAS,
-    ErrorCatalog.ARGUMENTO_INVALIDO,
-    "horas",
-  );
-
-  validacion.esValorPermitidoRequerido(
-    perfil.tipoDeCompromiso,
-    TipoCompromiso,
-    ErrorCatalog.PERFIL_TIPO_COMPROMISO_REQUERIDO,
-    ErrorCatalog.PERFIL_TIPO_COMPROMISO_FORMATO,
-  );
-
-  validacion.esValorPermitidoRequerido(
-    perfil.modalidadDeColaboracion,
-    ModalidadColaboracion,
-    ErrorCatalog.PERFIL_MODALIDAD_REQUERIDA,
-    ErrorCatalog.PERFIL_MODALIDAD_FORMATO,
-  );
-}
+const proyectoSchema = zod.object({
+  titulo: zod
+    .string({
+      required_error: "PROYECTO_TITULO_REQUERIDO",
+      invalid_type_error: "ARGUMENTO_INVALIDO",
+    })
+    .min(1, "PROYECTO_TITULO_REQUERIDO"),
+  descripcion: zod
+    .string({
+      required_error: "PROYECTO_DESCRIPCION_REQUERIDA",
+      invalid_type_error: "ARGUMENTO_INVALIDO",
+    })
+    .min(1, "PROYECTO_DESCRIPCION_REQUERIDA"),
+  // NUEVO: array de perfiles, con al menos uno
+  perfiles: zod
+    .array(perfilSchema, {
+      required_error: "PROYECTO_PERFILES_REQUERIDOS",
+      invalid_type_error: "PROYECTO_PERFILES_REQUERIDOS",
+    })
+    .min(1, "PROYECTO_PERFILES_REQUERIDOS"),
+  colectivo: zod.string({
+    required_error: "PROYECTO_COLECTIVO_REQUERIDO",
+    invalid_type_error: "PROYECTO_COLECTIVO_FORMATO",
+  }),
+});
 
 const validarProyecto = (req, res, next) => {
-  const { titulo, descripcion, perfiles, colectivo } = req.body;
+  const resultado = proyectoSchema.safeParse(req.body);
 
-  validacion.esStringRequerido(
-    titulo,
-    ErrorCatalog.PROYECTO_TITULO_REQUERIDO,
-    ErrorCatalog.ARGUMENTO_INVALIDO,
-    "titulo",
-  );
-
-  validacion.esStringRequerido(
-    descripcion,
-    ErrorCatalog.PROYECTO_DESCRIPCION_REQUERIDA,
-    ErrorCatalog.ARGUMENTO_INVALIDO,
-    "descripcion",
-  );
-
-  //Valido los perfiles
-
-  validacion.esNil(perfiles, ErrorCatalog.PROYECTO_PERFILES_REQUERIDOS);
-  if (!Array.isArray(perfiles) || perfiles.length === 0) {
-    throw new AppError(ErrorCatalog.PROYECTO_PERFILES_REQUERIDOS, 400);
-  }
-  perfiles.forEach(validarPerfilData);
-
-  validacion.esNil(colectivo, ErrorCatalog.PROYECTO_COLECTIVO_REQUERIDO);
-
-  if (typeof colectivo === "object") {
-    return res.status(400).json(ErrorCatalog.PROYECTO_COLECTIVO_FORMATO);
+  if (!resultado.success) {
+    const codigo = resultado.error.issues[0].message;
+    throw new AppError(ErrorCatalog[codigo], 400);
   }
 
   next();

@@ -1,16 +1,9 @@
 import { Colaboracion } from "../models/colaboracion.js";
-import colaboracionRepositoryDefault from "../repositories/colaboracionRepository.js";
-import personaColaboradoraServiceDefault from "./personaColaboradoraService.js";
-import proyectoServiceDefault from "./proyectoService.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
-class ColaboracionService {
-  constructor({
-    colaboracionRepository = colaboracionRepositoryDefault,
-    personaColaboradoraService = personaColaboradoraServiceDefault,
-    proyectoService = proyectoServiceDefault,
-  } = {}) {
+export class ColaboracionService {
+  constructor({ colaboracionRepository, personaColaboradoraService, proyectoService }) {
     this.colaboracionRepository = colaboracionRepository;
     this.personaColaboradoraService = personaColaboradoraService;
     this.proyectoService = proyectoService;
@@ -61,5 +54,3 @@ class ColaboracionService {
     return colaboracion;
   }
 }
-
-export default new ColaboracionService();

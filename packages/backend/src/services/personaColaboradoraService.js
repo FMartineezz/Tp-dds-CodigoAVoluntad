@@ -1,14 +1,9 @@
 import { PersonaColaboradora } from "../models/personaColaboradora.js";
-import personaColaboradoraRepositoryDefault from "../repositories/personaColaboradoraRepository.js";
-import habilidadServiceDefault from "./habilidadService.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
-class PersonaColaboradoraService {
-  constructor({
-    personaColaboradoraRepository = personaColaboradoraRepositoryDefault,
-    habilidadService = habilidadServiceDefault,
-  } = {}) {
+export class PersonaColaboradoraService {
+  constructor({ personaColaboradoraRepository, habilidadService }) {
     this.personaColaboradoraRepository = personaColaboradoraRepository;
 
     this.habilidadService = habilidadService;
@@ -54,5 +49,3 @@ class PersonaColaboradoraService {
     return persona;
   }
 }
-
-export default new PersonaColaboradoraService();

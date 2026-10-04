@@ -35,5 +35,3 @@ export class HabilidadRespository {
     return this.habilidades.find((habilidad) => habilidad.codigo === codigo) || null;
   }
 }
-
-export default new HabilidadRespository();

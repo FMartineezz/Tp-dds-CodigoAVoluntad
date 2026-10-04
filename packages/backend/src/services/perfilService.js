@@ -1,13 +1,7 @@
-//import proyectoServiceDefault from "../services/proyectoService.js";
-import habilidadServiceDefault from "./habilidadService.js";
 import { Perfil } from "../models/perfil.js";
 
-class PerfilService {
-  constructor({
-    //proyectoService = proyectoServiceDefault,
-    habilidadService = habilidadServiceDefault,
-  } = {}) {
-    //this.proyectoService = proyectoService;
+export class PerfilService {
+  constructor({ habilidadService }) {
     this.habilidadService = habilidadService;
   }
 
@@ -39,5 +33,3 @@ class PerfilService {
     return perfil;
   }
 }
-
-export default new PerfilService();

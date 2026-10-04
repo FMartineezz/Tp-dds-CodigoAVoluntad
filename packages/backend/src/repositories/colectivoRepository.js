@@ -1,10 +1,15 @@
-import { Colectivo } from "../models/colectivo.js";
-
-class ColectivoRepository {
+export class ColectivoRepository {
   constructor() {
     this.colectivos = [];
     this.id = 1;
   }
+
+  // crearColectivo(nombre, descripcion, ubicacion, tipoDeColectivo, proyectos) {
+  //   const colectivo = new Colectivo(this.id, nombre, descripcion, ubicacion, tipoDeColectivo, proyectos);
+  //   this.id++;
+  //   this.colectivos.push(colectivo);
+  //   return colectivo;
+  // }
 
   agregarColectivo(colectivo) {
     colectivo.id = this.id;
@@ -24,5 +29,3 @@ class ColectivoRepository {
     return this.colectivos.find((colectivo) => colectivo.nombre === nombre) || null;
   }
 }
-
-export default new ColectivoRepository();

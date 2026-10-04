@@ -1,5 +1,5 @@
 import { Router } from "express";
-import personaColaboradoraController from "../controllers/personaColaboradoraController.js";
+import { personaColaboradoraController } from "../container.js";
 import validarPersonaColaboradora from "../middlewares/validations/colaboradoraValidation.js";
 
 const pathColaboradoras = "/colaboradoras";

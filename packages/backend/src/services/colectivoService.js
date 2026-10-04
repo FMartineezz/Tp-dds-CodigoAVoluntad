@@ -2,10 +2,9 @@ import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Colectivo } from "../models/colectivo.js";
 import { TipoColectivo } from "../models/colectivo.js";
-import colectivoRepositoryDefault from "../repositories/colectivoRepository.js";
 
-class ColectivoService {
-  constructor({ repository = colectivoRepositoryDefault } = {}) {
+export class ColectivoService {
+  constructor({ repository }) {
     this.repository = repository;
   }
 
@@ -56,5 +55,3 @@ class ColectivoService {
     colectivo.proyectos.push(proyecto.id);
   }
 }
-
-export default new ColectivoService();

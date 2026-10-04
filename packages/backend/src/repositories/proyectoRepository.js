@@ -1,4 +1,4 @@
-class ProyectoRepository {
+export class ProyectoRepository {
   constructor() {
     this.proyectos = [];
     this.id = 1;
@@ -47,5 +47,3 @@ class ProyectoRepository {
     return proyecto.perfiles.find((perfil) => perfil.id === perfilId) ?? null;
   }
 }
-
-export default new ProyectoRepository();

@@ -1,4 +1,4 @@
-class ColaboracionRepository {
+export class ColaboracionRepository {
   constructor() {
     this.colaboraciones = [];
     this.id = 1;
@@ -20,5 +20,3 @@ class ColaboracionRepository {
     return this.colaboraciones.find((colaboracion) => colaboracion.id === id);
   }
 }
-
-export default new ColaboracionRepository();

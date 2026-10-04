@@ -1,7 +1,5 @@
-import proyectoServiceDefault from "../services/proyectoService.js";
-
-class ProyectoController {
-  constructor(proyectoService = proyectoServiceDefault) {
+export class ProyectoController {
+  constructor({ proyectoService }) {
     this.proyectoService = proyectoService;
   }
 
@@ -46,5 +44,3 @@ class ProyectoController {
     res.status(200).json(proyecto);
   };
 }
-
-export default new ProyectoController();

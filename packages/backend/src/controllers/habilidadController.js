@@ -1,7 +1,5 @@
-import habilidadServiceDefault from "../services/habilidadService.js";
-
 export class HabilidadController {
-  constructor(habilidadService = habilidadServiceDefault) {
+  constructor({ habilidadService }) {
     this.habilidadService = habilidadService;
   }
 
@@ -22,5 +20,3 @@ export class HabilidadController {
     res.status(200).json(respuesta);
   };
 }
-
-export default new HabilidadController();

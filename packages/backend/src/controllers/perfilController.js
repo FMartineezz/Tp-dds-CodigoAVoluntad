@@ -1,11 +1,9 @@
-import proyectoServiceDefault from "../services/proyectoService.js";
-
-class PerfilController {
+export class PerfilController {
   //Los perfiles tienen sentido unicamente en el contexto del proyecto,
   //Por ende siempre se tomara a proyecto como la entidad principal, y
   //El perfil es una entidad la cual no es a parte sino que viene con el proyecto
 
-  constructor(proyectoService = proyectoServiceDefault) {
+  constructor({ proyectoService }) {
     this.proyectoService = proyectoService;
   }
 
@@ -50,5 +48,3 @@ class PerfilController {
     const proyectoId = Number(req.params.idProyecto);
   };
 }
-
-export default new PerfilController();

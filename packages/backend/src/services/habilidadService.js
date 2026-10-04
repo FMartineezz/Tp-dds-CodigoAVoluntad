@@ -1,10 +1,9 @@
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Habilidad } from "../models/habilidad.js";
-import habilidadRepository from "../repositories/habilidadRepository.js";
 
 export class HabilidadService {
-  constructor({ repository = habilidadRepository } = {}) {
+  constructor({ repository }) {
     this.repository = repository;
   }
 
@@ -43,5 +42,3 @@ export class HabilidadService {
     return habilidad;
   }
 }
-
-export default new HabilidadService();

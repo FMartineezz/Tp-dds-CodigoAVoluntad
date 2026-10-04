@@ -1,7 +1,5 @@
-import serviceDefault from "../services/colectivoService.js";
-
-class ColectivoController {
-  constructor(service = serviceDefault) {
+export class ColectivoController {
+  constructor({ service }) {
     this.service = service;
   }
 
@@ -28,5 +26,3 @@ class ColectivoController {
     res.status(200).json(respuesta);
   }
 }
-
-export default new ColectivoController();
