@@ -7,6 +7,7 @@ export class ColaboracionController {
     const colaboracion = this.colaboracionService.crearColaboracion(
       req.body.personaColaboradoraId,
       req.body.proyectoId,
+      req.body.anonima,
     );
 
     res.status(201).location(`/colaboraciones/${colaboracion.id}`).json(colaboracion);

@@ -10,6 +10,7 @@ const colaboracionSchema = zod.object({
   proyectoId: zod.any().refine((valor) => valor !== undefined && valor !== null, {
     message: "COLABORACION_PROYECTO_REQUERIDO",
   }),
+  anonima: zod.boolean({ invalid_type_error: "COLABORACION_ANONIMA_FORMATO" }).optional(),
 });
 
 const validarColaboracion = (req, res, next) => {

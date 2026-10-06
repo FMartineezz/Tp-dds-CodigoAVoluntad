@@ -199,13 +199,18 @@ const ErrorCatalog = Object.freeze({
       `La colaboradora: ${colaboradora} ,debe tener al menos una habilidad requerida por el proyecto: ${proyecto} del colectivo: ${colectivo}`,
   },
 
+  COLABORACION_ANONIMA_FORMATO: {
+    code: "ERR-VAL-504",
+    message: "El campo anonima debe ser un booleano",
+  },
+
   COLABORACION_PROYECTO_FINALIZADO: {
-    code: "ERR-EST-504",
+    code: "ERR-EST-505",
     message: "No se puede colaborar en un proyecto finalizado",
   },
 
   COLABORACION_NO_ENCONTRADA: {
-    code: "ERR-NOT-505",
+    code: "ERR-NOT-506",
     message: (id) => `La colaboración ${id} no fue encontrada`,
   },
 
