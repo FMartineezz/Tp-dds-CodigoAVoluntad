@@ -17,6 +17,8 @@ export class PersonaColaboradoraService {
     habilidades,
     pronombres,
     presentacion,
+    contactos,
+    bloquearMensajeInterno,
   ) {
     const habilidadesEncontradas = habilidades.map((codigo) => {
       return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
@@ -30,11 +32,32 @@ export class PersonaColaboradoraService {
       habilidadesEncontradas,
       pronombres,
       presentacion,
+      contactos,
+      bloquearMensajeInterno,
     );
 
     return this.personaColaboradoraRepository.guardar(personaColaboradora);
   }
 
+  //Vista expuesta (sin contactos)
+  verPersonasColaboradoras() {
+    const personasColaboradoras = this.personaColaboradoraRepository.obtenerTodas();
+    return personasColaboradoras.map((personaColaboradora) =>
+      this.ocultarContactos(personaColaboradora),
+    );
+  }
+
+  verPersonasColaboradoraPorId(id) {
+    const personaColaboradora = this.personaColaboradoraRepository.obtenerPorId(id);
+
+    if (!personaColaboradora) {
+      throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+    }
+
+    return this.ocultarContactos(personaColaboradora);
+  }
+
+  //Metodo interno para la conexion entre service
   obtenerPersonasColaboradoras() {
     return this.personaColaboradoraRepository.obtenerTodas();
   }
@@ -47,5 +70,10 @@ export class PersonaColaboradoraService {
     }
 
     return persona;
+  }
+
+  ocultarContactos(personaColaboradora) {
+    const { contactos, ...resto } = personaColaboradora;
+    return resto;
   }
 }

@@ -7,7 +7,7 @@ export default function proyectoRoutes() {
 
   router.get("/proyectos/:idProyecto/perfiles", perfilController.obtenerPerfiles);
 
-  router.get("/proyectos/:idProyecto/perfiles/:idPerfil", perfilController.obtenerPerfilesPorId);
+  router.get("/proyectos/:idProyecto/perfiles/:idPerfil", perfilController.obtenerPerfilPorId);
 
   router.post("/proyectos/:idProyecto/perfiles", validarPerfil, perfilController.crearPerfil);
 

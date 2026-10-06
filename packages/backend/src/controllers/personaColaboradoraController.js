@@ -12,21 +12,23 @@ export class PersonaColaboradoraController {
       req.body.habilidades,
       req.body.pronombres,
       req.body.presentacion,
+      req.body.contactos,
+      req.body.bloquearMensajeInterno,
     );
 
     res.status(201).location(`/colaboradoras/${persona.id}`).json(persona);
   };
 
-  obtenerPersonasColaboradoras = (req, res) => {
-    const personas = this.personaColaboradoraService.obtenerPersonasColaboradoras();
+  verPersonasColaboradoras = (req, res) => {
+    const personas = this.personaColaboradoraService.verPersonasColaboradoras();
 
     res.status(200).json(personas);
   };
 
-  obtenerPersonaColaboradoraPorId = (req, res) => {
+  verPersonasColaboradoraPorId = (req, res) => {
     const id = Number(req.params.id);
 
-    const persona = this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(id);
+    const persona = this.personaColaboradoraService.verPersonasColaboradoraPorId(id);
 
     res.status(200).json(persona);
   };

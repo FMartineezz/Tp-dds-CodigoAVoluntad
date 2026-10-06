@@ -3,6 +3,7 @@ import { ColectivoRepository } from "./repositories/colectivoRepository.js";
 import { HabilidadRespository } from "./repositories/habilidadRepository.js";
 import { ColaboracionRepository } from "./repositories/colaboracionRepository.js";
 import { PersonaColaboradoraRepository } from "./repositories/personaColaboradoraRepository.js";
+import { MensajeRepository } from "./repositories/mensajesRepository.js";
 
 import { ProyectoService } from "./services/proyectoService.js";
 import { ColectivoService } from "./services/colectivoService.js";
@@ -10,6 +11,7 @@ import { HabilidadService } from "./services/habilidadService.js";
 import { ColaboracionService } from "./services/colaboracionService.js";
 import { PersonaColaboradoraService } from "./services/personaColaboradoraService.js";
 import { PerfilService } from "./services/perfilService.js";
+import { MensajeService } from "./services/mensajeService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -18,6 +20,7 @@ import { ColaboracionController } from "./controllers/colaboracionController.js"
 import { PersonaColaboradoraController } from "./controllers/personaColaboradoraController.js";
 import { HealthCheckController } from "./controllers/healthCheckController.js";
 import { PerfilController } from "./controllers/perfilController.js";
+import { MensajeController } from "./controllers/mensajeController.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
@@ -25,6 +28,7 @@ const colectivoRepository = new ColectivoRepository();
 const habilidadRepository = new HabilidadRespository();
 const colaboracionRepository = new ColaboracionRepository();
 const personaColaboradoraRepository = new PersonaColaboradoraRepository();
+const mensajeRepository = new MensajeRepository();
 
 // Services: dependen de repositorios y de otros services ya creados.
 const habilidadService = new HabilidadService({ repository: habilidadRepository });
@@ -44,6 +48,11 @@ const colaboracionService = new ColaboracionService({
   personaColaboradoraService,
   proyectoService,
 });
+const mensajeService = new MensajeService({
+  repository: mensajeRepository,
+  colectivoService,
+  personaColaboradoraService,
+});
 
 // Controllers: dependen de services.
 export const proyectoController = new ProyectoController({ proyectoService });
@@ -55,3 +64,4 @@ export const personaColaboradoraController = new PersonaColaboradoraController({
 });
 export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService });
+export const mensajeController = new MensajeController({ mensajeService });

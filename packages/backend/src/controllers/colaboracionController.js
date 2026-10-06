@@ -13,16 +13,16 @@ export class ColaboracionController {
     res.status(201).location(`/colaboraciones/${colaboracion.id}`).json(colaboracion);
   };
 
-  obtenerColaboraciones = (req, res) => {
-    const colaboraciones = this.colaboracionService.obtenerColaboraciones();
+  verColaboraciones = (req, res) => {
+    const colaboraciones = this.colaboracionService.verColaboraciones();
 
     res.status(200).json(colaboraciones);
   };
 
-  obtenerColaboracionPorId = (req, res) => {
+  verColaboracionPorId = (req, res) => {
     const id = Number(req.params.id);
 
-    const colaboracion = this.colaboracionService.obtenerColaboracionPorId(id);
+    const colaboracion = this.colaboracionService.verColaboracionPorId(id);
 
     res.status(200).json(colaboracion);
   };

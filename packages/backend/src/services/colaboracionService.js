@@ -40,9 +40,23 @@ export class ColaboracionService {
     return this.colaboracionRepository.guardar(colaboracion);
   }
 
-  obtenerColaboraciones() {
+  verColaboraciones() {
     const colaboraciones = this.colaboracionRepository.obtenerTodas();
     return colaboraciones.map((colaboracion) => this.ocultarSiEsAnonima(colaboracion));
+  }
+
+  verColaboracionPorId(id) {
+    const colaboracion = this.colaboracionRepository.obtenerPorId(id);
+
+    if (!colaboracion) {
+      throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);
+    }
+
+    return this.ocultarSiEsAnonima(colaboracion);
+  }
+
+  obtenerColaboraciones() {
+    return this.colaboracionRepository.obtenerTodas();
   }
 
   obtenerColaboracionPorId(id) {
@@ -52,7 +66,7 @@ export class ColaboracionService {
       throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);
     }
 
-    return this.ocultarSiEsAnonima(colaboracion);
+    return colaboracion;
   }
 
   ocultarSiEsAnonima(colaboracion) {

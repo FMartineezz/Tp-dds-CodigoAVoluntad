@@ -7,9 +7,9 @@ const pathColaboraciones = "/colaboraciones";
 export default function colaboracionRoutes() {
   const router = Router();
 
-  router.get(pathColaboraciones, colaboracionController.obtenerColaboraciones);
+  router.get(pathColaboraciones, colaboracionController.verColaboraciones);
 
-  router.get(pathColaboraciones + "/:id", colaboracionController.obtenerColaboracionPorId);
+  router.get(pathColaboraciones + "/:id", colaboracionController.verColaboracionPorId);
 
   router.post(pathColaboraciones, validarColaboracion, colaboracionController.crearColaboracion);
 

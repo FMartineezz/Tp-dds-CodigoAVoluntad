@@ -15,7 +15,7 @@ export class PerfilController {
     res.status(200).json(perfiles);
   };
 
-  obtenerPerfilesPorId = (req, res) => {
+  obtenerPerfilPorId = (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
     const perfilId = Number(req.params.idPerfil);
 
