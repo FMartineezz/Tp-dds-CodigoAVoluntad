@@ -1,5 +1,24 @@
+import { PersonaColaboradoraModel } from "../schemas/personaColaboradoraSchema";
+
 export class PersonaColaboradoraRepository {
-  constructor() {
+    constructor(){
+      this.model = PersonaColaboradoraModel
+    }
+    
+    async guardar(personaColaboradora) {
+      const nuevaPersonaColaboradora = new this.model(personaColaboradora);
+      return await nuevaPersonaColaboradora.save();
+    }
+    
+    async obtenerTodas() {
+      return await this.model.find();
+    }
+    
+    async obtenerPorId(id) {
+      return await this.model.findById(id);
+    }
+
+/*   constructor() {
     this.personasColaboradoras = [];
     this.id = 1;
   }
@@ -17,5 +36,5 @@ export class PersonaColaboradoraRepository {
 
   obtenerPorId(id) {
     return this.personasColaboradoras.find((persona) => persona.id === id);
-  }
+  } */
 }

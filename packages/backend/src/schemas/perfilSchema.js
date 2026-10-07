@@ -1,31 +1,54 @@
 import mongoose from "mongoose";
 import { Perfil } from "../models/perfil";
+import { ModalidadColaboracion, TipoCompromiso } from "../models/proyecto";
 
 
-//se puede embeber????
 const perfilSchema = new mongoose.Schema({
     descripcion:{
         type: String,
         required: true
     },
     habilidadesRequeridas:{
-        type: Array,
-        required: true
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Habilidad'
+        }],
+        required: true,
+        validate: {
+            validator: function(v) {
+                return Array.isArray(v) && v.length > 0;
+            },
+        }
     },
     habilidadesOpcionales:{
-        type: Array,
-        required: true
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Habilidad'
+        }],
+        required: true,
+        validate: {
+            validator: function(v) {
+                return Array.isArray(v) && v.length > 0;
+            },
+        }
     },
     horas:{
         type: Number,
-        required: false
+        required: false,
+        min: 0
     },
     tipoDeCompromiso:{
-        type: Array,
+        type: String,
+        enum: {
+            values: Object.values(TipoCompromiso),
+        },
         required: true
     },
     modalidadDeColaboracion:{
-        type: Array,
+        type: String,
+        enum: {
+            values: Object.values(ModalidadColaboracion),
+        },
         required: false
     }
 },{
@@ -35,14 +58,4 @@ const perfilSchema = new mongoose.Schema({
 
 perfilSchema.loadClass(Perfil);
 
-export const perfilModel = mongoose.model('Perfil', perfilSchema)
-
-
-
-// this.id = null;
-// this.descripcion = descripcion;
-// this.habilidadesRequeridas = habilidadesRequeridas;
-// this.habilidadesOpcionales = habilidadesOpcionales;
-// this.horas = horas;
-// this.tipoDeCompromiso = tipoDeCompromiso; // puede ser "semanales","mensuales" o "totales"
-// this.modalidadDeColaboracion = modalidadDeColaboracion;
+export const PerfilModel = mongoose.model('Perfil', perfilSchema)

@@ -1,15 +1,18 @@
 import mongoose from "mongoose";
 import { Colaboracion } from "../models/colaboracion";
-import { PersonaColaboradora } from "../models/personaColaboradora";
-import { Proyecto } from "../models/proyecto";
+
+//datos embebidos o referencia?
+//si la colaboradora cambia sus atributos(agrega mas habilidades por ejemplo) me interesa ver esos cambios o no? 
 
 const colaboracionSchema = new mongoose.Schema({
     personaColaboradora:{
-        type: PersonaColaboradora,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PersonaColaboradora',
         required: true
     },
     proyecto:{
-        type: Proyecto,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Proyecto',
         required: true
     }
 },{
@@ -19,7 +22,4 @@ const colaboracionSchema = new mongoose.Schema({
 
 colaboracionSchema.loadClass(Colaboracion);
 
-export const colaboracionModel = mongoose.model('Colaboracion', colaboracionSchema)
-
-// this.personaColaboradora = personaColaboradora;
-// this.proyecto = proyecto;
+export const ColaboracionModel = mongoose.model('Colaboracion', colaboracionSchema)

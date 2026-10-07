@@ -1,4 +1,7 @@
-const colaboracionSchema = new mongoose.Schema({
+import mongoose from "mongoose";
+import { Colectivo, TipoColectivo, UBICACION_VALIDA } from "../models/colectivo";
+
+const colectivoSchema = new mongoose.Schema({
     nombre:{
         type: String,
         required: true
@@ -8,28 +11,31 @@ const colaboracionSchema = new mongoose.Schema({
         required: true
     },
     ubicacion:{
-        type: Enumerator,
+        type: String,
+        enum: {
+            values: Object.values(UBICACION_VALIDA),
+        },
         required: true
     },
     tipoDeColectivo:{
-        type: Proyecto,
+        type: String,
+        enum: {
+            values: Object.values(TipoColectivo),
+        },
         required: true
     },
     proyectos:{
-        type: Proyecto,
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Proyecto'
+        }],
         required: true
     }
 },{
     timestamps: true,
-    collection: 'colaboraciones'
+    collection: 'colectivos'
 });
 
-colaboracionSchema.loadClass(Colaboracion);
+colectivoSchema.loadClass(Colectivo);
 
-export const colaboracionModel = mongoose.model('Colaboracion', colaboracionSchema)
-
-// this.nombre = nombre;
-// this.descripcion = descripcion;
-// this.ubicacion = ubicacion;
-// this.tipoDeColectivo = tipoDeColectivo;
-// this.proyectos = [];
+export const ColectivoModel = mongoose.model('Colectivo', colectivoSchema)

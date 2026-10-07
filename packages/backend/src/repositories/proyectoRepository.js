@@ -1,5 +1,39 @@
+import { ProyectoModel } from "../schemas/proyectoSchema";
+
 export class ProyectoRepository {
-  constructor() {
+    constructor(){
+      this.model = ProyectoModel
+    }
+    
+    async guardar(proyecto) {
+      const nuevoProyecto = new this.model(proyecto);
+      return await nuevoProyecto.save();
+    }
+    
+    async obtenerTodos() {
+      return await this.model.find();
+    }
+    
+    async obtenerPorId(id) {
+      return await this.model.findById(id);
+    }
+
+
+    //TODO
+    async obtenerPorTituloYColectivo(titulo) {
+      return await this.model.findOne({titulo});
+    }
+
+    async guardarPerfil(proyectoId, perfil) {
+      return await this.model.findOne({codigo});
+    }
+
+    async obtenerPerfilPorId(codigo) {
+      return await this.model.findOne({codigo});
+    }
+    
+
+/*   constructor() {
     this.proyectos = [];
     this.id = 1;
     this.perfilId = 1;
@@ -45,5 +79,5 @@ export class ProyectoRepository {
       return null;
     }
     return proyecto.perfiles.find((perfil) => perfil.id === perfilId) ?? null;
-  }
+  } */
 }

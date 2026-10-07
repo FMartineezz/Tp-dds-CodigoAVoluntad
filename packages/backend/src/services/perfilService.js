@@ -14,11 +14,11 @@ export class PerfilService {
     modalidadDeColaboracion,
   ) {
     const habilidadesEncontradasR = habilidadesRequeridas.map((codigo) => {
-      return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
+      return this.habilidadService.obtenerPorCodigo(codigo);
     });
 
     const habilidadesEncontradasO = habilidadesOpcionales.map((codigo) => {
-      return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
+      return this.habilidadService.obtenerPorCodigo(codigo);
     });
 
     const perfil = new Perfil(

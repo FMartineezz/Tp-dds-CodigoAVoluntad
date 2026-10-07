@@ -22,17 +22,17 @@ export class ColectivoService {
       tipoDeColectivo,
       proyectos,
     );
-    this.repository.agregarColectivo(nuevoColectivo);
+    this.repository.guardar(nuevoColectivo);
 
     return nuevoColectivo;
   }
 
   obtenerColectivos() {
-    return this.repository.obtenerColectivos();
+    return this.repository.obtenerTodos();
   }
 
   obtenerColectivoPorId(id) {
-    const colectivo = this.repository.obtenerColectivoPorId(id);
+    const colectivo = this.repository.obtenerPorId(id);
 
     if (!colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
@@ -42,7 +42,7 @@ export class ColectivoService {
   }
 
   obtenerColectivoPorNombre(nombre) {
-    const colectivo = this.repository.obtenerColectivoPorNombre(nombre);
+    const colectivo = this.repository.obtenerPorNombre(nombre);
 
     if (!colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE, 400, nombre);
@@ -51,6 +51,7 @@ export class ColectivoService {
     return colectivo;
   }
 
+  //CAMBIAR ESTO PARA PERSISTIRLO
   agregarProyecto(colectivo, proyecto) {
     colectivo.proyectos.push(proyecto.id);
   }

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { PersonaColaboradora } from "../models/personaColaboradora";
 
-const personaColaboradoraSchema = new mongoose.Schema({
+export const personaColaboradoraSchema = new mongoose.Schema({
     nombreFantasia:{
         type: String,
         required: true
@@ -19,11 +19,19 @@ const personaColaboradoraSchema = new mongoose.Schema({
         required: false
     },
     habilidades:{
-        type: Array,
-        required: true
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Habilidad'
+        }],
+        required: true,
+        validate: {
+            validator: function(v) {
+                return Array.isArray(v) && v.length > 0;
+            },
+        }
     },
     pronombres:{
-        type: Array,
+        type: [String],
         required: false
     },
     presentacion:{
@@ -32,9 +40,9 @@ const personaColaboradoraSchema = new mongoose.Schema({
     }
 },{
     timestamps: true,
-    collection: 'colaboradoras'
+    collection: 'personasColaboradoras'
 });
 
 personaColaboradoraSchema.loadClass(PersonaColaboradora);
 
-export const personaColaboradoraModel = mongoose.model('Colaboradora', personaColaboradoraSchema)
+export const PersonaColaboradoraModel = mongoose.model('PersonaColaboradora', personaColaboradoraSchema)
