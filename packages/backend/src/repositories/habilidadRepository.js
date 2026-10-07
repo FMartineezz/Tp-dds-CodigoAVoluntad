@@ -1,5 +1,4 @@
-import { HabilidadModel } from "../schemas/habilidadSchema";
-//normalizar nombres de metodos
+import { HabilidadModel } from "../schemas/habilidadSchema.js";
 
 export class HabilidadRespository {
     constructor(){
@@ -25,6 +24,10 @@ export class HabilidadRespository {
 
     async obtenerPorCodigo(codigo) {
       return await this.model.findOne({codigo});
+    }
+
+    async obtenerPorCodigos(codigos) {
+      return await this.model.find({ codigo: { $in: codigos } });
     }
 
 /*   constructor() {

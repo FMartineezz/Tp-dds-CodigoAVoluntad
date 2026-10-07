@@ -9,9 +9,9 @@ export class ColaboracionService {
     this.proyectoService = proyectoService;
   }
 
-  crearColaboracion(personaId, proyectoId) {
-    const persona = this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
-    const proyecto = this.proyectoService.obtenerProyectoPorId(proyectoId);
+  async crearColaboracion(personaId, proyectoId) {
+    const persona = await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
+    const proyecto = await this.proyectoService.obtenerProyectoPorId(proyectoId);
 
     if (this.proyectoService.estaFinalizado(proyecto)) {
       throw new AppError(ErrorCatalog.COLABORACION_PROYECTO_FINALIZADO, 409, proyectoId);
@@ -37,15 +37,15 @@ export class ColaboracionService {
 
     const colaboracion = new Colaboracion(persona, proyecto);
 
-    return this.colaboracionRepository.guardar(colaboracion);
+    return await this.colaboracionRepository.guardar(colaboracion);
   }
 
-  obtenerColaboraciones() {
-    return this.colaboracionRepository.obtenerTodas();
+  async obtenerColaboraciones() {
+    return await this.colaboracionRepository.obtenerTodas();
   }
 
-  obtenerColaboracionPorId(id) {
-    const colaboracion = this.colaboracionRepository.obtenerPorId(id);
+  async obtenerColaboracionPorId(id) {
+    const colaboracion = await this.colaboracionRepository.obtenerPorId(id);
 
     if (!colaboracion) {
       throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);

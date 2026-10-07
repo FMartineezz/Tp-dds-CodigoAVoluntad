@@ -7,24 +7,25 @@ export class HabilidadService {
     this.repository = repository;
   }
 
-  crearHabilidad(titulo, descripcion) {
+  async crearHabilidad(titulo, descripcion) {
     //Valido que no exista la habilidad
-    const habilidadExistente = this.repository.obtenerPorTitulo(titulo);
+    const habilidadExistente = await this.repository.obtenerPorTitulo(titulo);
+    console.log(habilidadExistente);
     if (habilidadExistente) {
       throw new AppError(ErrorCatalog.HABILIDAD_YA_EXISTE, 409, habilidadExistente.id);
     }
 
     const habilidad = new Habilidad(titulo, descripcion);
-    this.repository.guardar(habilidad);
+    await this.repository.guardar(habilidad);
     return habilidad;
   }
 
-  obtenerHabilidades() {
-    return this.repository.obtenerTodas();
+  async obtenerHabilidades() {
+    return await this.repository.obtenerTodas();
   }
 
-  obtenerHabilidadPorId(id) {
-    const habilidad = this.repository.obtenerPorId(id);
+  async obtenerHabilidadPorId(id) {
+    const habilidad = await this.repository.obtenerPorId(id);
 
     if (!habilidad) {
       throw new AppError(ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_ID, 404, id);
@@ -33,12 +34,17 @@ export class HabilidadService {
     return habilidad;
   }
 
-  obtenerHabilidadPorCodigo(codigo) {
-    const habilidad = this.repository.obtenerPorCodigo(codigo);
+  async obtenerHabilidadPorCodigo(codigo) {
+    const habilidad = await this.repository.obtenerPorCodigo(codigo);
 
     if (!habilidad) {
       throw new AppError(ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO, 400, codigo);
     }
     return habilidad;
+  }
+
+  async obtenerHabilidadesPorCodigos(codigos) {
+    const habilidadesEncontradas = await this.habilidadRepository.obtenerHabilidadesPorCodigos(codigos);
+    return habilidadesEncontradas;
   }
 }

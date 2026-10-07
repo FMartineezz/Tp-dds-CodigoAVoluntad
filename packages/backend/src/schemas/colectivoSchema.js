@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Colectivo, TipoColectivo, UBICACION_VALIDA } from "../models/colectivo";
+import { Colectivo, TipoColectivo, UBICACION_VALIDA } from "../models/colectivo.js";
 
 const colectivoSchema = new mongoose.Schema({
     nombre:{

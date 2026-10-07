@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { Proyecto } from "../models/proyecto";
-import { perfilSchema } from "../middlewares/validations/proyectoValidation";
+import { Proyecto } from "../models/proyecto.js";
+import { perfilSchema } from "./perfilSchema.js";
 
 const proyectoSchema = new mongoose.Schema({
     titulo:{

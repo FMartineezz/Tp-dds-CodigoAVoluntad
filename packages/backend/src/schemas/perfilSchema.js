@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
-import { Perfil } from "../models/perfil";
-import { ModalidadColaboracion, TipoCompromiso } from "../models/proyecto";
+import { Perfil } from "../models/perfil.js";
+import { ModalidadColaboracion, TipoCompromiso } from "../models/proyecto.js";
 
-
-const perfilSchema = new mongoose.Schema({
+export const perfilSchema = new mongoose.Schema({
     descripcion:{
         type: String,
         required: true
@@ -53,9 +52,6 @@ const perfilSchema = new mongoose.Schema({
     }
 },{
     timestamps: true,
-    collection: 'perfiles'
 });
 
 perfilSchema.loadClass(Perfil);
-
-export const PerfilModel = mongoose.model('Perfil', perfilSchema)

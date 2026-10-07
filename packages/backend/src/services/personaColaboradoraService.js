@@ -9,7 +9,7 @@ export class PersonaColaboradoraService {
     this.habilidadService = habilidadService;
   }
 
-  crearPersonaColaboradora(
+  async crearPersonaColaboradora(
     nombreFantasia,
     git,
     nombre,
@@ -18,10 +18,13 @@ export class PersonaColaboradoraService {
     pronombres,
     presentacion,
   ) {
+
+/*
     const habilidadesEncontradas = habilidades.map((codigo) => {
       return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
     });
-
+ */
+    const habilidadesEncontradas = await this.habilidadService.obtenerHabilidadesPorCodigos(habilidades);
     const personaColaboradora = new PersonaColaboradora(
       nombreFantasia,
       git,
@@ -32,15 +35,15 @@ export class PersonaColaboradoraService {
       presentacion,
     );
 
-    return this.personaColaboradoraRepository.guardar(personaColaboradora);
+    return await this.personaColaboradoraRepository.guardar(personaColaboradora);
   }
 
-  obtenerPersonasColaboradoras() {
-    return this.personaColaboradoraRepository.obtenerTodas();
+  async obtenerPersonasColaboradoras() {
+    return await this.personaColaboradoraRepository.obtenerTodas();
   }
 
-  obtenerPersonaColaboradoraPorId(id) {
-    const persona = this.personaColaboradoraRepository.obtenerPorId(id);
+  async obtenerPersonaColaboradoraPorId(id) {
+    const persona = await this.personaColaboradoraRepository.obtenerPorId(id);
 
     if (!persona) {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);

@@ -1,4 +1,4 @@
-import { ColaboracionModel } from "../schemas/colaboracionSchema";
+import { ColaboracionModel } from "../schemas/colaboracionSchema.js";
 
 export class ColaboracionRepository {
   constructor(){

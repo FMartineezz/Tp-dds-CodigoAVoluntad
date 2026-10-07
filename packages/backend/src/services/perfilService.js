@@ -5,7 +5,7 @@ export class PerfilService {
     this.habilidadService = habilidadService;
   }
 
-  crearPerfil(
+  async crearPerfil(
     descipcion,
     habilidadesRequeridas,
     habilidadesOpcionales,
@@ -13,13 +13,15 @@ export class PerfilService {
     tipoDeCompromiso,
     modalidadDeColaboracion,
   ) {
-    const habilidadesEncontradasR = habilidadesRequeridas.map((codigo) => {
-      return this.habilidadService.obtenerPorCodigo(codigo);
-    });
+    // const habilidadesEncontradasR = habilidadesRequeridas.map((codigo) => {
+    //   return this.habilidadService.obtenerPorCodigo(codigo);
+    // });
+    const habilidadesEncontradasR = await this.habilidadService.obtenerHabilidadesPorCodigos(habilidadesRequeridas);
 
-    const habilidadesEncontradasO = habilidadesOpcionales.map((codigo) => {
-      return this.habilidadService.obtenerPorCodigo(codigo);
-    });
+    // const habilidadesEncontradasO = habilidadesOpcionales.map((codigo) => {
+    //   return this.habilidadService.obtenerPorCodigo(codigo);
+    // });
+    const habilidadesEncontradasO = await this.habilidadService.obtenerHabilidadesPorCodigos(habilidadesOpcionales);
 
     const perfil = new Perfil(
       descipcion,

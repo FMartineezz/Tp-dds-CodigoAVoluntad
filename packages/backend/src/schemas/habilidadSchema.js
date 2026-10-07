@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Habilidad } from "../models/habilidad";
+import { Habilidad } from "../models/habilidad.js";
 
 export const habilidadSchema = new mongoose.Schema({
     titulo:{
@@ -8,7 +8,9 @@ export const habilidadSchema = new mongoose.Schema({
     },
     codigo:{
         type: String,
-        required: true
+        required: true,
+        unique: true, 
+        index: true
     },
     descripcion:{
         type: String,

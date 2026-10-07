@@ -1,4 +1,4 @@
-import { PersonaColaboradoraModel } from "../schemas/personaColaboradoraSchema";
+import { PersonaColaboradoraModel } from "../schemas/personaColaboradoraSchema.js";
 
 export class PersonaColaboradoraRepository {
     constructor(){

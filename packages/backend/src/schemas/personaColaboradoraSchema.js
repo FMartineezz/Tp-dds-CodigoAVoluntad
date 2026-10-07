@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { PersonaColaboradora } from "../models/personaColaboradora";
+import { PersonaColaboradora } from "../models/personaColaboradora.js";
 
 export const personaColaboradoraSchema = new mongoose.Schema({
     nombreFantasia:{

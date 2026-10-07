@@ -1,7 +1,6 @@
-import { ColectivoModel } from "../schemas/colectivoSchema";
+import { ColectivoModel } from "../schemas/colectivoSchema.js";
 
 export class ColectivoRepository {
-//normalizar nombres de metodos
     constructor(){
       this.model = ColectivoModel
     }

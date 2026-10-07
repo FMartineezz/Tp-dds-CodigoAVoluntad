@@ -8,8 +8,8 @@ export class ColectivoService {
     this.repository = repository;
   }
 
-  crearColectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos) {
-    const colectivo = this.repository.obtenerColectivoPorNombre(nombre);
+  async crearColectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos) {
+    const colectivo = await this.repository.obtenerColectivoPorNombre(nombre);
 
     if (colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_YA_EXISTE, 409, nombre);
@@ -22,17 +22,17 @@ export class ColectivoService {
       tipoDeColectivo,
       proyectos,
     );
-    this.repository.guardar(nuevoColectivo);
+    await this.repository.guardar(nuevoColectivo);
 
     return nuevoColectivo;
   }
 
-  obtenerColectivos() {
-    return this.repository.obtenerTodos();
+  async obtenerColectivos() {
+    return await this.repository.obtenerTodos();
   }
 
-  obtenerColectivoPorId(id) {
-    const colectivo = this.repository.obtenerPorId(id);
+  async obtenerColectivoPorId(id) {
+    const colectivo = await this.repository.obtenerPorId(id);
 
     if (!colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
@@ -41,8 +41,8 @@ export class ColectivoService {
     return colectivo;
   }
 
-  obtenerColectivoPorNombre(nombre) {
-    const colectivo = this.repository.obtenerPorNombre(nombre);
+  async obtenerColectivoPorNombre(nombre) {
+    const colectivo = await this.repository.obtenerPorNombre(nombre);
 
     if (!colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE, 400, nombre);

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Colaboracion } from "../models/colaboracion";
+import { Colaboracion } from "../models/colaboracion.js";
 
 //datos embebidos o referencia?
 //si la colaboradora cambia sus atributos(agrega mas habilidades por ejemplo) me interesa ver esos cambios o no? 

@@ -1,4 +1,4 @@
-import { ProyectoModel } from "../schemas/proyectoSchema";
+import { ProyectoModel } from "../schemas/proyectoSchema.js";
 
 export class ProyectoRepository {
     constructor(){
@@ -25,11 +25,16 @@ export class ProyectoRepository {
     }
 
     async guardarPerfil(proyectoId, perfil) {
-      return await this.model.findOne({codigo});
+      return await this.model.findByIdAndUpdate(proyectoId, {
+        $push: {
+          perfiles: perfil
+        }
+      });
     }
 
-    async obtenerPerfilPorId(codigo) {
-      return await this.model.findOne({codigo});
+    async obtenerPerfilPorId(proyectoId, perfilId) {
+      const proyecto = await this.model.findById(proyectoId);
+      return proyecto.perfiles.id(perfilId);
     }
     
 
