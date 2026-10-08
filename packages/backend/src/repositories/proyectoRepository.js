@@ -46,4 +46,22 @@ export class ProyectoRepository {
     }
     return proyecto.perfiles.find((perfil) => perfil.id === perfilId) ?? null;
   }
+/*
+  guardarLogro(proyectoId, logro){
+    
+  }
+  obtenerLogros(proyectoId){
+
+  }
+  obtenerLogroPorId(proyectoId, logroId){
+
+  }
+  actualizarLogro(proyectoId, logro){
+
+  }
+  eliminarLogro(proyectoId, logroId){
+    
+  }
+*/
+
 }
