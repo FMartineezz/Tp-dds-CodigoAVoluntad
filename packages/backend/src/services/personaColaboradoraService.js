@@ -72,7 +72,7 @@ export class PersonaColaboradoraService {
     const personaColaborado = this.personaColaboradoraRepository.obtenerPorId(id);
 
     if (!persona) {
-      throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 400, id);
+      throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
     }
 
     return personaColaborado;

@@ -20,7 +20,7 @@ export class PersonaColaboradoraRepository {
   }
 
   obtenerPorAlgunaHabilidad(codigos) {
-    return this.obtenerTodas().filter((persona) =>
+    return this.personasColaboradoras.filter((persona) =>
       persona.habilidades.some((habilidad) => codigos.includes(habilidad.codigo)),
     );
   }

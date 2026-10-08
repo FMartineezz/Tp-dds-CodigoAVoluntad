@@ -1,6 +1,7 @@
 export class PersonaColaboradoraController {
-  constructor({ personaColaboradoraService }) {
+  constructor({ personaColaboradoraService, busquedaService }) {
     this.personaColaboradoraService = personaColaboradoraService;
+    this.busquedaService = busquedaService;
   }
 
   crearPersonaColaboradora = (req, res) => {
@@ -31,5 +32,13 @@ export class PersonaColaboradoraController {
     const persona = this.personaColaboradoraService.verPersonaColaboradoraPorId(id);
 
     res.status(200).json(persona);
+  };
+
+  verProyectosAcordes = (req, res) => {
+    const id = Number(req.params.id);
+
+    const proyectos = this.personaColaboradoraService.verProyectosAcordes(id);
+
+    res.status(200).json(proyectos);
   };
 }

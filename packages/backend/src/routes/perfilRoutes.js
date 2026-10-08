@@ -16,7 +16,7 @@ export default function proyectoRoutes() {
   router.delete("/proyectos/:idProyecto/perfiles/:idPerfil", perfilController.eliminarPerfil);
 
   router.get(
-    "proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes",
+    "/proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes",
     perfilController.verColaboradorasAcordes,
   );
 

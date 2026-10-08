@@ -58,6 +58,11 @@ export class ProyectoService {
     return proyecto;
   }
 
+  verProyectosConAlgunaHabilidad(codigosHabilidad) {
+    const proyectos = this.proyectoRepository.obtenerPorAlgunaHabilidad(codigosHabilidad);
+    return proyectos;
+  }
+
   finalizarProyecto(id) {
     const proyecto = this.proyectoRepository.obtenerPorId(id);
 
@@ -122,16 +127,5 @@ export class ProyectoService {
       throw new AppError(ErrorCatalog.PERFIL_NO_ENCONTRADO, 404, perfilId);
     }
     return perfil;
-  }
-
-  verPersonasColaboradorasAcordesAPerfil(proyectoId, perfilId) {
-    const perfil = this.obtenerPerfilPorId(proyectoId, perfilId);
-    const codigosHabilidadesRequeridas = perfil.habilidadesRequeridas.map(
-      (habilidad) => habilidad.codigo,
-    );
-
-    return this.personaColaboradoraService.verPersonasConAlgunaHabilidad(
-      codigosHabilidadesRequeridas,
-    );
   }
 }

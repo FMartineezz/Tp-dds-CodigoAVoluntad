@@ -12,6 +12,7 @@ import { ColaboracionService } from "./services/colaboracionService.js";
 import { PersonaColaboradoraService } from "./services/personaColaboradoraService.js";
 import { PerfilService } from "./services/perfilService.js";
 import { MensajeService } from "./services/mensajeService.js";
+import { BusquedaService } from "./services/busquedaService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -42,8 +43,8 @@ const proyectoService = new ProyectoService({
   proyectoRepository,
   perfilService,
   colectivoService,
-  personaColaboradoraService,
 });
+const busquedaService = new BusquedaService({ proyectoService, personaColaboradoraService });
 const colaboracionService = new ColaboracionService({
   colaboracionRepository,
   personaColaboradoraService,
