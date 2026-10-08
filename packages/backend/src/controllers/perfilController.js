@@ -8,7 +8,7 @@ export class PerfilController {
   }
 
   obtenerPerfiles = (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
+    const proyectoId = req.params.idProyecto;
 
     const perfiles = this.proyectoService.obtenerPerfiles(proyectoId);
 

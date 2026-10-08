@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import { Colectivo, TipoColectivo, UBICACION_VALIDA } from "../models/colectivo.js";
 
 const colectivoSchema = new mongoose.Schema({
+    _id: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        auto: true 
+    },
     nombre:{
         type: String,
         required: true

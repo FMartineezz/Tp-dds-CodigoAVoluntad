@@ -3,6 +3,10 @@ import { Proyecto } from "../models/proyecto.js";
 import { perfilSchema } from "./perfilSchema.js";
 
 const proyectoSchema = new mongoose.Schema({
+    _id: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        auto: true 
+    },
     titulo:{
         type: String,
         required: true

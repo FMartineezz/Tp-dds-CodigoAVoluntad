@@ -23,7 +23,6 @@ export class ProyectoService {
     }
 
     //en vez de nombre, usar id
-    //se le pasa un colectivo pero en el service se espera el nombre
     const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
 
     const perfilesCreados = await Promise.all(
@@ -42,8 +41,8 @@ export class ProyectoService {
     const proyectoNuevo = new Proyecto(titulo, descripcion, perfilesCreados, colectivoEncontrado);
 
     const proyectoGuardado = await this.proyectoRepository.guardar(proyectoNuevo);
-
-    await this.colectivoService.agregarProyecto(colectivoEncontrado, proyectoGuardado);
+    
+    await this.colectivoService.agregarProyecto(colectivoEncontrado._id, proyectoGuardado._id);
 
     return proyectoGuardado;
   }
@@ -73,10 +72,9 @@ export class ProyectoService {
       throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, id);
     }
 
-    //ACTUALIZAR PROYECTO()
-    proyecto.finalizado = true;
+    //proyecto.finalizado = true;
 
-    return proyecto;
+    return await this.proyectoRepository.finalizarProyecto(id);
   }
 
   async actualizarProyecto(id, cambios = {}) {
@@ -87,12 +85,7 @@ export class ProyectoService {
       throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
 
-    return this.finalizarProyecto(id);
-  }
-
-  //GETTER EN LA CLASE??
-  estaFinalizado(proyecto) {
-    return proyecto.finalizado;
+    return await this.finalizarProyecto(id);
   }
 
   async agregarPerfil(
@@ -112,8 +105,8 @@ export class ProyectoService {
       tipoDeCompromiso,
       modalidadDeColaboracion,
     );
-    const perfilGuardado = await this.proyectoRepository.guardarPerfil(proyectoId, perfil);
-    return perfilGuardado;
+
+    return await this.proyectoRepository.guardarPerfil(proyectoId, perfil);
   }
 
   async obtenerPerfiles(proyectoId) {

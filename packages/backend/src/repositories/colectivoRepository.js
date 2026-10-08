@@ -22,6 +22,14 @@ export class ColectivoRepository {
       return await this.model.findOne({nombre});
     }
 
+    async agregarProyecto(colectivoId, proyecto) {
+      return await this.model.findByIdAndUpdate(colectivoId, {
+        $push: {
+          proyectos: proyecto
+        }
+      })
+    }
+
 /*   constructor() {
     this.colectivos = [];
     this.id = 1;

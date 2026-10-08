@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import { Habilidad } from "../models/habilidad.js";
 
 export const habilidadSchema = new mongoose.Schema({
+    _id: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        auto: true 
+    },
     titulo:{
         type: String,
         required: true

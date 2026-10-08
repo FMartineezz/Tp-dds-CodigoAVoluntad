@@ -5,6 +5,10 @@ import { Colaboracion } from "../models/colaboracion.js";
 //si la colaboradora cambia sus atributos(agrega mas habilidades por ejemplo) me interesa ver esos cambios o no? 
 
 const colaboracionSchema = new mongoose.Schema({
+    _id: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        auto: true 
+    },
     personaColaboradora:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'PersonaColaboradora',
@@ -16,6 +20,10 @@ const colaboracionSchema = new mongoose.Schema({
         required: true
     }
 },{
+    // timestamps: {
+    //   createdAt: { select: false },
+    //   updatedAt: { select: false }
+    // }
     timestamps: true,
     collection: 'colaboraciones'
 });

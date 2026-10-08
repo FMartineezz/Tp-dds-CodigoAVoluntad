@@ -13,7 +13,7 @@ export class ColaboracionService {
     const persona = await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
     const proyecto = await this.proyectoService.obtenerProyectoPorId(proyectoId);
 
-    if (this.proyectoService.estaFinalizado(proyecto)) {
+    if (proyecto.finalizado) {
       throw new AppError(ErrorCatalog.COLABORACION_PROYECTO_FINALIZADO, 409, proyectoId);
     }
 

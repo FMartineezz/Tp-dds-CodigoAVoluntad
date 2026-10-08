@@ -1,3 +1,4 @@
+import { trusted } from "mongoose";
 import { ProyectoModel } from "../schemas/proyectoSchema.js";
 
 export class ProyectoRepository {
@@ -37,6 +38,15 @@ export class ProyectoRepository {
       return proyecto.perfiles.id(perfilId);
     }
     
+    async finalizarProyecto(id){
+      await this.model.findByIdAndUpdate(
+        id, 
+        {$set: {
+          finalizado: true
+        }},
+        { new: true }
+      )
+    }
 
 /*   constructor() {
     this.proyectos = [];

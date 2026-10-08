@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import { PersonaColaboradora } from "../models/personaColaboradora.js";
 
 export const personaColaboradoraSchema = new mongoose.Schema({
+    _id: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        auto: true 
+    },
     nombreFantasia:{
         type: String,
         required: true

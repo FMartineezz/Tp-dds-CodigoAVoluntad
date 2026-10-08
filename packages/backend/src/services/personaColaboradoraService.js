@@ -24,7 +24,12 @@ export class PersonaColaboradoraService {
       return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
     });
  */
-    const habilidadesEncontradas = await this.habilidadService.obtenerHabilidadesPorCodigos(habilidades);
+    const habilidadesEncontradas = await Promise.all(
+      habilidades.map((codigo => {
+        return this.habilidadService.obtenerHabilidadPorCodigo(codigo)
+      }))
+    );
+
     const personaColaboradora = new PersonaColaboradora(
       nombreFantasia,
       git,

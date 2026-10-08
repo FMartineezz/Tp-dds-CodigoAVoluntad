@@ -50,8 +50,11 @@ export class ColectivoService {
     return colectivo;
   }
 
-  //CAMBIAR ESTO PARA PERSISTIRLO
-  agregarProyecto(colectivo, proyecto) {
-    colectivo.proyectos.push(proyecto.id);
+  async agregarProyecto(colectivoId, proyectoId) {
+    //es necesario esto?
+    const colectivo = await this.repository.obtenerPorId(colectivoId);
+    colectivo.proyectos.push(proyectoId);
+    //
+    await this.repository.agregarProyecto(colectivoId, proyectoId)
   }
 }

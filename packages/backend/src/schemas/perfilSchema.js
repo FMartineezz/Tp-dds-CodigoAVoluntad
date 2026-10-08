@@ -3,6 +3,10 @@ import { Perfil } from "../models/perfil.js";
 import { ModalidadColaboracion, TipoCompromiso } from "../models/proyecto.js";
 
 export const perfilSchema = new mongoose.Schema({
+    _id: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        auto: true 
+    },
     descripcion:{
         type: String,
         required: true

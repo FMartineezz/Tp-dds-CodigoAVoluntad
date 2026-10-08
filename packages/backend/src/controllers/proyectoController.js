@@ -20,7 +20,7 @@ export class ProyectoController {
   };
 
   obtenerProyectoPorId = async (req, res) => {
-    const id = Number(req.params.id);
+    const id = req.params.id;
 
     const proyecto = await this.proyectoService.obtenerProyectoPorId(id);
 

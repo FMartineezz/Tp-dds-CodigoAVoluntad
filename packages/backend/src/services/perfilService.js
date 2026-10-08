@@ -13,15 +13,17 @@ export class PerfilService {
     tipoDeCompromiso,
     modalidadDeColaboracion,
   ) {
-    // const habilidadesEncontradasR = habilidadesRequeridas.map((codigo) => {
-    //   return this.habilidadService.obtenerPorCodigo(codigo);
-    // });
-    const habilidadesEncontradasR = await this.habilidadService.obtenerHabilidadesPorCodigos(habilidadesRequeridas);
+    const habilidadesEncontradasR = await Promise.all(
+      habilidadesRequeridas.map((codigo => {
+        return this.habilidadService.obtenerHabilidadPorCodigo(codigo)
+      }))
+    );
 
-    // const habilidadesEncontradasO = habilidadesOpcionales.map((codigo) => {
-    //   return this.habilidadService.obtenerPorCodigo(codigo);
-    // });
-    const habilidadesEncontradasO = await this.habilidadService.obtenerHabilidadesPorCodigos(habilidadesOpcionales);
+    const habilidadesEncontradasO = await Promise.all(
+      habilidadesOpcionales.map((codigo => {
+        return this.habilidadService.obtenerHabilidadPorCodigo(codigo)
+      }))
+    );
 
     const perfil = new Perfil(
       descipcion,

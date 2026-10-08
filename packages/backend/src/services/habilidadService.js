@@ -43,7 +43,6 @@ export class HabilidadService {
   }
 
   async obtenerHabilidadesPorCodigos(codigos) {
-    const habilidadesEncontradas = await this.habilidadRepository.obtenerHabilidadesPorCodigos(codigos);
-    return habilidadesEncontradas;
+    return await this.habilidadRepository.obtenerHabilidadesPorCodigos(codigos);
   }
 }
