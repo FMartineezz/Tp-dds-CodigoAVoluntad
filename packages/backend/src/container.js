@@ -34,14 +34,15 @@ const mensajeRepository = new MensajeRepository();
 const habilidadService = new HabilidadService({ repository: habilidadRepository });
 const perfilService = new PerfilService({ habilidadService });
 const colectivoService = new ColectivoService({ repository: colectivoRepository });
+const personaColaboradoraService = new PersonaColaboradoraService({
+  personaColaboradoraRepository,
+  habilidadService,
+});
 const proyectoService = new ProyectoService({
   proyectoRepository,
   perfilService,
   colectivoService,
-});
-const personaColaboradoraService = new PersonaColaboradoraService({
-  personaColaboradoraRepository,
-  habilidadService,
+  personaColaboradoraService,
 });
 const colaboracionService = new ColaboracionService({
   colaboracionRepository,

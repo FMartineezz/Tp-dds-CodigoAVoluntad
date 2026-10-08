@@ -3,10 +3,11 @@ import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
 export class ProyectoService {
-  constructor({ proyectoRepository, perfilService, colectivoService }) {
+  constructor({ proyectoRepository, perfilService, colectivoService, personaColaboradoraService }) {
     this.proyectoRepository = proyectoRepository;
     this.perfilService = perfilService;
     this.colectivoService = colectivoService;
+    this.personaColaboradoraService = personaColaboradoraService;
   }
 
   crearProyecto(titulo, descripcion, perfiles, colectivo) {
@@ -121,5 +122,16 @@ export class ProyectoService {
       throw new AppError(ErrorCatalog.PERFIL_NO_ENCONTRADO, 404, perfilId);
     }
     return perfil;
+  }
+
+  verPersonasColaboradorasAcordesAPerfil(proyectoId, perfilId) {
+    const perfil = this.obtenerPerfilPorId(proyectoId, perfilId);
+    const codigosHabilidadesRequeridas = perfil.habilidadesRequeridas.map(
+      (habilidad) => habilidad.codigo,
+    );
+
+    return this.personaColaboradoraService.verPersonasConAlgunaHabilidad(
+      codigosHabilidadesRequeridas,
+    );
   }
 }

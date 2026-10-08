@@ -18,4 +18,10 @@ export class PersonaColaboradoraRepository {
   obtenerPorId(id) {
     return this.personasColaboradoras.find((persona) => persona.id === id);
   }
+
+  obtenerPorAlgunaHabilidad(codigos) {
+    return this.obtenerTodas().filter((persona) =>
+      persona.habilidades.some((habilidad) => codigos.includes(habilidad.codigo)),
+    );
+  }
 }

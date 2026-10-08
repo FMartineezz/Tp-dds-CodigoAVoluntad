@@ -7,16 +7,16 @@ const pathProyectos = "/proyectos";
 export default function proyectoRoutes() {
   const router = Router();
 
-  router.get(pathProyectos, proyectoController.obtenerProyectos);
+  router.get("/proyectos", proyectoController.obtenerProyectos);
 
-  router.get(pathProyectos + "/:id", proyectoController.obtenerProyectoPorId);
+  router.get("/proyectos/:id", proyectoController.obtenerProyectoPorId);
 
-  router.post(pathProyectos, proyectoValidation, proyectoController.crearProyecto);
+  router.post("/proyectos", proyectoValidation, proyectoController.crearProyecto);
 
-  router.patch(pathProyectos + "/:id/finalizar", proyectoController.finalizarProyecto);
+  router.patch("/proyectos/:id/finalizar", proyectoController.finalizarProyecto);
 
   // Alternativa recurso-céntrica: PATCH /proyectos/:id con body { finalizado: true }
-  router.patch(pathProyectos + "/:id", proyectoController.actualizarProyecto);
+  router.patch("/proyectos/:id", proyectoController.actualizarProyecto);
 
   return router;
 }

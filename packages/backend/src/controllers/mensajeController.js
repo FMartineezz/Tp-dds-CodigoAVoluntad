@@ -8,17 +8,17 @@ export class MensajeController {
 
     const mensaje = this.mensajeService.enviarMensajeDesdeColectivo(
       colectivoId,
-      personaColaboradoraId,
-      mensaje,
+      req.body.personaColaboradoraId,
+      req.body.mensaje,
     );
 
     res.status(201).json(mensaje);
   };
 
-  obtenerBandejaDeEntradaColaboradora = (req, res) => {
+  verBandejaDeEntradaColaboradora = (req, res) => {
     const personaColaboradoraId = Number(req.params.personaColaboradoraId);
 
-    const mensajes = this.mensajeService.obtenerBandejaDeEntradaColaboradora(personaColaboradoraId);
+    const mensajes = this.mensajeService.verBandejaDeEntradaColaboradora(personaColaboradoraId);
 
     res.status(200).json(mensajes);
   };

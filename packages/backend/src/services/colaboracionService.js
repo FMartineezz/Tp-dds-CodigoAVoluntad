@@ -72,7 +72,9 @@ export class ColaboracionService {
   ocultarSiEsAnonima(colaboracion) {
     return {
       ...colaboracion,
-      personaColaboradora: colaboracion.anonima ? null : colaboracion.personaColaboradora,
+      personaColaboradora: colaboracion.anonima
+        ? null
+        : this.personaColaboradoraService.ocultarContactos(colaboracion.personaColaboradora),
     };
   }
 }

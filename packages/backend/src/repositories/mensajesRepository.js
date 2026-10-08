@@ -11,6 +11,6 @@ export class MensajeRepository {
   }
 
   findByColaboradoraId(colaboradoraId) {
-    return this.mensajes.filter((mensaje) => mensaje.colaboradoraId === colaboradoraId);
+    return this.mensajes.filter((mensaje) => mensaje.personaColaboradora.id === colaboradoraId);
   }
 }

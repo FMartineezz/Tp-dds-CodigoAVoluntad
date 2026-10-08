@@ -1,7 +1,6 @@
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Colectivo } from "../models/colectivo.js";
-import { TipoColectivo } from "../models/colectivo.js";
 
 export class ColectivoService {
   constructor({ repository }) {
@@ -41,6 +40,7 @@ export class ColectivoService {
     return colectivo;
   }
 
+  //Metodos para usar dentro de otros service
   obtenerColectivoPorNombre(nombre) {
     const colectivo = this.repository.obtenerColectivoPorNombre(nombre);
 

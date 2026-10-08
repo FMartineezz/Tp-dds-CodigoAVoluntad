@@ -47,4 +47,15 @@ export class PerfilController {
   eliminarPerfil = (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
   };
+
+  verColaboradorasAcordes = (req, res) => {
+    const proyectoId = Number(req.params.idProyecto);
+    const perfilId = Number(req.params.idPerfil);
+
+    const personas = this.proyectoService.verPersonasColaboradorasAcoresAPerfil(
+      proyectoId,
+      perfilId,
+    );
+    res.status(200).json(personas);
+  };
 }

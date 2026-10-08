@@ -47,7 +47,7 @@ export class PersonaColaboradoraService {
     );
   }
 
-  verPersonasColaboradoraPorId(id) {
+  verPersonaColaboradoraPorId(id) {
     const personaColaboradora = this.personaColaboradoraRepository.obtenerPorId(id);
 
     if (!personaColaboradora) {
@@ -57,19 +57,25 @@ export class PersonaColaboradoraService {
     return this.ocultarContactos(personaColaboradora);
   }
 
+  verPersonasConAlgunaHabilidad(codigosHabilidad) {
+    const personasColaboradoras =
+      this.personaColaboradoraRepository.obtenerPorAlgunaHabilidad(codigosHabilidad);
+    return personasColaboradoras.map((persona) => this.ocultarContactos(persona));
+  }
+
   //Metodo interno para la conexion entre service
   obtenerPersonasColaboradoras() {
     return this.personaColaboradoraRepository.obtenerTodas();
   }
 
   obtenerPersonaColaboradoraPorId(id) {
-    const persona = this.personaColaboradoraRepository.obtenerPorId(id);
+    const personaColaborado = this.personaColaboradoraRepository.obtenerPorId(id);
 
     if (!persona) {
-      throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+      throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 400, id);
     }
 
-    return persona;
+    return personaColaborado;
   }
 
   ocultarContactos(personaColaboradora) {

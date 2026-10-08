@@ -317,6 +317,14 @@ const ErrorCatalog = Object.freeze({
     code: "ERR-VAL-707",
     message: "El teléfono debe tener 10 dígitos juntos, sin espacios ni símbolos (ej: 1127891234)",
   },
-});
 
+  // =========================
+  // MENSAJES
+  // =========================
+
+  MENSAJE_DESTINATARIA_NO_ACEPTA: {
+    code: "ERR-EST-801",
+    message: (nombre) => `La colaboradora ${nombre} no acepta mensajes internos`,
+  },
+});
 export default ErrorCatalog;

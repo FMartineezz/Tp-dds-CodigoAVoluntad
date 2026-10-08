@@ -6,7 +6,7 @@ export class PerfilService {
   }
 
   crearPerfil(
-    descipcion,
+    descripcion,
     habilidadesRequeridas,
     habilidadesOpcionales,
     horas,
@@ -22,7 +22,7 @@ export class PerfilService {
     });
 
     const perfil = new Perfil(
-      descipcion,
+      descripcion,
       habilidadesEncontradasR,
       habilidadesEncontradasO,
       horas,

@@ -25,10 +25,10 @@ export class PersonaColaboradoraController {
     res.status(200).json(personas);
   };
 
-  verPersonasColaboradoraPorId = (req, res) => {
+  verPersonaColaboradoraPorId = (req, res) => {
     const id = Number(req.params.id);
 
-    const persona = this.personaColaboradoraService.verPersonasColaboradoraPorId(id);
+    const persona = this.personaColaboradoraService.verPersonaColaboradoraPorId(id);
 
     res.status(200).json(persona);
   };

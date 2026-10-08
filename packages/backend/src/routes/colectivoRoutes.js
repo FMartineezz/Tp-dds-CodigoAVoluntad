@@ -8,22 +8,13 @@ const pathColectivos = "/colectivos";
 export default function colectivoRoutes() {
   const router = Router();
 
-  router.get(pathColectivos, (req, res) => {
-    colectivoController.obtenerColectivos(req, res);
-  });
+  router.get("/colectivos", colectivoController.obtenerColectivos);
 
-  router.get(pathColectivos + "/:id", (req, res) => {
-    colectivoController.obtenerColectivoPorId(req, res);
-  });
+  router.get("/colectivos/:id", colectivoController.obtenerColectivoPorId);
 
-  router.post(pathColectivos, validarColectivo, (req, res) => {
-    colectivoController.crearColectivo(req, res);
-  });
+  router.post("/colectivos", validarColectivo, colectivoController.crearColectivo);
 
-  router.post(
-    pathColectivos + "/:colectivoId/mensajes",
-    mensajeController.enviarMensajeDesdeColectivo,
-  );
+  router.post("/colectivos/:colectivoId/mensajes", mensajeController.enviarMensajeDesdeColectivo);
 
   return router;
 }

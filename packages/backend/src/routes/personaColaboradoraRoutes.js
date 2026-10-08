@@ -3,25 +3,20 @@ import { personaColaboradoraController } from "../container.js";
 import { mensajeController } from "../container.js";
 import validarPersonaColaboradora from "../middlewares/validations/personaColaboradoraValidation.js";
 
-const pathColaboradoras = "/colaboradoras";
-
 export default function personaColaboradoraRoutes() {
   const router = Router();
 
-  router.get(pathColaboradoras, personaColaboradoraController.verPersonasColaboradoras);
+  router.get("/colaboradoras", personaColaboradoraController.verPersonasColaboradoras);
+
+  router.get("/colaboradoras/:id", personaColaboradoraController.verPersonaColaboradoraPorId);
 
   router.get(
-    pathColaboradoras + "/:id",
-    personaColaboradoraController.verPersonasColaboradoraPorId,
-  );
-
-  router.get(
-    pathColaboradoras + "/:personaColaboradoraId/mensajes",
-    mensajeController.obtenerBandejaDeEntradaColaboradora,
+    "/colaboradoras/:personaColaboradoraId/mensajes",
+    mensajeController.verBandejaDeEntradaColaboradora,
   );
 
   router.post(
-    pathColaboradoras,
+    "/colaboradoras",
     validarPersonaColaboradora,
     personaColaboradoraController.crearPersonaColaboradora,
   );
