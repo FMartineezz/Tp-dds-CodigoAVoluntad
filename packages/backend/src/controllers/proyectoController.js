@@ -27,14 +27,6 @@ export class ProyectoController {
     res.status(200).json(proyecto);
   };
 
-  finalizarProyecto = (req, res, next) => {
-    const id = Number(req.params.id);
-
-    const proyecto = this.proyectoService.finalizarProyecto(id);
-
-    res.status(200).json(proyecto);
-  };
-
   // Alternativa recurso-céntrica a /finalizar (ver issue REST): PATCH /proyectos/:id { finalizado: true }
   actualizarProyecto = (req, res) => {
     const id = Number(req.params.id);

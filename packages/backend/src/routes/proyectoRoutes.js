@@ -13,8 +13,6 @@ export default function proyectoRoutes() {
 
   router.post("/proyectos", proyectoValidation, proyectoController.crearProyecto);
 
-  router.patch("/proyectos/:id/finalizar", proyectoController.finalizarProyecto);
-
   // Alternativa recurso-céntrica: PATCH /proyectos/:id con body { finalizado: true }
   router.patch("/proyectos/:id", proyectoController.actualizarProyecto);
 
