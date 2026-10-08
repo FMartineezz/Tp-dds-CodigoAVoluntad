@@ -10,7 +10,6 @@ export class HabilidadService {
   async crearHabilidad(titulo, descripcion) {
     //Valido que no exista la habilidad
     const habilidadExistente = await this.repository.obtenerPorTitulo(titulo);
-    console.log(habilidadExistente);
     if (habilidadExistente) {
       throw new AppError(ErrorCatalog.HABILIDAD_YA_EXISTE, 409, habilidadExistente.id);
     }

@@ -16,7 +16,7 @@ habilidades=(
     "descripcion": "Manejo de repositorios, ramas y flujo de trabajo colaborativo."
   }'
   '{
-    "titulo": "Disenio y Documentación de APIs con OpenAPI",
+    "titulo": "Disenio y Documentacion de APIs con OpenAPI",
     "descripcion": "Definicion de contratos de servicio RESTful, esquemas de datos y especificaciones OpenAPI/Swagger."
   }'
   '{
@@ -25,7 +25,7 @@ habilidades=(
   }'
 )
 
-echo "Iniciando envío de habilidades a $URL..."
+echo "Iniciando envío de habilidades a $URL"
 echo "----------------------------------------"
 
 # Iterar sobre cada habilidad y realizar la petición POST

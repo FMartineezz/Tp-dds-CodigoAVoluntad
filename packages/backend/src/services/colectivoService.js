@@ -1,15 +1,14 @@
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Colectivo } from "../models/colectivo.js";
-import { TipoColectivo } from "../models/colectivo.js";
 
 export class ColectivoService {
   constructor({ repository }) {
     this.repository = repository;
   }
 
-  async crearColectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos) {
-    const colectivo = await this.repository.obtenerColectivoPorNombre(nombre);
+  async crearColectivo(nombre, descripcion, ubicacion, tipoDeColectivo, proyectos) {
+    const colectivo = await this.repository.obtenerPorNombre(nombre);
 
     if (colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_YA_EXISTE, 409, nombre);
@@ -18,7 +17,7 @@ export class ColectivoService {
     const nuevoColectivo = new Colectivo(
       nombre,
       descripcion,
-      ubIcacion,
+      ubicacion,
       tipoDeColectivo,
       proyectos,
     );

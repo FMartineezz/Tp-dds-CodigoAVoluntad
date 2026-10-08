@@ -13,7 +13,7 @@ const colectivoSchema = new mongoose.Schema({
     ubicacion:{
         type: String,
         enum: {
-            values: Object.values(UBICACION_VALIDA),
+            values: Array.from(UBICACION_VALIDA),
         },
         required: true
     },

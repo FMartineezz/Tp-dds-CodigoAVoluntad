@@ -19,7 +19,7 @@ export class ColectivoRepository {
     }
 
     async obtenerPorNombre(nombre) {
-      return await this.model.findByOne({nombre});
+      return await this.model.findOne({nombre});
     }
 
 /*   constructor() {
