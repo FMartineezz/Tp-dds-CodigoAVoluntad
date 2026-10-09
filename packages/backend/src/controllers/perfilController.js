@@ -3,8 +3,9 @@ export class PerfilController {
   //Por ende siempre se tomara a proyecto como la entidad principal, y
   //El perfil es una entidad la cual no es a parte sino que viene con el proyecto
 
-  constructor({ proyectoService }) {
+  constructor({ proyectoService, busquedaService }) {
     this.proyectoService = proyectoService;
+    this.busquedaService = busquedaService;
   }
 
   obtenerPerfiles = (req, res) => {
@@ -15,7 +16,7 @@ export class PerfilController {
     res.status(200).json(perfiles);
   };
 
-  obtenerPerfilesPorId = (req, res) => {
+  obtenerPerfilPorId = (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
     const perfilId = Number(req.params.idPerfil);
 
@@ -46,5 +47,16 @@ export class PerfilController {
 
   eliminarPerfil = (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
+  };
+
+  verColaboradorasAcordes = (req, res) => {
+    const proyectoId = Number(req.params.idProyecto);
+    const perfilId = Number(req.params.idPerfil);
+
+    const personas = this.busquedaService.verPersonasColaboradorasAcordesAPerfil(
+      proyectoId,
+      perfilId,
+    );
+    res.status(200).json(personas);
   };
 }

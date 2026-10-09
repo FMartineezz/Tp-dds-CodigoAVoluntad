@@ -179,6 +179,11 @@ const ErrorCatalog = Object.freeze({
     message: "Las habilidades de la colaboradora deben ser un array del codigo de la habilidad",
   },
 
+  COLABORADORA_BLOQUEAR_MENSAJE_INTERNO_INVALIDO: {
+    code: "ERR-VAL-407",
+    message: "El campo bloquear mensaje interno debe ser un booleano",
+  },
+
   // =========================
   // COLABORACIONES
   // =========================
@@ -273,6 +278,68 @@ const ErrorCatalog = Object.freeze({
     code: "ERR-NOT-611",
     message: (id) => `El perfil ${id} no fue encontrado`,
   },
-});
 
+  // =========================
+  // MEDIO DE CONTACTO
+  // =========================
+
+  MEDIO_CONTACTO_FORMATO: {
+    code: "ERR-VAL-701",
+    message: "Los medios de contacto deben ser una lista",
+  },
+
+  MEDIO_CONTACTO_TIPO_REQUERIDO: {
+    code: "ERR-VAL-702",
+    message: "El tipo del medio de contacto es requerido",
+  },
+
+  MEDIO_CONTACTO_TIPO_INVALIDO: {
+    code: "ERR-VAL-703",
+    message: "El tipo del medio de contacto debe ser: email, whatsapp o sms",
+  },
+
+  MEDIO_CONTACTO_VALOR_REQUERIDO: {
+    code: "ERR-VAL-704",
+    message: "El valor del medio de contacto es requerido",
+  },
+
+  MEDIO_CONTACTO_VALOR_FORMATO: {
+    code: "ERR-VAL-705",
+    message: "El valor del medio de contacto debe ser un texto",
+  },
+
+  MEDIO_CONTACTO_EMAIL_INVALIDO: {
+    code: "ERR-VAL-706",
+    message: "El email del medio de contacto no tiene un formato válido",
+  },
+
+  MEDIO_CONTACTO_TELEFONO_INVALIDO: {
+    code: "ERR-VAL-707",
+    message: "El teléfono debe tener 10 dígitos juntos, sin espacios ni símbolos (ej: 1127891234)",
+  },
+
+  // =========================
+  // MENSAJES
+  // =========================
+
+  MENSAJE_DESTINATARIA_NO_ACEPTA: {
+    code: "ERR-EST-801",
+    message: (nombre) => `La colaboradora ${nombre} no acepta mensajes internos`,
+  },
+
+  MENSAJE_PERSONA_COLABORADORA_REQUERIDO: {
+    code: "ERR-VAL-802",
+    message: "La persona colaboradora destinataria es requerida",
+  },
+
+  MENSAJE_TEXTO_REQUERIDO: {
+    code: "ERR-VAL-803",
+    message: "El texto del mensaje es requerido",
+  },
+
+  MENSAJE_TEXTO_FORMATO: {
+    code: "ERR-VAL-804",
+    message: "El texto del mensaje debe ser un texto",
+  },
+});
 export default ErrorCatalog;

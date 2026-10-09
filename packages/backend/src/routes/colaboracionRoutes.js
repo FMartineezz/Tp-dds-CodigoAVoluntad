@@ -2,16 +2,14 @@ import { Router } from "express";
 import { colaboracionController } from "../container.js";
 import validarColaboracion from "../middlewares/validations/colaboracionValidation.js";
 
-const pathColaboraciones = "/colaboraciones";
-
 export default function colaboracionRoutes() {
   const router = Router();
 
-  router.get(pathColaboraciones, colaboracionController.obtenerColaboraciones);
+  router.get("/colaboraciones", colaboracionController.verColaboraciones);
 
-  router.get(pathColaboraciones + "/:id", colaboracionController.obtenerColaboracionPorId);
+  router.get("/colaboraciones/:id", colaboracionController.verColaboracionPorId);
 
-  router.post(pathColaboraciones, validarColaboracion, colaboracionController.crearColaboracion);
+  router.post("/colaboraciones", validarColaboracion, colaboracionController.crearColaboracion);
 
   return router;
 }

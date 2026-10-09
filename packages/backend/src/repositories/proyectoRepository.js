@@ -46,4 +46,16 @@ export class ProyectoRepository {
     }
     return proyecto.perfiles.find((perfil) => perfil.id === perfilId) ?? null;
   }
+
+  obtenerPorAlgunaHabilidad(codigosDeHabilidad) {
+    return this.proyectos.filter(
+      (proyecto) =>
+        !proyecto.finalizado &&
+        proyecto.perfiles.some((perfil) =>
+          perfil.habilidadesRequeridas.some((habilidad) =>
+            codigosDeHabilidad.includes(habilidad.codigo),
+          ),
+        ),
+    );
+  }
 }

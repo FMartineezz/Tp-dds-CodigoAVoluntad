@@ -1,23 +1,29 @@
 import { Router } from "express";
 import { personaColaboradoraController } from "../container.js";
-import validarPersonaColaboradora from "../middlewares/validations/colaboradoraValidation.js";
-
-const pathColaboradoras = "/colaboradoras";
+import { mensajeController } from "../container.js";
+import validarPersonaColaboradora from "../middlewares/validations/personaColaboradoraValidation.js";
 
 export default function personaColaboradoraRoutes() {
   const router = Router();
 
-  router.get(pathColaboradoras, personaColaboradoraController.obtenerPersonasColaboradoras);
+  router.get("/colaboradoras", personaColaboradoraController.verPersonasColaboradoras);
+
+  router.get("/colaboradoras/:id", personaColaboradoraController.verPersonaColaboradoraPorId);
 
   router.get(
-    pathColaboradoras + "/:id",
-    personaColaboradoraController.obtenerPersonaColaboradoraPorId,
+    "/colaboradoras/:personaColaboradoraId/mensajes",
+    mensajeController.verBandejaDeEntradaColaboradora,
   );
 
   router.post(
-    pathColaboradoras,
+    "/colaboradoras",
     validarPersonaColaboradora,
     personaColaboradoraController.crearPersonaColaboradora,
+  );
+
+  router.get(
+    "/colaboradoras/:id/proyectos-acordes",
+    personaColaboradoraController.verProyectosAcordes,
   );
 
   return router;

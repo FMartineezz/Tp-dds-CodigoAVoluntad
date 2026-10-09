@@ -40,12 +40,12 @@ export class ColaboracionService {
     return this.colaboracionRepository.guardar(colaboracion);
   }
 
-  obtenerColaboraciones() {
+  verColaboraciones() {
     const colaboraciones = this.colaboracionRepository.obtenerTodas();
     return colaboraciones.map((colaboracion) => this.ocultarSiEsAnonima(colaboracion));
   }
 
-  obtenerColaboracionPorId(id) {
+  verColaboracionPorId(id) {
     const colaboracion = this.colaboracionRepository.obtenerPorId(id);
 
     if (!colaboracion) {
@@ -55,10 +55,26 @@ export class ColaboracionService {
     return this.ocultarSiEsAnonima(colaboracion);
   }
 
+  obtenerColaboraciones() {
+    return this.colaboracionRepository.obtenerTodas();
+  }
+
+  obtenerColaboracionPorId(id) {
+    const colaboracion = this.colaboracionRepository.obtenerPorId(id);
+
+    if (!colaboracion) {
+      throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);
+    }
+
+    return colaboracion;
+  }
+
   ocultarSiEsAnonima(colaboracion) {
     return {
       ...colaboracion,
-      personaColaboradora: colaboracion.anonima ? null : colaboracion.personaColaboradora,
+      personaColaboradora: colaboracion.anonima
+        ? null
+        : this.personaColaboradoraService.ocultarContactos(colaboracion.personaColaboradora),
     };
   }
 }

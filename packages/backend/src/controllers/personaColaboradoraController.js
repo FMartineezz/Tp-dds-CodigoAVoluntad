@@ -1,6 +1,7 @@
 export class PersonaColaboradoraController {
-  constructor({ personaColaboradoraService }) {
+  constructor({ personaColaboradoraService, busquedaService }) {
     this.personaColaboradoraService = personaColaboradoraService;
+    this.busquedaService = busquedaService;
   }
 
   crearPersonaColaboradora = (req, res) => {
@@ -12,22 +13,32 @@ export class PersonaColaboradoraController {
       req.body.habilidades,
       req.body.pronombres,
       req.body.presentacion,
+      req.body.contactos,
+      req.body.bloquearMensajeInterno,
     );
 
     res.status(201).location(`/colaboradoras/${persona.id}`).json(persona);
   };
 
-  obtenerPersonasColaboradoras = (req, res) => {
-    const personas = this.personaColaboradoraService.obtenerPersonasColaboradoras();
+  verPersonasColaboradoras = (req, res) => {
+    const personas = this.personaColaboradoraService.verPersonasColaboradoras();
 
     res.status(200).json(personas);
   };
 
-  obtenerPersonaColaboradoraPorId = (req, res) => {
+  verPersonaColaboradoraPorId = (req, res) => {
     const id = Number(req.params.id);
 
-    const persona = this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(id);
+    const persona = this.personaColaboradoraService.verPersonaColaboradoraPorId(id);
 
     res.status(200).json(persona);
+  };
+
+  verProyectosAcordes = (req, res) => {
+    const id = Number(req.params.id);
+
+    const proyectos = this.busquedaService.verProyectosAcordesALaPersonaColaboradora(id);
+
+    res.status(200).json(proyectos);
   };
 }

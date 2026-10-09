@@ -17,6 +17,8 @@ export class PersonaColaboradoraService {
     habilidades,
     pronombres,
     presentacion,
+    contactos,
+    bloquearMensajeInterno,
   ) {
     const habilidadesEncontradas = habilidades.map((codigo) => {
       return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
@@ -30,22 +32,54 @@ export class PersonaColaboradoraService {
       habilidadesEncontradas,
       pronombres,
       presentacion,
+      contactos,
+      bloquearMensajeInterno,
     );
 
     return this.personaColaboradoraRepository.guardar(personaColaboradora);
   }
 
+  //Vista expuesta (sin contactos)
+  verPersonasColaboradoras() {
+    const personasColaboradoras = this.personaColaboradoraRepository.obtenerTodas();
+    return personasColaboradoras.map((personaColaboradora) =>
+      this.ocultarContactos(personaColaboradora),
+    );
+  }
+
+  verPersonaColaboradoraPorId(id) {
+    const personaColaboradora = this.personaColaboradoraRepository.obtenerPorId(id);
+
+    if (!personaColaboradora) {
+      throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+    }
+
+    return this.ocultarContactos(personaColaboradora);
+  }
+
+  verPersonasConAlgunaHabilidad(codigosHabilidad) {
+    const personasColaboradoras =
+      this.personaColaboradoraRepository.obtenerPorAlgunaHabilidad(codigosHabilidad);
+    return personasColaboradoras.map((persona) => this.ocultarContactos(persona));
+  }
+
+  //Metodo interno para la conexion entre service
   obtenerPersonasColaboradoras() {
     return this.personaColaboradoraRepository.obtenerTodas();
   }
 
   obtenerPersonaColaboradoraPorId(id) {
-    const persona = this.personaColaboradoraRepository.obtenerPorId(id);
+    const personaColaboradora = this.personaColaboradoraRepository.obtenerPorId(id);
 
-    if (!persona) {
+    if (!personaColaboradora) {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
     }
 
-    return persona;
+    return personaColaboradora;
+  }
+
+  ocultarContactos(personaColaboradora) {
+    const { contactos, ...resto } = personaColaboradora;
+    return resto;
   }
 }

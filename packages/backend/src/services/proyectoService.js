@@ -3,10 +3,11 @@ import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
 export class ProyectoService {
-  constructor({ proyectoRepository, perfilService, colectivoService }) {
+  constructor({ proyectoRepository, perfilService, colectivoService, personaColaboradoraService }) {
     this.proyectoRepository = proyectoRepository;
     this.perfilService = perfilService;
     this.colectivoService = colectivoService;
+    this.personaColaboradoraService = personaColaboradoraService;
   }
 
   crearProyecto(titulo, descripcion, perfiles, colectivo) {
@@ -55,6 +56,11 @@ export class ProyectoService {
     }
 
     return proyecto;
+  }
+
+  verProyectosConAlgunaHabilidad(codigosHabilidad) {
+    const proyectos = this.proyectoRepository.obtenerPorAlgunaHabilidad(codigosHabilidad);
+    return proyectos;
   }
 
   finalizarProyecto(id) {
