@@ -69,13 +69,13 @@ export class PersonaColaboradoraService {
   }
 
   obtenerPersonaColaboradoraPorId(id) {
-    const personaColaborado = this.personaColaboradoraRepository.obtenerPorId(id);
+    const personaColaboradora = this.personaColaboradoraRepository.obtenerPorId(id);
 
-    if (!persona) {
+    if (!personaColaboradora) {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
     }
 
-    return personaColaborado;
+    return personaColaboradora;
   }
 
   ocultarContactos(personaColaboradora) {

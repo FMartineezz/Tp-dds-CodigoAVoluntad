@@ -63,7 +63,8 @@ export const habilidadController = new HabilidadController({ habilidadService })
 export const colaboracionController = new ColaboracionController({ colaboracionService });
 export const personaColaboradoraController = new PersonaColaboradoraController({
   personaColaboradoraService,
+  busquedaService,
 });
 export const healthCheckController = new HealthCheckController();
-export const perfilController = new PerfilController({ proyectoService });
+export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });

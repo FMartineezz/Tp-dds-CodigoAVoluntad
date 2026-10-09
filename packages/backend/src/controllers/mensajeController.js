@@ -9,7 +9,7 @@ export class MensajeController {
     const mensaje = this.mensajeService.enviarMensajeDesdeColectivo(
       colectivoId,
       req.body.personaColaboradoraId,
-      req.body.mensaje,
+      req.body.texto,
     );
 
     res.status(201).json(mensaje);

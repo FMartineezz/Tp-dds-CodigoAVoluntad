@@ -37,7 +37,7 @@ export class PersonaColaboradoraController {
   verProyectosAcordes = (req, res) => {
     const id = Number(req.params.id);
 
-    const proyectos = this.personaColaboradoraService.verProyectosAcordes(id);
+    const proyectos = this.busquedaService.verProyectosAcordesALaPersonaColaboradora(id);
 
     res.status(200).json(proyectos);
   };

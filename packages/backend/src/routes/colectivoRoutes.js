@@ -1,5 +1,6 @@
 import { Router } from "express";
 import validarColectivo from "../middlewares/validations/colectivoValidation.js";
+import validarMensaje from "../middlewares/validations/mensajeValidation.js";
 import { colectivoController } from "../container.js";
 import { mensajeController } from "../container.js";
 
@@ -14,7 +15,11 @@ export default function colectivoRoutes() {
 
   router.post("/colectivos", validarColectivo, colectivoController.crearColectivo);
 
-  router.post("/colectivos/:colectivoId/mensajes", mensajeController.enviarMensajeDesdeColectivo);
+  router.post(
+    "/colectivos/:colectivoId/mensajes",
+    validarMensaje,
+    mensajeController.enviarMensajeDesdeColectivo,
+  );
 
   return router;
 }

@@ -4,5 +4,6 @@ export class Mensaje {
     this.colectivo = colectivo;
     this.personaColaboradora = personaColaboradora;
     this.texto = texto;
+    this.date = new Date();
   }
 }

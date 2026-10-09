@@ -1,3 +1,4 @@
+import { date } from "zod";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Mensaje } from "../models/mensaje.js";
@@ -35,20 +36,21 @@ export class MensajeService {
     return mensajes.map((mensaje) => this.vistaDeMensajesBandejaEntradas(mensaje));
   }
 
-  vistaDeMensajesBandejaEntradas({ id, colectivo, texto }) {
+  vistaDeMensajesBandejaEntradas({ id, colectivo, texto, date }) {
     return {
       id: id,
       colectivo: colectivo.nombre,
-      mensaje: texto,
+      texto: texto,
+      date: date,
     };
   }
 
-  vistaDeMensajesEnviados({ id, colectivo, personaColaboradora, texto }) {
+  vistaDeMensajesEnviados({ id, personaColaboradora, texto, date }) {
     return {
       id: id,
-      colectivo: colectivo.nombre,
-      personaColaboradora: this.personaColaboradoraService.ocultarContactos(personaColaboradora),
-      mensaje: texto,
+      personaColaboradora: personaColaboradora.nombreFantasia,
+      texto: texto,
+      date: date,
     };
   }
 }

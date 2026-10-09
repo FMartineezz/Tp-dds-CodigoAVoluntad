@@ -326,5 +326,20 @@ const ErrorCatalog = Object.freeze({
     code: "ERR-EST-801",
     message: (nombre) => `La colaboradora ${nombre} no acepta mensajes internos`,
   },
+
+  MENSAJE_PERSONA_COLABORADORA_REQUERIDO: {
+    code: "ERR-VAL-802",
+    message: "La persona colaboradora destinataria es requerida",
+  },
+
+  MENSAJE_TEXTO_REQUERIDO: {
+    code: "ERR-VAL-803",
+    message: "El texto del mensaje es requerido",
+  },
+
+  MENSAJE_TEXTO_FORMATO: {
+    code: "ERR-VAL-804",
+    message: "El texto del mensaje debe ser un texto",
+  },
 });
 export default ErrorCatalog;

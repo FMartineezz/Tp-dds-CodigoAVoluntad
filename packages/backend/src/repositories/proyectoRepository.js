@@ -48,10 +48,14 @@ export class ProyectoRepository {
   }
 
   obtenerPorAlgunaHabilidad(codigosDeHabilidad) {
-    return this.proyectos.filter((proyecto) =>
-      proyecto.perfiles.some((perfil) => {
-        perfil.habilidadesRequeridas.some((habilidad) => codigosDeHabilidad.includes(habilidad));
-      }),
+    return this.proyectos.filter(
+      (proyecto) =>
+        !proyecto.finalizado &&
+        proyecto.perfiles.some((perfil) =>
+          perfil.habilidadesRequeridas.some((habilidad) =>
+            codigosDeHabilidad.includes(habilidad.codigo),
+          ),
+        ),
     );
   }
 }
