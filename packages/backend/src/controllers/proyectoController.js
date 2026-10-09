@@ -3,8 +3,8 @@ export class ProyectoController {
     this.proyectoService = proyectoService;
   }
 
-  crearProyecto = (req, res) => {
-    const proyecto = this.proyectoService.crearProyecto(
+  crearProyecto = async (req, res) => {
+    const proyecto = await this.proyectoService.crearProyecto(
       req.body.titulo,
       req.body.descripcion,
       req.body.perfiles,
@@ -13,25 +13,33 @@ export class ProyectoController {
     res.status(201).location(`/proyectos/${proyecto.id}`).json(proyecto);
   };
 
-  obtenerProyectos = (req, res) => {
-    const proyectos = this.proyectoService.obtenerProyectos();
+  obtenerProyectos = async (req, res) => {
+    const proyectos = await this.proyectoService.obtenerProyectos();
 
     res.status(200).json(proyectos);
   };
 
-  obtenerProyectoPorId = (req, res) => {
-    const id = Number(req.params.id);
+  obtenerProyectoPorId = async (req, res) => {
+    const id = req.params.id;
 
-    const proyecto = this.proyectoService.obtenerProyectoPorId(id);
+    const proyecto = await this.proyectoService.obtenerProyectoPorId(id);
 
     res.status(200).json(proyecto);
   };
 
-  // Alternativa recurso-céntrica a /finalizar (ver issue REST): PATCH /proyectos/:id { finalizado: true }
-  actualizarProyecto = (req, res) => {
+/*   finalizarProyecto = async (req, res, next) => {
     const id = Number(req.params.id);
 
-    const proyecto = this.proyectoService.actualizarProyecto(id, req.body);
+    const proyecto = await this.proyectoService.finalizarProyecto(id);
+
+    res.status(200).json(proyecto);
+  }; */
+
+  // Alternativa recurso-céntrica a /finalizar (ver issue REST): PATCH /proyectos/:id { finalizado: true }
+  actualizarProyecto = async (req, res) => {
+    const id = req.params.id;
+
+    const proyecto = await this.proyectoService.actualizarProyecto(id, req.body);
 
     res.status(200).json(proyecto);
   };

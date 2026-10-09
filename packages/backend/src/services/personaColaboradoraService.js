@@ -9,7 +9,7 @@ export class PersonaColaboradoraService {
     this.habilidadService = habilidadService;
   }
 
-  crearPersonaColaboradora(
+  async crearPersonaColaboradora(
     nombreFantasia,
     git,
     nombre,
@@ -20,9 +20,17 @@ export class PersonaColaboradoraService {
     contactos,
     bloquearMensajeInterno,
   ) {
+
+/*
     const habilidadesEncontradas = habilidades.map((codigo) => {
       return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
     });
+ */
+    const habilidadesEncontradas = await Promise.all(
+      habilidades.map((codigo => {
+        return this.habilidadService.obtenerHabilidadPorCodigo(codigo)
+      }))
+    );
 
     const personaColaboradora = new PersonaColaboradora(
       nombreFantasia,
@@ -36,19 +44,19 @@ export class PersonaColaboradoraService {
       bloquearMensajeInterno,
     );
 
-    return this.personaColaboradoraRepository.guardar(personaColaboradora);
+    return await this.personaColaboradoraRepository.guardar(personaColaboradora);
   }
 
   //Vista expuesta (sin contactos)
-  verPersonasColaboradoras() {
-    const personasColaboradoras = this.personaColaboradoraRepository.obtenerTodas();
+  async obtenerPersonasColaboradoras() {
+    const personasColaboradoras = await this.personaColaboradoraRepository.obtenerTodas();
     return personasColaboradoras.map((personaColaboradora) =>
       this.ocultarContactos(personaColaboradora),
     );
   }
 
-  verPersonaColaboradoraPorId(id) {
-    const personaColaboradora = this.personaColaboradoraRepository.obtenerPorId(id);
+  async obtnerPersonaColaboradoraPorId(id) {
+    const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorId(id);
 
     if (!personaColaboradora) {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
@@ -57,27 +65,30 @@ export class PersonaColaboradoraService {
     return this.ocultarContactos(personaColaboradora);
   }
 
-  verPersonasConAlgunaHabilidad(codigosHabilidad) {
+  async obtenerPersonasConAlgunaHabilidad(codigosHabilidad) {
     const personasColaboradoras =
-      this.personaColaboradoraRepository.obtenerPorAlgunaHabilidad(codigosHabilidad);
+      await this.personaColaboradoraRepository.obtenerPorAlgunaHabilidad(codigosHabilidad);
     return personasColaboradoras.map((persona) => this.ocultarContactos(persona));
   }
 
   //Metodo interno para la conexion entre service
-  obtenerPersonasColaboradoras() {
+  //metodo duplicado
+/*   obtenerPersonasColaboradoras() {
     return this.personaColaboradoraRepository.obtenerTodas();
-  }
+  } */
 
-  obtenerPersonaColaboradoraPorId(id) {
-    const personaColaboradora = this.personaColaboradoraRepository.obtenerPorId(id);
+  //metodo duplicado
+/*   async obtenerPersonaColaboradoraPorId(id) {
+    const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorId(id);
 
     if (!personaColaboradora) {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
     }
 
     return personaColaboradora;
-  }
+  } */
 
+  //agregar en la query de la db?
   ocultarContactos(personaColaboradora) {
     const { contactos, ...resto } = personaColaboradora;
     return resto;

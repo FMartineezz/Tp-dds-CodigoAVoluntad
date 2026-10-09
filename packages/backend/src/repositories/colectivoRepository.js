@@ -1,15 +1,39 @@
+import { ColectivoModel } from "../schemas/colectivoSchema.js";
+
 export class ColectivoRepository {
-  constructor() {
+    constructor(){
+      this.model = ColectivoModel
+    }
+    
+    async guardar(colectivo) {
+      const nuevoColectivo = new this.model(colectivo);
+      return await nuevoColectivo.save();
+    }
+    
+    async obtenerTodos() {
+      return await this.model.find();
+    }
+    
+    async obtenerPorId(id) {
+      return await this.model.findById(id);
+    }
+
+    async obtenerPorNombre(nombre) {
+      return await this.model.findOne({nombre});
+    }
+
+    async agregarProyecto(colectivoId, proyecto) {
+      return await this.model.findByIdAndUpdate(colectivoId, {
+        $push: {
+          proyectos: proyecto
+        }
+      })
+    }
+
+/*   constructor() {
     this.colectivos = [];
     this.id = 1;
   }
-
-  // crearColectivo(nombre, descripcion, ubicacion, tipoDeColectivo, proyectos) {
-  //   const colectivo = new Colectivo(this.id, nombre, descripcion, ubicacion, tipoDeColectivo, proyectos);
-  //   this.id++;
-  //   this.colectivos.push(colectivo);
-  //   return colectivo;
-  // }
 
   agregarColectivo(colectivo) {
     colectivo.id = this.id;
@@ -28,4 +52,5 @@ export class ColectivoRepository {
   obtenerColectivoPorNombre(nombre) {
     return this.colectivos.find((colectivo) => colectivo.nombre === nombre) || null;
   }
+ */
 }

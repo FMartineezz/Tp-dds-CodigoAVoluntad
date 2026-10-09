@@ -1,0 +1,738 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Codigo a Voluntad",
+    "description": "Una plataforma de código libre que tiene como finalidad ser un punto de encuentro entre, por un lado, colectivos (fundaciones, ONGs, asambleas, comunidades, organizaciones territoriales, etc.) que necesitan producir software de clase profesional pero no cuentan con los recursos económicos para costearlo, y personas colaboradoras, que buscan realizar contribuciones a estas organizaciones en forma de mano de obra y asesoramiento sobre desarrollo de software.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local"
+    },
+    {
+      "url": "http://tpdds-codigoavoluntad.northcentralus.cloudapp.azure.com:3000",
+      "description": "Distribuido"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Colectivos"
+    },
+    {
+      "name": "Colaboraciones"
+    },
+    {
+      "name": "Proyectos"
+    },
+    {
+      "name": "Colaboradoras"
+    },
+    {
+      "name": "Habilidades"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Colectivo": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "descripcion",
+          "tipoDeColectivo"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Identificador único del colectivo (asignado tras la persistencia).",
+            "example": "652a9f5d3419c8f2b34c1a2d"
+          },
+          "nombre": {
+            "type": "string",
+            "description": "Nombre del colectivo.",
+            "example": "Colectivo Ambiental CABA"
+          },
+          "descripcion": {
+            "type": "string",
+            "description": "Descripción o propósito del colectivo.",
+            "example": "Organizacion dedicada a promover el cuidado del medio ambiente y la sustentabilidad en la Ciudad de Buenos Aires."
+          },
+          "ubicacion": {
+            "type": "string",
+            "description": "Ubicación geográfica del colectivo.",
+            "example": "caba"
+          },
+          "tipoDeColectivo": {
+            "$ref": "#/components/schemas/TipoColectivo",
+            "example": "fundacion"
+          },
+          "proyectos": {
+            "type": "array",
+            "description": "Lista de _ids proyectos asociados al colectivo.",
+            "items": {
+              "$ref": "#/components/schemas/Proyecto",
+              "description": "Estructura del proyecto (o referenciar a un $ref si tenés el esquema de Proyecto)."
+            },
+            "example": []
+          }
+        }
+      },
+      "Habilidad": {
+        "type": "object",
+        "required": [
+          "titulo",
+          "descripcion"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Identificador único de la habilidad.",
+            "example": "652a9f5d3419c8f2b34c1a2d"
+          },
+          "titulo": {
+            "type": "string",
+            "description": "Título o nombre de la habilidad.",
+            "example": "Programacion en JavaScript"
+          },
+          "codigo": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Identificador generado en formato snake_case a partir del título.",
+            "example": "programacion_en_java_script"
+          },
+          "descripcion": {
+            "type": "string",
+            "description": "Descripción detallada de la habilidad.",
+            "example": "Capacidad para desarrollar aplicaciones web y lógica de negocio utilizando JS moderno."
+          }
+        }
+      },
+      "PersonaColaboradora": {
+        "type": "object",
+        "required": [
+          "nombreFantasia",
+          "git",
+          "habilidades",
+          "presentacion"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Identificador único de la persona colaboradora.",
+            "example": "652a9f5d3419c8f2b34c1a2d"
+          },
+          "nombreFantasia": {
+            "type": "string",
+            "description": "Apodo o nombre público.",
+            "example": "DevNeko"
+          },
+          "git": {
+            "type": "string",
+            "format": "uri",
+            "description": "Enlace al perfil de GitHub o plataforma Git.",
+            "example": "https://github.com/devneko"
+          },
+          "nombre": {
+            "type": "string",
+            "description": "Nombre real.",
+            "example": "Lucía"
+          },
+          "apellido": {
+            "type": "string",
+            "description": "Apellido real.",
+            "example": "Gómez"
+          },
+          "habilidades": {
+            "type": "array",
+            "description": "Lista de códigos de habilidades asociadas (en formato snake_case).",
+            "items": {
+              "type": "string",
+              "example": "programacion_en_java_script"
+            }
+          },
+          "pronombres": {
+            "type": "string",
+            "description": "Pronombres de preferencia.",
+            "example": "ella"
+          },
+          "presentacion": {
+            "type": "string",
+            "description": "Breve presentación personal.",
+            "example": "Desarrolladora Frontend apasionada por proyectos comunitarios y de código abierto."
+          }
+        }
+      },
+      "Perfil": {
+        "type": "object",
+        "required": [
+          "descripcion",
+          "habilidadesRequeridas",
+          "habilidadesOpcionales",
+          "horas",
+          "tipoDeCompromiso",
+          "modalidadDeColaboracion"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Identificador único del perfil.",
+            "example": "652a9f5d3419c8f2b34c1a2d"
+          },
+          "descripcion": {
+            "type": "string",
+            "description": "Descripción de la tarea, rol o puesto que se busca cubrir.",
+            "example": "Desarrollo y mantenimiento de componentes de la interfaz gráfica web."
+          },
+          "habilidadesRequeridas": {
+            "type": "array",
+            "description": "Lista de códigos de habilidades obligatorias (en formato snake_case).",
+            "items": {
+              "type": "string",
+              "example": "programacion_en_java_script"
+            }
+          },
+          "habilidadesOpcionales": {
+            "type": "array",
+            "description": "Lista de códigos de habilidades recomendadas u opcionales.",
+            "items": {
+              "type": "string",
+              "example": "desarrollo_con_node_js_y_express"
+            }
+          },
+          "horas": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Cantidad de horas estimadas de dedicación.",
+            "example": 10
+          },
+          "tipoDeCompromiso": {
+            "$ref": "#/components/schemas/TipoDeCompromiso",
+            "example": "semanal"
+          },
+          "modalidadDeColaboracion": {
+            "$ref": "#/components/schemas/ModalidadColaboracion",
+            "example": "incentivo_economico"
+          }
+        }
+      },
+      "Proyecto": {
+        "type": "object",
+        "required": [
+          "titulo",
+          "descripcion",
+          "perfiles",
+          "colectivo"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Identificador único del proyecto",
+            "example": "652a9f5d3419c8f2b34c1a2d"
+          },
+          "titulo": {
+            "type": "string",
+            "description": "Nombre o título del proyecto.",
+            "example": "Plataforma de Donaciones Comunitarias"
+          },
+          "descripcion": {
+            "type": "string",
+            "description": "Detalle o propósito del proyecto.",
+            "example": "Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio."
+          },
+          "perfiles": {
+            "type": "array",
+            "description": "Lista de perfiles requeridas para el proyecto.",
+            "items": {
+              "$ref": "#/components/schemas/Perfil"
+            }
+          },
+          "colectivo": {
+            "type": "string",
+            "description": "Nombre del colectivo al que pertenece el proyecto.",
+            "example": "Colectivo Ambiental CABA"
+          },
+          "finalizado": {
+            "type": "boolean",
+            "default": false,
+            "description": "Estado de finalización del proyecto.",
+            "example": false
+          }
+        }
+      },
+      "TipoColectivo": {
+        "type": "string",
+        "enum": [
+          "fundacion",
+          "ong",
+          "asociacion",
+          "asamblea"
+        ],
+        "description": "Tipo de modalidad para la colaboracion."
+      },
+      "TipoDeCompromiso": {
+        "type": "string",
+        "enum": [
+          "semanal",
+          "mensual",
+          "total"
+        ],
+        "description": "Frecuencia o tipo de medición de las horas de dedicación."
+      },
+      "ModalidadColaboracion": {
+        "type": "string",
+        "enum": [
+          "gratuita",
+          "incentivo_economico",
+          "contratacion_eventual"
+        ],
+        "description": "Tipo de modalidad para la colaboracion."
+      }
+    }
+  },
+
+
+  "paths": {
+    "/colectivos": {
+      "get": {
+        "tags": [
+          "Colectivos"
+        ],
+        "summary": "Obtener todos los colectivos",
+        "responses": {
+          "200": {
+            "description": "Lista de colectivos obtenida con éxito"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Colectivos"
+        ],
+        "summary": "Crear un nuevo colectivo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Colectivo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Colectivo creado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Colectivo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/colectivos/{id}": {
+      "get": {
+        "tags": [
+          "Colectivos"
+        ],
+        "summary": "Obtener un colectivo por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID del colectivo",
+            "schema": {
+              "type": "string",
+              "example": "6ac7866e777df03c06e98a58"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colectivo encontrado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Colectivo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colectivo no encontrado"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/colaboraciones": {
+      "get": {
+        "tags": [
+          "Colaboraciones"
+        ],
+        "summary": "Obtener todas las colaboraciones",
+        "responses": {
+          "200": {
+            "description": "Lista de colaboraciones obtenida con éxito"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Colaboraciones"
+        ],
+        "summary": "Crear una nueva colaboración",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Colaboracion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Colaboración creada con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Colaboracion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/colaboraciones/{id}": {
+      "get": {
+        "tags": [
+          "Colaboraciones"
+        ],
+        "summary": "Obtener una colaboración por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la colaboración",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colaboración encontrada con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Colaboracion"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colaboración no encontrada"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/proyectos": {
+      "get": {
+        "tags": [
+          "Proyectos"
+        ],
+        "summary": "Obtener todos los proyectos",
+        "responses": {
+          "200": {
+            "description": "Lista de proyectos obtenida con éxito"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Proyectos"
+        ],
+        "summary": "Crear un nuevo proyecto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Proyecto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proyecto creado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proyecto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/proyectos/{id}": {
+      "get": {
+        "tags": [
+          "Proyectos"
+        ],
+        "summary": "Obtener un proyecto por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID del proyecto",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proyecto encontrado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proyecto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Proyecto no encontrado"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/colaboradoras": {
+      "get": {
+        "tags": [
+          "Colaboradoras"
+        ],
+        "summary": "Obtener todas las colaboradoras",
+        "responses": {
+          "200": {
+            "description": "Lista de colaboradoras obtenida con éxito"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Colaboradoras"
+        ],
+        "summary": "Crear una nueva colaboradora",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonaColaboradora"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Colaboradora creada con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/colaboradoras/{id}": {
+      "get": {
+        "tags": [
+          "Colaboradoras"
+        ],
+        "summary": "Obtener una colaboradora por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la colaboradora",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colaboradora encontrada con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colaboradora no encontrada"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/habilidades": {
+      "get": {
+        "tags": [
+          "Habilidades"
+        ],
+        "summary": "Obtener todas las habilidades",
+        "responses": {
+          "200": {
+            "description": "Lista de habilidades obtenida con éxito"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Habilidades"
+        ],
+        "summary": "Crear una nueva habilidad",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Habilidad"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Habilidad creada con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Habilidad"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/habilidades/{id}": {
+      "get": {
+        "tags": [
+          "Habilidades"
+        ],
+        "summary": "Obtener una habilidad por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la habilidad",
+            "schema": {
+              "type": "string",
+              "example": "6ac78677777df03c06e98a5b"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Habilidad encontrada con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Habilidad"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Habilidad no encontrada"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    }
+  }
+}

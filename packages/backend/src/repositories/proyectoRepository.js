@@ -1,5 +1,54 @@
+import { trusted } from "mongoose";
+import { ProyectoModel } from "../schemas/proyectoSchema.js";
+
 export class ProyectoRepository {
-  constructor() {
+    constructor(){
+      this.model = ProyectoModel
+    }
+    
+    async guardar(proyecto) {
+      const nuevoProyecto = new this.model(proyecto);
+      return await nuevoProyecto.save();
+    }
+    
+    async obtenerTodos() {
+      return await this.model.find();
+    }
+    
+    async obtenerPorId(id) {
+      return await this.model.findById(id);
+    }
+
+
+    //TODO
+    async obtenerPorTituloYColectivo(titulo) {
+      return await this.model.findOne({titulo});
+    }
+
+    async guardarPerfil(proyectoId, perfil) {
+      return await this.model.findByIdAndUpdate(proyectoId, {
+        $push: {
+          perfiles: perfil
+        }
+      });
+    }
+
+    async obtenerPerfilPorId(proyectoId, perfilId) {
+      const proyecto = await this.model.findById(proyectoId);
+      return proyecto.perfiles.id(perfilId);
+    }
+    
+    async finalizarProyecto(id){
+      await this.model.findByIdAndUpdate(
+        id, 
+        {$set: {
+          finalizado: true
+        }},
+        { new: true }
+      )
+    }
+
+/*   constructor() {
     this.proyectos = [];
     this.id = 1;
     this.perfilId = 1;
@@ -58,4 +107,5 @@ export class ProyectoRepository {
         ),
     );
   }
+  } */
 }

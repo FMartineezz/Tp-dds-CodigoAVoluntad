@@ -6,9 +6,9 @@ import validarPersonaColaboradora from "../middlewares/validations/personaColabo
 export default function personaColaboradoraRoutes() {
   const router = Router();
 
-  router.get("/colaboradoras", personaColaboradoraController.verPersonasColaboradoras);
+  router.get("/colaboradoras", personaColaboradoraController.obtenerPersonasColaboradoras);
 
-  router.get("/colaboradoras/:id", personaColaboradoraController.verPersonaColaboradoraPorId);
+  router.get("/colaboradoras/:id", personaColaboradoraController.obtenerPersonaColaboradoraPorId);
 
   router.get(
     "/colaboradoras/:personaColaboradoraId/mensajes",

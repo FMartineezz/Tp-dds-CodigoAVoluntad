@@ -1,5 +1,24 @@
+import { ColaboracionModel } from "../schemas/colaboracionSchema.js";
+
 export class ColaboracionRepository {
-  constructor() {
+  constructor(){
+    this.model = ColaboracionModel
+  }
+  
+  async guardar(colaboracion) {
+    const nuevaColaboracion = new this.model(colaboracion);
+    return await nuevaColaboracion.save();
+  }
+  
+  async obtenerTodas() {
+    return await this.model.find();
+  }
+  
+  async obtenerPorId(id) {
+    return await this.model.findById(id);
+  }
+
+  /*   constructor() {
     this.colaboraciones = [];
     this.id = 1;
   }
@@ -18,5 +37,5 @@ export class ColaboracionRepository {
 
   obtenerPorId(id) {
     return this.colaboraciones.find((colaboracion) => colaboracion.id === id);
-  }
+  } */
 }

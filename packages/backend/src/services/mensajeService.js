@@ -28,7 +28,7 @@ export class MensajeService {
     return this.vistaDeMensajesEnviados(mensaje);
   }
 
-  verBandejaDeEntradaColaboradora(personaColaboradoraId) {
+  obtenerBandejaDeEntradaColaboradora(personaColaboradoraId) {
     this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaColaboradoraId);
 
     const mensajes = this.repository.findByColaboradoraId(personaColaboradoraId);

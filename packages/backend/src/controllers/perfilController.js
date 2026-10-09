@@ -8,27 +8,27 @@ export class PerfilController {
     this.busquedaService = busquedaService;
   }
 
-  obtenerPerfiles = (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
+  obtenerPerfiles = async (req, res) => {
+    const proyectoId = req.params.idProyecto;
 
-    const perfiles = this.proyectoService.obtenerPerfiles(proyectoId);
+    const perfiles = await this.proyectoService.obtenerPerfiles(proyectoId);
 
     res.status(200).json(perfiles);
   };
 
-  obtenerPerfilPorId = (req, res) => {
+  obtenerPerfilPorId = async (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
     const perfilId = Number(req.params.idPerfil);
 
-    const perfil = this.proyectoService.obtenerPerfilPorId(proyectoId, perfilId);
+    const perfil = await this.proyectoService.obtenerPerfilPorId(proyectoId, perfilId);
 
     res.status(200).json(perfil);
   };
 
-  crearPerfil = (req, res) => {
+  crearPerfil = async (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
 
-    const perfil = this.proyectoService.agregarPerfil(
+    const perfil = await this.proyectoService.agregarPerfil(
       proyectoId,
       req.body.descripcion,
       req.body.habilidadesRequeridas,
@@ -41,19 +41,20 @@ export class PerfilController {
     res.status(201).json(perfil);
   };
 
-  actualizarPerfil = (req, res) => {
+  //no usar Number() porque en la db es un objectId(string)
+  actualizarPerfil = async (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
   };
 
-  eliminarPerfil = (req, res) => {
+  eliminarPerfil = async (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
   };
 
-  verColaboradorasAcordes = (req, res) => {
+  obtenerColaboradorasAcordes = async (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
     const perfilId = Number(req.params.idPerfil);
 
-    const personas = this.busquedaService.verPersonasColaboradorasAcordesAPerfil(
+    const personas = await this.busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(
       proyectoId,
       perfilId,
     );
