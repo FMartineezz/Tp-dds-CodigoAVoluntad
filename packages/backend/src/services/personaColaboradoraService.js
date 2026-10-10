@@ -20,16 +20,15 @@ export class PersonaColaboradoraService {
     contactos,
     bloquearMensajeInterno,
   ) {
-
-/*
+    /*
     const habilidadesEncontradas = habilidades.map((codigo) => {
       return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
     });
  */
     const habilidadesEncontradas = await Promise.all(
-      habilidades.map((codigo => {
-        return this.habilidadService.obtenerHabilidadPorCodigo(codigo)
-      }))
+      habilidades.map((codigo) => {
+        return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
+      }),
     );
 
     const personaColaboradora = new PersonaColaboradora(
@@ -43,8 +42,11 @@ export class PersonaColaboradoraService {
       contactos,
       bloquearMensajeInterno,
     );
+    const personaColaboradoraGuardada =
+      await this.personaColaboradoraRepository.guardar(personaColaboradora);
+    personaColaboradora.id = personaColaboradoraGuardada.id;
 
-    return await this.personaColaboradoraRepository.guardar(personaColaboradora);
+    return personaColaboradora;
   }
 
   //Vista expuesta (sin contactos)
@@ -73,12 +75,12 @@ export class PersonaColaboradoraService {
 
   //Metodo interno para la conexion entre service
   //metodo duplicado
-/*   obtenerPersonasColaboradoras() {
+  /*   obtenerPersonasColaboradoras() {
     return this.personaColaboradoraRepository.obtenerTodas();
   } */
 
   //metodo duplicado
-/*   async obtenerPersonaColaboradoraPorId(id) {
+  /*   async obtenerPersonaColaboradoraPorId(id) {
     const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorId(id);
 
     if (!personaColaboradora) {

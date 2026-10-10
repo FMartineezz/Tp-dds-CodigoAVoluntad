@@ -27,7 +27,7 @@ export class ProyectoService {
     const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
 
     const perfilesCreados = await Promise.all(
-      perfiles.map((perfil => 
+      perfiles.map((perfil) =>
         this.perfilService.crearPerfil(
           perfil.descripcion,
           perfil.habilidadesRequeridas,
@@ -35,14 +35,14 @@ export class ProyectoService {
           perfil.horas,
           perfil.tipoDeCompromiso,
           perfil.modalidadDeColaboracion,
-        )
-      ))
+        ),
+      ),
     );
 
     const proyectoNuevo = new Proyecto(titulo, descripcion, perfilesCreados, colectivoEncontrado);
-
     const proyectoGuardado = await this.proyectoRepository.guardar(proyectoNuevo);
-    
+    proyectoNuevo.id = proyectoGuardado.id;
+
     await this.colectivoService.agregarProyecto(colectivoEncontrado._id, proyectoGuardado._id);
 
     return proyectoGuardado;

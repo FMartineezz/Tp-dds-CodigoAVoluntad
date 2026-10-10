@@ -21,7 +21,8 @@ export class ColectivoService {
       tipoDeColectivo,
       proyectos,
     );
-    await this.repository.guardar(nuevoColectivo);
+    const colectivoGuardado = await this.repository.guardar(nuevoColectivo);
+    nuevoColectivo.id = colectivoGuardado.id;
 
     return nuevoColectivo;
   }
@@ -55,6 +56,6 @@ export class ColectivoService {
     const colectivo = await this.repository.obtenerPorId(colectivoId);
     colectivo.proyectos.push(proyectoId);
     //
-    await this.repository.agregarProyecto(colectivoId, proyectoId)
+    await this.repository.agregarProyecto(colectivoId, proyectoId);
   }
 }

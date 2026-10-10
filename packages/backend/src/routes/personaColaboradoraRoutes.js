@@ -23,7 +23,7 @@ export default function personaColaboradoraRoutes() {
 
   router.get(
     "/colaboradoras/:id/proyectos-acordes",
-    personaColaboradoraController.verProyectosAcordes,
+    personaColaboradoraController.obtenerProyectosAcordes,
   );
 
   return router;

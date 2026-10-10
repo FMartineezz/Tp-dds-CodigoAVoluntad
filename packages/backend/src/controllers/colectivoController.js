@@ -3,7 +3,7 @@ export class ColectivoController {
     this.service = service;
   }
 
-  async crearColectivo(req, res) {
+  crearColectivo = async (req, res) => {
     const respuesta = await this.service.crearColectivo(
       req.body.nombre,
       req.body.descripcion,
@@ -14,12 +14,12 @@ export class ColectivoController {
     res.status(201).location(`/colectivos/${respuesta.id}`).json(respuesta);
   };
 
-  async obtenerColectivos(req, res) {
+  obtenerColectivos = async (req, res) => {
     const respuesta = await this.service.obtenerColectivos();
     res.status(200).json(respuesta);
   };
 
-  async obtenerColectivoPorId(req, res) {
+  obtenerColectivoPorId = async (req, res) => {
     const id = req.params.id;
 
     const respuesta = await this.service.obtenerColectivoPorId(id);

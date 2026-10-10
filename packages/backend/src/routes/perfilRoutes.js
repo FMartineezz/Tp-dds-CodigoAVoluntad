@@ -17,7 +17,7 @@ export default function proyectoRoutes() {
 
   router.get(
     "/proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes",
-    perfilController.verColaboradorasAcordes,
+    perfilController.obtenerColaboradorasAcordes,
   );
 
   return router;

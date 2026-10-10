@@ -10,7 +10,8 @@ export class ColaboracionService {
   }
 
   async crearColaboracion(personaId, proyectoId, anonima) {
-    const persona = await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
+    const persona =
+      await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
     const proyecto = await this.proyectoService.obtenerProyectoPorId(proyectoId);
 
     if (proyecto.finalizado) {
@@ -36,8 +37,10 @@ export class ColaboracionService {
     }
 
     const colaboracion = new Colaboracion(persona, proyecto, anonima);
+    const colaboracionGuardada = await this.colaboracionRepository.guardar(colaboracion);
+    colaboracion.id = colaboracionGuardada.id;
 
-    return await this.colaboracionRepository.guardar(colaboracion);
+    return colaboracion;
   }
 
   //revisar ocultarSiEsAnonima
@@ -56,11 +59,11 @@ export class ColaboracionService {
     return this.ocultarSiEsAnonima(colaboracion);
   }
 
-/*   async obtenerColaboraciones() {
+  /*   async obtenerColaboraciones() {
     return await this.colaboracionRepository.obtenerTodas();
   } */
 
-/*   async obtenerColaboracionPorId(id) {
+  /*   async obtenerColaboracionPorId(id) {
     const colaboracion = await this.colaboracionRepository.obtenerPorId(id);
 
     if (!colaboracion) {
