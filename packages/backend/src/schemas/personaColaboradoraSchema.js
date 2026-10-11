@@ -1,52 +1,85 @@
 import mongoose from "mongoose";
 import { PersonaColaboradora } from "../models/personaColaboradora.js";
+import { TipoMedioDeContacto } from "../models/personaColaboradora.js";
 
-export const personaColaboradoraSchema = new mongoose.Schema({
-    _id: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        auto: true 
+export const personaColaboradoraSchema = new mongoose.Schema(
+  {
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      auto: true,
     },
-    nombreFantasia:{
-        type: String,
-        required: true
+    nombreFantasia: {
+      type: String,
+      required: true,
     },
-    git:{
-        type: String,
-        required: true
+    git: {
+      type: String,
+      required: true,
     },
-    nombre:{
-        type: String,
-        required: false
+    nombre: {
+      type: String,
+      required: false,
     },
-    apellido:{
-        type: String,
-        required: false
+    apellido: {
+      type: String,
+      required: false,
     },
-    habilidades:{
-        type: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Habilidad'
-        }],
-        required: true,
-        validate: {
-            validator: function(v) {
-                return Array.isArray(v) && v.length > 0;
-            },
-        }
+    habilidades: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Habilidad",
+        },
+      ],
+      required: true,
+      validate: {
+        validator: function (v) {
+          return Array.isArray(v) && v.length > 0;
+        },
+      },
     },
-    pronombres:{
-        type: [String],
-        required: false
+    pronombres: {
+      type: [String],
+      required: false,
     },
-    presentacion:{
-        type: String,
-        required: false
-    }
-},{
+
+    presentacion: {
+      type: String,
+      required: false,
+    },
+
+    contactos: {
+      type: [
+        {
+          _id: false,
+          tipo: {
+            type: String,
+            enum: Object.values(TipoMedioDeContacto),
+            required: true,
+          },
+          valor: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
+      default: [],
+    },
+    bloquearMensajeInterno: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
+  {
     timestamps: true,
-    collection: 'personasColaboradoras'
-});
+    collection: "personasColaboradoras",
+  },
+);
 
 personaColaboradoraSchema.loadClass(PersonaColaboradora);
 
-export const PersonaColaboradoraModel = mongoose.model('PersonaColaboradora', personaColaboradoraSchema)
+export const PersonaColaboradoraModel = mongoose.model(
+  "PersonaColaboradora",
+  personaColaboradoraSchema,
+);

@@ -20,11 +20,6 @@ export class PersonaColaboradoraService {
     contactos,
     bloquearMensajeInterno,
   ) {
-    /*
-    const habilidadesEncontradas = habilidades.map((codigo) => {
-      return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
-    });
- */
     const habilidadesEncontradas = await Promise.all(
       habilidades.map((codigo) => {
         return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
@@ -57,7 +52,7 @@ export class PersonaColaboradoraService {
     );
   }
 
-  async obtnerPersonaColaboradoraPorId(id) {
+  async obtenerPersonaColaboradoraPorId(id) {
     const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorId(id);
 
     if (!personaColaboradora) {
@@ -67,20 +62,26 @@ export class PersonaColaboradoraService {
     return this.ocultarContactos(personaColaboradora);
   }
 
-  async obtenerPersonasConAlgunaHabilidad(codigosHabilidad) {
+  async obtenerPersonasConAlgunaHabilidad(idsHabilidades) {
     const personasColaboradoras =
-      await this.personaColaboradoraRepository.obtenerPorAlgunaHabilidad(codigosHabilidad);
+      await this.personaColaboradoraRepository.obtenerPodHabilidadId(idsHabilidades);
     return personasColaboradoras.map((persona) => this.ocultarContactos(persona));
   }
+  //agregar en la query de la db?
+  ocultarContactos(personaColaboradora) {
+    const { contactos, ...resto } = personaColaboradora;
+    return resto;
+  }
+}
 
-  //Metodo interno para la conexion entre service
-  //metodo duplicado
-  /*   obtenerPersonasColaboradoras() {
+//Metodo interno para la conexion entre service
+//metodo duplicado
+/*   obtenerPersonasColaboradoras() {
     return this.personaColaboradoraRepository.obtenerTodas();
   } */
 
-  //metodo duplicado
-  /*   async obtenerPersonaColaboradoraPorId(id) {
+//metodo duplicado
+/*   async obtenerPersonaColaboradoraPorId(id) {
     const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorId(id);
 
     if (!personaColaboradora) {
@@ -89,10 +90,3 @@ export class PersonaColaboradoraService {
 
     return personaColaboradora;
   } */
-
-  //agregar en la query de la db?
-  ocultarContactos(personaColaboradora) {
-    const { contactos, ...resto } = personaColaboradora;
-    return resto;
-  }
-}

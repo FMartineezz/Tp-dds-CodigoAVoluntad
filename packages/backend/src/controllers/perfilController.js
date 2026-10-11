@@ -17,8 +17,8 @@ export class PerfilController {
   };
 
   obtenerPerfilPorId = async (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
-    const perfilId = Number(req.params.idPerfil);
+    const proyectoId = req.params.idProyecto;
+    const perfilId = req.params.idPerfil;
 
     const perfil = await this.proyectoService.obtenerPerfilPorId(proyectoId, perfilId);
 
@@ -51,8 +51,8 @@ export class PerfilController {
   };
 
   obtenerColaboradorasAcordes = async (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
-    const perfilId = Number(req.params.idPerfil);
+    const proyectoId = req.params.idProyecto;
+    const perfilId = req.params.idPerfil;
 
     const personas = await this.busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(
       proyectoId,

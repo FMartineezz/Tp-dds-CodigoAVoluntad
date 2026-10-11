@@ -1,24 +1,29 @@
 import { ColaboracionModel } from "../schemas/colaboracionSchema.js";
 
 export class ColaboracionRepository {
-  constructor(){
-    this.model = ColaboracionModel
+  constructor() {
+    this.model = ColaboracionModel;
   }
-  
+
   async guardar(colaboracion) {
     const nuevaColaboracion = new this.model(colaboracion);
     return await nuevaColaboracion.save();
   }
-  
+
   async obtenerTodas() {
-    return await this.model.find();
-  }
-  
-  async obtenerPorId(id) {
-    return await this.model.findById(id);
+    return await this.model.find().populate("personaColaboradora").populate("proyecto").lean();
   }
 
-  /*   constructor() {
+  async obtenerPorId(id) {
+    return await this.model
+      .findById(id)
+      .populate("personaColaboradora")
+      .populate("proyecto")
+      .lean();
+  }
+}
+
+/*   constructor() {
     this.colaboraciones = [];
     this.id = 1;
   }
@@ -38,4 +43,3 @@ export class ColaboracionRepository {
   obtenerPorId(id) {
     return this.colaboraciones.find((colaboracion) => colaboracion.id === id);
   } */
-}

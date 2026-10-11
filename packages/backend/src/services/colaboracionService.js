@@ -21,7 +21,7 @@ export class ColaboracionService {
     const tieneHabilidadRequerida = proyecto.perfiles.some((perfil) =>
       perfil.habilidadesRequeridas.some((habilidadPerfil) =>
         persona.habilidades.some(
-          (habilidadPersona) => habilidadPersona.codigo === habilidadPerfil.codigo,
+          (habilidadPersona) => habilidadPersona.toString() === habilidadPerfil.toString(),
         ),
       ),
     );

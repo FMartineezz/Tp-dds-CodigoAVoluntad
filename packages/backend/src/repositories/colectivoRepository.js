@@ -1,34 +1,35 @@
 import { ColectivoModel } from "../schemas/colectivoSchema.js";
 
 export class ColectivoRepository {
-    constructor(){
-      this.model = ColectivoModel
-    }
-    
-    async guardar(colectivo) {
-      const nuevoColectivo = new this.model(colectivo);
-      return await nuevoColectivo.save();
-    }
-    
-    async obtenerTodos() {
-      return await this.model.find();
-    }
-    
-    async obtenerPorId(id) {
-      return await this.model.findById(id);
-    }
+  constructor() {
+    this.model = ColectivoModel;
+  }
 
-    async obtenerPorNombre(nombre) {
-      return await this.model.findOne({nombre});
-    }
+  async guardar(colectivo) {
+    const nuevoColectivo = new this.model(colectivo);
+    return await nuevoColectivo.save();
+  }
 
-    async agregarProyecto(colectivoId, proyecto) {
-      return await this.model.findByIdAndUpdate(colectivoId, {
-        $push: {
-          proyectos: proyecto
-        }
-      })
-    }
+  async obtenerTodos() {
+    return await this.model.find().lean();
+  }
+
+  async obtenerPorId(id) {
+    return await this.model.findById(id).lean();
+  }
+
+  async obtenerPorNombre(nombre) {
+    return await this.model.findOne({ nombre }).lean();
+  }
+
+  async agregarProyecto(colectivoId, proyecto) {
+    return await this.model.findByIdAndUpdate(colectivoId, {
+      $push: {
+        proyectos: proyecto,
+      },
+    });
+  }
+}
 
 /*   constructor() {
     this.colectivos = [];
@@ -53,4 +54,3 @@ export class ColectivoRepository {
     return this.colectivos.find((colectivo) => colectivo.nombre === nombre) || null;
   }
  */
-}

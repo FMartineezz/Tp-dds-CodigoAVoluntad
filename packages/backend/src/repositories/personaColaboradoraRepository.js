@@ -1,22 +1,27 @@
 import { PersonaColaboradoraModel } from "../schemas/personaColaboradoraSchema.js";
 
 export class PersonaColaboradoraRepository {
-    constructor(){
-      this.model = PersonaColaboradoraModel
-    }
-    
-    async guardar(personaColaboradora) {
-      const nuevaPersonaColaboradora = new this.model(personaColaboradora);
-      return await nuevaPersonaColaboradora.save();
-    }
-    
-    async obtenerTodas() {
-      return await this.model.find();
-    }
-    
-    async obtenerPorId(id) {
-      return await this.model.findById(id);
-    }
+  constructor() {
+    this.model = PersonaColaboradoraModel;
+  }
+
+  async guardar(personaColaboradora) {
+    const nuevaPersonaColaboradora = new this.model(personaColaboradora);
+    return await nuevaPersonaColaboradora.save();
+  }
+
+  async obtenerTodas() {
+    return await this.model.find().lean();
+  }
+
+  async obtenerPorId(id) {
+    return await this.model.findById(id).lean();
+  }
+
+  async obtenerPodHabilidadId(habilidadesIds) {
+    return await this.model.find({ habilidades: { $in: habilidadesIds } }).lean();
+  }
+}
 
 /*   constructor() {
     this.personasColaboradoras = [];
@@ -44,4 +49,3 @@ export class PersonaColaboradoraRepository {
     );
   }
   } */
-}

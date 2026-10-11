@@ -34,10 +34,12 @@ export class PersonaColaboradoraController {
     res.status(200).json(persona);
   };
 
-  obtenerProyectosAcordes = (req, res) => {
-    const id = Number(req.params.id);
+  obtenerProyectosAcordes = async (req, res) => {
+    const id = req.params.id;
 
-    const proyectos = this.busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(id);
+    const proyectos = await this.busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(id);
+
+    console.log(proyectos);
 
     res.status(200).json(proyectos);
   };

@@ -62,8 +62,9 @@ export class ProyectoService {
     return proyecto;
   }
 
-  async obtenerProyectosConAlgunaHabilidad(codigosHabilidad) {
-    const proyectos = await this.proyectoRepository.obtenerPorAlgunaHabilidad(codigosHabilidad);
+  async obtenerProyectosConAlgunaHabilidad(idsHabilidad) {
+    const proyectos = await this.proyectoRepository.obtenerPorAlgunaHabilidad(idsHabilidad);
+    console.log(proyectos);
     return proyectos;
   }
 
@@ -122,7 +123,7 @@ export class ProyectoService {
   }
 
   async obtenerPerfilPorId(proyectoId, perfilId) {
-    //this.obtenerProyectoPorId(proyectoId);
+    await this.obtenerProyectoPorId(proyectoId);
     const perfil = await this.proyectoRepository.obtenerPerfilPorId(proyectoId, perfilId);
     if (!perfil) {
       throw new AppError(ErrorCatalog.PERFIL_NO_ENCONTRADO, 404, perfilId);

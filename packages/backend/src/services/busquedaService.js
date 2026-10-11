@@ -4,21 +4,22 @@ export class BusquedaService {
     this.personaColaboradoraService = personaColaboradoraService;
   }
 
-  obtenerPersonasColaboradorasAcordesAPerfil(proyectoId, perfilId) {
-    const perfil = this.proyectoService.obtenerPerfilPorId(proyectoId, perfilId);
-    const codigosHabilidadesRequeridas = perfil.habilidadesRequeridas.map(
-      (habilidad) => habilidad.codigo,
+  async obtenerPersonasColaboradorasAcordesAPerfil(proyectoId, perfilId) {
+    const perfil = await this.proyectoService.obtenerPerfilPorId(proyectoId, perfilId);
+    const idsHabilidadesRequeridas = perfil.habilidadesRequeridas.map((habilidad) =>
+      habilidad.toString(),
     );
 
     return this.personaColaboradoraService.obtenerPersonasConAlgunaHabilidad(
-      codigosHabilidadesRequeridas,
+      idsHabilidadesRequeridas,
     );
   }
 
-  obtenerProyectosAcordesALaPersonaColaboradora(personaColaboradoraId) {
+  async obtenerProyectosAcordesALaPersonaColaboradora(personaColaboradoraId) {
     const personaColaboradora =
-      this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaColaboradoraId);
-    const codigosDeHabilidad = personaColaboradora.habilidades.map((habilidad) => habilidad.codigo);
-    return this.proyectoService.obtenerProyectosConAlgunaHabilidad(codigosDeHabilidad);
+      await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaColaboradoraId);
+    const idsDeHabilidad = personaColaboradora.habilidades.map((habilidad) => habilidad.toString());
+
+    return this.proyectoService.obtenerProyectosConAlgunaHabilidad(idsDeHabilidad);
   }
 }

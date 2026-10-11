@@ -2,51 +2,63 @@ import { trusted } from "mongoose";
 import { ProyectoModel } from "../schemas/proyectoSchema.js";
 
 export class ProyectoRepository {
-    constructor(){
-      this.model = ProyectoModel
-    }
-    
-    async guardar(proyecto) {
-      const nuevoProyecto = new this.model(proyecto);
-      return await nuevoProyecto.save();
-    }
-    
-    async obtenerTodos() {
-      return await this.model.find();
-    }
-    
-    async obtenerPorId(id) {
-      return await this.model.findById(id);
-    }
+  constructor() {
+    this.model = ProyectoModel;
+  }
 
+  async guardar(proyecto) {
+    const nuevoProyecto = new this.model(proyecto);
+    return await nuevoProyecto.save();
+  }
 
-    //TODO
-    async obtenerPorTituloYColectivo(titulo) {
-      return await this.model.findOne({titulo});
-    }
+  async obtenerTodos() {
+    return await this.model.find().lean();
+  }
 
-    async guardarPerfil(proyectoId, perfil) {
-      return await this.model.findByIdAndUpdate(proyectoId, {
-        $push: {
-          perfiles: perfil
-        }
-      });
-    }
+  async obtenerPorId(id) {
+    return await this.model.findById(id).lean();
+  }
 
-    async obtenerPerfilPorId(proyectoId, perfilId) {
-      const proyecto = await this.model.findById(proyectoId);
-      return proyecto.perfiles.id(perfilId);
-    }
-    
-    async finalizarProyecto(id){
-      await this.model.findByIdAndUpdate(
-        id, 
-        {$set: {
-          finalizado: true
-        }},
-        { new: true }
-      )
-    }
+  //TODO
+  async obtenerPorTituloYColectivo(titulo) {
+    return await this.model.findOne({ titulo });
+  }
+
+  async guardarPerfil(proyectoId, perfil) {
+    return await this.model.findByIdAndUpdate(proyectoId, {
+      $push: {
+        perfiles: perfil,
+      },
+    });
+  }
+
+  async obtenerPerfilPorId(proyectoId, perfilId) {
+    const proyecto = await this.obtenerPorId(proyectoId);
+
+    return proyecto?.perfiles.find((perfil) => perfil._id.toString() === perfilId.toString());
+  }
+
+  async finalizarProyecto(id) {
+    await this.model.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          finalizado: true,
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async obtenerPorAlgunaHabilidad(idsHabilidad) {
+    return await this.model
+      .find({
+        finalizado: { $ne: true },
+        "perfiles.habilidadesRequeridas": { $in: idsHabilidad },
+      })
+      .lean();
+  }
+}
 
 /*   constructor() {
     this.proyectos = [];
@@ -108,4 +120,3 @@ export class ProyectoRepository {
     );
   }
   } */
-}
