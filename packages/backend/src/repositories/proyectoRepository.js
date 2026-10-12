@@ -186,6 +186,16 @@ export class ProyectoRepository {
 
     return logro;
   }
+  async cerrarProyectoSi(fechaActual) {
+    const resultado = await this.model.updateMany(
+      {
+        finalizado: { $ne: true },
+        fechaCierre: { $exists: true, $lte: fechaActual },
+      },
+      { $set: { finalizado: true } },
+    );
+    console.log(resultado);
+  }
 }
 
 /*   constructor() {

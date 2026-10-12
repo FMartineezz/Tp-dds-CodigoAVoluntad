@@ -10,10 +10,14 @@ export class ProyectoService {
     this.personaColaboradoraService = personaColaboradoraService;
   }
 
+<<<<<<< HEAD
   async crearProyecto(titulo, descripcion, perfiles, colectivo, urlSistema) {
     //en vez de nombre, usar id
     const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
 
+=======
+  async crearProyecto(titulo, descripcion, perfiles, colectivo, fechaCierre) {
+>>>>>>> a264e98 (Cierre automatico de proyectos en una fecha)
     //en vez de nombre de colectivo, usar id
     const proyecto = await this.proyectoRepository.obtenerPorTituloYColectivo(
       titulo,
@@ -47,7 +51,11 @@ export class ProyectoService {
       descripcion,
       perfilesCreados,
       colectivoEncontrado,
+<<<<<<< HEAD
       urlSistema,
+=======
+      fechaCierre,
+>>>>>>> a264e98 (Cierre automatico de proyectos en una fecha)
     );
     const proyectoGuardado = await this.proyectoRepository.guardar(proyectoNuevo);
     proyectoNuevo.id = proyectoGuardado.id;
@@ -150,6 +158,10 @@ export class ProyectoService {
     await this.obtenerPerfilPorId(proyectoId, perfilId);
 
     return await this.proyectoRepository.eliminarPerfil(proyectoId, perfilId);
+  }
+    
+  async cerrarProyectosSi(fechaActual) {
+    await this.proyectoRepository.cerrarProyectoSi(fechaActual);
   }
 }
 

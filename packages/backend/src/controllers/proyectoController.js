@@ -10,8 +10,9 @@ export class ProyectoController {
       req.body.perfiles,
       req.body.colectivo,
       req.body.urlSistema,
+      req.body.fechaCierre,
     );
-    res.status(201).location(`/proyectos/${proyecto.id}`).json(proyecto);
+    res.status(201).json(proyecto);
   };
 
   obtenerProyectos = async (req, res) => {
@@ -27,14 +28,6 @@ export class ProyectoController {
 
     res.status(200).json(proyecto);
   };
-
-  /*   finalizarProyecto = async (req, res, next) => {
-    const id = Number(req.params.id);
-
-    const proyecto = await this.proyectoService.finalizarProyecto(id);
-
-    res.status(200).json(proyecto);
-  }; */
 
   // Alternativa recurso-céntrica a /finalizar (ver issue REST): PATCH /proyectos/:id { finalizado: true }
   actualizarProyecto = async (req, res) => {
