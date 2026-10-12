@@ -55,7 +55,6 @@ export class ColectivoService {
     //es necesario esto?
     const colectivo = await this.repository.obtenerPorId(colectivoId);
     colectivo.proyectos.push(proyectoId);
-    //
     await this.repository.agregarProyecto(colectivoId, proyectoId);
   }
 }

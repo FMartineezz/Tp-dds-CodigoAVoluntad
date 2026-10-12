@@ -73,20 +73,3 @@ export class PersonaColaboradoraService {
     return resto;
   }
 }
-
-//Metodo interno para la conexion entre service
-//metodo duplicado
-/*   obtenerPersonasColaboradoras() {
-    return this.personaColaboradoraRepository.obtenerTodas();
-  } */
-
-//metodo duplicado
-/*   async obtenerPersonaColaboradoraPorId(id) {
-    const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorId(id);
-
-    if (!personaColaboradora) {
-      throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
-    }
-
-    return personaColaboradora;
-  } */

@@ -59,20 +59,6 @@ export class ColaboracionService {
     return this.ocultarSiEsAnonima(colaboracion);
   }
 
-  /*   async obtenerColaboraciones() {
-    return await this.colaboracionRepository.obtenerTodas();
-  } */
-
-  /*   async obtenerColaboracionPorId(id) {
-    const colaboracion = await this.colaboracionRepository.obtenerPorId(id);
-
-    if (!colaboracion) {
-      throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);
-    }
-
-    return colaboracion;
-  } */
-
   //agregar esto en la query de la db?. para no traer la info y despues mapearla
   ocultarSiEsAnonima(colaboracion) {
     return {
