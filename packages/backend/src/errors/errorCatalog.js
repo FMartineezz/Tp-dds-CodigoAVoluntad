@@ -62,6 +62,18 @@ const ErrorCatalog = Object.freeze({
     message: "El colectivo debe ser el nombre del mismo",
   },
 
+  PROYECYO_PORCENTAJE_MAXIMO: {
+    code: "ERR-VAL-113",
+    message: "El porcentaje de un proyecto no puede superar el 100%"
+  },
+
+  PROYECYO_LOGRO_INVALIDO: {
+    code: "ERR-VAL-114",
+    message: "El proyecto no contiene ese logro"
+  },
+
+
+
   // =========================
   // HABILIDADES
   // =========================
@@ -273,6 +285,30 @@ const ErrorCatalog = Object.freeze({
     code: "ERR-NOT-611",
     message: (id) => `El perfil ${id} no fue encontrado`,
   },
+
+  // =========================
+  // LOGROS
+  // =========================
+  
+  LOGRO_DESCRIPCION_INVALIDA: {
+    code: "ERR-NOT-700",
+    message: "La descripcion debe ser un string",
+  },  
+
+  LOGRO_PORCENTAJE_INVALIDO: {
+    code: "ERR-NOT-701",
+    message: "El porcentaje debe ser un numero positivo y menor o igual a 100",
+  },
+
+  LOGRO_URL_INVALIDA: {
+    code: "ERR-NOT-702",
+    message: "La url debe ser un string",
+  },
+
+
+
 });
+
+
 
 export default ErrorCatalog;

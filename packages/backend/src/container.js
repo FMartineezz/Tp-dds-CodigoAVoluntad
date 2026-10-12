@@ -10,6 +10,7 @@ import { HabilidadService } from "./services/habilidadService.js";
 import { ColaboracionService } from "./services/colaboracionService.js";
 import { PersonaColaboradoraService } from "./services/personaColaboradoraService.js";
 import { PerfilService } from "./services/perfilService.js";
+import { LogroService } from "./services/logroService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -18,6 +19,7 @@ import { ColaboracionController } from "./controllers/colaboracionController.js"
 import { PersonaColaboradoraController } from "./controllers/personaColaboradoraController.js";
 import { HealthCheckController } from "./controllers/healthCheckController.js";
 import { PerfilController } from "./controllers/perfilController.js";
+import { LogroController } from "./controllers/logroController.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
@@ -25,6 +27,7 @@ const colectivoRepository = new ColectivoRepository();
 const habilidadRepository = new HabilidadRespository();
 const colaboracionRepository = new ColaboracionRepository();
 const personaColaboradoraRepository = new PersonaColaboradoraRepository();
+
 
 // Services: dependen de repositorios y de otros services ya creados.
 const habilidadService = new HabilidadService({ repository: habilidadRepository });
@@ -45,13 +48,19 @@ const colaboracionService = new ColaboracionService({
   proyectoService,
 });
 
+const logroService = new LogroService({
+  proyectoService,
+  proyectoRepository,
+});
+
+
 // Controllers: dependen de services.
 export const proyectoController = new ProyectoController({ proyectoService });
 export const colectivoController = new ColectivoController({ service: colectivoService });
 export const habilidadController = new HabilidadController({ habilidadService });
 export const colaboracionController = new ColaboracionController({ colaboracionService });
 export const personaColaboradoraController = new PersonaColaboradoraController({
-  personaColaboradoraService,
-});
+  personaColaboradoraService,});
+export const logroController = new LogroController({ logroService });
 export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService });

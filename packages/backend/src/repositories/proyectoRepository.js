@@ -3,6 +3,7 @@ export class ProyectoRepository {
     this.proyectos = [];
     this.id = 1;
     this.perfilId = 1;
+    this.logroId=1;
   }
 
   guardar(proyecto) {
@@ -46,22 +47,68 @@ export class ProyectoRepository {
     }
     return proyecto.perfiles.find((perfil) => perfil.id === perfilId) ?? null;
   }
-/*
-  guardarLogro(proyectoId, logro){
-    
-  }
-  obtenerLogros(proyectoId){
 
-  }
-  obtenerLogroPorId(proyectoId, logroId){
+  guardarLogro(proyectoId, logro) {
+    const proyecto = this.obtenerPorId(proyectoId);
 
-  }
-  actualizarLogro(proyectoId, logro){
+    if (!proyecto) {
+      return null;
+    }
 
+    logro.id = this.logroId++;
+    proyecto.logros.push(logro);
+
+    return logro;
   }
-  eliminarLogro(proyectoId, logroId){
-    
+
+  obtenerLogros(proyectoId) {
+    const proyecto = this.obtenerPorId(proyectoId);
+
+    if (!proyecto) {
+      return null;
+    }
+
+    return proyecto.logros;
   }
-*/
+
+  obtenerLogroPorId(proyectoId, logroId) {
+    const proyecto = this.obtenerPorId(proyectoId);
+
+    if (!proyecto) {
+      return null;
+    }
+
+    return proyecto.logros.find((l) => l.id === logroId) ?? null;
+  }
+
+  actualizarLogro(proyectoId, logroId, cambios) {
+    const logro = this.obtenerLogroPorId(proyectoId, logroId);
+
+    if (!logro) {
+      return null;
+    }
+
+    Object.assign(logro, cambios);
+    return logro;
+  }
+
+  eliminarLogro(proyectoId, logroId) {
+    const proyecto = this.obtenerPorId(proyectoId);
+
+    if (!proyecto) {
+      return null;
+    }
+
+    const logro = this.obtenerLogroPorId(proyectoId, logroId);
+
+    if (!logro) {
+      return null;
+    }
+
+    proyecto.logros = proyecto.logros.filter((l) => l.id !== logroId);
+
+    return logro;
+  }
+
 
 }
