@@ -1,4 +1,3 @@
-import { date } from "zod";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Mensaje } from "../models/mensaje.js";
@@ -10,10 +9,10 @@ export class MensajeService {
     this.personaColaboradoraService = personaColaboradoraService;
   }
 
-  enviarMensajeDesdeColectivo(colectivoId, personaColaboradoraId, texto) {
-    const colectivo = this.colectivoService.obtenerColectivoPorId(colectivoId);
+  async enviarMensajeDesdeColectivo(colectivoId, personaColaboradoraId, texto) {
+    const colectivo = await this.colectivoService.obtenerColectivoPorId(colectivoId);
     const personaColaboradora =
-      this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaColaboradoraId);
+      await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaColaboradoraId);
 
     if (personaColaboradora.bloquearMensajeInterno) {
       throw new AppError(
@@ -24,21 +23,23 @@ export class MensajeService {
     }
 
     const mensaje = new Mensaje(colectivo, personaColaboradora, texto);
-    this.repository.agregarMensaje(mensaje);
+    const mensajeGuardado = await this.repository.guardar(mensaje);
+    mensaje.id = mensajeGuardado.id;
+
     return this.vistaDeMensajesEnviados(mensaje);
   }
 
-  obtenerBandejaDeEntradaColaboradora(personaColaboradoraId) {
-    this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaColaboradoraId);
+  async obtenerBandejaDeEntradaColaboradora(personaColaboradoraId) {
+    await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaColaboradoraId);
 
-    const mensajes = this.repository.findByColaboradoraId(personaColaboradoraId);
+    const mensajes = await this.repository.obtenerPorColaboradoraId(personaColaboradoraId);
 
     return mensajes.map((mensaje) => this.vistaDeMensajesBandejaEntradas(mensaje));
   }
 
-  vistaDeMensajesBandejaEntradas({ id, colectivo, texto, date }) {
+  vistaDeMensajesBandejaEntradas({ _id, colectivo, texto, date }) {
     return {
-      id: id,
+      id: _id,
       colectivo: colectivo.nombre,
       texto: texto,
       date: date,

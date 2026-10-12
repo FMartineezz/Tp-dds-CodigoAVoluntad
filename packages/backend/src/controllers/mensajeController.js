@@ -3,10 +3,10 @@ export class MensajeController {
     this.mensajeService = mensajeService;
   }
 
-  enviarMensajeDesdeColectivo = (req, res) => {
-    const colectivoId = Number(req.params.colectivoId);
+  enviarMensajeDesdeColectivo = async (req, res) => {
+    const colectivoId = req.params.colectivoId;
 
-    const mensaje = this.mensajeService.enviarMensajeDesdeColectivo(
+    const mensaje = await this.mensajeService.enviarMensajeDesdeColectivo(
       colectivoId,
       req.body.personaColaboradoraId,
       req.body.texto,
@@ -15,10 +15,11 @@ export class MensajeController {
     res.status(201).json(mensaje);
   };
 
-  verBandejaDeEntradaColaboradora = (req, res) => {
-    const personaColaboradoraId = Number(req.params.personaColaboradoraId);
+  verBandejaDeEntradaColaboradora = async (req, res) => {
+    const personaColaboradoraId = req.params.personaColaboradoraId;
 
-    const mensajes = this.mensajeService.verBandejaDeEntradaColaboradora(personaColaboradoraId);
+    const mensajes =
+      await this.mensajeService.obtenerBandejaDeEntradaColaboradora(personaColaboradoraId);
 
     res.status(200).json(mensajes);
   };
