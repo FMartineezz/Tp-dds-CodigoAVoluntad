@@ -18,7 +18,11 @@ export class PersonaColaboradoraRepository {
     return await this.model.findById(id).lean();
   }
 
-  async obtenerPodHabilidadId(habilidadesIds) {
+  async obtenerPorIdConContactos(id) {
+    return await this.model.findById(id).lean().select('+contactos');
+  }
+
+  async obtenerPorHabilidadId(habilidadesIds) {
     return await this.model.find({ habilidades: { $in: habilidadesIds } }).lean();
   }
 }

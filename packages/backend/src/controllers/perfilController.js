@@ -26,7 +26,7 @@ export class PerfilController {
   };
 
   crearPerfil = async (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
+    const proyectoId = req.params.idProyecto;
 
     const perfil = await this.proyectoService.agregarPerfil(
       proyectoId,
@@ -41,13 +41,12 @@ export class PerfilController {
     res.status(201).json(perfil);
   };
 
-  //no usar Number() porque en la db es un objectId(string)
   actualizarPerfil = async (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
+    const proyectoId = req.params.idProyecto;
   };
 
   eliminarPerfil = async (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
+    const proyectoId = req.params.idProyecto;
   };
 
   obtenerColaboradorasAcordes = async (req, res) => {

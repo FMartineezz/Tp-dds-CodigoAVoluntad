@@ -46,10 +46,7 @@ export class PersonaColaboradoraService {
 
   //Vista expuesta (sin contactos)
   async obtenerPersonasColaboradoras() {
-    const personasColaboradoras = await this.personaColaboradoraRepository.obtenerTodas();
-    return personasColaboradoras.map((personaColaboradora) =>
-      this.ocultarContactos(personaColaboradora),
-    );
+    return await this.personaColaboradoraRepository.obtenerTodas();
   }
 
   async obtenerPersonaColaboradoraPorId(id) {
@@ -59,17 +56,15 @@ export class PersonaColaboradoraService {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
     }
 
-    return this.ocultarContactos(personaColaboradora);
+    return personaColaboradora;
   }
 
   async obtenerPersonasConAlgunaHabilidad(idsHabilidades) {
-    const personasColaboradoras =
-      await this.personaColaboradoraRepository.obtenerPodHabilidadId(idsHabilidades);
-    return personasColaboradoras.map((persona) => this.ocultarContactos(persona));
+    return await this.personaColaboradoraRepository.obtenerPorHabilidadId(idsHabilidades);
   }
 
   async obtenerPersonaColaboradoraPorIdConContactos(id) {
-    const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorId(id);
+    const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorIdConContactos(id);
 
     if (!personaColaboradora) {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
@@ -79,8 +74,8 @@ export class PersonaColaboradoraService {
   }
 
   //agregar en la query de la db?
-  ocultarContactos(personaColaboradora) {
+/*   ocultarContactos(personaColaboradora) {
     const { contactos, ...resto } = personaColaboradora;
     return resto;
-  }
+  } */
 }

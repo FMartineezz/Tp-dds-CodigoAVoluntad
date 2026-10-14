@@ -53,7 +53,10 @@ export const perfilSchema = new mongoose.Schema({
             values: Object.values(ModalidadColaboracion),
         },
         required: false
-    }
+    },
+    createdAt: { type: Date, select: false },
+    updatedAt: { type: Date, select: false },
+    __v: { type: Number, select: false }
 },{
     timestamps: true,
 });

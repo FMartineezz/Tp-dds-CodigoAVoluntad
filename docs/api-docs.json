@@ -17,6 +17,9 @@
   ],
   "tags": [
     {
+      "name": "Health Check"
+    },
+    {
       "name": "Colectivos"
     },
     {
@@ -30,6 +33,9 @@
     },
     {
       "name": "Habilidades"
+    },
+    {
+      "name": "Perfiles"
     }
   ],
   "components": {
@@ -164,11 +170,33 @@
             "example": "Desarrolladora Frontend apasionada por proyectos comunitarios y de código abierto."
           },
           "contactos": {
-            "type":"array",
-            "description": "Lista de contactos.",
-            "items":{
-              
-            }
+            "type": "array",
+            "description": "Lista de medios de contactos.",
+            "writeOnly": true,
+            "items": {
+              "type": "object",
+              "required": [
+                "tipo",
+                "valor"
+              ],
+              "properties": {
+                "tipo": {
+                  "$ref": "#/components/schemas/TipoMedioDeContacto",
+                  "example": "email"
+                },
+                "valor": {
+                  "type": "string",
+                  "description": "Valor o dirección correspondiente al medio de contacto.",
+                  "example": "lucia.gomez@example.com"
+                }
+              }
+            },
+            "example": [
+              {
+                "tipo": "email",
+                "valor": "lucia.gomez@example.com"
+              }
+            ]
           }
         }
       },
@@ -284,12 +312,12 @@
             "description": "Identificador único del colectivo (asignado tras la persistencia).",
             "example": "652a9f5d3419c8f2b34c1a2d"
           },
-          "personaColaboradora": {
+          "personaColaboradoraId": {
             "type": "string",
             "description": "ID de la colaboradora",
             "example": "6ac7aaf37354a30fa1e853f4"
           },
-          "proyecto": {
+          "proyectoId": {
             "type": "string",
             "description": "ID del proyecto",
             "example": "6ac7b09eabcf80f4d1f10444"
@@ -297,6 +325,39 @@
           "anonima": {
             "type": "boolean",
             "default": false
+          }
+        }
+      },
+      "Mensaje": {
+        "type": "object",
+        "required": [
+          "personaColaboradoraId",
+          "texto"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "readOnly": true,
+            "example": "660d1f2e8b23a10012f3a4c0"
+          },
+          "colectivoId": {
+            "type": "string",
+            "readOnly": true,
+            "example": "660d1f2e8b23a10012f3a4b5"
+          },
+          "personaColaboradoraId": {
+            "type": "string",
+            "example": "660d1f2e8b23a10012f3a4b9"
+          },
+          "texto": {
+            "type": "string",
+            "example": "Nos interesa tu perfil. Queremos contactarte."
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "example": "2026-10-14T19:16:00.000Z"
           }
         }
       },
@@ -327,12 +388,38 @@
           "contratacion_eventual"
         ],
         "description": "Tipo de modalidad para la colaboracion."
+      },
+      "TipoMedioDeContacto": {
+        "type": "string",
+        "enum": [
+          "email",
+          "whatsapp",
+          "sms"
+        ],
+        "description": "Canales o tipos de medios de contacto permitidos."
       }
     }
   },
 
 
   "paths": {
+    "/healthCheck": {
+      "get": {
+        "tags": [
+          "Health Check"
+        ],
+        "summary": "Comprobar el estado del sistema",
+        "responses": {
+          "200": {
+            "description": "Servidor funcionando con éxito"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    
     "/colectivos": {
       "get": {
         "tags": [
@@ -421,6 +508,55 @@
         }
       }
     },
+    "/colectivos/{colectivoId}/mensajes": {
+      "post": {
+        "tags": [
+          "Colectivos"
+        ],
+        "summary": "Crear un nuevo mensaje",
+        "parameters": [
+          {
+            "name": "colectivoId",
+            "in": "path",
+            "required": true,
+            "description": "ID del colectivo",
+            "schema": {
+              "type": "string",
+              "example": "6ac7866e777df03c06e98a58"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Mensaje"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Mensaje creado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mensaje"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+
     "/colaboraciones": {
       "get": {
         "tags": [
@@ -682,6 +818,61 @@
         }
       }
     },
+    "/colaboradoras/{id}/proyectos-acordes": {
+      "get": {
+        "tags": [
+          "Colaboradoras"
+        ],
+        "summary": "Obtener todos los proyectos acordes",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la colaboradora",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de proyectos acordes obtenida con éxito"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/colaboradoras/{personaColaboradoraId}/mensajes": {
+      "get": {
+        "tags": [
+          "Colaboradoras"
+        ],
+        "summary": "Obtener todos los mensajes",
+        "parameters": [
+          {
+            "name": "personaColaboradoraId",
+            "in": "path",
+            "required": true,
+            "description": "ID de la colaboradora",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de mensajes recibidos obtenida con éxito"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+
     "/habilidades": {
       "get": {
         "tags": [
@@ -763,6 +954,174 @@
           },
           "404": {
             "description": "Habilidad no encontrada"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+
+    "/proyectos/{idProyecto}/perfiles": {
+      "get": {
+        "tags": [
+          "Perfiles"
+        ],
+        "summary": "Obtener todos los perfiles",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "ID del Proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6ac78677777df03c06e98a5b"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de perfiles obtenida con éxito"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Perfiles"
+        ],
+        "summary": "Crear un nuevo perfil",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "ID del Proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6ac78677777df03c06e98a5b"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Perfil"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Perfil creado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/proyectos/{idProyecto}/perfiles/{idPerfil}": {
+      "get": {
+        "tags": [
+          "Perfiles"
+        ],
+        "summary": "Obtener un perfil por ID",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "ID del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6ac7866e777df03c06e98a58"
+            }
+          },
+          {
+            "name": "idPerfil",
+            "in": "path",
+            "required": true,
+            "description": "ID del perfil",
+            "schema": {
+              "type": "string",
+              "example": "6ac7866e777df03c06e98a58"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfil encontrado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Perfil no encontrado"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+        "/proyectos/{idProyecto}/perfiles/{idPerfil}/colaboradoras-acordes": {
+      "get": {
+        "tags": [
+          "Perfiles"
+        ],
+        "summary": "Obtener colaboradoras acordes para un perfil",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "ID del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6ac7866e777df03c06e98a58"
+            }
+          },
+          {
+            "name": "idPerfil",
+            "in": "path",
+            "required": true,
+            "description": "ID del perfil",
+            "schema": {
+              "type": "string",
+              "example": "6ac7866e777df03c06e98a58"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colaboradoras acordes encontradas con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
           },
           "500": {
             "description": "Error interno del servidor"

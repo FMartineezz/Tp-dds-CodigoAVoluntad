@@ -24,12 +24,11 @@ const colaboracionSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    createdAt: { type: Date, select: false },
+    updatedAt: { type: Date, select: false },
+    __v: { type: Number, select: false }
   },
   {
-    // timestamps: {
-    //   createdAt: { select: false },
-    //   updatedAt: { select: false }
-    // },
     timestamps: true,
     collection: "colaboraciones",
   },

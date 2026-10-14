@@ -62,11 +62,15 @@ export const personaColaboradoraSchema = new mongoose.Schema(
                 _id: false
             }
         ],
+        select: false
     },
     bloquearMensajeInterno:{
         type: Boolean,
         default: false
-    }
+    },
+    createdAt: { type: Date, select: false },
+    updatedAt: { type: Date, select: false },
+    __v: { type: Number, select: false }
 },{
     timestamps: true,
     collection: "personasColaboradoras",

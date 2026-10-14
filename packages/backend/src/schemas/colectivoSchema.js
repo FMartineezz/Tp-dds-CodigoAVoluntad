@@ -34,7 +34,10 @@ const colectivoSchema = new mongoose.Schema({
             ref: 'Proyecto'
         }],
         required: true
-    }
+    },
+    createdAt: { type: Date, select: false },
+    updatedAt: { type: Date, select: false },
+    __v: { type: Number, select: false }
 },{
     timestamps: true,
     collection: 'colectivos'

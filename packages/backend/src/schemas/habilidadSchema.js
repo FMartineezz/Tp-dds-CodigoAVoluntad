@@ -19,7 +19,10 @@ export const habilidadSchema = new mongoose.Schema({
     descripcion:{
         type: String,
         required: true
-    }
+    },
+    createdAt: { type: Date, select: false },
+    updatedAt: { type: Date, select: false },
+    __v: { type: Number, select: false }
 },{
     timestamps: true,
     collection: 'habilidades'
