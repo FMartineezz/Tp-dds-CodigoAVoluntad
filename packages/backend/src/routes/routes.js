@@ -5,6 +5,7 @@ import personaColaboradoraRoutes from "./personaColaboradoraRoutes.js";
 import colaboracionRoutes from "./colaboracionRoutes.js";
 import healthCheckRoutes from "./healthCheckRoutes.js";
 import perfilRoutes from "./perfilRoutes.js";
+import logroRoutes from "./logroRoutes.js";
 
 const routes = [
   habilidadRoutes(),
@@ -14,6 +15,7 @@ const routes = [
   colaboracionRoutes(),
   healthCheckRoutes(),
   perfilRoutes(),
+  logroRoutes(),
 ];
 
 export default routes;

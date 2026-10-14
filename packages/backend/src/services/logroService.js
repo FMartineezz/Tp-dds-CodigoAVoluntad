@@ -1,4 +1,3 @@
-
 import { Logro } from "../models/logro.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
@@ -14,7 +13,7 @@ export class LogroService {
       this.proyectoService.obtenerProyectoPorId(proyectoId);
 
     if (proyecto.finalizado) {
-      throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400);
+      throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, proyectoId);
     }
 
     const porcentajeActual = proyecto.logros.reduce(
@@ -23,7 +22,7 @@ export class LogroService {
     );
 
     if (porcentajeActual + datos.porcentaje > 100) {
-      throw new AppError(ErrorCatalog.PROYECYO_PORCENTAJE_MAXIMO, 400);
+      throw new AppError(ErrorCatalog.PROYECTO_PORCENTAJE_MAXIMO, 400);
     }
 
     const logro = new Logro(
@@ -49,7 +48,7 @@ export class LogroService {
     );
 
     if (!logro) {
-      throw new AppError(ErrorCatalog.PROYECYO_LOGRO_INVALIDO, 404, logroId);
+      throw new AppError(ErrorCatalog.PROYECYO_LOGRO_NO_ENCONTRADO, 404, logroId);
     }
 
     return logro;
@@ -60,7 +59,7 @@ export class LogroService {
       this.proyectoService.obtenerProyectoPorId(proyectoId);
 
     if (proyecto.finalizado) {
-      throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400);
+      throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, proyectoId);
     }
 
     const logro = this.obtenerLogroPorId(proyectoId, logroId);
@@ -74,7 +73,7 @@ export class LogroService {
       ) - logro.porcentaje;
 
     if (porcentajeSinLogro + porcentajeNuevo > 100) {
-      throw new AppError(ErrorCatalog.PROYECYO_PORCENTAJE_MAXIMO, 400);
+      throw new AppError(ErrorCatalog.PROYECTO_PORCENTAJE_MAXIMO, 400);
     }
 
     return this.proyectoRepository.actualizarLogro(
@@ -89,7 +88,7 @@ export class LogroService {
       this.proyectoService.obtenerProyectoPorId(proyectoId);
 
     if (proyecto.finalizado) {
-      throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400);
+      throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, proyectoId);
     }
 
     this.obtenerLogroPorId(proyectoId, logroId);

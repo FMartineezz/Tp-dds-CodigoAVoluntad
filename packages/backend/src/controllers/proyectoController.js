@@ -9,6 +9,7 @@ export class ProyectoController {
       req.body.descripcion,
       req.body.perfiles,
       req.body.colectivo,
+      req.body.urlSistema,
     );
     res.status(201).location(`/proyectos/${proyecto.id}`).json(proyecto);
   };

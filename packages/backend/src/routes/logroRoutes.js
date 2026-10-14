@@ -11,11 +11,11 @@ export default function logroRoutes() {
 
   router.get(pathLogros, logroController.obtenerLogros);
 
-  router.get(pathLogros + "/:id",logroController.obtenerLogroPorId);
+  router.get(pathLogros + "/:logroId",logroController.obtenerLogroPorId);
 
-  router.put(pathLogros + "/:id", logroValidation, logroController.actualizarLogro);
+  router.put(pathLogros + "/:logroId", logroValidation, logroController.actualizarLogro);
 
-  router.delete(pathLogros + "/:id", logroController.eliminarLogro);
+  router.delete(pathLogros + "/:logroId", logroController.eliminarLogro);
 
   return router;
 }

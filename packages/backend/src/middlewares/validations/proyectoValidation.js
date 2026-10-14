@@ -41,6 +41,11 @@ export const perfilSchema = zod.object({
         issue.code === "invalid_type" ? "PERFIL_MODALIDAD_REQUERIDA" : "PERFIL_MODALIDAD_FORMATO",
     }),
   }),
+  urlSistema: zod
+  .string({
+    required_error: "PROYECTO_URL_SISTEMA_INVALIDA",
+    invalid_type_error: "PROYECTO_URL_SISTEMA_INVALIDA",
+  }).url("PROYECTO_URL_SISTEMA_INVALIDA"),
 });
 
 const proyectoSchema = zod.object({

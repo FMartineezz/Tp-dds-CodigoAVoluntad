@@ -9,7 +9,7 @@ export class ProyectoService {
     this.colectivoService = colectivoService;
   }
 
-  crearProyecto(titulo, descripcion, perfiles, colectivo) {
+  crearProyecto(titulo, descripcion, perfiles, colectivo, urlSistema) {
     const proyecto = this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
 
     if (proyecto) {
@@ -34,7 +34,7 @@ export class ProyectoService {
       ),
     );
 
-    const proyectoNuevo = new Proyecto(titulo, descripcion, perfilesCreados, colectivoEncontrado);
+    const proyectoNuevo = new Proyecto(titulo, descripcion, perfilesCreados, colectivoEncontrado, urlSistema);
 
     const proyectoGuardado = this.proyectoRepository.guardar(proyectoNuevo);
 

@@ -62,14 +62,19 @@ const ErrorCatalog = Object.freeze({
     message: "El colectivo debe ser el nombre del mismo",
   },
 
-  PROYECYO_PORCENTAJE_MAXIMO: {
+  PROYECTO_PORCENTAJE_MAXIMO: {
     code: "ERR-VAL-113",
     message: "El porcentaje de un proyecto no puede superar el 100%"
   },
 
-  PROYECYO_LOGRO_INVALIDO: {
+  PROYECYO_LOGRO_NO_ENCONTRADO: {
     code: "ERR-VAL-114",
     message: "El proyecto no contiene ese logro"
+  },
+
+  PROYECTO_URL_SISTEMA_INVALIDA: {
+  code: "ERR-VAL-115",
+  message: "La URL del sistema debe ser una URL válida",
   },
 
 

@@ -21,22 +21,4 @@ export class Proyecto {
     this.logros = [];
     this.finalizado = false;
   }
-
-  agregarLogro(logro) {
-    const porcentajeActual = this.calcularPorcentajeConcrecion();
-
-    if (porcentajeActual + logro.porcentaje > 100) {
-      throw new Error("La concreción del proyecto no puede superar el 100%");
-    }
-
-    this.logros.push(logro);
-  }
-
-  eliminarLogro(logro) {
-    this.logros = this.logros.filter((l) => l.id !== logro.id);
-  }
-
-  calcularPorcentajeConcrecion() {
-    return this.logros.reduce((total, logro) => total + logro.porcentaje, 0,);
-  }
 }
