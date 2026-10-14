@@ -9,6 +9,7 @@ export class ProyectoController {
       req.body.descripcion,
       req.body.perfiles,
       req.body.colectivo,
+      req.body.urlSistema,
     );
     res.status(201).location(`/proyectos/${proyecto.id}`).json(proyecto);
   };
@@ -27,7 +28,7 @@ export class ProyectoController {
     res.status(200).json(proyecto);
   };
 
-/*   finalizarProyecto = async (req, res, next) => {
+  /*   finalizarProyecto = async (req, res, next) => {
     const id = Number(req.params.id);
 
     const proyecto = await this.proyectoService.finalizarProyecto(id);

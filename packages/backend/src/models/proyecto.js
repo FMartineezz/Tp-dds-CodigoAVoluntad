@@ -11,12 +11,14 @@ export const ModalidadColaboracion = Object.freeze({
 });
 
 export class Proyecto {
-  constructor(titulo, descripcion, perfiles, colectivo) {
+  constructor(titulo, descripcion, perfiles, colectivo, urlSistema) {
     this.id = null;
     this.titulo = titulo;
     this.descripcion = descripcion;
     this.perfiles = perfiles;
     this.colectivo = colectivo;
+    this.urlSistema = urlSistema;
+    this.logros = [];
     this.finalizado = false;
   }
 }

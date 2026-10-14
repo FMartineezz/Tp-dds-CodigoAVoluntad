@@ -10,7 +10,7 @@ export class ProyectoService {
     this.personaColaboradoraService = personaColaboradoraService;
   }
 
-  async crearProyecto(titulo, descripcion, perfiles, colectivo) {
+  async crearProyecto(titulo, descripcion, perfiles, colectivo, urlSistema) {
     //en vez de nombre de colectivo, usar id
     const proyecto = await this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
 
@@ -39,7 +39,13 @@ export class ProyectoService {
       ),
     );
 
-    const proyectoNuevo = new Proyecto(titulo, descripcion, perfilesCreados, colectivoEncontrado);
+    const proyectoNuevo = new Proyecto(
+      titulo,
+      descripcion,
+      perfilesCreados,
+      colectivoEncontrado,
+      urlSistema,
+    );
     const proyectoGuardado = await this.proyectoRepository.guardar(proyectoNuevo);
     proyectoNuevo.id = proyectoGuardado.id;
 

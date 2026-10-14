@@ -67,6 +67,12 @@ const proyectoSchema = zod.object({
     required_error: "PROYECTO_COLECTIVO_REQUERIDO",
     invalid_type_error: "PROYECTO_COLECTIVO_FORMATO",
   }),
+  urlSistema: zod
+    .string({
+      required_error: "PROYECTO_URL_SISTEMA_INVALIDA",
+      invalid_type_error: "PROYECTO_URL_SISTEMA_INVALIDA",
+    })
+    .url("PROYECTO_URL_SISTEMA_INVALIDA"),
 });
 
 const validarProyecto = (req, res, next) => {

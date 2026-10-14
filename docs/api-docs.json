@@ -36,11 +36,7 @@
     "schemas": {
       "Colectivo": {
         "type": "object",
-        "required": [
-          "nombre",
-          "descripcion",
-          "tipoDeColectivo"
-        ],
+        "required": ["nombre", "descripcion", "tipoDeColectivo"],
         "properties": {
           "_id": {
             "type": "string",
@@ -80,10 +76,7 @@
       },
       "Habilidad": {
         "type": "object",
-        "required": [
-          "titulo",
-          "descripcion"
-        ],
+        "required": ["titulo", "descripcion"],
         "properties": {
           "_id": {
             "type": "string",
@@ -111,12 +104,7 @@
       },
       "PersonaColaboradora": {
         "type": "object",
-        "required": [
-          "nombreFantasia",
-          "git",
-          "habilidades",
-          "presentacion"
-        ],
+        "required": ["nombreFantasia", "git", "habilidades", "presentacion"],
         "properties": {
           "_id": {
             "type": "string",
@@ -221,12 +209,7 @@
       },
       "Proyecto": {
         "type": "object",
-        "required": [
-          "titulo",
-          "descripcion",
-          "perfiles",
-          "colectivo"
-        ],
+        "required": ["titulo", "descripcion", "perfiles", "colectivo"],
         "properties": {
           "_id": {
             "type": "string",
@@ -266,42 +249,26 @@
       },
       "TipoColectivo": {
         "type": "string",
-        "enum": [
-          "fundacion",
-          "ong",
-          "asociacion",
-          "asamblea"
-        ],
+        "enum": ["fundacion", "ong", "asociacion", "asamblea"],
         "description": "Tipo de modalidad para la colaboracion."
       },
       "TipoDeCompromiso": {
         "type": "string",
-        "enum": [
-          "semanal",
-          "mensual",
-          "total"
-        ],
+        "enum": ["semanal", "mensual", "total"],
         "description": "Frecuencia o tipo de medición de las horas de dedicación."
       },
       "ModalidadColaboracion": {
         "type": "string",
-        "enum": [
-          "gratuita",
-          "incentivo_economico",
-          "contratacion_eventual"
-        ],
+        "enum": ["gratuita", "incentivo_economico", "contratacion_eventual"],
         "description": "Tipo de modalidad para la colaboracion."
       }
     }
   },
 
-
   "paths": {
     "/colectivos": {
       "get": {
-        "tags": [
-          "Colectivos"
-        ],
+        "tags": ["Colectivos"],
         "summary": "Obtener todos los colectivos",
         "responses": {
           "200": {
@@ -313,9 +280,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Colectivos"
-        ],
+        "tags": ["Colectivos"],
         "summary": "Crear un nuevo colectivo",
         "requestBody": {
           "required": true,
@@ -349,9 +314,7 @@
     },
     "/colectivos/{id}": {
       "get": {
-        "tags": [
-          "Colectivos"
-        ],
+        "tags": ["Colectivos"],
         "summary": "Obtener un colectivo por ID",
         "parameters": [
           {
@@ -387,9 +350,7 @@
     },
     "/colaboraciones": {
       "get": {
-        "tags": [
-          "Colaboraciones"
-        ],
+        "tags": ["Colaboraciones"],
         "summary": "Obtener todas las colaboraciones",
         "responses": {
           "200": {
@@ -401,9 +362,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Colaboraciones"
-        ],
+        "tags": ["Colaboraciones"],
         "summary": "Crear una nueva colaboración",
         "requestBody": {
           "required": true,
@@ -437,9 +396,7 @@
     },
     "/colaboraciones/{id}": {
       "get": {
-        "tags": [
-          "Colaboraciones"
-        ],
+        "tags": ["Colaboraciones"],
         "summary": "Obtener una colaboración por ID",
         "parameters": [
           {
@@ -474,9 +431,7 @@
     },
     "/proyectos": {
       "get": {
-        "tags": [
-          "Proyectos"
-        ],
+        "tags": ["Proyectos"],
         "summary": "Obtener todos los proyectos",
         "responses": {
           "200": {
@@ -488,9 +443,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Proyectos"
-        ],
+        "tags": ["Proyectos"],
         "summary": "Crear un nuevo proyecto",
         "requestBody": {
           "required": true,
@@ -524,9 +477,7 @@
     },
     "/proyectos/{id}": {
       "get": {
-        "tags": [
-          "Proyectos"
-        ],
+        "tags": ["Proyectos"],
         "summary": "Obtener un proyecto por ID",
         "parameters": [
           {
@@ -561,9 +512,7 @@
     },
     "/colaboradoras": {
       "get": {
-        "tags": [
-          "Colaboradoras"
-        ],
+        "tags": ["Colaboradoras"],
         "summary": "Obtener todas las colaboradoras",
         "responses": {
           "200": {
@@ -575,9 +524,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Colaboradoras"
-        ],
+        "tags": ["Colaboradoras"],
         "summary": "Crear una nueva colaboradora",
         "requestBody": {
           "required": true,
@@ -611,9 +558,7 @@
     },
     "/colaboradoras/{id}": {
       "get": {
-        "tags": [
-          "Colaboradoras"
-        ],
+        "tags": ["Colaboradoras"],
         "summary": "Obtener una colaboradora por ID",
         "parameters": [
           {
@@ -648,9 +593,7 @@
     },
     "/habilidades": {
       "get": {
-        "tags": [
-          "Habilidades"
-        ],
+        "tags": ["Habilidades"],
         "summary": "Obtener todas las habilidades",
         "responses": {
           "200": {
@@ -662,9 +605,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Habilidades"
-        ],
+        "tags": ["Habilidades"],
         "summary": "Crear una nueva habilidad",
         "requestBody": {
           "required": true,
@@ -698,9 +639,7 @@
     },
     "/habilidades/{id}": {
       "get": {
-        "tags": [
-          "Habilidades"
-        ],
+        "tags": ["Habilidades"],
         "summary": "Obtener una habilidad por ID",
         "parameters": [
           {

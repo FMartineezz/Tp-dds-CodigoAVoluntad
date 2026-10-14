@@ -1,4 +1,3 @@
-import { trusted } from "mongoose";
 import { ProyectoModel } from "../schemas/proyectoSchema.js";
 
 export class ProyectoRepository {
@@ -58,12 +57,90 @@ export class ProyectoRepository {
       })
       .lean();
   }
-}
 
-/*   constructor() {
+  /* guardarLogro(proyectoId, logro) {
+    const proyecto = this.obtenerPorId(proyectoId);
+
+    if (!proyecto) {
+      return null;
+    }
+
+    logro.id = this.logroId++;
+    proyecto.logros.push(logro);
+
+    return logro;
+  } ADAPTAR TODO AL SIGUIENTE FORMATO ↓ */
+
+  async guardarLogro(proyectoId, logro) {
+    const proyecto = await this.model
+      .findByIdAndUpdate(
+        proyectoId,
+        {
+          $push: {
+            logros: logro,
+          },
+        },
+        { new: true },
+      )
+      .lean();
+
+    return proyecto?.logros.at(-1);
+  } // TODO: pasar todos los siguientes a este formato
+
+  obtenerLogros(proyectoId) {
+    const proyecto = this.obtenerPorId(proyectoId);
+
+    if (!proyecto) {
+      return null;
+    }
+
+    return proyecto.logros;
+  }
+
+  obtenerLogroPorId(proyectoId, logroId) {
+    const proyecto = this.obtenerPorId(proyectoId);
+
+    if (!proyecto) {
+      return null;
+    }
+
+    return proyecto.logros.find((l) => l.id === logroId) ?? null;
+  }
+
+  actualizarLogro(proyectoId, logroId, cambios) {
+    const logro = this.obtenerLogroPorId(proyectoId, logroId);
+
+    if (!logro) {
+      return null;
+    }
+
+    Object.assign(logro, cambios);
+    return logro;
+  }
+
+  eliminarLogro(proyectoId, logroId) {
+    const proyecto = this.obtenerPorId(proyectoId);
+
+    if (!proyecto) {
+      return null;
+    }
+
+    const logro = this.obtenerLogroPorId(proyectoId, logroId);
+
+    if (!logro) {
+      return null;
+    }
+
+    proyecto.logros = proyecto.logros.filter((l) => l.id !== logroId);
+
+    return logro;
+  }
+
+  /*   constructor() {
     this.proyectos = [];
     this.id = 1;
     this.perfilId = 1;
+    this.logroId=1;
   }
 
   guardar(proyecto) {
@@ -107,16 +184,5 @@ export class ProyectoRepository {
     }
     return proyecto.perfiles.find((perfil) => perfil.id === perfilId) ?? null;
   }
-
-  obtenerPorAlgunaHabilidad(codigosDeHabilidad) {
-    return this.proyectos.filter(
-      (proyecto) =>
-        !proyecto.finalizado &&
-        proyecto.perfiles.some((perfil) =>
-          perfil.habilidadesRequeridas.some((habilidad) =>
-            codigosDeHabilidad.includes(habilidad.codigo),
-          ),
-        ),
-    );
-  }
-  } */
+*/
+}

@@ -62,6 +62,21 @@ const ErrorCatalog = Object.freeze({
     message: "El colectivo debe ser el nombre del mismo",
   },
 
+  PROYECTO_PORCENTAJE_MAXIMO: {
+    code: "ERR-EST-113",
+    message: "El porcentaje de un proyecto no puede superar el 100%",
+  },
+
+  PROYECTO_LOGRO_NO_ENCONTRADO: {
+    code: "ERR-NOT-114",
+    message: (id) => `El proyecto no contiene el logro ${id}`,
+  },
+
+  PROYECTO_URL_SISTEMA_INVALIDA: {
+    code: "ERR-VAL-115",
+    message: "La URL del sistema debe ser una URL válida",
+  },
+
   // =========================
   // HABILIDADES
   // =========================
@@ -341,5 +356,25 @@ const ErrorCatalog = Object.freeze({
     code: "ERR-VAL-804",
     message: "El texto del mensaje debe ser un texto",
   },
+
+  // =========================
+  // LOGROS
+  // =========================
+
+  LOGRO_DESCRIPCION_INVALIDA: {
+    code: "ERR-VAL-901",
+    message: "La descripción del logro es requerida y debe ser un texto",
+  },
+
+  LOGRO_PORCENTAJE_INVALIDO: {
+    code: "ERR-VAL-902",
+    message: "El porcentaje debe ser un numero positivo y menor o igual a 100",
+  },
+
+  LOGRO_URL_INVALIDA: {
+    code: "ERR-VAL-903",
+    message: "La URL del código fuente debe ser una URL válida",
+  },
 });
+
 export default ErrorCatalog;

@@ -5,6 +5,7 @@ import personaColaboradoraRoutes from "./personaColaboradoraRoutes.js";
 import colaboracionRoutes from "./colaboracionRoutes.js";
 import healthCheckRoutes from "./healthCheckRoutes.js";
 import perfilRoutes from "./perfilRoutes.js";
+import logroRoutes from "./logroRoutes.js";
 import swaggerRoutes from "./swaggerRoutes.js";
 
 const routes = [
@@ -15,7 +16,8 @@ const routes = [
   colaboracionRoutes(),
   healthCheckRoutes(),
   perfilRoutes(),
-  swaggerRoutes()
+  logroRoutes(),
+  swaggerRoutes(),
 ];
 
 export default routes;
