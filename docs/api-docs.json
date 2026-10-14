@@ -3,12 +3,18 @@
   "info": {
     "title": "API Codigo a Voluntad",
     "description": "Una plataforma de código libre que tiene como finalidad ser un punto de encuentro entre, por un lado, colectivos (fundaciones, ONGs, asambleas, comunidades, organizaciones territoriales, etc.) que necesitan producir software de clase profesional pero no cuentan con los recursos económicos para costearlo, y personas colaboradoras, que buscan realizar contribuciones a estas organizaciones en forma de mano de obra y asesoramiento sobre desarrollo de software.",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "servers": [
     {
-      "url": "http://localhost:3000",
-      "description": "Local"
+      "url": "http://localhost:{puerto}",
+      "description": "Local",
+      "variables": {
+        "puerto": {
+          "default": "8000",
+          "description": "Valor de SERVER_PORT en el .env (3000 si no está definido)"
+        }
+      }
     },
     {
       "url": "http://tpdds-codigoavoluntad.northcentralus.cloudapp.azure.com:3000",
@@ -17,143 +23,396 @@
   ],
   "tags": [
     {
+      "name": "Health Check"
+    },
+    {
+      "name": "Habilidades"
+    },
+    {
       "name": "Colectivos"
-    },
-    {
-      "name": "Colaboraciones"
-    },
-    {
-      "name": "Proyectos"
     },
     {
       "name": "Colaboradoras"
     },
     {
-      "name": "Habilidades"
+      "name": "Proyectos"
+    },
+    {
+      "name": "Perfiles"
+    },
+    {
+      "name": "Logros"
+    },
+    {
+      "name": "Colaboraciones"
+    },
+    {
+      "name": "Búsquedas"
+    },
+    {
+      "name": "Mensajes"
     }
   ],
   "components": {
     "schemas": {
-      "Colectivo": {
+      "Error": {
         "type": "object",
-        "required": ["nombre", "descripcion", "tipoDeColectivo"],
+        "description": "Formato estándar de error. Los códigos salen de `errorCatalog.js`.",
         "properties": {
-          "_id": {
+          "code": {
             "type": "string",
-            "readOnly": true,
-            "description": "Identificador único del colectivo (asignado tras la persistencia).",
-            "example": "652a9f5d3419c8f2b34c1a2d"
+            "example": "ERR-VAL-101"
           },
-          "nombre": {
+          "message": {
             "type": "string",
-            "description": "Nombre del colectivo.",
-            "example": "Colectivo Ambiental CABA"
+            "example": "El título del proyecto es requerido"
+          }
+        }
+      },
+      "TipoColectivo": {
+        "type": "string",
+        "enum": ["fundacion", "ong", "asociacion barrial", "asamblea"],
+        "description": "Tipo de colectivo."
+      },
+      "Ubicacion": {
+        "type": "string",
+        "description": "Ubicación en minúsculas y sin tildes: argentina, caba o una de las 23 provincias.",
+        "enum": [
+          "argentina",
+          "caba",
+          "buenos aires",
+          "catamarca",
+          "chaco",
+          "chubut",
+          "cordoba",
+          "corrientes",
+          "entre rios",
+          "formosa",
+          "jujuy",
+          "la pampa",
+          "la rioja",
+          "mendoza",
+          "misiones",
+          "neuquen",
+          "rio negro",
+          "salta",
+          "san juan",
+          "san luis",
+          "santa cruz",
+          "santa fe",
+          "santiago del estero",
+          "tierra del fuego",
+          "tucuman"
+        ],
+        "example": "caba"
+      },
+      "TipoDeCompromiso": {
+        "type": "string",
+        "enum": ["total", "semanal", "mensual"],
+        "description": "Cómo se miden las horas de dedicación."
+      },
+      "ModalidadColaboracion": {
+        "type": "string",
+        "enum": ["gratuita", "incentivo_economico", "contratacion_eventual"],
+        "description": "Modalidad de la colaboración."
+      },
+      "TipoMedioDeContacto": {
+        "type": "string",
+        "enum": ["email", "whatsapp", "sms"],
+        "description": "Tipo de medio de contacto (se acepta en mayúsculas o minúsculas)."
+      },
+      "HabilidadInput": {
+        "type": "object",
+        "required": ["titulo", "descripcion"],
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "example": "Desarrollo Web React"
           },
           "descripcion": {
             "type": "string",
-            "description": "Descripción o propósito del colectivo.",
-            "example": "Organizacion dedicada a promover el cuidado del medio ambiente y la sustentabilidad en la Ciudad de Buenos Aires."
-          },
-          "ubicacion": {
-            "type": "string",
-            "description": "Ubicación geográfica del colectivo.",
-            "example": "caba"
-          },
-          "tipoDeColectivo": {
-            "$ref": "#/components/schemas/TipoColectivo",
-            "example": "fundacion"
-          },
-          "proyectos": {
-            "type": "array",
-            "description": "Lista de _ids proyectos asociados al colectivo.",
-            "items": {
-              "$ref": "#/components/schemas/Proyecto",
-              "description": "Estructura del proyecto (o referenciar a un $ref si tenés el esquema de Proyecto)."
-            },
-            "example": []
+            "example": "Desarrollo de interfaces con React."
           }
         }
       },
       "Habilidad": {
         "type": "object",
-        "required": ["titulo", "descripcion"],
         "properties": {
           "_id": {
             "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
             "readOnly": true,
-            "description": "Identificador único de la habilidad.",
-            "example": "652a9f5d3419c8f2b34c1a2d"
+            "description": "Identificador de la habilidad."
           },
           "titulo": {
             "type": "string",
-            "description": "Título o nombre de la habilidad.",
-            "example": "Programacion en JavaScript"
+            "example": "Desarrollo Web React"
           },
           "codigo": {
             "type": "string",
             "readOnly": true,
-            "description": "Identificador generado en formato snake_case a partir del título.",
-            "example": "programacion_en_java_script"
+            "description": "Título normalizado en snake_case. Ojo: los números se separan (\"Testing E2E\" → `testing_e_2_e`).",
+            "example": "desarrollo_web_react"
           },
           "descripcion": {
             "type": "string",
-            "description": "Descripción detallada de la habilidad.",
-            "example": "Capacidad para desarrollar aplicaciones web y lógica de negocio utilizando JS moderno."
+            "example": "Desarrollo de interfaces con React."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "HabilidadCreada": {
+        "type": "object",
+        "description": "Respuesta del alta: devuelve `id` en lugar de `_id`.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
+            "readOnly": true,
+            "description": "Identificador de la habilidad."
+          },
+          "titulo": {
+            "type": "string",
+            "example": "Desarrollo Web React"
+          },
+          "codigo": {
+            "type": "string",
+            "example": "desarrollo_web_react"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Desarrollo de interfaces con React."
+          }
+        }
+      },
+      "ColectivoInput": {
+        "type": "object",
+        "required": ["nombre", "descripcion", "ubicacion", "tipoDeColectivo"],
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "description": "Nombre único del colectivo.",
+            "example": "Colectivo Ambiental CABA"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Promovemos el cuidado del ambiente en la Ciudad."
+          },
+          "ubicacion": {
+            "$ref": "#/components/schemas/Ubicacion",
+            "description": "Hoy es obligatoria: si falta, la base de datos rechaza el alta."
+          },
+          "tipoDeColectivo": {
+            "$ref": "#/components/schemas/TipoColectivo"
+          }
+        }
+      },
+      "Colectivo": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
+            "readOnly": true,
+            "description": "Identificador del colectivo."
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Colectivo Ambiental CABA"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "ubicacion": {
+            "$ref": "#/components/schemas/Ubicacion"
+          },
+          "tipoDeColectivo": {
+            "$ref": "#/components/schemas/TipoColectivo"
+          },
+          "proyectos": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            },
+            "description": "Ids de los proyectos del colectivo."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "MedioDeContacto": {
+        "type": "object",
+        "required": ["tipo", "valor"],
+        "description": "Para email, `valor` debe ser un email válido; para sms y whatsapp, 10 dígitos sin espacios ni símbolos.",
+        "properties": {
+          "tipo": {
+            "$ref": "#/components/schemas/TipoMedioDeContacto"
+          },
+          "valor": {
+            "type": "string",
+            "example": "ana@mail.com"
+          }
+        }
+      },
+      "PersonaColaboradoraInput": {
+        "type": "object",
+        "required": ["nombreFantasia", "git", "habilidades", "presentacion"],
+        "properties": {
+          "nombreFantasia": {
+            "type": "string",
+            "example": "DevNeko"
+          },
+          "git": {
+            "type": "string",
+            "description": "Cuenta de GitHub o GitLab.",
+            "example": "https://github.com/devneko"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Lucía"
+          },
+          "apellido": {
+            "type": "string",
+            "example": "Gómez"
+          },
+          "habilidades": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "desarrollo_web_react"
+            },
+            "description": "Códigos de habilidades existentes."
+          },
+          "pronombres": {
+            "type": "string",
+            "example": "ella"
+          },
+          "presentacion": {
+            "type": "string",
+            "example": "Desarrolladora front interesada en proyectos comunitarios."
+          },
+          "contactos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedioDeContacto"
+            },
+            "description": "Medios de contacto internos (cero o más). No se muestran públicamente."
+          },
+          "bloquearMensajeInterno": {
+            "type": "boolean",
+            "default": false,
+            "description": "Si es true, los colectivos no pueden enviarle mensajes internos."
           }
         }
       },
       "PersonaColaboradora": {
         "type": "object",
-        "required": ["nombreFantasia", "git", "habilidades", "presentacion"],
+        "description": "Vista pública: nunca incluye `contactos`.",
         "properties": {
           "_id": {
             "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
             "readOnly": true,
-            "description": "Identificador único de la persona colaboradora.",
-            "example": "652a9f5d3419c8f2b34c1a2d"
+            "description": "Identificador de la persona colaboradora."
           },
           "nombreFantasia": {
             "type": "string",
-            "description": "Apodo o nombre público.",
             "example": "DevNeko"
           },
           "git": {
-            "type": "string",
-            "format": "uri",
-            "description": "Enlace al perfil de GitHub o plataforma Git.",
-            "example": "https://github.com/devneko"
+            "type": "string"
           },
           "nombre": {
             "type": "string",
-            "description": "Nombre real.",
-            "example": "Lucía"
+            "nullable": true
           },
           "apellido": {
             "type": "string",
-            "description": "Apellido real.",
-            "example": "Gómez"
+            "nullable": true
           },
           "habilidades": {
             "type": "array",
-            "description": "Lista de códigos de habilidades asociadas (en formato snake_case).",
             "items": {
               "type": "string",
-              "example": "programacion_en_java_script"
-            }
+              "example": "6acfd66264d02459ba8dc6a2"
+            },
+            "description": "Ids de sus habilidades."
           },
           "pronombres": {
             "type": "string",
-            "description": "Pronombres de preferencia.",
-            "example": "ella"
+            "nullable": true
           },
           "presentacion": {
             "type": "string",
-            "description": "Breve presentación personal.",
-            "example": "Desarrolladora Frontend apasionada por proyectos comunitarios y de código abierto."
+            "nullable": true
+          },
+          "bloquearMensajeInterno": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
           }
         }
       },
-      "Perfil": {
+      "PersonaColaboradoraCreada": {
+        "type": "object",
+        "description": "Respuesta del alta: devuelve `id`, las habilidades completas y sus contactos.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
+            "readOnly": true,
+            "description": "Identificador de la persona colaboradora."
+          },
+          "nombreFantasia": {
+            "type": "string"
+          },
+          "git": {
+            "type": "string"
+          },
+          "habilidades": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Habilidad"
+            }
+          },
+          "contactos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedioDeContacto"
+            }
+          },
+          "bloquearMensajeInterno": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PerfilInput": {
         "type": "object",
         "required": [
           "descripcion",
@@ -164,429 +423,380 @@
           "modalidadDeColaboracion"
         ],
         "properties": {
-          "_id": {
-            "type": "string",
-            "readOnly": true,
-            "description": "Identificador único del perfil.",
-            "example": "652a9f5d3419c8f2b34c1a2d"
-          },
           "descripcion": {
             "type": "string",
-            "description": "Descripción de la tarea, rol o puesto que se busca cubrir.",
-            "example": "Desarrollo y mantenimiento de componentes de la interfaz gráfica web."
+            "example": "Tester"
           },
           "habilidadesRequeridas": {
             "type": "array",
-            "description": "Lista de códigos de habilidades obligatorias (en formato snake_case).",
             "items": {
               "type": "string",
-              "example": "programacion_en_java_script"
-            }
+              "example": "testing_e_2_e"
+            },
+            "minItems": 1,
+            "description": "Códigos de habilidades obligatorias."
           },
           "habilidadesOpcionales": {
             "type": "array",
-            "description": "Lista de códigos de habilidades recomendadas u opcionales.",
             "items": {
               "type": "string",
-              "example": "desarrollo_con_node_js_y_express"
-            }
+              "example": "desarrollo_web_react"
+            },
+            "minItems": 1,
+            "description": "Códigos de habilidades opcionales."
           },
           "horas": {
-            "type": "integer",
-            "minimum": 1,
-            "description": "Cantidad de horas estimadas de dedicación.",
-            "example": 10
+            "type": "number",
+            "example": 5
           },
           "tipoDeCompromiso": {
-            "$ref": "#/components/schemas/TipoDeCompromiso",
-            "example": "semanal"
+            "$ref": "#/components/schemas/TipoDeCompromiso"
           },
           "modalidadDeColaboracion": {
-            "$ref": "#/components/schemas/ModalidadColaboracion",
-            "example": "incentivo_economico"
+            "$ref": "#/components/schemas/ModalidadColaboracion"
+          }
+        }
+      },
+      "Perfil": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
+            "readOnly": true,
+            "description": "Identificador del perfil."
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Tester"
+          },
+          "habilidadesRequeridas": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            },
+            "description": "Ids de habilidades obligatorias."
+          },
+          "habilidadesOpcionales": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            },
+            "description": "Ids de habilidades opcionales."
+          },
+          "horas": {
+            "type": "number",
+            "example": 5
+          },
+          "tipoDeCompromiso": {
+            "$ref": "#/components/schemas/TipoDeCompromiso"
+          },
+          "modalidadDeColaboracion": {
+            "$ref": "#/components/schemas/ModalidadColaboracion"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "LogroInput": {
+        "type": "object",
+        "required": ["descripcion", "porcentaje", "urlCodigoFuente"],
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "example": "MVP publicado"
+          },
+          "porcentaje": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Porcentaje de concreción que aporta. La suma de los logros del proyecto no puede superar 100.",
+            "example": 40
+          },
+          "urlCodigoFuente": {
+            "type": "string",
+            "format": "uri",
+            "description": "Enlace al código fuente (público).",
+            "example": "https://github.com/colectivo/proyecto"
+          }
+        }
+      },
+      "Logro": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
+            "readOnly": true,
+            "description": "Identificador del logro."
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "MVP publicado"
+          },
+          "porcentaje": {
+            "type": "number",
+            "example": 40
+          },
+          "urlCodigoFuente": {
+            "type": "string",
+            "example": "https://github.com/colectivo/proyecto"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "ProyectoInput": {
+        "type": "object",
+        "required": ["titulo", "descripcion", "perfiles", "colectivo", "urlSistema"],
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "description": "Título único.",
+            "example": "Plataforma de Donaciones"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "App web para gestionar entregas de alimentos."
+          },
+          "perfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PerfilInput"
+            },
+            "minItems": 1
+          },
+          "colectivo": {
+            "type": "string",
+            "description": "Nombre del colectivo dueño del proyecto.",
+            "example": "Colectivo Ambiental CABA"
+          },
+          "urlSistema": {
+            "type": "string",
+            "format": "uri",
+            "description": "Enlace al sistema en funcionamiento.",
+            "example": "https://donaciones.org"
           }
         }
       },
       "Proyecto": {
         "type": "object",
-        "required": ["titulo", "descripcion", "perfiles", "colectivo"],
         "properties": {
           "_id": {
             "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
             "readOnly": true,
-            "description": "Identificador único del proyecto",
-            "example": "652a9f5d3419c8f2b34c1a2d"
+            "description": "Identificador del proyecto."
           },
           "titulo": {
             "type": "string",
-            "description": "Nombre o título del proyecto.",
-            "example": "Plataforma de Donaciones Comunitarias"
+            "example": "Plataforma de Donaciones"
           },
           "descripcion": {
-            "type": "string",
-            "description": "Detalle o propósito del proyecto.",
-            "example": "Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio."
+            "type": "string"
           },
           "perfiles": {
             "type": "array",
-            "description": "Lista de perfiles requeridas para el proyecto.",
             "items": {
               "$ref": "#/components/schemas/Perfil"
             }
           },
           "colectivo": {
             "type": "string",
-            "description": "Nombre del colectivo al que pertenece el proyecto.",
-            "example": "Colectivo Ambiental CABA"
+            "example": "6acfd66264d02459ba8dc6a2",
+            "description": "Id del colectivo."
+          },
+          "urlSistema": {
+            "type": "string",
+            "example": "https://donaciones.org"
+          },
+          "logros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Logro"
+            }
           },
           "finalizado": {
             "type": "boolean",
-            "default": false,
-            "description": "Estado de finalización del proyecto.",
             "example": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
           }
         }
       },
-      "TipoColectivo": {
-        "type": "string",
-        "enum": ["fundacion", "ong", "asociacion", "asamblea"],
-        "description": "Tipo de modalidad para la colaboracion."
+      "ColaboracionInput": {
+        "type": "object",
+        "required": ["personaColaboradoraId", "proyectoId"],
+        "properties": {
+          "personaColaboradoraId": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2"
+          },
+          "proyectoId": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2"
+          },
+          "anonima": {
+            "type": "boolean",
+            "default": false,
+            "description": "Si es true, la colaboración figura sin indicar quién la realizó."
+          }
+        }
       },
-      "TipoDeCompromiso": {
-        "type": "string",
-        "enum": ["semanal", "mensual", "total"],
-        "description": "Frecuencia o tipo de medición de las horas de dedicación."
+      "Colaboracion": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
+            "readOnly": true,
+            "description": "Identificador de la colaboración."
+          },
+          "personaColaboradora": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PersonaColaboradora"
+              }
+            ],
+            "nullable": true,
+            "description": "`null` si la colaboración es anónima."
+          },
+          "proyecto": {
+            "$ref": "#/components/schemas/Proyecto"
+          },
+          "anonima": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
       },
-      "ModalidadColaboracion": {
-        "type": "string",
-        "enum": ["gratuita", "incentivo_economico", "contratacion_eventual"],
-        "description": "Tipo de modalidad para la colaboracion."
+      "MensajeInput": {
+        "type": "object",
+        "required": ["personaColaboradoraId", "texto"],
+        "properties": {
+          "personaColaboradoraId": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2"
+          },
+          "texto": {
+            "type": "string",
+            "example": "¡Hola! Tu perfil encaja con nuestro proyecto."
+          }
+        }
+      },
+      "MensajeEnviado": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
+            "readOnly": true,
+            "description": "Identificador del mensaje."
+          },
+          "personaColaboradora": {
+            "type": "string",
+            "description": "Nombre de fantasía de la destinataria.",
+            "example": "DevNeko"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MensajeRecibido": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "6acfd66264d02459ba8dc6a2",
+            "readOnly": true,
+            "description": "Identificador del mensaje."
+          },
+          "colectivo": {
+            "type": "string",
+            "description": "Nombre del colectivo que lo envió.",
+            "example": "Colectivo Ambiental CABA"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     }
   },
-
   "paths": {
-    "/colectivos": {
+    "/healthCheck": {
       "get": {
-        "tags": ["Colectivos"],
-        "summary": "Obtener todos los colectivos",
+        "tags": ["Health Check"],
+        "summary": "Estado del servidor",
         "responses": {
           "200": {
-            "description": "Lista de colectivos obtenida con éxito"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      },
-      "post": {
-        "tags": ["Colectivos"],
-        "summary": "Crear un nuevo colectivo",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Colectivo"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Colectivo creado con éxito",
+            "description": "El servidor está activo",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Colectivo"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "uptime": {
+                      "type": "number",
+                      "example": 24.7
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Datos de entrada inválidos"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      }
-    },
-    "/colectivos/{id}": {
-      "get": {
-        "tags": ["Colectivos"],
-        "summary": "Obtener un colectivo por ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "ID del colectivo",
-            "schema": {
-              "type": "string",
-              "example": "6ac7866e777df03c06e98a58"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Colectivo encontrado con éxito",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Colectivo"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Colectivo no encontrado"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      }
-    },
-    "/colaboraciones": {
-      "get": {
-        "tags": ["Colaboraciones"],
-        "summary": "Obtener todas las colaboraciones",
-        "responses": {
-          "200": {
-            "description": "Lista de colaboraciones obtenida con éxito"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      },
-      "post": {
-        "tags": ["Colaboraciones"],
-        "summary": "Crear una nueva colaboración",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Colaboracion"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Colaboración creada con éxito",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Colaboracion"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Datos de entrada inválidos"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      }
-    },
-    "/colaboraciones/{id}": {
-      "get": {
-        "tags": ["Colaboraciones"],
-        "summary": "Obtener una colaboración por ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "ID de la colaboración",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Colaboración encontrada con éxito",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Colaboracion"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Colaboración no encontrada"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      }
-    },
-    "/proyectos": {
-      "get": {
-        "tags": ["Proyectos"],
-        "summary": "Obtener todos los proyectos",
-        "responses": {
-          "200": {
-            "description": "Lista de proyectos obtenida con éxito"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      },
-      "post": {
-        "tags": ["Proyectos"],
-        "summary": "Crear un nuevo proyecto",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Proyecto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Proyecto creado con éxito",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Proyecto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Datos de entrada inválidos"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      }
-    },
-    "/proyectos/{id}": {
-      "get": {
-        "tags": ["Proyectos"],
-        "summary": "Obtener un proyecto por ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "ID del proyecto",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Proyecto encontrado con éxito",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Proyecto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Proyecto no encontrado"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      }
-    },
-    "/colaboradoras": {
-      "get": {
-        "tags": ["Colaboradoras"],
-        "summary": "Obtener todas las colaboradoras",
-        "responses": {
-          "200": {
-            "description": "Lista de colaboradoras obtenida con éxito"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      },
-      "post": {
-        "tags": ["Colaboradoras"],
-        "summary": "Crear una nueva colaboradora",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PersonaColaboradora"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Colaboradora creada con éxito",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PersonaColaboradora"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Datos de entrada inválidos"
-          },
-          "500": {
-            "description": "Error interno del servidor"
-          }
-        }
-      }
-    },
-    "/colaboradoras/{id}": {
-      "get": {
-        "tags": ["Colaboradoras"],
-        "summary": "Obtener una colaboradora por ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "ID de la colaboradora",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Colaboradora encontrada con éxito",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PersonaColaboradora"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Colaboradora no encontrada"
-          },
-          "500": {
-            "description": "Error interno del servidor"
           }
         }
       }
@@ -594,45 +804,94 @@
     "/habilidades": {
       "get": {
         "tags": ["Habilidades"],
-        "summary": "Obtener todas las habilidades",
+        "summary": "Listar habilidades",
         "responses": {
           "200": {
-            "description": "Lista de habilidades obtenida con éxito"
+            "description": "Lista de habilidades",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Habilidad"
+                  }
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error interno del servidor"
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       },
       "post": {
         "tags": ["Habilidades"],
-        "summary": "Crear una nueva habilidad",
+        "summary": "Crear una habilidad",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Habilidad"
+                "$ref": "#/components/schemas/HabilidadInput"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Habilidad creada con éxito",
+            "description": "Habilidad creada. El header `Location` apunta al nuevo recurso.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Habilidad"
+                  "$ref": "#/components/schemas/HabilidadCreada"
                 }
               }
             }
           },
           "400": {
-            "description": "Datos de entrada inválidos"
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-201`, `ERR-VAL-202`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-201",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ya existe una habilidad con ese título. Códigos posibles: `ERR-CSR-206`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-CSR-206",
+                  "message": "Descripción del error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error interno del servidor"
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -640,22 +899,22 @@
     "/habilidades/{id}": {
       "get": {
         "tags": ["Habilidades"],
-        "summary": "Obtener una habilidad por ID",
+        "summary": "Obtener una habilidad",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "ID de la habilidad",
+            "description": "Id de la habilidad",
             "schema": {
               "type": "string",
-              "example": "6ac78677777df03c06e98a5b"
+              "example": "6acfd66264d02459ba8dc6a2"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Habilidad encontrada con éxito",
+            "description": "Habilidad encontrada",
             "content": {
               "application/json": {
                 "schema": {
@@ -665,10 +924,1174 @@
             }
           },
           "404": {
-            "description": "Habilidad no encontrada"
+            "description": "No existe. Códigos posibles: `ERR-NOT-204`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-204",
+                  "message": "Descripción del error"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Error interno del servidor"
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colectivos": {
+      "get": {
+        "tags": ["Colectivos"],
+        "summary": "Listar colectivos",
+        "responses": {
+          "200": {
+            "description": "Lista de colectivos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Colectivo"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Colectivos"],
+        "summary": "Crear un colectivo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ColectivoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Colectivo creado (devuelve `id` en lugar de `_id`). El header `Location` apunta al nuevo recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Colectivo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-301`, `ERR-VAL-302`, `ERR-VAL-304`, `ERR-VAL-307`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-301",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ya existe un colectivo con ese nombre. Códigos posibles: `ERR-CSR-308`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-CSR-308",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colectivos/{id}": {
+      "get": {
+        "tags": ["Colectivos"],
+        "summary": "Obtener un colectivo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id del colectivo",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colectivo encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Colectivo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe. Códigos posibles: `ERR-NOT-305`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-305",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colectivos/{colectivoId}/mensajes": {
+      "post": {
+        "tags": ["Mensajes"],
+        "summary": "Enviar un mensaje interno a una colaboradora",
+        "description": "Guarda el mensaje en la bandeja de la colaboradora y lo replica por email a sus contactos registrados. Si el envío del mail falla, el mensaje interno se guarda igual.",
+        "parameters": [
+          {
+            "name": "colectivoId",
+            "in": "path",
+            "required": true,
+            "description": "Id del colectivo que envía",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MensajeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Mensaje enviado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MensajeEnviado"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-802`, `ERR-VAL-803`, `ERR-VAL-804`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-802",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La colaboradora no acepta mensajes internos. Códigos posibles: `ERR-EST-801`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-EST-801",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el colectivo o la colaboradora. Códigos posibles: `ERR-NOT-305`, `ERR-NOT-405`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-305",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colaboradoras": {
+      "get": {
+        "tags": ["Colaboradoras"],
+        "summary": "Listar colaboradoras",
+        "description": "No incluye los medios de contacto.",
+        "responses": {
+          "200": {
+            "description": "Lista de colaboradoras",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonaColaboradora"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Colaboradoras"],
+        "summary": "Registrar una colaboradora",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonaColaboradoraInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Colaboradora registrada. El header `Location` apunta al nuevo recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaColaboradoraCreada"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-401`, `ERR-VAL-402`, `ERR-VAL-403`, `ERR-VAL-404`, `ERR-VAL-406`, `ERR-VAL-407`, `ERR-VAL-701`, `ERR-VAL-702`, `ERR-VAL-703`, `ERR-VAL-704`, `ERR-VAL-705`, `ERR-VAL-706`, `ERR-VAL-707`, `ERR-VAL-207`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-401",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colaboradoras/{id}": {
+      "get": {
+        "tags": ["Colaboradoras"],
+        "summary": "Obtener una colaboradora",
+        "description": "No incluye los medios de contacto.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id de la colaboradora",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colaboradora encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe. Códigos posibles: `ERR-NOT-405`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-405",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colaboradoras/{personaColaboradoraId}/mensajes": {
+      "get": {
+        "tags": ["Mensajes"],
+        "summary": "Bandeja de entrada de una colaboradora",
+        "description": "Mensajes recibidos, del más viejo al más nuevo.",
+        "parameters": [
+          {
+            "name": "personaColaboradoraId",
+            "in": "path",
+            "required": true,
+            "description": "Id de la colaboradora",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mensajes recibidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MensajeRecibido"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la colaboradora. Códigos posibles: `ERR-NOT-405`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-405",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colaboradoras/{id}/proyectos-acordes": {
+      "get": {
+        "tags": ["Búsquedas"],
+        "summary": "Proyectos acordes a las habilidades de una colaboradora",
+        "description": "Proyectos no finalizados con al menos un perfil que requiera alguna de sus habilidades.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id de la colaboradora",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proyectos encontrados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Proyecto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la colaboradora. Códigos posibles: `ERR-NOT-405`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-405",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proyectos": {
+      "get": {
+        "tags": ["Proyectos"],
+        "summary": "Listar proyectos",
+        "responses": {
+          "200": {
+            "description": "Lista de proyectos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Proyecto"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Proyectos"],
+        "summary": "Crear un proyecto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProyectoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proyecto creado y vinculado a su colectivo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proyecto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, colectivo o habilidad inexistente. Códigos posibles: `ERR-VAL-101`, `ERR-VAL-102`, `ERR-VAL-103`, `ERR-VAL-107`, `ERR-VAL-112`, `ERR-VAL-115`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-NOT-306`, `ERR-VAL-207`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-101",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ya existe un proyecto con ese título. Códigos posibles: `ERR-CSR-110`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-CSR-110",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proyectos/{id}": {
+      "get": {
+        "tags": ["Proyectos"],
+        "summary": "Obtener un proyecto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proyecto encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proyecto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe. Códigos posibles: `ERR-NOT-108`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Proyectos"],
+        "summary": "Finalizar un proyecto (cierre manual)",
+        "description": "Por ahora la única modificación soportada es `{ \"finalizado\": true }`. Después ya no se pueden anotar colaboradoras ni cargar logros.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["finalizado"],
+                "properties": {
+                  "finalizado": {
+                    "type": "boolean",
+                    "enum": [true]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proyecto finalizado (respuesta sin cuerpo)"
+          },
+          "400": {
+            "description": "Cuerpo distinto de { finalizado: true } o proyecto ya finalizado. Códigos posibles: `ERR-VAL-001`, `ERR-EST-109`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-001",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe. Códigos posibles: `ERR-NOT-108`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proyectos/{idProyecto}/perfiles": {
+      "get": {
+        "tags": ["Perfiles"],
+        "summary": "Listar los perfiles de un proyecto",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfiles del proyecto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Perfil"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto. Códigos posibles: `ERR-NOT-108`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proyectos/{idProyecto}/perfiles/{idPerfil}": {
+      "get": {
+        "tags": ["Perfiles"],
+        "summary": "Obtener un perfil",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          },
+          {
+            "name": "idPerfil",
+            "in": "path",
+            "required": true,
+            "description": "Id del perfil",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfil encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto o el perfil. Códigos posibles: `ERR-NOT-108`, `ERR-NOT-611`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proyectos/{idProyecto}/perfiles/{idPerfil}/colaboradoras-acordes": {
+      "get": {
+        "tags": ["Búsquedas"],
+        "summary": "Colaboradoras acordes a un perfil",
+        "description": "Colaboradoras con al menos una de las habilidades requeridas del perfil. No incluye medios de contacto.",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          },
+          {
+            "name": "idPerfil",
+            "in": "path",
+            "required": true,
+            "description": "Id del perfil",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colaboradoras encontradas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonaColaboradora"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto o el perfil. Códigos posibles: `ERR-NOT-108`, `ERR-NOT-611`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proyectos/{proyectoId}/logros": {
+      "post": {
+        "tags": ["Logros"],
+        "summary": "Cargar un logro en un proyecto",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogroInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Logro creado. El header `Location` apunta al nuevo recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logro"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, proyecto finalizado o el total supera 100%. Códigos posibles: `ERR-VAL-901`, `ERR-VAL-902`, `ERR-VAL-903`, `ERR-EST-109`, `ERR-EST-113`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-901",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto. Códigos posibles: `ERR-NOT-108`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colaboraciones": {
+      "get": {
+        "tags": ["Colaboraciones"],
+        "summary": "Listar colaboraciones",
+        "description": "Las anónimas tienen `personaColaboradora: null`.",
+        "responses": {
+          "200": {
+            "description": "Lista de colaboraciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Colaboracion"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Colaboraciones"],
+        "summary": "Anotar una colaboradora a un proyecto",
+        "description": "La colaboradora debe tener al menos una de las habilidades requeridas de algún perfil del proyecto.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ColaboracionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Colaboración creada (devuelve `id`, la colaboradora y el proyecto completos). El header `Location` apunta al nuevo recurso."
+          },
+          "400": {
+            "description": "Datos inválidos o la colaboradora no tiene ninguna habilidad requerida. Códigos posibles: `ERR-VAL-501`, `ERR-VAL-502`, `ERR-VAL-504`, `ERR-VAL-503`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-501",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la colaboradora o el proyecto. Códigos posibles: `ERR-NOT-405`, `ERR-NOT-108`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-405",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El proyecto está finalizado. Códigos posibles: `ERR-EST-505`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-EST-505",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colaboraciones/{id}": {
+      "get": {
+        "tags": ["Colaboraciones"],
+        "summary": "Obtener una colaboración",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id de la colaboración",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colaboración encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Colaboracion"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe. Códigos posibles: `ERR-NOT-506`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-506",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }

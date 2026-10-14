@@ -1,50 +1,60 @@
 @startuml CodigoAVoluntad
 class Colectivo{
-    -id : Number
+    -id : String
     -nombre : String
     -descripcion : String
     -ubicacion : String
     -tipoDeColectivo : TipoColectivo
     -proyectos : [Proyecto]
 
-    +cargarProyecto()
+    +cargarProyecto(proyecto)
 }
 
 class Proyecto{
-    -id : Number
+    -id : String
     -titulo : String
     -descripcion : String
-    -habilidadesRequeridas : [Habilidad]
-    -horas : Number
-    -tipoDeCompromiso : TipoCompromiso
-    -modalidadDeColaboracion : ModalidadColaboracion
+    -perfiles : [Perfil]
     -colectivo : Colectivo
+    -urlSistema : String
+    -logros : [Logro]
     -finalizado : Boolean
 }
 
+class Perfil{
+    -id : String
+    -descripcion : String
+    -habilidadesRequeridas : [Habilidad]
+    -habilidadesOpcionales : [Habilidad]
+    -horas : Number
+    -tipoDeCompromiso : TipoCompromiso
+    -modalidadDeColaboracion : ModalidadColaboracion
+}
+
+class Logro{
+    -id : String
+    -descripcion : String
+    -porcentaje : Number
+    -urlCodigoFuente : String
+}
+
 class Colaboracion{
+    -id : String
     -personaColaboradora : PersonaColaboradora
     -proyecto : Proyecto
+    -anonima : Boolean
 }
 
 class Habilidad{
-    -id : Number
+    -id : String
     -titulo : String
     -codigo : String
     -descripcion : String
-
-    +normalizarTitulo()
 }
-
-
-class CatalogoHabilidades{
-    -habilidades : [Habilidad]
-
-    +agregarHabilidad(habilidad)
-}
+note right of Habilidad : codigo = titulo normalizado en snake_case
 
 class PersonaColaboradora{
-    -id : Number
+    -id : String
     -nombreFantasia : String
     -git : String
     -nombre : String
@@ -52,6 +62,21 @@ class PersonaColaboradora{
     -habilidades : [Habilidad]
     -pronombres : String
     -presentacion : String
+    -contactos : [MedioDeContacto]
+    -bloquearMensajeInterno : Boolean
+}
+
+class MedioDeContacto{
+    -tipo : TipoMedioDeContacto
+    -valor : String
+}
+
+class Mensaje{
+    -id : String
+    -colectivo : Colectivo
+    -personaColaboradora : PersonaColaboradora
+    -texto : String
+    -date : Date
 }
 
 enum ModalidadColaboracion {
@@ -70,17 +95,29 @@ enum TipoColectivo {
     FUNDACION
     ONG
     ASOCIACION_BARRIAL
-    ASAMBLEAS
+    ASAMBLEA
+}
+
+enum TipoMedioDeContacto {
+    EMAIL
+    WHATSAPP
+    SMS
 }
 
 Colectivo --> "*" Proyecto
-PersonaColaboradora -> "*" Habilidad
-CatalogoHabilidades -> "*" Habilidad
-Habilidad "*" <- Proyecto
+Colectivo --> TipoColectivo
+Proyecto *-- "1..*" Perfil
+Proyecto *-- "*" Logro
+Perfil --> "1..*" Habilidad : requeridas
+Perfil --> "1..*" Habilidad : opcionales
+Perfil --> TipoCompromiso
+Perfil --> ModalidadColaboracion
+PersonaColaboradora --> "*" Habilidad
+PersonaColaboradora *-- "*" MedioDeContacto
+MedioDeContacto --> TipoMedioDeContacto
 Colaboracion --> Proyecto
 Colaboracion --> PersonaColaboradora
-Colectivo -> TipoColectivo
-Proyecto --> ModalidadColaboracion
-Proyecto --> TipoCompromiso
+Mensaje --> Colectivo
+Mensaje --> PersonaColaboradora
 
 @enduml
