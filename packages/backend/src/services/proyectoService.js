@@ -136,4 +136,28 @@ export class ProyectoService {
     }
     return perfil;
   }
+
+  async actualizarPerfil(proyectoId, perfilId, cambios) {
+  await this.obtenerProyectoPorId(proyectoId);
+  await this.obtenerPerfilPorId(proyectoId, perfilId);
+
+  const cambiosPreparados =
+    await this.perfilService.prepararCambios(cambios);
+
+  return await this.proyectoRepository.actualizarPerfil(
+    proyectoId,
+    perfilId,
+    cambiosPreparados,
+  );
+}
+
+  async eliminarPerfil(proyectoId, perfilId) {
+  await this.obtenerProyectoPorId(proyectoId);
+  await this.obtenerPerfilPorId(proyectoId, perfilId);
+
+  return await this.proyectoRepository.eliminarPerfil(
+    proyectoId,
+    perfilId,
+  );
+  }
 }

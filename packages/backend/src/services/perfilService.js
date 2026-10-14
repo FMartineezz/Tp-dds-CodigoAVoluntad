@@ -36,4 +36,27 @@ export class PerfilService {
 
     return perfil;
   }
+
+  async prepararCambios(cambios) {
+  const cambiosPreparados = { ...cambios };
+
+  if (cambios.habilidadesRequeridas !== undefined) {
+    cambiosPreparados.habilidadesRequeridas = await Promise.all(
+      cambios.habilidadesRequeridas.map((codigo) =>
+        this.habilidadService.obtenerHabilidadPorCodigo(codigo),
+      ),
+    );
+  }
+
+  if (cambios.habilidadesOpcionales !== undefined) {
+    cambiosPreparados.habilidadesOpcionales = await Promise.all(
+      cambios.habilidadesOpcionales.map((codigo) =>
+        this.habilidadService.obtenerHabilidadPorCodigo(codigo),
+      ),
+    );
+  }
+
+  return cambiosPreparados;
+}
+
 }
