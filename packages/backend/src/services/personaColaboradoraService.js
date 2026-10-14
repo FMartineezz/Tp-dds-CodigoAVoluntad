@@ -67,6 +67,17 @@ export class PersonaColaboradoraService {
       await this.personaColaboradoraRepository.obtenerPodHabilidadId(idsHabilidades);
     return personasColaboradoras.map((persona) => this.ocultarContactos(persona));
   }
+
+  async obtenerPersonaColaboradoraPorIdConContactos(id) {
+    const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorId(id);
+
+    if (!personaColaboradora) {
+      throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+    }
+
+    return personaColaboradora;
+  }
+
   //agregar en la query de la db?
   ocultarContactos(personaColaboradora) {
     const { contactos, ...resto } = personaColaboradora;
