@@ -63,21 +63,19 @@ const ErrorCatalog = Object.freeze({
   },
 
   PROYECTO_PORCENTAJE_MAXIMO: {
-    code: "ERR-VAL-113",
-    message: "El porcentaje de un proyecto no puede superar el 100%"
+    code: "ERR-EST-113",
+    message: "El porcentaje de un proyecto no puede superar el 100%",
   },
 
-  PROYECYO_LOGRO_NO_ENCONTRADO: {
-    code: "ERR-VAL-114",
-    message: "El proyecto no contiene ese logro"
+  PROYECTO_LOGRO_NO_ENCONTRADO: {
+    code: "ERR-NOT-114",
+    message: (id) => `El proyecto no contiene el logro ${id}`,
   },
 
   PROYECTO_URL_SISTEMA_INVALIDA: {
-  code: "ERR-VAL-115",
-  message: "La URL del sistema debe ser una URL válida",
+    code: "ERR-VAL-115",
+    message: "La URL del sistema debe ser una URL válida",
   },
-
-
 
   // =========================
   // HABILIDADES
@@ -196,6 +194,11 @@ const ErrorCatalog = Object.freeze({
     message: "Las habilidades de la colaboradora deben ser un array del codigo de la habilidad",
   },
 
+  COLABORADORA_BLOQUEAR_MENSAJE_INTERNO_INVALIDO: {
+    code: "ERR-VAL-407",
+    message: "El campo bloquear mensaje interno debe ser un booleano",
+  },
+
   // =========================
   // COLABORACIONES
   // =========================
@@ -292,28 +295,86 @@ const ErrorCatalog = Object.freeze({
   },
 
   // =========================
+  // MEDIO DE CONTACTO
+  // =========================
+
+  MEDIO_CONTACTO_FORMATO: {
+    code: "ERR-VAL-701",
+    message: "Los medios de contacto deben ser una lista",
+  },
+
+  MEDIO_CONTACTO_TIPO_REQUERIDO: {
+    code: "ERR-VAL-702",
+    message: "El tipo del medio de contacto es requerido",
+  },
+
+  MEDIO_CONTACTO_TIPO_INVALIDO: {
+    code: "ERR-VAL-703",
+    message: "El tipo del medio de contacto debe ser: email, whatsapp o sms",
+  },
+
+  MEDIO_CONTACTO_VALOR_REQUERIDO: {
+    code: "ERR-VAL-704",
+    message: "El valor del medio de contacto es requerido",
+  },
+
+  MEDIO_CONTACTO_VALOR_FORMATO: {
+    code: "ERR-VAL-705",
+    message: "El valor del medio de contacto debe ser un texto",
+  },
+
+  MEDIO_CONTACTO_EMAIL_INVALIDO: {
+    code: "ERR-VAL-706",
+    message: "El email del medio de contacto no tiene un formato válido",
+  },
+
+  MEDIO_CONTACTO_TELEFONO_INVALIDO: {
+    code: "ERR-VAL-707",
+    message: "El teléfono debe tener 10 dígitos juntos, sin espacios ni símbolos (ej: 1127891234)",
+  },
+
+  // =========================
+  // MENSAJES
+  // =========================
+
+  MENSAJE_DESTINATARIA_NO_ACEPTA: {
+    code: "ERR-EST-801",
+    message: (nombre) => `La colaboradora ${nombre} no acepta mensajes internos`,
+  },
+
+  MENSAJE_PERSONA_COLABORADORA_REQUERIDO: {
+    code: "ERR-VAL-802",
+    message: "La persona colaboradora destinataria es requerida",
+  },
+
+  MENSAJE_TEXTO_REQUERIDO: {
+    code: "ERR-VAL-803",
+    message: "El texto del mensaje es requerido",
+  },
+
+  MENSAJE_TEXTO_FORMATO: {
+    code: "ERR-VAL-804",
+    message: "El texto del mensaje debe ser un texto",
+  },
+
+  // =========================
   // LOGROS
   // =========================
-  
+
   LOGRO_DESCRIPCION_INVALIDA: {
-    code: "ERR-NOT-700",
-    message: "La descripcion debe ser un string",
-  },  
+    code: "ERR-VAL-901",
+    message: "La descripción del logro es requerida y debe ser un texto",
+  },
 
   LOGRO_PORCENTAJE_INVALIDO: {
-    code: "ERR-NOT-701",
+    code: "ERR-VAL-902",
     message: "El porcentaje debe ser un numero positivo y menor o igual a 100",
   },
 
   LOGRO_URL_INVALIDA: {
-    code: "ERR-NOT-702",
-    message: "La url debe ser un string",
+    code: "ERR-VAL-903",
+    message: "La URL del código fuente debe ser una URL válida",
   },
-
-
-
 });
-
-
 
 export default ErrorCatalog;

@@ -3,31 +3,32 @@ export class PerfilController {
   //Por ende siempre se tomara a proyecto como la entidad principal, y
   //El perfil es una entidad la cual no es a parte sino que viene con el proyecto
 
-  constructor({ proyectoService }) {
+  constructor({ proyectoService, busquedaService }) {
     this.proyectoService = proyectoService;
+    this.busquedaService = busquedaService;
   }
 
-  obtenerPerfiles = (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
+  obtenerPerfiles = async (req, res) => {
+    const proyectoId = req.params.idProyecto;
 
-    const perfiles = this.proyectoService.obtenerPerfiles(proyectoId);
+    const perfiles = await this.proyectoService.obtenerPerfiles(proyectoId);
 
     res.status(200).json(perfiles);
   };
 
-  obtenerPerfilesPorId = (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
-    const perfilId = Number(req.params.idPerfil);
+  obtenerPerfilPorId = async (req, res) => {
+    const proyectoId = req.params.idProyecto;
+    const perfilId = req.params.idPerfil;
 
-    const perfil = this.proyectoService.obtenerPerfilPorId(proyectoId, perfilId);
+    const perfil = await this.proyectoService.obtenerPerfilPorId(proyectoId, perfilId);
 
     res.status(200).json(perfil);
   };
 
-  crearPerfil = (req, res) => {
+  crearPerfil = async (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
 
-    const perfil = this.proyectoService.agregarPerfil(
+    const perfil = await this.proyectoService.agregarPerfil(
       proyectoId,
       req.body.descripcion,
       req.body.habilidadesRequeridas,
@@ -40,11 +41,23 @@ export class PerfilController {
     res.status(201).json(perfil);
   };
 
-  actualizarPerfil = (req, res) => {
+  //no usar Number() porque en la db es un objectId(string)
+  actualizarPerfil = async (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
   };
 
-  eliminarPerfil = (req, res) => {
+  eliminarPerfil = async (req, res) => {
     const proyectoId = Number(req.params.idProyecto);
+  };
+
+  obtenerColaboradorasAcordes = async (req, res) => {
+    const proyectoId = req.params.idProyecto;
+    const perfilId = req.params.idPerfil;
+
+    const personas = await this.busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(
+      proyectoId,
+      perfilId,
+    );
+    res.status(200).json(personas);
   };
 }

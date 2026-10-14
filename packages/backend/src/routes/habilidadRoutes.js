@@ -7,9 +7,11 @@ const pathHabilidades = "/habilidades";
 export default function habilidadRoutes() {
   const router = Router();
 
-  router.get(pathHabilidades, habilidadController.obtenerHabilidades);
-  router.get(pathHabilidades + "/:id", habilidadController.obtenerHabilidadPorId);
-  router.post(pathHabilidades, validarHabilidad, habilidadController.crearHabilidad);
+  router.get("/habilidades", habilidadController.obtenerHabilidades);
+
+  router.get("/habilidades/:id", habilidadController.obtenerHabilidadPorId);
+
+  router.post("/habilidades", validarHabilidad, habilidadController.crearHabilidad);
 
   return router;
 }

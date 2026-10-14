@@ -1,10 +1,11 @@
 export class PersonaColaboradoraController {
-  constructor({ personaColaboradoraService }) {
+  constructor({ personaColaboradoraService, busquedaService }) {
     this.personaColaboradoraService = personaColaboradoraService;
+    this.busquedaService = busquedaService;
   }
 
-  crearPersonaColaboradora = (req, res) => {
-    const persona = this.personaColaboradoraService.crearPersonaColaboradora(
+  crearPersonaColaboradora = async (req, res) => {
+    const persona = await this.personaColaboradoraService.crearPersonaColaboradora(
       req.body.nombreFantasia,
       req.body.git,
       req.body.nombre,
@@ -12,22 +13,34 @@ export class PersonaColaboradoraController {
       req.body.habilidades,
       req.body.pronombres,
       req.body.presentacion,
+      req.body.contactos,
+      req.body.bloquearMensajeInterno,
     );
 
     res.status(201).location(`/colaboradoras/${persona.id}`).json(persona);
   };
 
-  obtenerPersonasColaboradoras = (req, res) => {
-    const personas = this.personaColaboradoraService.obtenerPersonasColaboradoras();
+  obtenerPersonasColaboradoras = async (req, res) => {
+    const personas = await this.personaColaboradoraService.obtenerPersonasColaboradoras();
 
     res.status(200).json(personas);
   };
 
-  obtenerPersonaColaboradoraPorId = (req, res) => {
-    const id = Number(req.params.id);
+  obtenerPersonaColaboradoraPorId = async (req, res) => {
+    const id = req.params.id;
 
-    const persona = this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(id);
+    const persona = await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(id);
 
     res.status(200).json(persona);
+  };
+
+  obtenerProyectosAcordes = async (req, res) => {
+    const id = req.params.id;
+
+    const proyectos = await this.busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(id);
+
+    console.log(proyectos);
+
+    res.status(200).json(proyectos);
   };
 }

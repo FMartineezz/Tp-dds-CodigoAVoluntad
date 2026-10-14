@@ -3,48 +3,40 @@ export class LogroController {
     this.logroService = logroService;
   }
 
-  crearLogro = (req, res) => {
-    const proyectoId = Number(req.params.proyectoId);
-    const logro = this.logroService.crearLogro(proyectoId, req.body);
+  crearLogro = async (req, res) => {
+    const proyectoId = req.params.proyectoId;
+    const logro = await this.logroService.crearLogro(proyectoId, req.body);
 
-    res
-      .status(201)
-      .location(`/proyectos/${proyectoId}/logros/${logro.id}`)
-      .json(logro);
+    res.status(201).location(`/proyectos/${proyectoId}/logros/${logro._id}`).json(logro);
   };
 
-  obtenerLogros = (req, res) => {
-    const logros = this.logroService.obtenerLogros(
-      Number(req.params.proyectoId),
-    );
+  obtenerLogros = async (req, res) => {
+    const logros = await this.logroService.obtenerLogros(req.params.proyectoId);
 
     res.status(200).json(logros);
   };
 
-  obtenerLogroPorId = (req, res) => {
-    const logro = this.logroService.obtenerLogroPorId(
-      Number(req.params.proyectoId),
-      Number(req.params.logroId),
+  obtenerLogroPorId = async (req, res) => {
+    const logro = await this.logroService.obtenerLogroPorId(
+      req.params.proyectoId,
+      req.params.logroId,
     );
 
     res.status(200).json(logro);
   };
 
-  actualizarLogro = (req, res) => {
-    const logro = this.logroService.actualizarLogro(
-      Number(req.params.proyectoId),
-      Number(req.params.logroId),
+  actualizarLogro = async (req, res) => {
+    const logro = await this.logroService.actualizarLogro(
+      req.params.proyectoId,
+      req.params.logroId,
       req.body,
     );
 
     res.status(200).json(logro);
   };
 
-  eliminarLogro = (req, res) => {
-    const logro = this.logroService.eliminarLogro(
-      Number(req.params.proyectoId),
-      Number(req.params.logroId),
-    );
+  eliminarLogro = async (req, res) => {
+    const logro = await this.logroService.eliminarLogro(req.params.proyectoId, req.params.logroId);
 
     res.status(200).json(logro);
   };

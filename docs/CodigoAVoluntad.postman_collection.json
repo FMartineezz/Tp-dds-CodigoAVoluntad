@@ -353,14 +353,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros"]
             }
           },
           "event": [
@@ -387,14 +381,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros"]
             }
           }
         },
@@ -405,22 +393,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros",
-                "{{logroId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros", "{{logroId}}"]
             }
           }
         },
         {
           "name": "Modificar logro",
           "request": {
-            "method": "PUT",
+            "method": "PATCH",
             "header": [
               {
                 "key": "Content-Type",
@@ -438,15 +419,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros",
-                "{{logroId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros", "{{logroId}}"]
             }
           }
         },
@@ -457,22 +431,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros",
-                "{{logroId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros", "{{logroId}}"]
             }
           }
         }
       ]
     }
   ],
-  
+
   "variable": [
     {
       "key": "baseUrl",
@@ -480,4 +447,3 @@
     }
   ]
 }
-

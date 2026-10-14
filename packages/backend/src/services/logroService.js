@@ -8,94 +8,71 @@ export class LogroService {
     this.proyectoRepository = proyectoRepository;
   }
 
-  crearLogro(proyectoId, datos) {
-    const proyecto =
-      this.proyectoService.obtenerProyectoPorId(proyectoId);
+  async crearLogro(proyectoId, datos) {
+    const proyecto = await this.proyectoService.obtenerProyectoPorId(proyectoId);
 
     if (proyecto.finalizado) {
       throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, proyectoId);
     }
 
-    const porcentajeActual = proyecto.logros.reduce(
-      (total, logro) => total + logro.porcentaje,
-      0,
-    );
+    const porcentajeActual = proyecto.logros.reduce((total, logro) => total + logro.porcentaje, 0);
 
     if (porcentajeActual + datos.porcentaje > 100) {
       throw new AppError(ErrorCatalog.PROYECTO_PORCENTAJE_MAXIMO, 400);
     }
 
-    const logro = new Logro(
-      datos.descripcion,
-      datos.porcentaje,
-      datos.urlCodigoFuente,
-    );
+    const logro = new Logro(datos.descripcion, datos.porcentaje, datos.urlCodigoFuente);
 
-    return this.proyectoRepository.guardarLogro(proyectoId, logro);
+    return await this.proyectoRepository.guardarLogro(proyectoId, logro);
   }
 
-  obtenerLogros(proyectoId) {
-    this.proyectoService.obtenerProyectoPorId(proyectoId);
-    return this.proyectoRepository.obtenerLogros(proyectoId);
+  async obtenerLogros(proyectoId) {
+    await this.proyectoService.obtenerProyectoPorId(proyectoId);
+    return await this.proyectoRepository.obtenerLogros(proyectoId);
   }
 
-  obtenerLogroPorId(proyectoId, logroId) {
-    this.proyectoService.obtenerProyectoPorId(proyectoId);
+  async obtenerLogroPorId(proyectoId, logroId) {
+    await this.proyectoService.obtenerProyectoPorId(proyectoId);
 
-    const logro = this.proyectoRepository.obtenerLogroPorId(
-      proyectoId,
-      logroId,
-    );
+    const logro = await this.proyectoRepository.obtenerLogroPorId(proyectoId, logroId);
 
     if (!logro) {
-      throw new AppError(ErrorCatalog.PROYECYO_LOGRO_NO_ENCONTRADO, 404, logroId);
+      throw new AppError(ErrorCatalog.PROYECTO_LOGRO_NO_ENCONTRADO, 404, logroId);
     }
 
     return logro;
   }
 
-  actualizarLogro(proyectoId, logroId, cambios) {
-    const proyecto =
-      this.proyectoService.obtenerProyectoPorId(proyectoId);
+  async actualizarLogro(proyectoId, logroId, cambios) {
+    const proyecto = await this.proyectoService.obtenerProyectoPorId(proyectoId);
 
     if (proyecto.finalizado) {
       throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, proyectoId);
     }
 
-    const logro = this.obtenerLogroPorId(proyectoId, logroId);
+    const logro = await this.obtenerLogroPorId(proyectoId, logroId);
 
     const porcentajeNuevo = cambios.porcentaje ?? logro.porcentaje;
 
     const porcentajeSinLogro =
-      proyecto.logros.reduce(
-        (total, l) => total + l.porcentaje,
-        0,
-      ) - logro.porcentaje;
+      proyecto.logros.reduce((total, l) => total + l.porcentaje, 0) - logro.porcentaje;
 
     if (porcentajeSinLogro + porcentajeNuevo > 100) {
       throw new AppError(ErrorCatalog.PROYECTO_PORCENTAJE_MAXIMO, 400);
     }
 
-    return this.proyectoRepository.actualizarLogro(
-      proyectoId,
-      logroId,
-      cambios,
-    );
+    return await this.proyectoRepository.actualizarLogro(proyectoId, logroId, cambios);
   }
 
-  eliminarLogro(proyectoId, logroId) {
-    const proyecto =
-      this.proyectoService.obtenerProyectoPorId(proyectoId);
+  async eliminarLogro(proyectoId, logroId) {
+    const proyecto = await this.proyectoService.obtenerProyectoPorId(proyectoId);
 
     if (proyecto.finalizado) {
       throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, proyectoId);
     }
 
-    this.obtenerLogroPorId(proyectoId, logroId);
+    await this.obtenerLogroPorId(proyectoId, logroId);
 
-    return this.proyectoRepository.eliminarLogro(
-      proyectoId,
-      logroId,
-    );
+    return await this.proyectoRepository.eliminarLogro(proyectoId, logroId);
   }
 }

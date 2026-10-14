@@ -30,7 +30,7 @@ const TipoColectivo = Object.freeze({
   FUNDACION: "fundacion",
   ONG: "ong",
   ASOCIACION_BARRIAL: "asociacion barrial",
-  ASAMBLEAS: "asambleas",
+  ASAMBLEA: "asamblea",
 });
 
 class Colectivo {

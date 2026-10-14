@@ -3,8 +3,8 @@ export class ColectivoController {
     this.service = service;
   }
 
-  crearColectivo(req, res) {
-    const respuesta = this.service.crearColectivo(
+  crearColectivo = async (req, res) => {
+    const respuesta = await this.service.crearColectivo(
       req.body.nombre,
       req.body.descripcion,
       req.body.ubicacion,
@@ -12,17 +12,17 @@ export class ColectivoController {
       req.body.proyectos,
     );
     res.status(201).location(`/colectivos/${respuesta.id}`).json(respuesta);
-  }
+  };
 
-  obtenerColectivos(req, res) {
-    const respuesta = this.service.obtenerColectivos();
+  obtenerColectivos = async (req, res) => {
+    const respuesta = await this.service.obtenerColectivos();
     res.status(200).json(respuesta);
-  }
+  };
 
-  obtenerColectivoPorId(req, res) {
-    const id = Number(req.params.id);
+  obtenerColectivoPorId = async (req, res) => {
+    const id = req.params.id;
 
-    const respuesta = this.service.obtenerColectivoPorId(id);
+    const respuesta = await this.service.obtenerColectivoPorId(id);
     res.status(200).json(respuesta);
-  }
+  };
 }

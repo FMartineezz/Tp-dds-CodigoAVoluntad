@@ -1,15 +1,14 @@
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Colectivo } from "../models/colectivo.js";
-import { TipoColectivo } from "../models/colectivo.js";
 
 export class ColectivoService {
   constructor({ repository }) {
     this.repository = repository;
   }
 
-  crearColectivo(nombre, descripcion, ubIcacion, tipoDeColectivo, proyectos) {
-    const colectivo = this.repository.obtenerColectivoPorNombre(nombre);
+  async crearColectivo(nombre, descripcion, ubicacion, tipoDeColectivo, proyectos) {
+    const colectivo = await this.repository.obtenerPorNombre(nombre);
 
     if (colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_YA_EXISTE, 409, nombre);
@@ -18,21 +17,22 @@ export class ColectivoService {
     const nuevoColectivo = new Colectivo(
       nombre,
       descripcion,
-      ubIcacion,
+      ubicacion,
       tipoDeColectivo,
       proyectos,
     );
-    this.repository.agregarColectivo(nuevoColectivo);
+    const colectivoGuardado = await this.repository.guardar(nuevoColectivo);
+    nuevoColectivo.id = colectivoGuardado.id;
 
     return nuevoColectivo;
   }
 
-  obtenerColectivos() {
-    return this.repository.obtenerColectivos();
+  async obtenerColectivos() {
+    return await this.repository.obtenerTodos();
   }
 
-  obtenerColectivoPorId(id) {
-    const colectivo = this.repository.obtenerColectivoPorId(id);
+  async obtenerColectivoPorId(id) {
+    const colectivo = await this.repository.obtenerPorId(id);
 
     if (!colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
@@ -41,8 +41,8 @@ export class ColectivoService {
     return colectivo;
   }
 
-  obtenerColectivoPorNombre(nombre) {
-    const colectivo = this.repository.obtenerColectivoPorNombre(nombre);
+  async obtenerColectivoPorNombre(nombre) {
+    const colectivo = await this.repository.obtenerPorNombre(nombre);
 
     if (!colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE, 400, nombre);
@@ -51,7 +51,10 @@ export class ColectivoService {
     return colectivo;
   }
 
-  agregarProyecto(colectivo, proyecto) {
-    colectivo.proyectos.push(proyecto.id);
+  async agregarProyecto(colectivoId, proyectoId) {
+    //es necesario esto?
+    const colectivo = await this.repository.obtenerPorId(colectivoId);
+    colectivo.proyectos.push(proyectoId);
+    await this.repository.agregarProyecto(colectivoId, proyectoId);
   }
 }
