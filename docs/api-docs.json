@@ -162,6 +162,13 @@
             "type": "string",
             "description": "Breve presentación personal.",
             "example": "Desarrolladora Frontend apasionada por proyectos comunitarios y de código abierto."
+          },
+          "contactos": {
+            "type":"array",
+            "description": "Lista de contactos.",
+            "items":{
+              
+            }
           }
         }
       },
@@ -261,6 +268,35 @@
             "default": false,
             "description": "Estado de finalización del proyecto.",
             "example": false
+          }
+        }
+      },
+      "Colaboracion": {
+        "type": "object",
+        "required": [
+          "personaColaboradora",
+          "proyecto"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Identificador único del colectivo (asignado tras la persistencia).",
+            "example": "652a9f5d3419c8f2b34c1a2d"
+          },
+          "personaColaboradora": {
+            "type": "string",
+            "description": "ID de la colaboradora",
+            "example": "6ac7aaf37354a30fa1e853f4"
+          },
+          "proyecto": {
+            "type": "string",
+            "description": "ID del proyecto",
+            "example": "6ac7b09eabcf80f4d1f10444"
+          },
+          "anonima": {
+            "type": "boolean",
+            "default": false
           }
         }
       },

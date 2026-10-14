@@ -26,6 +26,10 @@ const colaboracionSchema = new mongoose.Schema(
     },
   },
   {
+    // timestamps: {
+    //   createdAt: { select: false },
+    //   updatedAt: { select: false }
+    // },
     timestamps: true,
     collection: "colaboraciones",
   },

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import { PersonaColaboradora } from "../models/personaColaboradora.js";
-import { TipoMedioDeContacto } from "../models/personaColaboradora.js";
+import { PersonaColaboradora, TipoMedioDeContacto } from "../models/personaColaboradora.js";
 
 export const personaColaboradoraSchema = new mongoose.Schema(
   {
@@ -42,36 +41,33 @@ export const personaColaboradoraSchema = new mongoose.Schema(
       type: [String],
       required: false,
     },
-
-    presentacion: {
-      type: String,
-      required: false,
+    presentacion:{
+        type: String,
+        required: false
     },
-
-    contactos: {
-      type: [
-        {
-          _id: false,
-          tipo: {
-            type: String,
-            enum: Object.values(TipoMedioDeContacto),
-            required: true,
-          },
-          valor: {
-            type: String,
-            required: true,
-          },
-        },
-      ],
-      default: [],
+    contactos:{
+        type: [
+            {
+                tipo:{
+                    type: String,
+                    enum: {
+                        values: Object.values(TipoMedioDeContacto),
+                    },
+                    required: true
+                },
+                valor:{
+                    type: String,
+                    required: true
+                },
+                _id: false
+            }
+        ],
     },
-    bloquearMensajeInterno: {
-      type: Boolean,
-      default: false,
-    },
-  },
-
-  {
+    bloquearMensajeInterno:{
+        type: Boolean,
+        default: false
+    }
+},{
     timestamps: true,
     collection: "personasColaboradoras",
   },
