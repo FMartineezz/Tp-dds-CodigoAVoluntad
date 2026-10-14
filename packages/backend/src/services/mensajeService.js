@@ -2,23 +2,14 @@ import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Mensaje } from "../models/mensaje.js";
 import { TipoMedioDeContacto } from "../models/personaColaboradora.js";
-import nodemailer from "nodemailer";
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
 
 export class MensajeService {
-  constructor({ repository, colectivoService, personaColaboradoraService }) {
+  // transporter: cualquier objeto con sendMail(opciones) (en producción, el de nodemailer)
+  constructor({ repository, colectivoService, personaColaboradoraService, transporter }) {
     this.repository = repository;
     this.colectivoService = colectivoService;
     this.personaColaboradoraService = personaColaboradoraService;
+    this.transporter = transporter;
   }
 
   async enviarMensajeDesdeColectivo(colectivoId, personaColaboradoraId, texto) {
@@ -34,7 +25,7 @@ export class MensajeService {
       throw new AppError(
         ErrorCatalog.MENSAJE_DESTINATARIA_NO_ACEPTA,
         403,
-        personaColaboradora.nombre,
+        personaColaboradora.nombreFantasia,
       );
     }
 
@@ -77,7 +68,7 @@ export class MensajeService {
 
   async enviarEmail(email, texto) {
     try {
-      await transporter.sendMail({
+      await this.transporter.sendMail({
         from: process.env.SMTP_USER,
         to: email,
         text: texto,

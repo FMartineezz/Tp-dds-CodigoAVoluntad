@@ -1,3 +1,4 @@
+import nodemailer from "nodemailer";
 import { ProyectoRepository } from "./repositories/proyectoRepository.js";
 import { ColectivoRepository } from "./repositories/colectivoRepository.js";
 import { HabilidadRespository } from "./repositories/habilidadRepository.js";
@@ -33,6 +34,17 @@ const colaboracionRepository = new ColaboracionRepository();
 const personaColaboradoraRepository = new PersonaColaboradoraRepository();
 const mensajeRepository = new MensajeRepository();
 
+// Transporter de mails para las notificaciones por medios externos.
+const mailTransporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
+
 // Services: dependen de repositorios y de otros services ya creados.
 const habilidadService = new HabilidadService({ repository: habilidadRepository });
 const perfilService = new PerfilService({ habilidadService });
@@ -56,6 +68,7 @@ const mensajeService = new MensajeService({
   repository: mensajeRepository,
   colectivoService,
   personaColaboradoraService,
+  transporter: mailTransporter,
 });
 
 const logroService = new LogroService({

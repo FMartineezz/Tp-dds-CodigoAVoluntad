@@ -26,7 +26,7 @@ export class PerfilController {
   };
 
   crearPerfil = async (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
+    const proyectoId = req.params.idProyecto;
 
     const perfil = await this.proyectoService.agregarPerfil(
       proyectoId,
