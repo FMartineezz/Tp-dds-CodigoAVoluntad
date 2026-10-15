@@ -42,4 +42,40 @@ describe("PerfilService", () => {
       400,
     );
   });
+
+  describe("prepararCambios", () => {
+    test("convierte los códigos de habilidades en habilidades existentes", async () => {
+      const cambios = await ctx.perfilService.prepararCambios({
+        habilidadesRequeridas: ["testing_e_2_e_con_cypress"],
+        habilidadesOpcionales: ["uso_de_soap_ui"],
+      });
+
+      expect(cambios.habilidadesRequeridas.map((h) => h.titulo)).toEqual([
+        "Testing E2E con Cypress",
+      ]);
+      expect(cambios.habilidadesOpcionales.map((h) => h.titulo)).toEqual(["Uso de Soap UI"]);
+    });
+
+    test("deja intactos los demás campos y no agrega los que no vienen", async () => {
+      const cambios = await ctx.perfilService.prepararCambios({ descripcion: "QA", horas: 3 });
+
+      expect(cambios).toEqual({ descripcion: "QA", horas: 3 });
+    });
+
+    test("no modifica el objeto recibido", async () => {
+      const recibidos = { habilidadesRequeridas: ["uso_de_soap_ui"] };
+
+      await ctx.perfilService.prepararCambios(recibidos);
+
+      expect(recibidos).toEqual({ habilidadesRequeridas: ["uso_de_soap_ui"] });
+    });
+
+    test("falla con 400 si una habilidad no existe", async () => {
+      await expectAppError(
+        ctx.perfilService.prepararCambios({ habilidadesRequeridas: ["pandas"] }),
+        ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO,
+        400,
+      );
+    });
+  });
 });

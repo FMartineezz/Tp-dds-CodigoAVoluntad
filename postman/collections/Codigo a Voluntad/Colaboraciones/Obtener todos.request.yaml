@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/colaboraciones"
+method: GET
+order: 1000

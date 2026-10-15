@@ -30,8 +30,8 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`                                                      |
 | [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `POST /colaboradoras`                                             |
 | [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `POST /proyectos`, `PATCH /proyectos/:id`                                 |
-| [Perfiles](#perfiles)             | `GET /proyectos/:idProyecto/perfiles`, `GET /proyectos/:idProyecto/perfiles/:idPerfil`                            |
-| [Logros](#logros)                 | `POST /proyectos/:proyectoId/logros`                                                                              |
+| [Perfiles](#perfiles)             | `GET`, `POST /proyectos/:idProyecto/perfiles`; `GET`, `PATCH`, `DELETE /proyectos/:idProyecto/perfiles/:idPerfil` |
+| [Logros](#logros)                 | `GET`, `POST /proyectos/:proyectoId/logros`; `GET`, `PATCH`, `DELETE /proyectos/:proyectoId/logros/:logroId`      |
 | [Colaboraciones](#colaboraciones) | `GET /colaboraciones`, `GET /colaboraciones/:id`, `POST /colaboraciones`                                          |
 | [Búsquedas](#búsquedas)           | `GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes`, `GET /colaboradoras/:id/proyectos-acordes` |
 | [Mensajes](#mensajes)             | `POST /colectivos/:colectivoId/mensajes`, `GET /colaboradoras/:personaColaboradoraId/mensajes`                    |
@@ -344,7 +344,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 
 | Campo         | Tipo     | Requerido | Notas                                                 |
 | ------------- | -------- | --------- | ----------------------------------------------------- |
-| `titulo`      | string   | sí        | debe ser único (hoy entre **todos** los colectivos)   |
+| `titulo`      | string   | sí        | no puede repetirse dentro del mismo colectivo         |
 | `descripcion` | string   | sí        |                                                       |
 | `perfiles`    | object[] | sí        | al menos un perfil (ver abajo)                        |
 | `colectivo`   | string   | sí        | **nombre** del colectivo existente (no id, no objeto) |
@@ -407,7 +407,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-NOT-306` | No existe un colectivo con ese nombre                             |
 | 400    | `ERR-VAL-207` | Alguno de los códigos de habilidad no existe                      |
 | 400    | `ERR-VAL-001` | Algún campo de texto no es de tipo string, u `horas` no es número |
-| 409    | `ERR-CSR-110` | Ya existe un proyecto con ese título                              |
+| 409    | `ERR-CSR-110` | El colectivo ya tiene un proyecto con ese título                  |
 
 ### PATCH `/proyectos/:id`
 
@@ -419,7 +419,7 @@ Cierre manual del proyecto. Después de finalizarlo ya no se pueden anotar colab
 { "finalizado": true }
 ```
 
-**Respuesta 200:** sin cuerpo.
+**Respuesta 200:** el proyecto actualizado, con `finalizado: true` (misma forma que el `GET`).
 
 **Errores:**
 
@@ -438,7 +438,10 @@ Los perfiles existen solo dentro de un proyecto, así que todas las rutas cuelga
 | Método | Path                                        | Descripción                     |
 | ------ | ------------------------------------------- | ------------------------------- |
 | GET    | `/proyectos/:idProyecto/perfiles`           | Lista los perfiles del proyecto |
+| POST   | `/proyectos/:idProyecto/perfiles`           | Agrega un perfil al proyecto    |
 | GET    | `/proyectos/:idProyecto/perfiles/:idPerfil` | Obtiene un perfil por id        |
+| PATCH  | `/proyectos/:idProyecto/perfiles/:idPerfil` | Modifica un perfil              |
+| DELETE | `/proyectos/:idProyecto/perfiles/:idPerfil` | Elimina un perfil               |
 
 ### GET `/proyectos/:idProyecto/perfiles`
 
@@ -461,15 +464,84 @@ Los perfiles existen solo dentro de un proyecto, así que todas las rutas cuelga
 | 404    | `ERR-NOT-108` | No existe un proyecto con ese id          |
 | 404    | `ERR-NOT-611` | El proyecto no tiene un perfil con ese id |
 
+### POST `/proyectos/:idProyecto/perfiles`
+
+**Body:** igual que cada perfil en `POST /proyectos` (`descripcion`, `habilidadesRequeridas`, `habilidadesOpcionales`, `horas`, `tipoDeCompromiso`, `modalidadDeColaboracion`). Las habilidades se indican por **código**.
+
+**Respuesta 201:** el perfil creado, con su `_id` y las habilidades como ids.
+
+```json
+{
+  "_id": "6acfd66264d02459ba8dc6a5",
+  "descripcion": "Tester",
+  "habilidadesRequeridas": ["6acfd66164d02459ba8dc69d"],
+  "habilidadesOpcionales": ["6acfd66164d02459ba8dc69c"],
+  "horas": 5,
+  "tipoDeCompromiso": "mensual",
+  "modalidadDeColaboracion": "gratuita",
+  "createdAt": "2026-10-14T19:22:10.179Z",
+  "updatedAt": "2026-10-14T19:22:10.179Z"
+}
+```
+
+> **Ojo:** hoy no se verifica que el proyecto exista. Con un id válido pero inexistente, responde `201` con `null`.
+
+**Errores:** los mismos de validación de perfil que en `POST /proyectos` (`ERR-VAL-601` a `ERR-VAL-610`, `ERR-VAL-001`), y `ERR-VAL-207` si algún código de habilidad no existe.
+
+### PATCH `/proyectos/:idProyecto/perfiles/:idPerfil`
+
+Modificación parcial: se manda solo lo que cambia, pero al menos un campo. Si vienen `habilidadesRequeridas` u `habilidadesOpcionales`, se indican por **código** y reemplazan la lista anterior.
+
+```json
+{ "horas": 8, "habilidadesOpcionales": ["desarrollo_web_react"] }
+```
+
+**Respuesta 200:** el perfil actualizado.
+
+**Errores:**
+
+| Status | code                          | Cuándo                                        |
+| ------ | ----------------------------- | --------------------------------------------- |
+| 400    | `ERR-VAL-001`                 | El body está vacío o un campo es de otro tipo |
+| 400    | `ERR-VAL-601` a `ERR-VAL-610` | Algún campo enviado no pasa la validación     |
+| 400    | `ERR-VAL-207`                 | Algún código de habilidad no existe           |
+| 404    | `ERR-NOT-108`                 | No existe un proyecto con ese id              |
+| 404    | `ERR-NOT-611`                 | El proyecto no tiene un perfil con ese id     |
+
+### DELETE `/proyectos/:idProyecto/perfiles/:idPerfil`
+
+**Respuesta 200:** el perfil eliminado.
+
+**Errores:**
+
+| Status | code          | Cuándo                                    |
+| ------ | ------------- | ----------------------------------------- |
+| 404    | `ERR-NOT-108` | No existe un proyecto con ese id          |
+| 404    | `ERR-NOT-611` | El proyecto no tiene un perfil con ese id |
+
 ---
 
 ## Logros
 
 Los logros dan trazabilidad al avance del proyecto. Cada uno aporta un porcentaje de concreción, y la suma de los logros de un proyecto no puede superar 100%. El enlace al sistema en funcionamiento es el `urlSistema` del proyecto.
 
-| Método | Path                            | Descripción                   |
-| ------ | ------------------------------- | ----------------------------- |
-| POST   | `/proyectos/:proyectoId/logros` | Carga un logro en un proyecto |
+| Método | Path                                     | Descripción                   |
+| ------ | ---------------------------------------- | ----------------------------- |
+| GET    | `/proyectos/:proyectoId/logros`          | Lista los logros del proyecto |
+| POST   | `/proyectos/:proyectoId/logros`          | Carga un logro en un proyecto |
+| GET    | `/proyectos/:proyectoId/logros/:logroId` | Obtiene un logro por id       |
+| PATCH  | `/proyectos/:proyectoId/logros/:logroId` | Modifica un logro             |
+| DELETE | `/proyectos/:proyectoId/logros/:logroId` | Elimina un logro              |
+
+### GET `/proyectos/:proyectoId/logros`
+
+**Respuesta 200:** array de logros (misma forma que la respuesta del `POST`).
+
+**Errores:**
+
+| Status | code          | Cuándo                           |
+| ------ | ------------- | -------------------------------- |
+| 404    | `ERR-NOT-108` | No existe un proyecto con ese id |
 
 ### POST `/proyectos/:proyectoId/logros`
 
@@ -504,6 +576,53 @@ Los logros dan trazabilidad al avance del proyecto. Cada uno aporta un porcentaj
 | 400    | `ERR-EST-109` | El proyecto está finalizado                               |
 | 400    | `ERR-EST-113` | Con este logro, el total del proyecto superaría 100%      |
 | 404    | `ERR-NOT-108` | No existe un proyecto con ese id                          |
+
+### GET `/proyectos/:proyectoId/logros/:logroId`
+
+**Respuesta 200:** el logro.
+
+**Errores:**
+
+| Status | code          | Cuándo                                   |
+| ------ | ------------- | ---------------------------------------- |
+| 404    | `ERR-NOT-108` | No existe un proyecto con ese id         |
+| 404    | `ERR-NOT-114` | El proyecto no tiene un logro con ese id |
+
+### PATCH `/proyectos/:proyectoId/logros/:logroId`
+
+Modificación parcial: se manda solo lo que cambia. Los campos que vienen se validan igual que en el alta.
+
+```json
+{ "porcentaje": 70 }
+```
+
+Para el tope de 100% se cuenta el porcentaje **nuevo** del logro en lugar del anterior. Por ejemplo, con logros de 50% y 30%, el segundo se puede llevar a 50%, pero no a 51%.
+
+**Respuesta 200:** el logro actualizado.
+
+**Errores:**
+
+| Status | code          | Cuándo                                              |
+| ------ | ------------- | --------------------------------------------------- |
+| 400    | `ERR-VAL-901` | `descripcion` vacía o no es texto                   |
+| 400    | `ERR-VAL-902` | `porcentaje` no es número o está fuera de (0, 100]  |
+| 400    | `ERR-VAL-903` | `urlCodigoFuente` no es una URL válida              |
+| 400    | `ERR-EST-109` | El proyecto está finalizado                         |
+| 400    | `ERR-EST-113` | Con el cambio, el total del proyecto superaría 100% |
+| 404    | `ERR-NOT-108` | No existe un proyecto con ese id                    |
+| 404    | `ERR-NOT-114` | El proyecto no tiene un logro con ese id            |
+
+### DELETE `/proyectos/:proyectoId/logros/:logroId`
+
+**Respuesta 200:** el logro eliminado.
+
+**Errores:**
+
+| Status | code          | Cuándo                                   |
+| ------ | ------------- | ---------------------------------------- |
+| 400    | `ERR-EST-109` | El proyecto está finalizado              |
+| 404    | `ERR-NOT-108` | No existe un proyecto con ese id         |
+| 404    | `ERR-NOT-114` | El proyecto no tiene un logro con ese id |
 
 ---
 

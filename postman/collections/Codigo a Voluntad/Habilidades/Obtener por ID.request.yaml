@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/habilidades/:id"
+method: GET
+pathVariables:
+  id: "{{habilidadId}}"
+order: 4000

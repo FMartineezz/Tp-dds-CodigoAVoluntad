@@ -102,6 +102,15 @@ export class FakePersonaColaboradoraRepository extends FakeRepository {
   }
 }
 
+const camposEditablesDePerfil = [
+  "descripcion",
+  "habilidadesRequeridas",
+  "habilidadesOpcionales",
+  "horas",
+  "tipoDeCompromiso",
+  "modalidadDeColaboracion",
+];
+
 const normalizarPerfil = (perfil) => {
   const { id, ...datos } = perfil;
   return {
@@ -122,8 +131,12 @@ export class FakeProyectoRepository extends FakeRepository {
     };
   }
 
-  async obtenerPorTituloYColectivo(titulo) {
-    return copiar(this.documentos.find((p) => p.titulo === titulo)) ?? null;
+  async obtenerPorTituloYColectivo(titulo, colectivoId) {
+    return (
+      copiar(
+        this.documentos.find((p) => p.titulo === titulo && mismoId(p.colectivo, colectivoId)),
+      ) ?? null
+    );
   }
 
   async guardarPerfil(proyectoId, perfil) {
@@ -134,13 +147,40 @@ export class FakeProyectoRepository extends FakeRepository {
     return copiar(perfilGuardado);
   }
 
+  buscarPerfil(proyectoId, perfilId) {
+    return this.buscar(proyectoId)?.perfiles.find((p) => mismoId(p._id, perfilId));
+  }
+
   async obtenerPerfilPorId(proyectoId, perfilId) {
-    return copiar(this.buscar(proyectoId)?.perfiles.find((p) => mismoId(p._id, perfilId)));
+    return copiar(this.buscarPerfil(proyectoId, perfilId)) ?? null;
+  }
+
+  // Igual que el $set posicional del repositorio real: solo campos editables,
+  // y las habilidades se guardan como id
+  async actualizarPerfil(proyectoId, perfilId, cambios) {
+    const perfil = this.buscarPerfil(proyectoId, perfilId);
+    if (!perfil) return null;
+    for (const campo of camposEditablesDePerfil) {
+      if (cambios[campo] !== undefined) perfil[campo] = copiar(cambios[campo]);
+    }
+    perfil.habilidadesRequeridas = perfil.habilidadesRequeridas.map(aId);
+    perfil.habilidadesOpcionales = perfil.habilidadesOpcionales.map(aId);
+    return copiar(perfil);
+  }
+
+  async eliminarPerfil(proyectoId, perfilId) {
+    const perfil = this.buscarPerfil(proyectoId, perfilId);
+    if (!perfil) return null;
+    const proyecto = this.buscar(proyectoId);
+    proyecto.perfiles = proyecto.perfiles.filter((p) => p !== perfil);
+    return copiar(perfil);
   }
 
   async finalizarProyecto(id) {
     const proyecto = this.buscar(id);
-    if (proyecto) proyecto.finalizado = true;
+    if (!proyecto) return null;
+    proyecto.finalizado = true;
+    return copiar(proyecto);
   }
 
   async obtenerPorAlgunaHabilidad(idsHabilidad) {

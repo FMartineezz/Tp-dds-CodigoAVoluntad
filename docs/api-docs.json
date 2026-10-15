@@ -571,7 +571,7 @@
         "properties": {
           "titulo": {
             "type": "string",
-            "description": "Título único.",
+            "description": "No puede repetirse dentro del mismo colectivo.",
             "example": "Plataforma de Donaciones"
           },
           "descripcion": {
@@ -765,6 +765,69 @@
             "format": "date-time"
           }
         }
+      },
+      "PerfilUpdate": {
+        "type": "object",
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "example": "Tester"
+          },
+          "habilidadesRequeridas": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "testing_e_2_e"
+            },
+            "minItems": 1,
+            "description": "Códigos de habilidades obligatorias."
+          },
+          "habilidadesOpcionales": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "desarrollo_web_react"
+            },
+            "minItems": 1,
+            "description": "Códigos de habilidades opcionales."
+          },
+          "horas": {
+            "type": "number",
+            "example": 5
+          },
+          "tipoDeCompromiso": {
+            "$ref": "#/components/schemas/TipoDeCompromiso"
+          },
+          "modalidadDeColaboracion": {
+            "$ref": "#/components/schemas/ModalidadColaboracion"
+          }
+        },
+        "description": "Todos los campos son opcionales, pero tiene que venir al menos uno.",
+        "minProperties": 1
+      },
+      "LogroUpdate": {
+        "type": "object",
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "example": "MVP publicado"
+          },
+          "porcentaje": {
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Porcentaje de concreción que aporta. La suma de los logros del proyecto no puede superar 100.",
+            "example": 40
+          },
+          "urlCodigoFuente": {
+            "type": "string",
+            "format": "uri",
+            "description": "Enlace al código fuente (público).",
+            "example": "https://github.com/colectivo/proyecto"
+          }
+        },
+        "description": "Todos los campos son opcionales. Los que vienen se validan igual que en el alta."
       }
     }
   },
@@ -1514,7 +1577,7 @@
             }
           },
           "409": {
-            "description": "Ya existe un proyecto con ese título. Códigos posibles: `ERR-CSR-110`",
+            "description": "Ya existe un proyecto con ese título en el colectivo. Códigos posibles: `ERR-CSR-110`",
             "content": {
               "application/json": {
                 "schema": {
@@ -1628,7 +1691,14 @@
         },
         "responses": {
           "200": {
-            "description": "Proyecto finalizado (respuesta sin cuerpo)"
+            "description": "Proyecto finalizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proyecto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Cuerpo distinto de { finalizado: true } o proyecto ya finalizado. Códigos posibles: `ERR-VAL-001`, `ERR-EST-109`",
@@ -1726,6 +1796,69 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": ["Perfiles"],
+        "summary": "Agregar un perfil a un proyecto",
+        "description": "Hoy no se verifica que el proyecto exista: con un id válido pero inexistente responde 201 con `null`.",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PerfilInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Perfil creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-VAL-207`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-601",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/proyectos/{idProyecto}/perfiles/{idPerfil}": {
@@ -1757,6 +1890,155 @@
         "responses": {
           "200": {
             "description": "Perfil encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto o el perfil. Códigos posibles: `ERR-NOT-108`, `ERR-NOT-611`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Perfiles"],
+        "summary": "Modificar un perfil",
+        "description": "Modificación parcial. Las habilidades se indican por código y reemplazan a las anteriores.",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          },
+          {
+            "name": "idPerfil",
+            "in": "path",
+            "required": true,
+            "description": "Id del perfil",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PerfilUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Body vacío, datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-001`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-VAL-207`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-001",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto o el perfil. Códigos posibles: `ERR-NOT-108`, `ERR-NOT-611`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Perfiles"],
+        "summary": "Eliminar un perfil",
+        "parameters": [
+          {
+            "name": "idProyecto",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          },
+          {
+            "name": "idPerfil",
+            "in": "path",
+            "required": true,
+            "description": "Id del perfil",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfil eliminado (se devuelve el perfil borrado)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1936,6 +2218,61 @@
             }
           }
         }
+      },
+      "get": {
+        "tags": ["Logros"],
+        "summary": "Listar los logros de un proyecto",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logros del proyecto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Logro"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto. Códigos posibles: `ERR-NOT-108`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/colaboraciones": {
@@ -2078,6 +2415,233 @@
                 },
                 "example": {
                   "code": "ERR-NOT-506",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proyectos/{proyectoId}/logros/{logroId}": {
+      "get": {
+        "tags": ["Logros"],
+        "summary": "Obtener un logro",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          },
+          {
+            "name": "logroId",
+            "in": "path",
+            "required": true,
+            "description": "Id del logro",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logro encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto o el logro. Códigos posibles: `ERR-NOT-108`, `ERR-NOT-114`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Logros"],
+        "summary": "Modificar un logro",
+        "description": "Modificación parcial. Si cambia el porcentaje, el total del proyecto (contando el valor nuevo en lugar del anterior) no puede superar 100%.",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          },
+          {
+            "name": "logroId",
+            "in": "path",
+            "required": true,
+            "description": "Id del logro",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogroUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logro actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logro"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos, proyecto finalizado o el total supera 100%. Códigos posibles: `ERR-VAL-901`, `ERR-VAL-902`, `ERR-VAL-903`, `ERR-EST-109`, `ERR-EST-113`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-901",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto o el logro. Códigos posibles: `ERR-NOT-108`, `ERR-NOT-114`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Logros"],
+        "summary": "Eliminar un logro",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "in": "path",
+            "required": true,
+            "description": "Id del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          },
+          {
+            "name": "logroId",
+            "in": "path",
+            "required": true,
+            "description": "Id del logro",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logro eliminado (se devuelve el logro borrado)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logro"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El proyecto está finalizado. Códigos posibles: `ERR-EST-109`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-EST-109",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe el proyecto o el logro. Códigos posibles: `ERR-NOT-108`, `ERR-NOT-114`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-108",
                   "message": "Descripción del error"
                 }
               }

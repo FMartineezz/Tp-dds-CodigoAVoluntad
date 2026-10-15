@@ -11,20 +11,23 @@ export class ProyectoService {
   }
 
   async crearProyecto(titulo, descripcion, perfiles, colectivo, urlSistema) {
+    //en vez de nombre, usar id
+    const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
+
     //en vez de nombre de colectivo, usar id
-    const proyecto = await this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
+    const proyecto = await this.proyectoRepository.obtenerPorTituloYColectivo(
+      titulo,
+      colectivoEncontrado._id,
+    );
 
     if (proyecto) {
       throw new AppError(
         ErrorCatalog.PROYECTO_YA_EXISTENTE,
         409,
         proyecto.titulo,
-        proyecto.colectivo.nombre,
+        colectivoEncontrado.nombre,
       );
     }
-
-    //en vez de nombre, usar id
-    const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
 
     const perfilesCreados = await Promise.all(
       perfiles.map((perfil) =>
@@ -135,5 +138,21 @@ export class ProyectoService {
       throw new AppError(ErrorCatalog.PERFIL_NO_ENCONTRADO, 404, perfilId);
     }
     return perfil;
+  }
+
+  async actualizarPerfil(proyectoId, perfilId, cambios) {
+    await this.obtenerProyectoPorId(proyectoId);
+    await this.obtenerPerfilPorId(proyectoId, perfilId);
+
+    const cambiosPreparados = await this.perfilService.prepararCambios(cambios);
+
+    return await this.proyectoRepository.actualizarPerfil(proyectoId, perfilId, cambiosPreparados);
+  }
+
+  async eliminarPerfil(proyectoId, perfilId) {
+    await this.obtenerProyectoPorId(proyectoId);
+    await this.obtenerPerfilPorId(proyectoId, perfilId);
+
+    return await this.proyectoRepository.eliminarPerfil(proyectoId, perfilId);
   }
 }

@@ -372,6 +372,86 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Crear perfil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Desarrollo backend\",\n  \"habilidadesRequeridas\": [\n    \"desarrollo_con_node_js_y_express\"\n  ],\n  \"habilidadesOpcionales\": [\n    \"programacion_en_java_script\"\n  ],\n  \"horas\": 20,\n  \"tipoDeCompromiso\": \"mensual\",\n  \"modalidadDeColaboracion\": \"incentivo_economico\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('perfilNuevoId', String(pm.response.json()._id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Modificar perfil",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"horas\": 12,\n  \"habilidadesOpcionales\": [\n    \"programacion_en_java_script\",\n    \"desarrollo_con_node_js_y_express\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilNuevoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilNuevoId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar perfil",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilNuevoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilNuevoId}}"]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -704,6 +784,10 @@
     },
     {
       "key": "perfilId",
+      "value": ""
+    },
+    {
+      "key": "perfilNuevoId",
       "value": ""
     },
     {

@@ -1,0 +1,36 @@
+$kind: http-request
+url: "{{baseUrl}}/proyectos"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "titulo": "Plataforma de Donaciones Comunitarias",
+      "descripcion": "Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.",
+      "colectivo": "Colectivo Ambiental CABA",
+      "urlSistema": "https://donaciones.colectivoambiental.org",
+      "perfiles": [
+        {
+          "descripcion": "Desarrollo frontend",
+          "habilidadesRequeridas": [
+            "programacion_en_java_script"
+          ],
+          "habilidadesOpcionales": [
+            "desarrollo_con_node_js_y_express"
+          ],
+          "horas": 10,
+          "tipoDeCompromiso": "semanal",
+          "modalidadDeColaboracion": "gratuita"
+        }
+      ]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 201) {
+          const body = pm.response.json();
+          pm.collectionVariables.set('proyectoId', String(body._id ?? body.id));
+          pm.collectionVariables.set('perfilId', String(body.perfiles[0]._id));
+      }
+    language: text/javascript
+order: 2000

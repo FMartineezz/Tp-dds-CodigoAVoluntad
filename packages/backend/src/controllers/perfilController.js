@@ -41,13 +41,20 @@ export class PerfilController {
     res.status(201).json(perfil);
   };
 
-  //no usar Number() porque en la db es un objectId(string)
   actualizarPerfil = async (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
+    const { idProyecto, idPerfil } = req.params;
+
+    const perfil = await this.proyectoService.actualizarPerfil(idProyecto, idPerfil, req.body);
+
+    res.status(200).json(perfil);
   };
 
   eliminarPerfil = async (req, res) => {
-    const proyectoId = Number(req.params.idProyecto);
+    const { idProyecto, idPerfil } = req.params;
+
+    const perfil = await this.proyectoService.eliminarPerfil(idProyecto, idPerfil);
+
+    res.status(200).json(perfil);
   };
 
   obtenerColaboradorasAcordes = async (req, res) => {

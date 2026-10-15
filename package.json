@@ -8,6 +8,7 @@
   "scripts": {
     "start:backend": "npm start --workspace=backend",
     "dev:backend": "npm run dev --workspace=backend",
+    "seed:backend": "npm run seed --workspace=backend",
     "start:frontend": "npm start --workspace=frontend",
     "start:dev": "concurrently \"npm run dev:backend\" \"npm run start:frontend\"",
     "test:backend": "npm test --workspace=backend",

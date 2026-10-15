@@ -18,35 +18,91 @@ export class ProyectoRepository {
     return await this.model.findById(id).lean();
   }
 
-  //TODO
-  async obtenerPorTituloYColectivo(titulo) {
-    return await this.model.findOne({ titulo });
+  async obtenerPorTituloYColectivo(titulo, colectivoId) {
+    return await this.model
+      .findOne({
+        titulo,
+        colectivo: colectivoId,
+      })
+      .lean();
   }
 
   async guardarPerfil(proyectoId, perfil) {
-    return await this.model.findByIdAndUpdate(proyectoId, {
-      $push: {
-        perfiles: perfil,
-      },
-    });
+    const proyecto = await this.model.findById(proyectoId);
+
+    if (!proyecto) return null;
+
+    proyecto.perfiles.push(perfil);
+    await proyecto.save();
+
+    return proyecto.perfiles[proyecto.perfiles.length - 1];
   }
 
   async obtenerPerfilPorId(proyectoId, perfilId) {
     const proyecto = await this.obtenerPorId(proyectoId);
 
-    return proyecto?.perfiles.find((perfil) => perfil._id.toString() === perfilId.toString());
+    if (!proyecto) return null;
+
+    return proyecto.perfiles.find((perfil) => String(perfil._id) === String(perfilId)) ?? null;
+  }
+
+  async actualizarPerfil(proyectoId, perfilId, cambios) {
+    const actualizaciones = {};
+    const camposPermitidos = [
+      "descripcion",
+      "habilidadesRequeridas",
+      "habilidadesOpcionales",
+      "horas",
+      "tipoDeCompromiso",
+      "modalidadDeColaboracion",
+    ];
+
+    for (const campo of camposPermitidos) {
+      if (cambios[campo] !== undefined) {
+        actualizaciones[`perfiles.$.${campo}`] = cambios[campo];
+      }
+    }
+
+    if (Object.keys(actualizaciones).length === 0) {
+      return await this.obtenerPerfilPorId(proyectoId, perfilId);
+    }
+
+    const proyecto = await this.model
+      .findOneAndUpdate(
+        { _id: proyectoId, "perfiles._id": perfilId },
+        { $set: actualizaciones },
+        { new: true, runValidators: true },
+      )
+      .lean();
+
+    return proyecto?.perfiles.find((perfil) => String(perfil._id) === String(perfilId)) ?? null;
+  }
+
+  async eliminarPerfil(proyectoId, perfilId) {
+    const perfil = await this.obtenerPerfilPorId(proyectoId, perfilId);
+
+    if (!perfil) return null;
+
+    await this.model.findOneAndUpdate(
+      { _id: proyectoId, "perfiles._id": perfilId },
+      { $pull: { perfiles: { _id: perfilId } } },
+    );
+
+    return perfil;
   }
 
   async finalizarProyecto(id) {
-    await this.model.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          finalizado: true,
+    return await this.model
+      .findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            finalizado: true,
+          },
         },
-      },
-      { new: true },
-    );
+        { new: true },
+      )
+      .lean();
   }
 
   async obtenerPorAlgunaHabilidad(idsHabilidad) {
@@ -58,85 +114,81 @@ export class ProyectoRepository {
       .lean();
   }
 
-  /* guardarLogro(proyectoId, logro) {
-    const proyecto = this.obtenerPorId(proyectoId);
+  async guardarLogro(proyectoId, logro) {
+    const proyecto = await this.model.findById(proyectoId);
 
     if (!proyecto) {
       return null;
     }
 
-    logro.id = this.logroId++;
-    proyecto.logros.push(logro);
+    proyecto.logros.push({
+      descripcion: logro.descripcion,
+      porcentaje: logro.porcentaje,
+      urlCodigoFuente: logro.urlCodigoFuente,
+    });
 
-    return logro;
-  } ADAPTAR TODO AL SIGUIENTE FORMATO ↓ */
+    await proyecto.save();
 
-  async guardarLogro(proyectoId, logro) {
+    return proyecto.logros[proyecto.logros.length - 1];
+  }
+
+  async obtenerLogros(proyectoId) {
+    const proyecto = await this.model.findById(proyectoId).select("logros").lean();
+
+    return proyecto?.logros ?? null;
+  }
+
+  async obtenerLogroPorId(proyectoId, logroId) {
+    const proyecto = await this.model.findById(proyectoId).lean();
+
+    if (!proyecto) {
+      return null;
+    }
+
+    return proyecto.logros.find((l) => l._id.toString() === logroId.toString()) ?? null;
+  }
+
+  async actualizarLogro(proyectoId, logroId, cambios) {
+    const actualizaciones = {};
+
+    for (const campo of ["descripcion", "porcentaje", "urlCodigoFuente"]) {
+      if (cambios[campo] !== undefined) {
+        actualizaciones[`logros.$.${campo}`] = cambios[campo];
+      }
+    }
+
+    if (Object.keys(actualizaciones).length === 0) {
+      return await this.obtenerLogroPorId(proyectoId, logroId);
+    }
+
     const proyecto = await this.model
-      .findByIdAndUpdate(
-        proyectoId,
-        {
-          $push: {
-            logros: logro,
-          },
-        },
-        { new: true },
+      .findOneAndUpdate(
+        { _id: proyectoId, "logros._id": logroId },
+        { $set: actualizaciones },
+        { new: true, runValidators: true },
       )
       .lean();
 
-    return proyecto?.logros.at(-1);
-  } // TODO: pasar todos los siguientes a este formato
-
-  obtenerLogros(proyectoId) {
-    const proyecto = this.obtenerPorId(proyectoId);
-
-    if (!proyecto) {
-      return null;
-    }
-
-    return proyecto.logros;
+    return proyecto?.logros.find((l) => String(l._id) === String(logroId)) ?? null;
   }
 
-  obtenerLogroPorId(proyectoId, logroId) {
-    const proyecto = this.obtenerPorId(proyectoId);
-
-    if (!proyecto) {
-      return null;
-    }
-
-    return proyecto.logros.find((l) => l.id === logroId) ?? null;
-  }
-
-  actualizarLogro(proyectoId, logroId, cambios) {
-    const logro = this.obtenerLogroPorId(proyectoId, logroId);
+  async eliminarLogro(proyectoId, logroId) {
+    const logro = await this.obtenerLogroPorId(proyectoId, logroId);
 
     if (!logro) {
       return null;
     }
 
-    Object.assign(logro, cambios);
-    return logro;
-  }
-
-  eliminarLogro(proyectoId, logroId) {
-    const proyecto = this.obtenerPorId(proyectoId);
-
-    if (!proyecto) {
-      return null;
-    }
-
-    const logro = this.obtenerLogroPorId(proyectoId, logroId);
-
-    if (!logro) {
-      return null;
-    }
-
-    proyecto.logros = proyecto.logros.filter((l) => l.id !== logroId);
+    await this.model.findOneAndUpdate(
+      { _id: proyectoId, "logros._id": logroId },
+      { $pull: { logros: { _id: logroId } } },
+    );
 
     return logro;
   }
+}
 
-  /*   constructor() {
+/*   constructor() {
     this.proyectos = [];
     this.id = 1;
     this.perfilId = 1;
@@ -185,4 +237,3 @@ export class ProyectoRepository {
     return proyecto.perfiles.find((perfil) => perfil.id === perfilId) ?? null;
   }
 */
-}

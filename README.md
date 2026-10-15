@@ -57,8 +57,9 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
    - `MONGODB_URI=mongodb://localhost:27017`
    - `MONGODB_DB_NAME=codigoavoluntad`
    - `SMTP_*` solo hace falta para probar el envío de mails (por ejemplo, con una cuenta de [ethereal.email](https://ethereal.email))
-4. `npm run dev:backend`
-5. La API queda en `http://localhost:8000` (el `SERVER_PORT` del `.env`) y la documentación Swagger en `/api-docs`.
+4. Cargar los datos iniciales: `npm run seed:backend` (**borra** lo que haya en las colecciones de la base del `.env` y vuelve a cargar habilidades, colectivos, colaboradoras, proyectos con perfiles y logros, colaboraciones y mensajes)
+5. `npm run dev:backend`
+6. La API queda en `http://localhost:8000` (el `SERVER_PORT` del `.env`) y la documentación Swagger en `/api-docs`.
 
 Para probar la API a mano está la colección de Postman en `docs/CodigoAVoluntad.postman_collection.json`. Las carpetas están en orden: si se corre entera, cada alta guarda su id en una variable de la colección y los requests siguientes lo usan.
 
