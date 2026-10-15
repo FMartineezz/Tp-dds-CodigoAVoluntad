@@ -36,6 +36,9 @@
     },
     {
       "name": "Perfiles"
+    },
+    {
+      "name": "Logros"
     }
   ],
   "components": {
@@ -47,7 +50,7 @@
           "_id": {
             "type": "string",
             "readOnly": true,
-            "description": "Identificador único del colectivo (asignado tras la persistencia).",
+            "description": "Identificador único del colectivo.",
             "example": "652a9f5d3419c8f2b34c1a2d"
           },
           "nombre": {
@@ -73,8 +76,7 @@
             "type": "array",
             "description": "Lista de _ids proyectos asociados al colectivo.",
             "items": {
-              "$ref": "#/components/schemas/Proyecto",
-              "description": "Estructura del proyecto (o referenciar a un $ref si tenés el esquema de Proyecto)."
+              "$ref": "#/components/schemas/Proyecto"
             },
             "example": []
           }
@@ -244,7 +246,13 @@
       },
       "Proyecto": {
         "type": "object",
-        "required": ["titulo", "descripcion", "perfiles", "colectivo"],
+        "required": [
+          "titulo", 
+          "descripcion", 
+          "perfiles", 
+          "colectivo",
+          "urlSistema"
+        ],
         "properties": {
           "_id": {
             "type": "string",
@@ -274,6 +282,19 @@
             "description": "Nombre del colectivo al que pertenece el proyecto.",
             "example": "Colectivo Ambiental CABA"
           },
+          "urlSistema": {
+            "type": "string",
+            "description": "URL del sistema del proyecto.",
+            "example": "https://urlejemplo.com"
+          },
+          "logros": {
+            "type": "array",
+            "description": "Lista de _ids de logros completados o en proceso.",
+            "items": {
+              "$ref": "#/components/schemas/Logro"
+            },
+            "example": []
+          },
           "finalizado": {
             "type": "boolean",
             "default": false,
@@ -292,7 +313,7 @@
           "_id": {
             "type": "string",
             "readOnly": true,
-            "description": "Identificador único del colectivo (asignado tras la persistencia).",
+            "description": "Identificador único del colectivo.",
             "example": "652a9f5d3419c8f2b34c1a2d"
           },
           "personaColaboradoraId": {
@@ -318,7 +339,7 @@
           "texto"
         ],
         "properties": {
-          "id": {
+          "_id": {
             "type": "string",
             "readOnly": true,
             "example": "660d1f2e8b23a10012f3a4c0"
@@ -341,6 +362,41 @@
             "format": "date-time",
             "readOnly": true,
             "example": "2026-10-14T19:16:00.000Z"
+          }
+        }
+      },
+      "Logro": {
+        "type": "object",
+        "required": [
+          "descripcion",
+          "porcentaje",
+          "urlCodigoFuente"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string",
+            "readOnly": true,
+            "description": "Identificador único",
+            "example": "660d1f2e8b23a10012f3a4c0"
+          },
+          "descripcion": {
+            "type": "string",
+            "description": "Descripción del logro alcanzado",
+            "example": "Implementación completa de la API de gestión de colectivos"
+          },
+          "porcentaje": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Porcentaje de avance o cumplimiento del logro (0 a 100)",
+            "example": 85.5
+          },
+          "urlCodigoFuente": {
+            "type": "string",
+            "format": "uri",
+            "description": "Enlace al repositorio o archivo de código fuente asociado",
+            "example": "https://github.com/usuario/repositorio/blob/main/src/logro.js"
           }
         }
       },
@@ -1023,7 +1079,7 @@
         }
       }
     },
-        "/proyectos/{idProyecto}/perfiles/{idPerfil}/colaboradoras-acordes": {
+    "/proyectos/{idProyecto}/perfiles/{idPerfil}/colaboradoras-acordes": {
       "get": {
         "tags": [
           "Perfiles"
@@ -1061,6 +1117,136 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+
+    "/proyectos/{proyectoId}/logros": {
+      "get": {
+        "tags": [
+          "Logros"
+        ],
+        "summary": "Obtener logros de un proyecto",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "in": "path",
+            "required": true,
+            "description": "ID del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6ac7866e777df03c06e98a58"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logro encontrado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Logros"
+        ],
+        "summary": "Crear un nuevo logro",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "in": "path",
+            "required": true,
+            "description": "ID del Proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6ac78677777df03c06e98a5b"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Logro"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Logro creado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logro"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "//proyectos/{proyectoId}/logros/{logroId}": {
+      "get": {
+        "tags": [
+          "Logros"
+        ],
+        "summary": "Obtener un logro por ID",
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "in": "path",
+            "required": true,
+            "description": "ID del proyecto",
+            "schema": {
+              "type": "string",
+              "example": "6ac7866e777df03c06e98a58"
+            }
+          },
+          {
+            "name": "logroId",
+            "in": "path",
+            "required": true,
+            "description": "ID del logro",
+            "schema": {
+              "type": "string",
+              "example": "6ac7866e777df03c06e98a58"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logro encontrado con éxito",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Logro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Logro no encontrado"
           },
           "500": {
             "description": "Error interno del servidor"
