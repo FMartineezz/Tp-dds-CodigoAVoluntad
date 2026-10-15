@@ -15,16 +15,16 @@ export class ProyectoService {
     const proyecto = await this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
 
     if (proyecto) {
-      throw new AppError(
-        ErrorCatalog.PROYECTO_YA_EXISTENTE,
-        409,
-        proyecto.titulo,
+    throw new AppError(
+      ErrorCatalog.PROYECTO_YA_EXISTENTE,
+      409,
+      proyecto.titulo,
         proyecto.colectivo.nombre,
-      );
-    }
+    );
+  }
 
     //en vez de nombre, usar id
-    const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
+    const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorId(colectivo);
 
     const perfilesCreados = await Promise.all(
       perfiles.map((perfil) =>
@@ -93,7 +93,7 @@ export class ProyectoService {
   async actualizarProyecto(id, cambios = {}) {
     const campos = Object.keys(cambios);
 
-    // Por ahora la única actualización parcial soportada es marcar el proyecto como finalizado.
+    // Por ahora la Ãºnica actualizaciÃ³n parcial soportada es marcar el proyecto como finalizado.
     if (campos.length !== 1 || campos[0] !== "finalizado" || cambios.finalizado !== true) {
       throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
@@ -161,3 +161,5 @@ export class ProyectoService {
   );
   }
 }
+
+

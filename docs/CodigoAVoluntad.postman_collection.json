@@ -1,9 +1,10 @@
 {
   "info": {
-    "_postman_id": "97af0f7a-46c4-4510-a5da-e1ab84afbad3",
+    "_postman_id": "2d10d595-41d6-48e8-a91e-680fe886ef28",
     "name": "Codigo a Voluntad",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "54385115"
+    "_exporter_id": "56343450",
+    "_collection_link": "https://go.postman.co/collection/56343450-2d10d595-41d6-48e8-a91e-680fe886ef28?source=collection_link"
   },
   "item": [
     {
@@ -16,8 +17,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colectivos",
-              "host": ["{{baseUrl}}"],
-              "path": ["colectivos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colectivos"
+              ]
             }
           },
           "response": []
@@ -38,8 +43,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colectivos",
-              "host": ["{{baseUrl}}"],
-              "path": ["colectivos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colectivos"
+              ]
             }
           },
           "response": []
@@ -51,8 +60,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colectivos/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["colectivos", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colectivos",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -75,8 +89,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/habilidades",
-              "host": ["{{baseUrl}}"],
-              "path": ["habilidades"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "habilidades"
+              ]
             }
           },
           "response": []
@@ -97,8 +115,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/habilidades",
-              "host": ["{{baseUrl}}"],
-              "path": ["habilidades"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "habilidades"
+              ]
             }
           },
           "response": []
@@ -110,8 +132,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/habilidades/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["habilidades", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "habilidades",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -134,8 +161,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboraciones",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboraciones"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboraciones"
+              ]
             }
           },
           "response": []
@@ -156,8 +187,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboraciones",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboraciones"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboraciones"
+              ]
             }
           },
           "response": []
@@ -169,8 +204,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboraciones/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboraciones", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboraciones",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -193,8 +233,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ]
             }
           },
           "response": []
@@ -206,7 +250,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"titulo\": \"Plataforma de Donaciones Comunitarias\",\r\n    \"descripcion\": \"Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.\",\r\n    \"habilidadesRequeridas\": [\"programación_en_javascript\"],\r\n    \"horas\": 10,\r\n    \"tipoDeCompromiso\": \"semanal\",\r\n    \"modalidadDeColaboracion\": \"gratuita\",\r\n    \"colectivo\": \"Colectivo Ambiental CABA\"\r\n}",
+              "raw": "{\r\n    \"titulo\": \"Plataforma de Donaciones Comunitarias\",\r\n    \"descripcion\": \"Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.\",\r\n    \"habilidadesRequeridas\": [\"programación_en_javascript\"],\r\n    \"horas\": 10,\r\n    \"tipoDeCompromiso\": \"semanal\",\r\n    \"modalidadDeColaboracion\": \"gratuita\",\r\n    \"colectivo\": \"Colectivo Ambiental CABA\"\r\n, \"urlSistema\": \"https://ejemplo.com\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -215,8 +259,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ]
             }
           },
           "response": []
@@ -228,8 +276,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -256,8 +309,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -280,8 +338,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboradoras"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras"
+              ]
             }
           },
           "response": []
@@ -302,8 +364,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboradoras",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboradoras"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras"
+              ]
             }
           },
           "response": []
@@ -315,8 +381,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboradoras", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -334,6 +405,22 @@
       "item": [
         {
           "name": "Crear logro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.id !== undefined && body.id !== null) {",
+                  "        pm.collectionVariables.set('logroId', String(body.id));",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -353,26 +440,17 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "logros"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "logros"
+              ]
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "    const body = pm.response.json();",
-                  "    if (body.id !== undefined && body.id !== null) {",
-                  "        pm.collectionVariables.set('logroId', String(body.id));",
-                  "    }",
-                  "}"
-                ]
-              }
-            }
-          ]
+          "response": []
         },
         {
           "name": "Listar logros del proyecto",
@@ -381,10 +459,17 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "logros"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "logros"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Obtener logro por ID",
@@ -393,10 +478,18 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "logros", "{{logroId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "logros",
+                "{{logroId}}"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Modificar logro",
@@ -419,10 +512,18 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "logros", "{{logroId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "logros",
+                "{{logroId}}"
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Eliminar logro",
@@ -431,18 +532,190 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "logros", "{{logroId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "logros",
+                "{{logroId}}"
+              ]
             }
-          }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Perfiles",
+      "item": [
+        {
+          "name": "Obtener todos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\nif (pm.response.code === 201) {\r\n  const body = pm.response.json();\r\n  const perfilId = body._id ?? body.id;\r\n\r\n  if (perfilId) {\r\n    pm.collectionVariables.set(\"perfilId\", String(perfilId));\r\n  }\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "\r\n{\r\n  \"descripcion\": \"Implementar la API\",\r\n  \"habilidadesRequeridas\": [\r\n    \"programacion_en_java_script\"\r\n  ],\r\n  \"habilidadesOpcionales\": [],\r\n  \"horas\": 10,\r\n  \"tipoDeCompromiso\": \"semanal\",\r\n  \"modalidadDeColaboracion\": \"gratuita\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles",
+                "{{perfilId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "\r\n{\r\n  \"descripcion\": \"Implementar y documentar la API\",\r\n  \"horas\": 12\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles",
+                "{{perfilId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles",
+                "{{perfilId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Colaboradoras acordes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}/colaboradoras-acordes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles",
+                "{{perfilId}}",
+                "colaboradoras-acordes"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }
   ],
-
   "variable": [
     {
       "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "proyectoId",
+      "value": ""
+    },
+    {
+      "key": "logroId",
+      "value": ""
+    },
+    {
+      "key": "perfilId",
       "value": ""
     }
   ]

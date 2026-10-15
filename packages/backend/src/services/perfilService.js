@@ -1,4 +1,4 @@
-import { Perfil } from "../models/perfil.js";
+﻿import { Perfil } from "../models/perfil.js";
 
 export class PerfilService {
   constructor({ habilidadService }) {
@@ -20,7 +20,7 @@ export class PerfilService {
     );
 
     const habilidadesEncontradasO = await Promise.all(
-      habilidadesOpcionales.map((codigo) => {
+      (habilidadesOpcionales ?? []).map((codigo) => {
         return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
       }),
     );
@@ -60,3 +60,4 @@ export class PerfilService {
 }
 
 }
+
