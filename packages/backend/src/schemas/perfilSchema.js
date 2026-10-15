@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+﻿import mongoose from "mongoose";
 import { Perfil } from "../models/perfil.js";
 import { ModalidadColaboracion, TipoCompromiso } from "../models/proyecto.js";
 
@@ -26,20 +26,7 @@ export const perfilSchema = new mongoose.Schema(
         },
       },
     },
-    habilidadesOpcionales: {
-      type: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Habilidad",
-        },
-      ],
-      required: true,
-      validate: {
-        validator: function (v) {
-          return Array.isArray(v) && v.length > 0;
-        },
-      },
-    },
+    habilidadesOpcionales: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Habilidad" }], default: [] },
     horas: {
       type: Number,
       required: false,
@@ -66,3 +53,4 @@ export const perfilSchema = new mongoose.Schema(
 );
 
 perfilSchema.loadClass(Perfil);
+

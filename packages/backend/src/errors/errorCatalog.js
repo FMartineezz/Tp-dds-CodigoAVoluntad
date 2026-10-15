@@ -248,11 +248,6 @@ const ErrorCatalog = Object.freeze({
     message: "Las habilidades requeridas son obligatorias",
   },
 
-  PERFIL_HABILIDADES_OPCIONALES: {
-    code: "ERR-VAL-603",
-    message: "Las habilidades opcionales son obligatorias",
-  },
-
   PERFIL_HORAS_REQUERIDAS: {
     code: "ERR-VAL-604",
     message: "Las horas son requeridas",
