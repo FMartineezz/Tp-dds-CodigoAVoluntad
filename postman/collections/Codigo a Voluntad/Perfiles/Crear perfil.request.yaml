@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "descripcion": "Desarrollo backend",
+      "habilidadesRequeridas": [
+        "desarrollo_con_node_js_y_express"
+      ],
+      "habilidadesOpcionales": [
+        "programacion_en_java_script"
+      ],
+      "horas": 20,
+      "tipoDeCompromiso": "mensual",
+      "modalidadDeColaboracion": "incentivo_economico"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 201) {
+          pm.collectionVariables.set('perfilNuevoId', String(pm.response.json()._id));
+      }
+    language: text/javascript
+order: 3000

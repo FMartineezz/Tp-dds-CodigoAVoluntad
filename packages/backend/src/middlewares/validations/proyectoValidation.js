@@ -81,8 +81,4 @@ const validarProyecto = (req, res, next) => {
   next();
 };
 
-
 export default validarProyecto;
-
-
-

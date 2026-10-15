@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/habilidades"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "titulo": "Desarrollo con Node.js y Express",
+      "descripcion": "Creación de APIs RESTful, ruteo y manejo de middleware."
+    }
+order: 3000

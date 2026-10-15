@@ -19,64 +19,64 @@ export class ProyectoRepository {
   }
 
   async obtenerPorTituloYColectivo(titulo, colectivoId) {
-  return await this.model.findOne({
-    titulo,
-    colectivo: colectivoId,
-  }).lean();
+    return await this.model
+      .findOne({
+        titulo,
+        colectivo: colectivoId,
+      })
+      .lean();
   }
 
-async guardarPerfil(proyectoId, perfil) {
-  const proyecto = await this.model.findById(proyectoId);
+  async guardarPerfil(proyectoId, perfil) {
+    const proyecto = await this.model.findById(proyectoId);
 
-  if (!proyecto) return null;
+    if (!proyecto) return null;
 
-  proyecto.perfiles.push(perfil);
-  await proyecto.save();
+    proyecto.perfiles.push(perfil);
+    await proyecto.save();
 
-  return proyecto.perfiles[proyecto.perfiles.length - 1];
+    return proyecto.perfiles[proyecto.perfiles.length - 1];
   }
 
-async obtenerPerfilPorId(proyectoId, perfilId) {
-  const proyecto = await this.obtenerPorId(proyectoId);
+  async obtenerPerfilPorId(proyectoId, perfilId) {
+    const proyecto = await this.obtenerPorId(proyectoId);
 
-  if (!proyecto) return null;
+    if (!proyecto) return null;
 
-  return proyecto.perfiles.find(
-    (perfil) => String(perfil._id) === String(perfilId)
-  ) ?? null;
-}
+    return proyecto.perfiles.find((perfil) => String(perfil._id) === String(perfilId)) ?? null;
+  }
 
   async actualizarPerfil(proyectoId, perfilId, cambios) {
-  const actualizaciones = {};
-  const camposPermitidos = [
-    "descripcion",
-    "habilidadesRequeridas",
-    "habilidadesOpcionales",
-    "horas",
-    "tipoDeCompromiso",
-    "modalidadDeColaboracion",
-  ];
+    const actualizaciones = {};
+    const camposPermitidos = [
+      "descripcion",
+      "habilidadesRequeridas",
+      "habilidadesOpcionales",
+      "horas",
+      "tipoDeCompromiso",
+      "modalidadDeColaboracion",
+    ];
 
-  for (const campo of camposPermitidos) {
-    if (cambios[campo] !== undefined) {
-      actualizaciones[`perfiles.$.${campo}`] = cambios[campo];
+    for (const campo of camposPermitidos) {
+      if (cambios[campo] !== undefined) {
+        actualizaciones[`perfiles.$.${campo}`] = cambios[campo];
+      }
     }
+
+    if (Object.keys(actualizaciones).length === 0) {
+      return await this.obtenerPerfilPorId(proyectoId, perfilId);
+    }
+
+    const proyecto = await this.model
+      .findOneAndUpdate(
+        { _id: proyectoId, "perfiles._id": perfilId },
+        { $set: actualizaciones },
+        { new: true, runValidators: true },
+      )
+      .lean();
+
+    return proyecto?.perfiles.find((perfil) => String(perfil._id) === String(perfilId)) ?? null;
   }
-
-  if (Object.keys(actualizaciones).length === 0) {
-    return await this.obtenerPerfilPorId(proyectoId, perfilId);
-  }
-
-  const proyecto = await this.model.findOneAndUpdate(
-    { _id: proyectoId, "perfiles._id": perfilId },
-    { $set: actualizaciones },
-    { new: true, runValidators: true },
-  ).lean();
-
-  return proyecto?.perfiles.find(
-    (perfil) => String(perfil._id) === String(perfilId),
-  ) ?? null;
-}
 
   async eliminarPerfil(proyectoId, perfilId) {
     const perfil = await this.obtenerPerfilPorId(proyectoId, perfilId);
@@ -92,16 +92,18 @@ async obtenerPerfilPorId(proyectoId, perfilId) {
   }
 
   async finalizarProyecto(id) {
-  return await this.model.findByIdAndUpdate(
-    id,
-    {
-      $set: {
-        finalizado: true,
-      },
-    },
-    { new: true },
-  ).lean();
-}
+    return await this.model
+      .findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            finalizado: true,
+          },
+        },
+        { new: true },
+      )
+      .lean();
+  }
 
   async obtenerPorAlgunaHabilidad(idsHabilidad) {
     return await this.model
@@ -113,30 +115,27 @@ async obtenerPerfilPorId(proyectoId, perfilId) {
   }
 
   async guardarLogro(proyectoId, logro) {
-  const proyecto = await this.model.findById(proyectoId);
+    const proyecto = await this.model.findById(proyectoId);
 
-  if (!proyecto) {
-    return null;
-  }
+    if (!proyecto) {
+      return null;
+    }
 
-  proyecto.logros.push({
-    descripcion: logro.descripcion,
-    porcentaje: logro.porcentaje,
-    urlCodigoFuente: logro.urlCodigoFuente,
-  });
+    proyecto.logros.push({
+      descripcion: logro.descripcion,
+      porcentaje: logro.porcentaje,
+      urlCodigoFuente: logro.urlCodigoFuente,
+    });
 
-  await proyecto.save();
+    await proyecto.save();
 
-  return proyecto.logros[proyecto.logros.length - 1];
+    return proyecto.logros[proyecto.logros.length - 1];
   }
 
   async obtenerLogros(proyectoId) {
-  const proyecto = await this.model
-    .findById(proyectoId)
-    .select("logros")
-    .lean();
+    const proyecto = await this.model.findById(proyectoId).select("logros").lean();
 
-  return proyecto?.logros ?? null;
+    return proyecto?.logros ?? null;
   }
 
   async obtenerLogroPorId(proyectoId, logroId) {
@@ -150,50 +149,46 @@ async obtenerPerfilPorId(proyectoId, perfilId) {
   }
 
   async actualizarLogro(proyectoId, logroId, cambios) {
-  const actualizaciones = {};
+    const actualizaciones = {};
 
-  for (const campo of ["descripcion", "porcentaje", "urlCodigoFuente"]) {
-    if (cambios[campo] !== undefined) {
-      actualizaciones[`logros.$.${campo}`] = cambios[campo];
+    for (const campo of ["descripcion", "porcentaje", "urlCodigoFuente"]) {
+      if (cambios[campo] !== undefined) {
+        actualizaciones[`logros.$.${campo}`] = cambios[campo];
+      }
     }
-  }
 
-  if (Object.keys(actualizaciones).length === 0) {
-    return await this.obtenerLogroPorId(proyectoId, logroId);
-  }
+    if (Object.keys(actualizaciones).length === 0) {
+      return await this.obtenerLogroPorId(proyectoId, logroId);
+    }
 
-  const proyecto = await this.model
-    .findOneAndUpdate(
-      { _id: proyectoId, "logros._id": logroId },
-      { $set: actualizaciones },
-      { new: true, runValidators: true },
-    )
-    .lean();
+    const proyecto = await this.model
+      .findOneAndUpdate(
+        { _id: proyectoId, "logros._id": logroId },
+        { $set: actualizaciones },
+        { new: true, runValidators: true },
+      )
+      .lean();
 
-  return (
-    proyecto?.logros.find(
-      (l) => String(l._id) === String(logroId),
-    ) ?? null
-  );
+    return proyecto?.logros.find((l) => String(l._id) === String(logroId)) ?? null;
   }
 
   async eliminarLogro(proyectoId, logroId) {
-  const logro = await this.obtenerLogroPorId(proyectoId, logroId);
+    const logro = await this.obtenerLogroPorId(proyectoId, logroId);
 
-  if (!logro) {
-    return null;
-  }
+    if (!logro) {
+      return null;
+    }
 
-  await this.model.findOneAndUpdate(
-    { _id: proyectoId, "logros._id": logroId },
-    { $pull: { logros: { _id: logroId } } },
-  );
+    await this.model.findOneAndUpdate(
+      { _id: proyectoId, "logros._id": logroId },
+      { $pull: { logros: { _id: logroId } } },
+    );
 
-  return logro;
+    return logro;
   }
 }
 
-  /*   constructor() {
+/*   constructor() {
     this.proyectos = [];
     this.id = 1;
     this.perfilId = 1;

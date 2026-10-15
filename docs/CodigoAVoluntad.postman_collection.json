@@ -8,71 +8,17 @@
   },
   "item": [
     {
-      "name": "Colectivos",
+      "name": "Health Check",
       "item": [
         {
-          "name": "Obtener todos",
+          "name": "Health Check",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/colectivos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Crear",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"nombre\": \"Colectivo Ambiental CABA\",\r\n    \"descripcion\": \"Organización dedicada a promover el cuidado del medio ambiente y la sustentabilidad en la Ciudad de Buenos Aires.\",\r\n    \"ubicacion\": \"caba\",\r\n    \"tipoDeColectivo\": \"fundacion\",\r\n    \"proyectos\": []\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/colectivos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Obtener por ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/colectivos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos",
-                ":id"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "1"
-                }
-              ]
+              "raw": "{{baseUrl}}/healthCheck",
+              "host": ["{{baseUrl}}"],
+              "path": ["healthCheck"]
             }
           },
           "response": []
@@ -123,6 +69,47 @@
               ]
             }
           },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('habilidadId', String(body.id ?? body._id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear (Node.js)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Desarrollo con Node.js y Express\",\n  \"descripcion\": \"Creación de APIs RESTful, ruteo y manejo de middleware.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/habilidades",
+              "host": ["{{baseUrl}}"],
+              "path": ["habilidades"]
+            }
+          },
           "response": []
         },
         {
@@ -142,7 +129,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "1"
+                  "value": "{{habilidadId}}"
                 }
               ]
             }
@@ -152,7 +139,7 @@
       ]
     },
     {
-      "name": "Colaboraciones",
+      "name": "Colectivos",
       "item": [
         {
           "name": "Obtener todos",
@@ -160,13 +147,9 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/colaboraciones",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboraciones"
-              ]
+              "raw": "{{baseUrl}}/colectivos",
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos"]
             }
           },
           "response": []
@@ -178,7 +161,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"personaColaboradora\": 1,\r\n  \"proyecto\": 101\r\n}",
+              "raw": "{\n  \"nombre\": \"Colectivo Ambiental CABA\",\n  \"descripcion\": \"Organización dedicada a promover el cuidado del medio ambiente y la sustentabilidad en la Ciudad de Buenos Aires.\",\n  \"ubicacion\": \"caba\",\n  \"tipoDeColectivo\": \"fundacion\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -186,16 +169,26 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/colaboraciones",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboraciones"
-              ]
+              "raw": "{{baseUrl}}/colectivos",
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos"]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('colectivoId', String(body.id ?? body._id));",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Obtener por ID",
@@ -203,123 +196,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/colaboraciones/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboraciones",
-                ":id"
-              ],
+              "raw": "{{baseUrl}}/colectivos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", ":id"],
               "variable": [
                 {
                   "key": "id",
-                  "value": ""
-                }
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Proyectos",
-      "item": [
-        {
-          "name": "Obtener todos",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/proyectos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Crear",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"titulo\": \"Plataforma de Donaciones Comunitarias\",\r\n    \"descripcion\": \"Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.\",\r\n    \"habilidadesRequeridas\": [\"programación_en_javascript\"],\r\n    \"horas\": 10,\r\n    \"tipoDeCompromiso\": \"semanal\",\r\n    \"modalidadDeColaboracion\": \"gratuita\",\r\n    \"colectivo\": \"Colectivo Ambiental CABA\"\r\n, \"urlSistema\": \"https://ejemplo.com\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/proyectos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Obtener por ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/proyectos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                ":id"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "1"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Finalizar",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/proyectos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                ":id"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
+                  "value": "{{colectivoId}}"
                 }
               ]
             }
@@ -355,7 +238,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"nombreFantasia\": \"DevNeko\",\r\n    \"git\": \"https://github.com/devneko\",\r\n    \"nombre\": \"Lucía\",\r\n    \"apellido\": \"Gómez\",\r\n    \"habilidades\": [\"programación_en_javascript\"],\r\n    \"pronombres\": \"ella\",\r\n    \"presentacion\": \"Desarrolladora Frontend apasionada por proyectos comunitarios y de código abierto.\"\r\n}",
+              "raw": "{\n  \"nombreFantasia\": \"DevNeko\",\n  \"git\": \"https://github.com/devneko\",\n  \"nombre\": \"Lucía\",\n  \"apellido\": \"Gómez\",\n  \"habilidades\": [\n    \"programacion_en_java_script\"\n  ],\n  \"pronombres\": \"ella\",\n  \"presentacion\": \"Desarrolladora Frontend apasionada por proyectos comunitarios y de código abierto.\",\n  \"contactos\": [\n    {\n      \"tipo\": \"email\",\n      \"valor\": \"devneko@mail.com\"\n    },\n    {\n      \"tipo\": \"whatsapp\",\n      \"valor\": \"1127891234\"\n    }\n  ],\n  \"bloquearMensajeInterno\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -372,7 +255,21 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('colaboradoraId', String(body.id ?? body._id));",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Obtener por ID",
@@ -391,9 +288,354 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "1"
+                  "value": "{{colaboradoraId}}"
                 }
               ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Proyectos",
+      "item": [
+        {
+          "name": "Obtener todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Plataforma de Donaciones Comunitarias\",\n  \"descripcion\": \"Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.\",\n  \"colectivo\": \"Colectivo Ambiental CABA\",\n  \"urlSistema\": \"https://donaciones.colectivoambiental.org\",\n  \"perfiles\": [\n    {\n      \"descripcion\": \"Desarrollo frontend\",\n      \"habilidadesRequeridas\": [\n        \"programacion_en_java_script\"\n      ],\n      \"habilidadesOpcionales\": [\n        \"desarrollo_con_node_js_y_express\"\n      ],\n      \"horas\": 10,\n      \"tipoDeCompromiso\": \"semanal\",\n      \"modalidadDeColaboracion\": \"gratuita\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('proyectoId', String(body._id ?? body.id));",
+                  "    pm.collectionVariables.set('perfilId', String(body.perfiles[0]._id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{proyectoId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Perfiles",
+      "item": [
+        {
+          "name": "Listar perfiles del proyecto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener perfil por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear perfil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Desarrollo backend\",\n  \"habilidadesRequeridas\": [\n    \"desarrollo_con_node_js_y_express\"\n  ],\n  \"habilidadesOpcionales\": [\n    \"programacion_en_java_script\"\n  ],\n  \"horas\": 20,\n  \"tipoDeCompromiso\": \"mensual\",\n  \"modalidadDeColaboracion\": \"incentivo_economico\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('perfilNuevoId', String(pm.response.json()._id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Modificar perfil",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"horas\": 12,\n  \"habilidadesOpcionales\": [\n    \"programacion_en_java_script\",\n    \"desarrollo_con_node_js_y_express\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilNuevoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilNuevoId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar perfil",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilNuevoId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilNuevoId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Colaboraciones",
+      "item": [
+        {
+          "name": "Obtener todos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colaboraciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personaColaboradoraId\": \"{{colaboradoraId}}\",\n  \"proyectoId\": \"{{proyectoId}}\",\n  \"anonima\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colaboraciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('colaboracionId', String(body.id ?? body._id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colaboraciones/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colaboracionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Búsquedas",
+      "item": [
+        {
+          "name": "Colaboradoras acordes a un perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}/colaboradoras-acordes",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles",
+                "{{perfilId}}",
+                "colaboradoras-acordes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Proyectos acordes a una colaboradora",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras/{{colaboradoraId}}/proyectos-acordes",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", "{{colaboradoraId}}", "proyectos-acordes"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Mensajes",
+      "item": [
+        {
+          "name": "Enviar mensaje desde un colectivo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personaColaboradoraId\": \"{{colaboradoraId}}\",\n  \"texto\": \"¡Hola! Tu perfil encaja con nuestro proyecto de donaciones.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colectivos/{{colectivoId}}/mensajes",
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", "{{colectivoId}}", "mensajes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bandeja de entrada de una colaboradora",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras/{{colaboradoraId}}/mensajes",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", "{{colaboradoraId}}", "mensajes"]
             }
           },
           "response": []
@@ -699,11 +941,81 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Cierre de proyecto",
+      "item": [
+        {
+          "name": "Finalizar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"finalizado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{proyectoId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "habilidadId",
+      "value": ""
+    },
+    {
+      "key": "colectivoId",
+      "value": ""
+    },
+    {
+      "key": "colaboradoraId",
+      "value": ""
+    },
+    {
+      "key": "proyectoId",
+      "value": ""
+    },
+    {
+      "key": "perfilId",
+      "value": ""
+    },
+    {
+      "key": "perfilNuevoId",
+      "value": ""
+    },
+    {
+      "key": "colaboracionId",
+      "value": ""
+    },
+    {
+      "key": "logroId",
       "value": ""
     },
     {
