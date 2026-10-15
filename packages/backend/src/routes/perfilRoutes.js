@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { perfilController } from "../container.js";
-import validarPerfil from "../middlewares/validations/perfilValidation.js";
+import validarPerfil, { validarActualizacionPerfil } from "../middlewares/validations/perfilValidation.js";
 
 export default function proyectoRoutes() {
   const router = Router();
@@ -11,7 +11,7 @@ export default function proyectoRoutes() {
 
   router.post("/proyectos/:idProyecto/perfiles", validarPerfil, perfilController.crearPerfil);
 
-  router.patch("/proyectos/:idProyecto/perfiles/:idPerfil", perfilController.actualizarPerfil);
+  router.patch("/proyectos/:idProyecto/perfiles/:idPerfil", validarActualizacionPerfil, perfilController.actualizarPerfil);
 
   router.delete("/proyectos/:idProyecto/perfiles/:idPerfil", perfilController.eliminarPerfil);
 

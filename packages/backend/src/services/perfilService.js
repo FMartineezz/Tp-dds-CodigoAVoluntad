@@ -1,4 +1,4 @@
-import { Perfil } from "../models/perfil.js";
+﻿import { Perfil } from "../models/perfil.js";
 
 export class PerfilService {
   constructor({ habilidadService }) {
@@ -20,7 +20,7 @@ export class PerfilService {
     );
 
     const habilidadesEncontradasO = await Promise.all(
-      habilidadesOpcionales.map((codigo) => {
+      (habilidadesOpcionales ?? []).map((codigo) => {
         return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
       }),
     );
@@ -36,4 +36,28 @@ export class PerfilService {
 
     return perfil;
   }
+
+  async prepararCambios(cambios) {
+  const cambiosPreparados = { ...cambios };
+
+  if (cambios.habilidadesRequeridas !== undefined) {
+    cambiosPreparados.habilidadesRequeridas = await Promise.all(
+      cambios.habilidadesRequeridas.map((codigo) =>
+        this.habilidadService.obtenerHabilidadPorCodigo(codigo),
+      ),
+    );
+  }
+
+  if (cambios.habilidadesOpcionales !== undefined) {
+    cambiosPreparados.habilidadesOpcionales = await Promise.all(
+      cambios.habilidadesOpcionales.map((codigo) =>
+        this.habilidadService.obtenerHabilidadPorCodigo(codigo),
+      ),
+    );
+  }
+
+  return cambiosPreparados;
 }
+
+}
+
