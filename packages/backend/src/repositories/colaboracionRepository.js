@@ -21,6 +21,20 @@ export class ColaboracionRepository {
       .populate("proyecto")
       .lean();
   }
+
+  //Estadisticas
+  async contarTotalYAnonimas() {
+    return await this.model.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          anonimas: { $sum: { $cond: ["$anonima", 1, 0] } },
+        },
+      },
+      { $project: { _id: 0, total: 1, anonimas: 1 } },
+    ]);
+  }
 }
 
 /*   constructor() {

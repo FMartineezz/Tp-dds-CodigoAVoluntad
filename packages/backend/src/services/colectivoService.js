@@ -57,4 +57,12 @@ export class ColectivoService {
     colectivo.proyectos.push(proyectoId);
     await this.repository.agregarProyecto(colectivoId, proyectoId);
   }
+
+  //Estadisticas
+  async obtenerEstadisticas() {
+    const porUbicacion = await this.repository.contarPorUbicacion();
+    const total = porUbicacion.reduce((suma, grupo) => suma + grupo.cantidad, 0);
+
+    return { total, porUbicacion };
+  }
 }

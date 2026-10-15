@@ -29,6 +29,15 @@ export class ColectivoRepository {
       },
     });
   }
+
+  //Estadisticas
+  async contarPorUbicacion() {
+    return await this.model.aggregate([
+      { $group: { _id: "$ubicacion", cantidad: { $sum: 1 } } },
+      { $sort: { cantidad: -1 } },
+      { $project: { _id: 0, ubicacion: "$_id", cantidad: 1 } },
+    ]);
+  }
 }
 
 /*   constructor() {

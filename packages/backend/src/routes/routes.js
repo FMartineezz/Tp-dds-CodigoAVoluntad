@@ -6,6 +6,7 @@ import colaboracionRoutes from "./colaboracionRoutes.js";
 import healthCheckRoutes from "./healthCheckRoutes.js";
 import perfilRoutes from "./perfilRoutes.js";
 import swaggerRoutes from "./swaggerRoutes.js";
+import estadisticasRoutes from "./estadisticasRoutes.js";
 
 const routes = [
   habilidadRoutes(),
@@ -15,7 +16,8 @@ const routes = [
   colaboracionRoutes(),
   healthCheckRoutes(),
   perfilRoutes(),
-  swaggerRoutes()
+  swaggerRoutes(),
+  estadisticasRoutes(),
 ];
 
 export default routes;

@@ -83,4 +83,16 @@ export class PersonaColaboradoraService {
     const { contactos, ...resto } = personaColaboradora;
     return resto;
   }
+
+  //Estadisticas
+  async obtenerEstadisticas() {
+    const resultado = await this.personaColaboradoraRepository.obtenerEstadisticas();
+    const { total, bloqueanMensajes, conContactos, promedioHabilidades } = resultado[0] ?? {
+      total: 0,
+      bloqueanMensajes: 0,
+      conContactos: 0,
+      promedioHabilidades: 0,
+    };
+    return { total, bloqueanMensajes, conContactos, promedioHabilidades };
+  }
 }

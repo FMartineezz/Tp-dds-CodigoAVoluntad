@@ -13,6 +13,7 @@ import { PersonaColaboradoraService } from "./services/personaColaboradoraServic
 import { PerfilService } from "./services/perfilService.js";
 import { MensajeService } from "./services/mensajeService.js";
 import { BusquedaService } from "./services/busquedaService.js";
+import { EstadisticasService } from "./services/estadisticasService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -22,6 +23,7 @@ import { PersonaColaboradoraController } from "./controllers/personaColaboradora
 import { HealthCheckController } from "./controllers/healthCheckController.js";
 import { PerfilController } from "./controllers/perfilController.js";
 import { MensajeController } from "./controllers/mensajeController.js";
+import { EstadisticasController } from "./controllers/estadisticasController.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
@@ -55,6 +57,12 @@ const mensajeService = new MensajeService({
   colectivoService,
   personaColaboradoraService,
 });
+const estadisticasService = new EstadisticasService({
+  colaboracionService,
+  colectivoService,
+  proyectoService,
+  personaColaboradoraService,
+});
 
 // Controllers: dependen de services.
 export const proyectoController = new ProyectoController({ proyectoService });
@@ -68,3 +76,4 @@ export const personaColaboradoraController = new PersonaColaboradoraController({
 export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });
+export const estadisticasController = new EstadisticasController({ estadisticasService });

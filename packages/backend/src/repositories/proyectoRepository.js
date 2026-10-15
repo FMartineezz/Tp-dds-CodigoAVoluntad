@@ -58,6 +58,20 @@ export class ProyectoRepository {
       })
       .lean();
   }
+
+  //Estadisticas
+  async contarTotalYActicvos() {
+    return await this.model.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          activos: { $sum: { $cond: ["$finalizado", 0, 1] } },
+        },
+      },
+      { $project: { _id: 0, total: 1, activos: 1 } },
+    ]);
+  }
 }
 
 /*   constructor() {
