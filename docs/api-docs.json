@@ -1206,7 +1206,7 @@
         }
       }
     },
-    "//proyectos/{proyectoId}/logros/{logroId}": {
+    "/proyectos/{proyectoId}/logros/{logroId}": {
       "get": {
         "tags": [
           "Logros"
