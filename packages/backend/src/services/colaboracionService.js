@@ -43,10 +43,8 @@ export class ColaboracionService {
     return colaboracion;
   }
 
-  //revisar ocultarSiEsAnonima
   async obtenerColaboraciones() {
-    const colaboraciones = await this.colaboracionRepository.obtenerTodas();
-    return colaboraciones.map((colaboracion) => this.ocultarSiEsAnonima(colaboracion));
+    return await this.colaboracionRepository.obtenerTodas();
   }
 
   async obtenerColaboracionPorId(id) {
@@ -56,16 +54,7 @@ export class ColaboracionService {
       throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);
     }
 
-    return this.ocultarSiEsAnonima(colaboracion);
+    return colaboracion;
   }
 
-  //agregar esto en la query de la db?. para no traer la info y despues mapearla
-  ocultarSiEsAnonima(colaboracion) {
-    return {
-      ...colaboracion,
-      personaColaboradora: colaboracion.anonima
-        ? null
-        : this.personaColaboradoraService.ocultarContactos(colaboracion.personaColaboradora),
-    };
-  }
 }

@@ -22,6 +22,9 @@ export const logroSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    createdAt: { type: Date, select: false },
+    updatedAt: { type: Date, select: false },
+    __v: { type: Number, select: false }
   },
   {
     timestamps: true,
