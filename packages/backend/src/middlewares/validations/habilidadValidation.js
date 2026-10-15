@@ -1,5 +1,6 @@
 import { z as zod } from "zod";
 import ErrorCatalog from "../../errors/errorCatalog.js";
+import { AppError } from "../../errors/appError.js";
 
 const habilidadSchema = zod.object({
   // zod.tipoDeDatoQueDeberiaSer({ required_error: CodigoSiEsteCampoNoViaja, invalid_type_error: CodigoSiViajaPeroConOtroTipoDeDato }).min(longitudMinima, CodigoSiNoLlegaAEsaLongitud)

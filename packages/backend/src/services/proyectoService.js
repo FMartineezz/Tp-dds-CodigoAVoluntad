@@ -3,52 +3,66 @@ import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
 export class ProyectoService {
-  constructor({ proyectoRepository, perfilService, colectivoService }) {
+  constructor({ proyectoRepository, perfilService, colectivoService, personaColaboradoraService }) {
     this.proyectoRepository = proyectoRepository;
     this.perfilService = perfilService;
     this.colectivoService = colectivoService;
+    this.personaColaboradoraService = personaColaboradoraService;
   }
 
-  crearProyecto(titulo, descripcion, perfiles, colectivo) {
-    const proyecto = this.proyectoRepository.obtenerPorTituloYColectivo(titulo, colectivo);
+  async crearProyecto(titulo, descripcion, perfiles, colectivo, urlSistema) {
+    //en vez de nombre, usar id
+    const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
+
+    //en vez de nombre de colectivo, usar id
+    const proyecto = await this.proyectoRepository.obtenerPorTituloYColectivo(
+      titulo,
+      colectivoEncontrado._id,
+    );
 
     if (proyecto) {
       throw new AppError(
         ErrorCatalog.PROYECTO_YA_EXISTENTE,
         409,
         proyecto.titulo,
-        proyecto.colectivo.nombre,
+        colectivoEncontrado.nombre,
       );
     }
 
-    const colectivoEncontrado = this.colectivoService.obtenerColectivoPorNombre(colectivo);
-
-    const perfilesCreados = perfiles.map((perfil) =>
-      this.perfilService.crearPerfil(
-        perfil.descripcion,
-        perfil.habilidadesRequeridas,
-        perfil.habilidadesOpcionales,
-        perfil.horas,
-        perfil.tipoDeCompromiso,
-        perfil.modalidadDeColaboracion,
+    const perfilesCreados = await Promise.all(
+      perfiles.map((perfil) =>
+        this.perfilService.crearPerfil(
+          perfil.descripcion,
+          perfil.habilidadesRequeridas,
+          perfil.habilidadesOpcionales,
+          perfil.horas,
+          perfil.tipoDeCompromiso,
+          perfil.modalidadDeColaboracion,
+        ),
       ),
     );
 
-    const proyectoNuevo = new Proyecto(titulo, descripcion, perfilesCreados, colectivoEncontrado);
+    const proyectoNuevo = new Proyecto(
+      titulo,
+      descripcion,
+      perfilesCreados,
+      colectivoEncontrado,
+      urlSistema,
+    );
+    const proyectoGuardado = await this.proyectoRepository.guardar(proyectoNuevo);
+    proyectoNuevo.id = proyectoGuardado.id;
 
-    const proyectoGuardado = this.proyectoRepository.guardar(proyectoNuevo);
-
-    this.colectivoService.agregarProyecto(colectivoEncontrado, proyectoGuardado);
+    await this.colectivoService.agregarProyecto(colectivoEncontrado._id, proyectoGuardado._id);
 
     return proyectoGuardado;
   }
 
-  obtenerProyectos() {
-    return this.proyectoRepository.obtenerTodos();
+  async obtenerProyectos() {
+    return await this.proyectoRepository.obtenerTodos();
   }
 
-  obtenerProyectoPorId(id) {
-    const proyecto = this.proyectoRepository.obtenerPorId(id);
+  async obtenerProyectoPorId(id) {
+    const proyecto = await this.proyectoRepository.obtenerPorId(id);
 
     if (!proyecto) {
       throw new AppError(ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
@@ -57,8 +71,14 @@ export class ProyectoService {
     return proyecto;
   }
 
-  finalizarProyecto(id) {
-    const proyecto = this.proyectoRepository.obtenerPorId(id);
+  async obtenerProyectosConAlgunaHabilidad(idsHabilidad) {
+    const proyectos = await this.proyectoRepository.obtenerPorAlgunaHabilidad(idsHabilidad);
+    console.log(proyectos);
+    return proyectos;
+  }
+
+  async finalizarProyecto(id) {
+    const proyecto = await this.proyectoRepository.obtenerPorId(id);
 
     if (!proyecto) {
       throw new AppError(ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
@@ -68,27 +88,20 @@ export class ProyectoService {
       throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, id);
     }
 
-    proyecto.finalizado = true;
-
-    return proyecto;
+    return await this.proyectoRepository.finalizarProyecto(id);
   }
 
-  actualizarProyecto(id, cambios = {}) {
+  async actualizarProyecto(id, cambios = {}) {
     const campos = Object.keys(cambios);
 
-    // Por ahora la única actualización parcial soportada es marcar el proyecto como finalizado.
     if (campos.length !== 1 || campos[0] !== "finalizado" || cambios.finalizado !== true) {
       throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
 
-    return this.finalizarProyecto(id);
+    return await this.finalizarProyecto(id);
   }
 
-  estaFinalizado(proyecto) {
-    return proyecto.finalizado;
-  }
-
-  agregarPerfil(
+  async agregarPerfil(
     proyectoId,
     descripcion,
     habilidadesRequeridas,
@@ -97,7 +110,7 @@ export class ProyectoService {
     tipoDeCompromiso,
     modalidadDeColaboracion,
   ) {
-    const perfil = this.perfilService.crearPerfil(
+    const perfil = await this.perfilService.crearPerfil(
       descripcion,
       habilidadesRequeridas,
       habilidadesOpcionales,
@@ -105,21 +118,39 @@ export class ProyectoService {
       tipoDeCompromiso,
       modalidadDeColaboracion,
     );
-    const perfilGuardado = this.proyectoRepository.guardarPerfil(proyectoId, perfil);
-    return perfilGuardado;
+
+    return await this.proyectoRepository.guardarPerfil(proyectoId, perfil);
   }
 
-  obtenerPerfiles(proyectoId) {
-    const proyecto = this.obtenerProyectoPorId(proyectoId);
+  async obtenerPerfiles(proyectoId) {
+    const proyecto = await this.obtenerProyectoPorId(proyectoId);
     return proyecto.perfiles;
   }
 
-  obtenerPerfilPorId(proyectoId, perfilId) {
-    this.obtenerProyectoPorId(proyectoId);
-    const perfil = this.proyectoRepository.obtenerPerfilPorId(proyectoId, perfilId);
+  async obtenerPerfilPorId(proyectoId, perfilId) {
+    await this.obtenerProyectoPorId(proyectoId);
+    const perfil = await this.proyectoRepository.obtenerPerfilPorId(proyectoId, perfilId);
     if (!perfil) {
       throw new AppError(ErrorCatalog.PERFIL_NO_ENCONTRADO, 404, perfilId);
     }
     return perfil;
   }
+
+  async actualizarPerfil(proyectoId, perfilId, cambios) {
+    await this.obtenerProyectoPorId(proyectoId);
+    await this.obtenerPerfilPorId(proyectoId, perfilId);
+
+    const cambiosPreparados = await this.perfilService.prepararCambios(cambios);
+
+    return await this.proyectoRepository.actualizarPerfil(proyectoId, perfilId, cambiosPreparados);
+  }
+
+  async eliminarPerfil(proyectoId, perfilId) {
+    await this.obtenerProyectoPorId(proyectoId);
+    await this.obtenerPerfilPorId(proyectoId, perfilId);
+
+    return await this.proyectoRepository.eliminarPerfil(proyectoId, perfilId);
+  }
 }
+
+

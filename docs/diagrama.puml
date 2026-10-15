@@ -1,0 +1,123 @@
+@startuml CodigoAVoluntad
+class Colectivo{
+    -id : String
+    -nombre : String
+    -descripcion : String
+    -ubicacion : String
+    -tipoDeColectivo : TipoColectivo
+    -proyectos : [Proyecto]
+
+    +cargarProyecto(proyecto)
+}
+
+class Proyecto{
+    -id : String
+    -titulo : String
+    -descripcion : String
+    -perfiles : [Perfil]
+    -colectivo : Colectivo
+    -urlSistema : String
+    -logros : [Logro]
+    -finalizado : Boolean
+}
+
+class Perfil{
+    -id : String
+    -descripcion : String
+    -habilidadesRequeridas : [Habilidad]
+    -habilidadesOpcionales : [Habilidad]
+    -horas : Number
+    -tipoDeCompromiso : TipoCompromiso
+    -modalidadDeColaboracion : ModalidadColaboracion
+}
+
+class Logro{
+    -id : String
+    -descripcion : String
+    -porcentaje : Number
+    -urlCodigoFuente : String
+}
+
+class Colaboracion{
+    -id : String
+    -personaColaboradora : PersonaColaboradora
+    -proyecto : Proyecto
+    -anonima : Boolean
+}
+
+class Habilidad{
+    -id : String
+    -titulo : String
+    -codigo : String
+    -descripcion : String
+}
+note right of Habilidad : codigo = titulo normalizado en snake_case
+
+class PersonaColaboradora{
+    -id : String
+    -nombreFantasia : String
+    -git : String
+    -nombre : String
+    -apellido : String
+    -habilidades : [Habilidad]
+    -pronombres : String
+    -presentacion : String
+    -contactos : [MedioDeContacto]
+    -bloquearMensajeInterno : Boolean
+}
+
+class MedioDeContacto{
+    -tipo : TipoMedioDeContacto
+    -valor : String
+}
+
+class Mensaje{
+    -id : String
+    -colectivo : Colectivo
+    -personaColaboradora : PersonaColaboradora
+    -texto : String
+    -date : Date
+}
+
+enum ModalidadColaboracion {
+    GRATUITA
+    INCENTIVO_ECONOMICO
+    CONTRATACION_EVENTUAL
+}
+
+enum TipoCompromiso {
+    TOTAL
+    SEMANAL
+    MENSUAL
+}
+
+enum TipoColectivo {
+    FUNDACION
+    ONG
+    ASOCIACION_BARRIAL
+    ASAMBLEA
+}
+
+enum TipoMedioDeContacto {
+    EMAIL
+    WHATSAPP
+    SMS
+}
+
+Colectivo --> "*" Proyecto
+Colectivo --> TipoColectivo
+Proyecto *-- "1..*" Perfil
+Proyecto *-- "*" Logro
+Perfil --> "1..*" Habilidad : requeridas
+Perfil --> "1..*" Habilidad : opcionales
+Perfil --> TipoCompromiso
+Perfil --> ModalidadColaboracion
+PersonaColaboradora --> "*" Habilidad
+PersonaColaboradora *-- "*" MedioDeContacto
+MedioDeContacto --> TipoMedioDeContacto
+Colaboracion --> Proyecto
+Colaboracion --> PersonaColaboradora
+Mensaje --> Colectivo
+Mensaje --> PersonaColaboradora
+
+@enduml

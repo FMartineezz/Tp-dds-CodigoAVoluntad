@@ -4,7 +4,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node --watch index.js"
+    "dev": "node --watch index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "seed": "node seeds/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +17,24 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
+    "mongoose": "^9.11.0",
+    "nodemailer": "^10.1.1",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^3.24.1"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "jest": "^30.5.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {},
+    "roots": [
+      "<rootDir>/test"
+    ],
+    "collectCoverageFrom": [
+      "src/services/**/*.js",
+      "src/models/**/*.js"
+    ]
+  }
 }

@@ -1,5 +1,33 @@
+import { PersonaColaboradoraModel } from "../schemas/personaColaboradoraSchema.js";
+
 export class PersonaColaboradoraRepository {
   constructor() {
+    this.model = PersonaColaboradoraModel;
+  }
+
+  async guardar(personaColaboradora) {
+    const nuevaPersonaColaboradora = new this.model(personaColaboradora);
+    return await nuevaPersonaColaboradora.save();
+  }
+
+  async obtenerTodas() {
+    return await this.model.find().lean();
+  }
+
+  async obtenerPorId(id) {
+    return await this.model.findById(id).lean();
+  }
+
+  async obtenerPorIdConContactos(id) {
+    return await this.model.findById(id).lean().select('+contactos');
+  }
+
+  async obtenerPorHabilidadId(habilidadesIds) {
+    return await this.model.find({ habilidades: { $in: habilidadesIds } }).lean();
+  }
+}
+
+/*   constructor() {
     this.personasColaboradoras = [];
     this.id = 1;
   }
@@ -18,4 +46,10 @@ export class PersonaColaboradoraRepository {
   obtenerPorId(id) {
     return this.personasColaboradoras.find((persona) => persona.id === id);
   }
-}
+
+  obtenerPorAlgunaHabilidad(codigos) {
+    return this.personasColaboradoras.filter((persona) =>
+      persona.habilidades.some((habilidad) => codigos.includes(habilidad.codigo)),
+    );
+  }
+  } */

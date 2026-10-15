@@ -1,0 +1,37 @@
+$kind: http-request
+url: "{{baseUrl}}/colaboradoras"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "nombreFantasia": "DevNeko",
+      "git": "https://github.com/devneko",
+      "nombre": "Lucía",
+      "apellido": "Gómez",
+      "habilidades": [
+        "programacion_en_java_script"
+      ],
+      "pronombres": "ella",
+      "presentacion": "Desarrolladora Frontend apasionada por proyectos comunitarios y de código abierto.",
+      "contactos": [
+        {
+          "tipo": "email",
+          "valor": "devneko@mail.com"
+        },
+        {
+          "tipo": "whatsapp",
+          "valor": "1127891234"
+        }
+      ],
+      "bloquearMensajeInterno": false
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 201) {
+          const body = pm.response.json();
+          pm.collectionVariables.set('colaboradoraId', String(body.id ?? body._id));
+      }
+    language: text/javascript
+order: 2000

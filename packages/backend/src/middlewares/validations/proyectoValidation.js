@@ -1,4 +1,4 @@
-import { z as zod } from "zod";
+﻿import { z as zod } from "zod";
 import { AppError } from "../../errors/appError.js";
 import ErrorCatalog from "../../errors/errorCatalog.js";
 import { TipoCompromiso, ModalidadColaboracion } from "../../models/proyecto.js";
@@ -17,12 +17,7 @@ export const perfilSchema = zod.object({
       invalid_type_error: "PERFIL_HABILIDADES_REQUERIDAS_FORMATO",
     })
     .min(1, "PERFIL_HABILIDADES_REQUERIDAS"),
-  habilidadesOpcionales: zod
-    .array(zod.string({ invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO" }), {
-      required_error: "PERFIL_HABILIDADES_OPCIONALES",
-      invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO",
-    })
-    .min(1, "PERFIL_HABILIDADES_OPCIONALES"),
+  habilidadesOpcionales: zod.array(zod.string({ invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO" }), { invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO" }).default([]),
   horas: zod.number({
     required_error: "PERFIL_HORAS_REQUERIDAS",
     invalid_type_error: "ARGUMENTO_INVALIDO",
@@ -67,6 +62,12 @@ const proyectoSchema = zod.object({
     required_error: "PROYECTO_COLECTIVO_REQUERIDO",
     invalid_type_error: "PROYECTO_COLECTIVO_FORMATO",
   }),
+  urlSistema: zod
+    .string({
+      required_error: "PROYECTO_URL_SISTEMA_INVALIDA",
+      invalid_type_error: "PROYECTO_URL_SISTEMA_INVALIDA",
+    })
+    .url("PROYECTO_URL_SISTEMA_INVALIDA"),
 });
 
 const validarProyecto = (req, res, next) => {
