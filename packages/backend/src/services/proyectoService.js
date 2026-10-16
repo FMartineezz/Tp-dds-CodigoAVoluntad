@@ -10,7 +10,7 @@ export class ProyectoService {
     this.personaColaboradoraService = personaColaboradoraService;
   }
 
-  async crearProyecto(titulo, descripcion, perfiles, colectivo, urlSistema) {
+  async crearProyecto(titulo, descripcion, perfiles, colectivo, urlSistema, fechaCierre) {
     //en vez de nombre, usar id
     const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
 
@@ -48,6 +48,7 @@ export class ProyectoService {
       perfilesCreados,
       colectivoEncontrado,
       urlSistema,
+      fechaCierre,
     );
     const proyectoGuardado = await this.proyectoRepository.guardar(proyectoNuevo);
     proyectoNuevo.id = proyectoGuardado.id;
@@ -151,6 +152,8 @@ export class ProyectoService {
 
     return await this.proyectoRepository.eliminarPerfil(proyectoId, perfilId);
   }
+
+  async cerrarProyectosSi(fechaActual) {
+    await this.proyectoRepository.cerrarProyectoSi(fechaActual);
+  }
 }
-
-

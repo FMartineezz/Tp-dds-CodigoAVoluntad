@@ -17,7 +17,11 @@ export const perfilSchema = zod.object({
       invalid_type_error: "PERFIL_HABILIDADES_REQUERIDAS_FORMATO",
     })
     .min(1, "PERFIL_HABILIDADES_REQUERIDAS"),
-  habilidadesOpcionales: zod.array(zod.string({ invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO" }), { invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO" }).default([]),
+  habilidadesOpcionales: zod
+    .array(zod.string({ invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO" }), {
+      invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO",
+    })
+    .default([]),
   horas: zod.number({
     required_error: "PERFIL_HORAS_REQUERIDAS",
     invalid_type_error: "ARGUMENTO_INVALIDO",
@@ -68,6 +72,7 @@ const proyectoSchema = zod.object({
       invalid_type_error: "PROYECTO_URL_SISTEMA_INVALIDA",
     })
     .url("PROYECTO_URL_SISTEMA_INVALIDA"),
+  fechaCierre: zod.coerce.date().optional(),
 });
 
 const validarProyecto = (req, res, next) => {

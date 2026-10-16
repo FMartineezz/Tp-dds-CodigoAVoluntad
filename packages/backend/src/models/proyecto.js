@@ -11,7 +11,7 @@ export const ModalidadColaboracion = Object.freeze({
 });
 
 export class Proyecto {
-  constructor(titulo, descripcion, perfiles, colectivo, urlSistema) {
+  constructor(titulo, descripcion, perfiles, colectivo, urlSistema, fechaCierre = undefined) {
     this.id = null;
     this.titulo = titulo;
     this.descripcion = descripcion;
@@ -20,5 +20,6 @@ export class Proyecto {
     this.urlSistema = urlSistema;
     this.logros = [];
     this.finalizado = false;
+    this.fechaCierre = fechaCierre;
   }
 }

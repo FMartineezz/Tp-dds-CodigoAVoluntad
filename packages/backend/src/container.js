@@ -26,6 +26,8 @@ import { PerfilController } from "./controllers/perfilController.js";
 import { MensajeController } from "./controllers/mensajeController.js";
 import { LogroController } from "./controllers/logroController.js";
 
+import { cierreProyectosJob } from "./cronTasks/CierreProyectoJob.js";
+
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
 const colectivoRepository = new ColectivoRepository();
@@ -90,3 +92,6 @@ export const logroController = new LogroController({ logroService });
 export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });
+
+//Job task
+export const cierreProyectos = new cierreProyectosJob({ proyectoService });
