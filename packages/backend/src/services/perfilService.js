@@ -12,6 +12,7 @@ export class PerfilService {
     horas,
     tipoDeCompromiso,
     modalidadDeColaboracion,
+    cantidadMaxima,
   ) {
     const habilidadesEncontradasR = await Promise.all(
       habilidadesRequeridas.map((codigo) => {
@@ -32,6 +33,7 @@ export class PerfilService {
       horas,
       tipoDeCompromiso,
       modalidadDeColaboracion,
+      cantidadMaxima,
     );
 
     return perfil;
@@ -59,4 +61,3 @@ export class PerfilService {
     return cambiosPreparados;
   }
 }
-

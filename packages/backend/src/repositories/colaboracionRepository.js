@@ -1,4 +1,5 @@
 import { ColaboracionModel } from "../schemas/colaboracionSchema.js";
+import { EstadoColaboracion } from "../models/colaboracion.js";
 
 export class ColaboracionRepository {
   constructor() {
@@ -20,6 +21,14 @@ export class ColaboracionRepository {
       .populate("personaColaboradora")
       .populate("proyecto")
       .lean();
+  }
+
+  async contarActivasPorPerfil(proyectoId, perfilId) {
+    return await this.model.countDocuments({
+      proyecto: proyectoId,
+      perfil: perfilId,
+      estado: EstadoColaboracion.ACTIVA,
+    });
   }
 }
 

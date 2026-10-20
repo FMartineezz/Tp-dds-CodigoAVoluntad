@@ -40,7 +40,16 @@ const proyectoSchema = new mongoose.Schema(
     },
     fechaCierre: {
       type: Date,
-      default: null,
+      default: undefined,
+    },
+    busquedaCerrada: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    fechaLimiteBusqueda: {
+      type: Date,
+      default: undefined,
     },
 
     createdAt: { type: Date, select: false },

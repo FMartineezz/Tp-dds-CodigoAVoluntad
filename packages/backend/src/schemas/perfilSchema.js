@@ -26,7 +26,10 @@ export const perfilSchema = new mongoose.Schema(
         },
       },
     },
-    habilidadesOpcionales: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Habilidad" }], default: [] },
+    habilidadesOpcionales: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Habilidad" }],
+      default: [],
+    },
     horas: {
       type: Number,
       required: false,
@@ -46,9 +49,15 @@ export const perfilSchema = new mongoose.Schema(
       },
       required: false,
     },
+    cantidadMaxima: {
+      type: Number,
+      required: false,
+      default: undefined,
+      min: 1,
+    },
     createdAt: { type: Date, select: false },
     updatedAt: { type: Date, select: false },
-    __v: { type: Number, select: false }
+    __v: { type: Number, select: false },
   },
   {
     timestamps: true,
@@ -56,4 +65,3 @@ export const perfilSchema = new mongoose.Schema(
 );
 
 perfilSchema.loadClass(Perfil);
-

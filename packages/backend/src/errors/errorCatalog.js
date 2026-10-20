@@ -234,6 +234,11 @@ const ErrorCatalog = Object.freeze({
     message: (id) => `La colaboración ${id} no fue encontrada`,
   },
 
+  COLABORACION_CUPO_COMPLETO: {
+    code: "ERR-EST-505",
+    message: "Se acabo el cupo maximo de colaboraciones del perfil",
+  },
+
   // =========================
   // Perfiles
   // =========================
@@ -369,6 +374,58 @@ const ErrorCatalog = Object.freeze({
   LOGRO_URL_INVALIDA: {
     code: "ERR-VAL-903",
     message: "La URL del código fuente debe ser una URL válida",
+  },
+
+  // =========================
+  // POSTULACION
+  // =========================
+
+  POSTULACION_PERSONA_REQUERIDA: {
+    code: "ERR-VAL-1001",
+    message: "La persona colaboradora que se postula es requerida",
+  },
+
+  POSTULACION_ANONIMA_FORMATO: {
+    code: "ERR-VAL-1002",
+    message: "El campo anonima debe ser true o false",
+  },
+
+  POSTULACION_ESTADO_REQUERIDO: {
+    code: "ERR-VAL-1003",
+    message: "El estado de la postulación es requerido",
+  },
+
+  POSTULACION_ESTADO_INVALIDO: {
+    code: "ERR-VAL-1004",
+    message: "El estado debe ser: aceptada o rechazada",
+  },
+
+  POSTULACION_PROYECTO_FINALIZADO: {
+    code: "ERR-EST-1005",
+    message: (id) => `El proyecto ${id} está finalizado y ya no acepta postulaciones`,
+  },
+  POSTULACION_BUSQUEDA_CERRADA: {
+    code: "ERR-EST-1006",
+    message: (id) => `La búsqueda del proyecto ${id} está cerrada`,
+  },
+  POSTULACION_HABILIDAD_REQUERIDA: {
+    code: "ERR-VAL-1007",
+    message: (nombreFantasia) =>
+      `${nombreFantasia} no tiene ninguna de las habilidades requeridas por el perfil`,
+  },
+  POSTULACION_DUPLICADA: {
+    code: "ERR-EST-1008",
+    message: (nombreFantasia, perfilDescripcion) =>
+      `Ya existe una postulación pendiente de ${nombreFantasia} para el perfil: ${perfilDescripcion}`,
+  },
+  POSTULACION_NO_ENCONTRADA: {
+    code: "ERR-NOT-1009",
+    message: (id) => `La postulacion id : ${id} no fue encontrada`,
+  },
+  POSTULACION_YA_RESUELTA: {
+    code: "ERR-EST-1010",
+    message:
+      "La Postulacion ya fue resuelta, asegurese de resolver postuaciones con estado PENDIENTE",
   },
 });
 

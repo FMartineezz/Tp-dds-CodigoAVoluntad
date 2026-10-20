@@ -3,16 +3,6 @@ export class ColaboracionController {
     this.colaboracionService = colaboracionService;
   }
 
-  crearColaboracion = async (req, res) => {
-    const colaboracion = await this.colaboracionService.crearColaboracion(
-      req.body.personaColaboradoraId,
-      req.body.proyectoId,
-      req.body.anonima,
-    );
-
-    res.status(201).location(`/colaboraciones/${colaboracion.id}`).json(colaboracion);
-  };
-
   obtenerColaboraciones = async (req, res) => {
     const colaboraciones = await this.colaboracionService.obtenerColaboraciones();
 

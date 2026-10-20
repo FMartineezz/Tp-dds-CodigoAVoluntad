@@ -36,6 +36,7 @@ export class PerfilController {
       req.body.horas,
       req.body.tipoDeCompromiso,
       req.body.modalidadDeColaboracion,
+      req.body.cantidadMaxima,
     );
 
     res.status(201).json(perfil);
@@ -44,11 +45,7 @@ export class PerfilController {
   actualizarPerfil = async (req, res) => {
     const { idProyecto, idPerfil } = req.params;
 
-    const perfil = await this.proyectoService.actualizarPerfil(
-      idProyecto,
-      idPerfil,
-      req.body,
-  );
+    const perfil = await this.proyectoService.actualizarPerfil(idProyecto, idPerfil, req.body);
 
     res.status(200).json(perfil);
   };
@@ -56,10 +53,7 @@ export class PerfilController {
   eliminarPerfil = async (req, res) => {
     const { idProyecto, idPerfil } = req.params;
 
-    const perfil = await this.proyectoService.eliminarPerfil(
-      idProyecto,
-      idPerfil,
-    );
+    const perfil = await this.proyectoService.eliminarPerfil(idProyecto, idPerfil);
 
     res.status(200).json(perfil);
   };

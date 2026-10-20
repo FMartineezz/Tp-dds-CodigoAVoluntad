@@ -10,7 +10,15 @@ export class ProyectoService {
     this.personaColaboradoraService = personaColaboradoraService;
   }
 
-  async crearProyecto(titulo, descripcion, perfiles, colectivo, urlSistema, fechaCierre) {
+  async crearProyecto(
+    titulo,
+    descripcion,
+    perfiles,
+    colectivo,
+    urlSistema,
+    fechaCierre,
+    fechaLimiteBusqueda,
+  ) {
     //en vez de nombre, usar id
     const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
 
@@ -38,6 +46,7 @@ export class ProyectoService {
           perfil.horas,
           perfil.tipoDeCompromiso,
           perfil.modalidadDeColaboracion,
+          perfil.cantidadMaxima,
         ),
       ),
     );
@@ -49,6 +58,7 @@ export class ProyectoService {
       colectivoEncontrado,
       urlSistema,
       fechaCierre,
+      fechaLimiteBusqueda,
     );
     const proyectoGuardado = await this.proyectoRepository.guardar(proyectoNuevo);
     proyectoNuevo.id = proyectoGuardado.id;
@@ -110,6 +120,7 @@ export class ProyectoService {
     horas,
     tipoDeCompromiso,
     modalidadDeColaboracion,
+    cantidadMaxima,
   ) {
     const perfil = await this.perfilService.crearPerfil(
       descripcion,
@@ -118,6 +129,7 @@ export class ProyectoService {
       horas,
       tipoDeCompromiso,
       modalidadDeColaboracion,
+      cantidadMaxima,
     );
 
     return await this.proyectoRepository.guardarPerfil(proyectoId, perfil);
@@ -155,5 +167,13 @@ export class ProyectoService {
 
   async cerrarProyectosSi(fechaActual) {
     await this.proyectoRepository.cerrarProyectoSi(fechaActual);
+  }
+
+  estaBusquedaAbierta(proyecto) {
+    if (proyecto.busquedaAbierta === false) return false;
+    if (proyecto.fechaLimiteBusqueda && new Date(proyecto.fechaLimiteBusqueda) < new Date()) {
+      return false;
+    }
+    return true;
   }
 }
