@@ -30,25 +30,16 @@ export class ColaboracionRepository {
       estado: EstadoColaboracion.ACTIVA,
     });
   }
+
+  async desactivar(id) {
+  return await this.model.findByIdAndUpdate(
+    id,
+    {
+      estado: EstadoColaboracion.BAJA,
+      fechaBaja: new Date(),
+      //bajaPor: OrigenBaja.ADMIN, // resolver cuando se implemente la autenticación y autorización para obtener el usuario que realiza la baja
+    },
+    { new: true }
+  );
+  }
 }
-
-/*   constructor() {
-    this.colaboraciones = [];
-    this.id = 1;
-  }
-
-  guardar(colaboracion) {
-    colaboracion.id = this.id;
-    this.id++;
-    this.colaboraciones.push(colaboracion);
-
-    return colaboracion;
-  }
-
-  obtenerTodas() {
-    return this.colaboraciones;
-  }
-
-  obtenerPorId(id) {
-    return this.colaboraciones.find((colaboracion) => colaboracion.id === id);
-  } */

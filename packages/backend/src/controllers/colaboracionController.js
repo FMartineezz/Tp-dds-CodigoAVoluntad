@@ -16,4 +16,11 @@ export class ColaboracionController {
 
     res.status(200).json(colaboracion);
   };
+
+  desactivarColaboracion = async (req, res) => {
+    const id = req.params.id;
+
+    await this.colaboracionService.desactivarColaboracion(id);
+    res.status(200).json( { message: "Colaboración desactivada correctamente" });
+  }
 }

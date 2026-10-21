@@ -55,4 +55,17 @@ export class ColaboracionService {
 
     return colaboracion;
   }
+
+  async desactivarColaboracion(id) {
+    const colaboracion = await this.colaboracionRepository.obtenerPorId(id);
+
+    if (!colaboracion) {
+      throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);
+    }
+
+    if (colaboracion.estado === EstadoColaboracion.BAJA) {
+      throw new AppError(ErrorCatalog.COLABORACION_YA_DADA_DE_BAJA, 409, id);
+    }
+    await this.colaboracionRepository.desactivar(id);
+  }
 }
