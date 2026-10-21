@@ -370,6 +370,48 @@ const ErrorCatalog = Object.freeze({
     code: "ERR-VAL-903",
     message: "La URL del código fuente debe ser una URL válida",
   },
+
+  // =========================
+  // VALORACIONES
+  // =========================
+
+  VALORACION_COLABORACION_ID_INVALIDO: {
+    code: "ERR-VAL-1001",
+    message: "El id de la colaboración es requerido",
+  },
+  VALORACION_EVALUADOR_TIPO_FORMATO: {
+    code: "ERR-VAL-1002",
+    message: "El tipo de evaluador no es válido",
+  },
+  VALORACION_PUNTAJE_REQUERIDO: {
+    code: "ERR-VAL-1004",
+    message: "El puntaje es requerido",
+  },
+  VALORACION_COMENTARIO_REQUERIDO: {
+    code: "ERR-VAL-1005",
+    message: "El comentario es requerido",
+  },
+
+  VALORACION_PUNTAJE_FORMATO: {
+    code: "ERR-VAL-1006",
+    message: "El puntaje debe ser un número entero entre 1 y 5",
+  },
+
+  VALORACION_PUNTAJE_RANGO: {
+    code: "ERR-VAL-1007",
+    message: "El puntaje debe estar entre 1 y 5",
+  },
+
+  VALORACION_COMENTARIO_FORMATO: {
+    code: "ERR-VAL-1008",
+    message: "El comentario debe ser un texto de entre 1 y 500 caracteres",
+  },
+
+  VALORACION_COMENTARIO_LARGO: {
+    code: "ERR-VAL-1009",
+    message: "El comentario debe tener un máximo de 500 caracteres",
+  },
+
 });
 
 export default ErrorCatalog;

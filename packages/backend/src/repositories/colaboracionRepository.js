@@ -21,6 +21,18 @@ export class ColaboracionRepository {
       .populate("proyecto")
       .lean();
   }
+
+  async obtenerPorPersonaColaboradoraId(personaColaboradoraId) {
+  return await this.model
+    .find({ personaColaboradora: personaColaboradoraId })
+    .lean();
+  }
+
+  async obtenerPorProyectoIds(proyectoIds) {
+    return await this.model
+      .find({ proyecto: { $in: proyectoIds } })
+      .lean();
+  }
 }
 
 /*   constructor() {
