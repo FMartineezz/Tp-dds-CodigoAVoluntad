@@ -8,5 +8,7 @@ export default function colaboracionRoutes() {
 
   router.get("/colaboraciones/:id", colaboracionController.obtenerColaboracionPorId);
 
+  router.delete("/colaboraciones/:id", colaboracionController.desactivarColaboracion);
+
   return router;
 }
