@@ -235,8 +235,13 @@ const ErrorCatalog = Object.freeze({
   },
 
   COLABORACION_CUPO_COMPLETO: {
-    code: "ERR-EST-505",
+    code: "ERR-EST-507",
     message: "Se acabo el cupo maximo de colaboraciones del perfil",
+  },
+
+  COLABORACION_YA_DADA_DE_BAJA: {
+    code: "ERR-EST-508",
+    message: (id) => `La colaboración ${id} ya fue dada de baja`,
   },
 
   // =========================
