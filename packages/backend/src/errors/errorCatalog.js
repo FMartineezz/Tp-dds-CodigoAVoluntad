@@ -116,6 +116,10 @@ const ErrorCatalog = Object.freeze({
     message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
   },
 
+  HABILIDADES_INEXISTENTES_GENERICO: {
+    code: "ERR-VAL-207",
+    message: (codigos) => `Las habilidades de codigo: ${codigos.join(', ')} no existen`,
+  },
   // =========================
   // COLECTIVOS
   // =========================

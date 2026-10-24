@@ -22,7 +22,6 @@ export class ProyectoService {
     //en vez de nombre, usar id
     const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
 
-    //en vez de nombre de colectivo, usar id
     const proyecto = await this.proyectoRepository.obtenerPorTituloYColectivo(
       titulo,
       colectivoEncontrado._id,
@@ -37,6 +36,7 @@ export class ProyectoService {
       );
     }
 
+    //consultar si vale la pena
     const perfilesCreados = await Promise.all(
       perfiles.map((perfil) =>
         this.perfilService.crearPerfil(
