@@ -1,7 +1,6 @@
 import { Colaboracion } from "../models/colaboracion.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
-import { EstadoColaboracion, OrigenBaja } from "../models/colaboracion.js";
 
 export class ColaboracionService {
   constructor({ colaboracionRepository, personaColaboradoraService, proyectoService }) {
@@ -63,9 +62,10 @@ export class ColaboracionService {
       throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);
     }
 
-    if (colaboracion.estado === EstadoColaboracion.BAJA) {
+    if (!colaboracion.activo) {
       throw new AppError(ErrorCatalog.COLABORACION_YA_DADA_DE_BAJA, 409, id);
     }
+
     await this.colaboracionRepository.desactivar(id);
   }
 }

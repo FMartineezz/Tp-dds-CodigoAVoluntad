@@ -1,5 +1,4 @@
 import { ColaboracionModel } from "../schemas/colaboracionSchema.js";
-import { EstadoColaboracion } from "../models/colaboracion.js";
 
 export class ColaboracionRepository {
   constructor() {
@@ -27,7 +26,7 @@ export class ColaboracionRepository {
     return await this.model.countDocuments({
       proyecto: proyectoId,
       perfil: perfilId,
-      estado: EstadoColaboracion.ACTIVA,
+      activo: true,
     });
   }
 
@@ -35,7 +34,7 @@ export class ColaboracionRepository {
   return await this.model.findByIdAndUpdate(
     id,
     {
-      estado: EstadoColaboracion.BAJA,
+      activo: false,
       fechaBaja: new Date(),
       //bajaPor: OrigenBaja.ADMIN, // resolver cuando se implemente la autenticación y autorización para obtener el usuario que realiza la baja
     },

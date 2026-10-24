@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 import { Colaboracion } from "../models/colaboracion.js";
-import { EstadoColaboracion, OrigenBaja } from "../models/colaboracion.js";
-//datos embebidos o referencia?
-//si la colaboradora cambia sus atributos(agrega mas habilidades por ejemplo) me interesa ver esos cambios o no?
+import { OrigenBaja } from "../models/colaboracion.js";
 
 const colaboracionSchema = new mongoose.Schema(
   {
@@ -28,10 +26,10 @@ const colaboracionSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    estado: {
-      type: String,
-      enum: { values: Object.values(EstadoColaboracion) },
-      default: EstadoColaboracion.ACTIVA,
+    activo: {
+      type: Boolean,
+      required: false,
+      default: true
     },
     fechaBaja: {
       type: Date,

@@ -1,7 +1,7 @@
-export const EstadoColaboracion = Object.freeze({
+/* export const EstadoColaboracion = Object.freeze({
   ACTIVA: "activa",
   BAJA: "baja",
-});
+}); */
 
 export const OrigenBaja = Object.freeze({
   PERSONA: "persona",
@@ -15,7 +15,7 @@ export class Colaboracion {
     this.proyecto = proyecto;
     this.perfil = perfil;
     this.anonima = esAnonima;
-    this.estado = EstadoColaboracion.ACTIVA;
+    this.activo = true;
     this.fechaBaja = undefined;
     this.bajaPor = undefined;
   }

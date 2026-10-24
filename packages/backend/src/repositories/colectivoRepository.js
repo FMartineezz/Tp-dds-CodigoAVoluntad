@@ -11,6 +11,10 @@ export class ColectivoRepository {
   }
 
   async obtenerTodos() {
+    return await this.model.find({ activo: true }).lean();
+  }
+
+  async obtenerTodosConEliminados() {
     return await this.model.find().lean();
   }
 
@@ -28,6 +32,12 @@ export class ColectivoRepository {
         proyectos: proyecto,
       },
     });
+  }
+
+  async eliminarColectivo(id) {
+    return await this.model.findByIdAndUpdate(id, {
+      activo: false
+    })
   }
 }
 
