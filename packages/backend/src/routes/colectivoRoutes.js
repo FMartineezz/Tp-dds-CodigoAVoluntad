@@ -14,12 +14,14 @@ export default function colectivoRoutes() {
   router.get("/colectivos/:id", colectivoController.obtenerColectivoPorId);
 
   router.post("/colectivos", validarColectivo, colectivoController.crearColectivo);
-
+  
   router.post(
     "/colectivos/:colectivoId/mensajes",
     validarMensaje,
     mensajeController.enviarMensajeDesdeColectivo,
   );
+  
+  router.delete("/colectivos/:id", colectivoController.eliminarColectivo);
 
   return router;
 }

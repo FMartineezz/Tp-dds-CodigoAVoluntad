@@ -160,6 +160,11 @@ const ErrorCatalog = Object.freeze({
     message: (nombre) => `Ya existe un colectivo con el nombre ${nombre}`,
   },
 
+  COLECTIVO_YA_DADO_DE_BAJA: {
+    code: "ERR-EST-508",
+    message: (id) => `El colectivo ${id} ya fue dado de baja`,
+  },
+
   // =========================
   // COLABORADORAS
   // =========================
