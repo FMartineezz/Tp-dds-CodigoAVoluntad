@@ -73,6 +73,20 @@ export class PersonaColaboradoraService {
     return personaColaboradora;
   }
 
+  async eliminarPersonaColaboradora(id) {
+    const resultado = await this.personaColaboradoraRepository.eliminar(id);
+
+    if (!resultado.actualizado) {
+      if (resultado.razon === 'NO_ENCONTRADO') {
+        throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+      }
+      if (resultado.razon === 'YA_DADO_DE_BAJA') {
+        throw new AppError(ErrorCatalog.COLABORADORA_YA_DADA_DE_BAJA, 409, id);
+      }
+    }
+
+  }
+
   //agregar en la query de la db?
 /*   ocultarContactos(personaColaboradora) {
     const { contactos, ...resto } = personaColaboradora;

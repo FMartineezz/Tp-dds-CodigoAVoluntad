@@ -68,6 +68,12 @@ export const personaColaboradoraSchema = new mongoose.Schema(
         type: Boolean,
         default: false
     },
+    activo:{
+      type: Boolean,
+      required: false,
+      default: true,
+      select: false
+    },
     createdAt: { type: Date, select: false },
     updatedAt: { type: Date, select: false },
     __v: { type: Number, select: false }

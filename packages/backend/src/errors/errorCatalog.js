@@ -208,6 +208,11 @@ const ErrorCatalog = Object.freeze({
     message: "El campo bloquear mensaje interno debe ser un booleano",
   },
 
+  COLABORADORA_YA_DADA_DE_BAJA: {
+    code: "ERR-EST-508",
+    message: (id) => `La persona colaboradora ${id} ya fue dada de baja`,
+  },
+
   // =========================
   // COLABORACIONES
   // =========================
