@@ -29,7 +29,7 @@ export class ColectivoController {
   eliminarColectivo = async (req, res) => {
     const id = req.params.id;
 
-    const respuesta = await this.service.eliminarColectivo(id);
-    res.status(204).json(respuesta);
+    await this.service.eliminarColectivo(id);
+    res.status(204).send();
   }
 }
