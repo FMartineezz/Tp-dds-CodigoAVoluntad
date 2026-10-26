@@ -59,17 +59,16 @@ export class ColectivoService {
   }
 
   async eliminarColectivo(id) {
-    const colectivo = await this.repository.obtenerPorId(id);
-    
-    if (!colectivo) {
-      throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
-    }
-    
-    if (colectivo.activo) {
-      throw new AppError(ErrorCatalog.COLECTIVO_YA_DADO_DE_BAJA, 409, id);
+    const resultado = await this.repository.eliminar(id);
+
+    if (!resultado.actualizado) {
+      if (resultado.razon === 'NO_ENCONTRADO') {
+        throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
+      }
+      if (resultado.razon === 'YA_DADO_DE_BAJA') {
+        throw new AppError(ErrorCatalog.COLECTIVO_YA_DADO_DE_BAJA, 409, id);
+      }
     }
 
-    await this.repository.eliminarColectivo(id);
   }
-  
 }
