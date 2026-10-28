@@ -30,5 +30,4 @@ const validarActualizacionPerfil = (req, res, next) => {
   next();
 };
 
-export { validarActualizacionPerfil };
-export default validarPerfil;
+export { validarPerfil, validarActualizacionPerfil };

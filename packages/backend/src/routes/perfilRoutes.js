@@ -1,13 +1,12 @@
 import { Router } from "express";
 import { perfilController } from "../container.js";
-import validarPerfil, {
-  validarActualizacionPerfil,
-} from "../middlewares/validations/perfilValidation.js";
+import { validarPerfil, validarActualizacionPerfil } from "../middlewares/validations/perfilValidation.js";
+import { checkRole, verifyToken } from "../middlewares/auth.js";
 
 export default function proyectoRoutes() {
   const router = Router();
 
-  router.get("/proyectos/:idProyecto/perfiles", perfilController.obtenerPerfiles);
+  router.get("/proyectos/:idProyecto/perfiles", /* verifyToken, checkRole(['admin', 'colectivo']), */ perfilController.obtenerPerfiles);
 
   router.get("/proyectos/:idProyecto/perfiles/:idPerfil", perfilController.obtenerPerfilPorId);
 
