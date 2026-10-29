@@ -38,30 +38,17 @@ const colectivoSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    tipoDeColectivo:{
-        type: String,
-        enum: {
-            values: Object.values(TipoColectivo),
-        },
-        required: true
-    },
-    proyectos:{
-        type: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Proyecto'
-        }],
-        required: true
-    },
-    activo:{
+    activo: {
       type: Boolean,
       required: false,
       default: true,
-      select: false
+      select: false,
     },
     createdAt: { type: Date, select: false },
     updatedAt: { type: Date, select: false },
-    __v: { type: Number, select: false }
-},{
+    __v: { type: Number, select: false },
+  },
+  {
     timestamps: true,
     collection: "colectivos",
   },
