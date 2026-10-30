@@ -1,4 +1,4 @@
-﻿import { z as zod } from "zod";
+import { z as zod } from "zod";
 import { AppError } from "../../errors/appError.js";
 import ErrorCatalog from "../../errors/errorCatalog.js";
 import { TipoCompromiso, ModalidadColaboracion } from "../../models/proyecto.js";
@@ -43,6 +43,23 @@ export const perfilSchema = zod.object({
   cantidadMaxima: zod.number({ invalid_type_error: "ARGUMENTO_INVALIDO" }).optional(),
 });
 
+export const urlDonacionesSchema = zod
+  .string({ invalid_type_error: "PROYECTO_URL_DONACIONES_INVALIDA" })
+  .nullable()
+  .optional()
+  .refine(
+    (val) => {
+      if (val === undefined || val === null || val === "") return true;
+      try {
+        const parsed = new URL(val);
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    { message: "PROYECTO_URL_DONACIONES_INVALIDA" },
+  );
+
 const proyectoSchema = zod.object({
   titulo: zod
     .string({
@@ -75,7 +92,22 @@ const proyectoSchema = zod.object({
     .url("PROYECTO_URL_SISTEMA_INVALIDA"),
   fechaCierre: zod.coerce.date().optional(),
   fechaLimiteBusqueda: zod.coerce.date().optional(),
+  urlDonaciones: urlDonacionesSchema,
 });
+
+export const proyectoActualizacionSchema = zod
+  .object({
+    finalizado: zod
+      .literal(true, {
+        errorMap: () => ({ message: "ARGUMENTO_INVALIDO" }),
+      })
+      .optional(),
+    urlDonaciones: urlDonacionesSchema,
+  })
+  .strict({ message: "ARGUMENTO_INVALIDO" })
+  .refine((datos) => Object.keys(datos).length > 0, {
+    message: "ARGUMENTO_INVALIDO",
+  });
 
 const validarProyecto = (req, res, next) => {
   const resultado = proyectoSchema.safeParse(req.body);
@@ -88,4 +120,17 @@ const validarProyecto = (req, res, next) => {
   next();
 };
 
+export const validarActualizacionProyecto = (req, res, next) => {
+  const resultado = proyectoActualizacionSchema.safeParse(req.body);
+
+  if (!resultado.success) {
+    const codigo = resultado.error.issues[0].message;
+    throw new AppError(ErrorCatalog[codigo], 400);
+  }
+
+  req.body = resultado.data;
+  next();
+};
+
+export { validarActualizacionProyecto as validarActualizacion };
 export default validarProyecto;

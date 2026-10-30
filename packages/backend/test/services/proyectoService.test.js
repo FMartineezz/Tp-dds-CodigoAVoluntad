@@ -100,6 +100,68 @@ describe("ProyectoService", () => {
         400,
       );
     });
+    test("permite crear proyecto con urlDonaciones válida", async () => {
+      const proyecto = await ctx.proyectoService.crearProyecto(
+        "Proyecto Donaciones",
+        "d",
+        [perfilDeEjemplo()],
+        "Fundación Ejemplo",
+        "https://donaciones.org",
+        undefined,
+        undefined,
+        "https://cafecito.app/ejemplo",
+      );
+
+      expect(proyecto.urlDonaciones).toBe("https://cafecito.app/ejemplo");
+      const guardado = await ctx.proyectoService.obtenerProyectoPorId(proyecto.id);
+      expect(guardado.urlDonaciones).toBe("https://cafecito.app/ejemplo");
+    });
+
+    test("crear proyecto sin urlDonaciones la inicializa en null", async () => {
+      const proyecto = await ctx.proyectoService.crearProyecto(
+        "Proyecto Sin Donaciones",
+        "d",
+        [perfilDeEjemplo()],
+        "Fundación Ejemplo",
+        "https://sindonaciones.org",
+      );
+
+      expect(proyecto.urlDonaciones).toBeNull();
+    });
+
+    test("crear proyecto con urlDonaciones inválida falla con 400", async () => {
+      await expectAppError(
+        ctx.proyectoService.crearProyecto(
+          "Proyecto Donacion Invalida",
+          "d",
+          [perfilDeEjemplo()],
+          "Fundación Ejemplo",
+          "https://ok.org",
+          undefined,
+          undefined,
+          "esto-no-es-una-url",
+        ),
+        ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
+        400,
+      );
+    });
+
+    test("crear proyecto con protocolo no HTTP/HTTPS en urlDonaciones falla con 400", async () => {
+      await expectAppError(
+        ctx.proyectoService.crearProyecto(
+          "Proyecto Donacion FTP",
+          "d",
+          [perfilDeEjemplo()],
+          "Fundación Ejemplo",
+          "https://ok.org",
+          undefined,
+          undefined,
+          "ftp://cafecito.app/ejemplo",
+        ),
+        ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
+        400,
+      );
+    });
   });
 
   test("obtenerProyectos lista todos", async () => {
@@ -160,6 +222,107 @@ describe("ProyectoService", () => {
         ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, cambios),
         ErrorCatalog.ARGUMENTO_INVALIDO,
         400,
+      );
+    });
+  });
+
+  describe("actualizarProyecto - urlDonaciones", () => {
+    test("permite modificar urlDonaciones con una URL válida", async () => {
+      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+        urlDonaciones: "https://cafecito.app/nueva-url",
+      });
+
+      expect(actualizado.urlDonaciones).toBe("https://cafecito.app/nueva-url");
+      const enDb = await ctx.proyectoService.obtenerProyectoPorId(escenario.proyecto.id);
+      expect(enDb.urlDonaciones).toBe("https://cafecito.app/nueva-url");
+    });
+
+    test("permite actualizar con protocolo http", async () => {
+      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+        urlDonaciones: "http://donaciones.org/proyecto",
+      });
+
+      expect(actualizado.urlDonaciones).toBe("http://donaciones.org/proyecto");
+    });
+
+    test("conserva urlDonaciones si se omite en el PATCH", async () => {
+      await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+        urlDonaciones: "https://cafecito.app/mi-proyecto",
+      });
+
+      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+        finalizado: true,
+      });
+
+      expect(actualizado.finalizado).toBe(true);
+      expect(actualizado.urlDonaciones).toBe("https://cafecito.app/mi-proyecto");
+    });
+
+    test("permite eliminar urlDonaciones enviando null", async () => {
+      await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+        urlDonaciones: "https://cafecito.app/mi-proyecto",
+      });
+
+      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+        urlDonaciones: null,
+      });
+
+      expect(actualizado.urlDonaciones).toBeNull();
+      const enDb = await ctx.proyectoService.obtenerProyectoPorId(escenario.proyecto.id);
+      expect(enDb.urlDonaciones).toBeNull();
+    });
+
+    test("permite eliminar urlDonaciones enviando cadena vacía", async () => {
+      await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+        urlDonaciones: "https://cafecito.app/mi-proyecto",
+      });
+
+      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+        urlDonaciones: "",
+      });
+
+      expect(actualizado.urlDonaciones).toBeNull();
+      const enDb = await ctx.proyectoService.obtenerProyectoPorId(escenario.proyecto.id);
+      expect(enDb.urlDonaciones).toBeNull();
+    });
+
+    test("permite actualizar finalizado y urlDonaciones a la vez", async () => {
+      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+        finalizado: true,
+        urlDonaciones: "https://cafecito.app/final",
+      });
+
+      expect(actualizado.finalizado).toBe(true);
+      expect(actualizado.urlDonaciones).toBe("https://cafecito.app/final");
+    });
+
+    test("falla con 400 si urlDonaciones no es una URL válida", async () => {
+      await expectAppError(
+        ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+          urlDonaciones: "invalido",
+        }),
+        ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
+        400,
+      );
+    });
+
+    test("falla con 400 si urlDonaciones tiene protocolo no permitido", async () => {
+      await expectAppError(
+        ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+          urlDonaciones: "ftp://cafecito.app/algo",
+        }),
+        ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
+        400,
+      );
+    });
+
+    test("falla con 404 al intentar actualizar proyecto inexistente", async () => {
+      await expectAppError(
+        ctx.proyectoService.actualizarProyecto("inexistente", {
+          urlDonaciones: "https://cafecito.app/ok",
+        }),
+        ErrorCatalog.PROYECTO_NO_ENCONTRADO,
+        404,
       );
     });
   });

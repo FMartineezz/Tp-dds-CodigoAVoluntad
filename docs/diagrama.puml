@@ -17,6 +17,7 @@ class Proyecto{
     -perfiles : [Perfil]
     -colectivo : Colectivo
     -urlSistema : String
+    -urlDonaciones : String
     -logros : [Logro]
     -finalizado : Boolean
 }

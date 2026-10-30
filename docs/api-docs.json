@@ -595,6 +595,13 @@
             "format": "uri",
             "description": "Enlace al sistema en funcionamiento.",
             "example": "https://donaciones.org"
+          },
+          "urlDonaciones": {
+            "type": "string",
+            "format": "uri",
+            "description": "Enlace externo para recibir contribuciones económicas (con protocolo HTTP o HTTPS).",
+            "example": "https://cafecito.app/mi-proyecto",
+            "nullable": true
           }
         }
       },
@@ -648,6 +655,13 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
+          },
+          "urlDonaciones": {
+            "type": "string",
+            "format": "uri",
+            "description": "Enlace externo para recibir contribuciones económicas.",
+            "example": "https://cafecito.app/mi-proyecto",
+            "nullable": true
           }
         }
       },
@@ -1563,7 +1577,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos, colectivo o habilidad inexistente. Códigos posibles: `ERR-VAL-101`, `ERR-VAL-102`, `ERR-VAL-103`, `ERR-VAL-107`, `ERR-VAL-112`, `ERR-VAL-115`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-NOT-306`, `ERR-VAL-207`, `ERR-VAL-001`",
+            "description": "Datos inválidos, colectivo o habilidad inexistente. Códigos posibles: `ERR-VAL-101`, `ERR-VAL-102`, `ERR-VAL-103`, `ERR-VAL-107`, `ERR-VAL-112`, `ERR-VAL-115`, `ERR-VAL-116`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-NOT-306`, `ERR-VAL-207`, `ERR-VAL-001`",
             "content": {
               "application/json": {
                 "schema": {
@@ -1658,8 +1672,8 @@
       },
       "patch": {
         "tags": ["Proyectos"],
-        "summary": "Finalizar un proyecto (cierre manual)",
-        "description": "Por ahora la única modificación soportada es `{ \"finalizado\": true }`. Después ya no se pueden anotar colaboradoras ni cargar logros.",
+        "summary": "Actualizar un proyecto (finalizar o actualizar enlace de donaciones)",
+        "description": "Permite finalizar un proyecto (cierre manual) y/o actualizar el enlace externo de donaciones (urlDonaciones). Si se envía null o cadena vacía, se elimina el enlace. Si se omite, se conserva el valor actual.",
         "parameters": [
           {
             "name": "id",
@@ -1678,11 +1692,18 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["finalizado"],
                 "properties": {
                   "finalizado": {
                     "type": "boolean",
-                    "enum": [true]
+                    "enum": [true],
+                    "description": "Cierre manual del proyecto."
+                  },
+                  "urlDonaciones": {
+                    "type": "string",
+                    "format": "uri",
+                    "nullable": true,
+                    "description": "Enlace externo para donaciones (HTTP o HTTPS). Enviar null o cadena vacía para eliminarlo.",
+                    "example": "https://cafecito.app/mi-proyecto"
                   }
                 }
               }
@@ -1691,7 +1712,7 @@
         },
         "responses": {
           "200": {
-            "description": "Proyecto finalizado",
+            "description": "Proyecto actualizado",
             "content": {
               "application/json": {
                 "schema": {
@@ -1701,7 +1722,7 @@
             }
           },
           "400": {
-            "description": "Cuerpo distinto de { finalizado: true } o proyecto ya finalizado. Códigos posibles: `ERR-VAL-001`, `ERR-EST-109`",
+            "description": "Cuerpo inválido, proyecto ya finalizado o URL de donaciones inválida. Códigos posibles: `ERR-VAL-001`, `ERR-EST-109`, `ERR-VAL-116`",
             "content": {
               "application/json": {
                 "schema": {

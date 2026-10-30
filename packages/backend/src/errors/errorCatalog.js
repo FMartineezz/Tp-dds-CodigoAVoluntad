@@ -77,6 +77,11 @@ const ErrorCatalog = Object.freeze({
     message: "La URL del sistema debe ser una URL válida",
   },
 
+  PROYECTO_URL_DONACIONES_INVALIDA: {
+    code: "ERR-VAL-116",
+    message: "La URL de donaciones debe ser una URL válida",
+  },
+
   // =========================
   // HABILIDADES
   // =========================
@@ -118,7 +123,7 @@ const ErrorCatalog = Object.freeze({
 
   HABILIDADES_INEXISTENTES_GENERICO: {
     code: "ERR-VAL-207",
-    message: (codigos) => `Las habilidades de codigo: ${codigos.join(', ')} no existen`,
+    message: (codigos) => `Las habilidades de codigo: ${codigos.join(", ")} no existen`,
   },
   // =========================
   // COLECTIVOS
