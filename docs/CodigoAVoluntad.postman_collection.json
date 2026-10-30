@@ -17,8 +17,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/healthCheck",
-              "host": ["{{baseUrl}}"],
-              "path": ["healthCheck"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "healthCheck"
+              ]
             }
           },
           "response": []
@@ -106,8 +110,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/habilidades",
-              "host": ["{{baseUrl}}"],
-              "path": ["habilidades"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "habilidades"
+              ]
             }
           },
           "response": []
@@ -148,8 +156,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colectivos",
-              "host": ["{{baseUrl}}"],
-              "path": ["colectivos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colectivos"
+              ]
             }
           },
           "response": []
@@ -170,8 +182,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colectivos",
-              "host": ["{{baseUrl}}"],
-              "path": ["colectivos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colectivos"
+              ]
             }
           },
           "response": [],
@@ -197,8 +213,96 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colectivos/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["colectivos", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colectivos",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colectivoId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear con redes sociales",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Fundación Semillas del Sur\",\n  \"descripcion\": \"Organización barrial enfocada en huertas comunitarias y educación ambiental.\",\n  \"ubicacion\": \"caba\",\n  \"tipoDeColectivo\": \"ong\",\n  \"redesSociales\": [\n    {\n      \"tipo\": \"instagram\",\n      \"url\": \"https://instagram.com/semillasdelsur\"\n    },\n    {\n      \"tipo\": \"youtube\",\n      \"url\": \"https://youtube.com/@semillasdelsur\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colectivos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colectivos"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('colectivoConRedesId', String(body.id ?? body._id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar redes sociales (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redesSociales\": [\n    {\n      \"tipo\": \"instagram\",\n      \"url\": \"https://instagram.com/colectivoambiental_oficial\"\n    },\n    {\n      \"tipo\": \"tiktok\",\n      \"url\": \"https://tiktok.com/@colectivoambiental\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colectivos/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colectivos",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -294,6 +398,203 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Crear con redes sociales",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreFantasia\": \"DevSocial\",\n  \"git\": \"https://github.com/devsocial\",\n  \"nombre\": \"Camila\",\n  \"apellido\": \"Pérez\",\n  \"habilidades\": [\n    \"programacion_en_java_script\"\n  ],\n  \"pronombres\": \"ella\",\n  \"presentacion\": \"Desarrolladora con presencia activa en redes sociales de tecnología.\",\n  \"contactos\": [\n    {\n      \"tipo\": \"email\",\n      \"valor\": \"devsocial@mail.com\"\n    }\n  ],\n  \"bloquearMensajeInterno\": false,\n  \"redesSociales\": [\n    {\n      \"tipo\": \"github\",\n      \"url\": \"https://github.com/devsocial\"\n    },\n    {\n      \"tipo\": \"linkedin\",\n      \"url\": \"https://linkedin.com/in/devsocial\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('colaboradoraConRedesId', String(body.id ?? body._id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar redes sociales (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redesSociales\": [\n    {\n      \"tipo\": \"github\",\n      \"url\": \"https://github.com/devneko-updated\"\n    },\n    {\n      \"tipo\": \"x\",\n      \"url\": \"https://x.com/devneko\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colaboradoraId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar una red de la lista (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redesSociales\": [\n    {\n      \"tipo\": \"github\",\n      \"url\": \"https://github.com/devneko-updated\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colaboradoraId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar URL inválida (Error 400)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redesSociales\": [\n    {\n      \"tipo\": \"github\",\n      \"url\": \"ftp://github.com/protocolo-invalido\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colaboradoraId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar tipo de red social inválido (Error 400)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"redesSociales\": [\n    {\n      \"tipo\": \"plataforma_inexistente\",\n      \"url\": \"https://ejemplo.com/perfil\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colaboradoraId}}"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -307,8 +608,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ]
             }
           },
           "response": []
@@ -329,8 +634,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ]
             }
           },
           "response": [],
@@ -357,8 +666,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -381,8 +695,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles"
+              ]
             }
           },
           "response": []
@@ -394,8 +714,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles",
+                "{{perfilId}}"
+              ]
             }
           },
           "response": []
@@ -421,8 +748,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles"
+              ]
             }
           },
           "event": [
@@ -461,8 +794,15 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilNuevoId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilNuevoId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles",
+                "{{perfilNuevoId}}"
+              ]
             }
           },
           "response": []
@@ -474,8 +814,15 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilNuevoId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilNuevoId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{proyectoId}}",
+                "perfiles",
+                "{{perfilNuevoId}}"
+              ]
             }
           },
           "response": []
@@ -492,8 +839,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboraciones",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboraciones"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboraciones"
+              ]
             }
           },
           "response": []
@@ -519,8 +870,12 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboraciones",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboraciones"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboraciones"
+              ]
             }
           },
           "response": [],
@@ -546,8 +901,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboraciones/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboraciones", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboraciones",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -570,7 +930,9 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}/colaboradoras-acordes",
-              "host": ["{{baseUrl}}"],
+              "host": [
+                "{{baseUrl}}"
+              ],
               "path": [
                 "proyectos",
                 "{{proyectoId}}",
@@ -589,8 +951,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/{{colaboradoraId}}/proyectos-acordes",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboradoras", "{{colaboradoraId}}", "proyectos-acordes"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras",
+                "{{colaboradoraId}}",
+                "proyectos-acordes"
+              ]
             }
           },
           "response": []
@@ -621,8 +989,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colectivos/{{colectivoId}}/mensajes",
-              "host": ["{{baseUrl}}"],
-              "path": ["colectivos", "{{colectivoId}}", "mensajes"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colectivos",
+                "{{colectivoId}}",
+                "mensajes"
+              ]
             }
           },
           "response": []
@@ -634,8 +1008,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/{{colaboradoraId}}/mensajes",
-              "host": ["{{baseUrl}}"],
-              "path": ["colaboradoras", "{{colaboradoraId}}", "mensajes"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "colaboradoras",
+                "{{colaboradoraId}}",
+                "mensajes"
+              ]
             }
           },
           "response": []
@@ -966,8 +1346,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",

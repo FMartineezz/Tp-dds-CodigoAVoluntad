@@ -15,6 +15,7 @@ export class PersonaColaboradora {
     presentacion = null,
     contactos = [],
     bloquearMensajeInterno = false,
+    redesSociales = [],
   ) {
     this.id = null;
     this.nombreFantasia = nombreFantasia;
@@ -26,5 +27,6 @@ export class PersonaColaboradora {
     this.presentacion = presentacion;
     this.contactos = contactos;
     this.bloquearMensajeInterno = bloquearMensajeInterno;
+    this.redesSociales = redesSociales;
   }
 }
