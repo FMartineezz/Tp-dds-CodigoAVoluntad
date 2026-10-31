@@ -41,6 +41,7 @@ class Colectivo {
     this.ubicacion = ubicacion;
     this.tipoDeColectivo = tipoDeColectivo;
     this.proyectos = [];
+    this.denuncias = [];
     this.activo = true
   }
 

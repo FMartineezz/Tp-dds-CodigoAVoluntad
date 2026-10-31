@@ -35,6 +35,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | [Colaboraciones](#colaboraciones) | `GET /colaboraciones`, `GET /colaboraciones/:id`, `POST /colaboraciones`                                          |
 | [Búsquedas](#búsquedas)           | `GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes`, `GET /colaboradoras/:id/proyectos-acordes` |
 | [Mensajes](#mensajes)             | `POST /colectivos/:colectivoId/mensajes`, `GET /colaboradoras/:personaColaboradoraId/mensajes`                    |
+| [Denuncias](#denuncias)           | `POST /colaboraciones/:id/denuncia`, `GET /admin/denuncias`, `GET /admin/denuncias/:id`, `PATCH /admin/denuncias/:id/estado` |
 
 ---
 
@@ -800,6 +801,144 @@ Guarda el mensaje en la bandeja de la persona y lo **replica por email** a los c
 
 ---
 
+## Denuncias
+
+Permite que una persona que haya participado en un proyecto con una organización denuncie a la misma por mal comportamiento. Queda a criterio del equipo administrativo evaluar la denuncia.
+
+> **Aviso de seguridad y autenticación:** Actualmente el backend no cuenta con un sistema de autenticación ni control de acceso por roles (RBAC). Las rutas administrativas bajo `/admin/` están formalmente separadas de las rutas operativas, pero **no se encuentran protegidas técnicamente frente a terceros no autorizados** hasta tanto se implemente una capa transversal de autenticación.
+
+| Método | Path                           | Descripción                                                       |
+| ------ | ------------------------------ | ----------------------------------------------------------------- |
+| POST   | `/colaboraciones/:id/denuncia` | Registra una denuncia contra el colectivo asociado a una colaboración |
+| GET    | `/admin/denuncias`             | Lista global de denuncias para evaluación administrativa          |
+| GET    | `/admin/denuncias/:id`         | Detalle de una denuncia junto a la colaboración y contacto        |
+| PATCH  | `/admin/denuncias/:id/estado`  | Actualiza el estado administrativo de una denuncia                |
+
+### POST `/colaboraciones/:id/denuncia`
+
+Registra una denuncia contra el colectivo responsable del proyecto en el cual se participó. El colectivo no se selecciona libremente sino que se deduce automáticamente a partir de la colaboración (`Colaboración -> Proyecto -> Colectivo`).
+
+**Body:**
+
+| Campo         | Tipo   | Requerido | Notas                               |
+| ------------- | ------ | --------- | ----------------------------------- |
+| `descripcion` | string | sí        | Explicación de lo ocurrido (no vacío) |
+
+**Reglas de negocio:**
+- La colaboración debe existir.
+- La colaboración debe acreditar participación real en el proyecto (tanto colaboraciones activas como finalizadas / dadas de baja son válidas).
+- El proyecto debe tener un colectivo asociado.
+- Solo se permite una denuncia por colaboración (duplicados son rechazados).
+- La denuncia se crea con estado inicial `pendiente`.
+- **Privacidad:** La denuncia no almacena directamente datos personales (`denunciante` ni `personaId`). La respuesta operativa no expone datos personales.
+
+**Respuesta 201:**
+
+```json
+{
+  "id": "60c72b2f9b1d8b2bad000001",
+  "_id": "60c72b2f9b1d8b2bad000001",
+  "descripcion": "Incumplimiento reiterado de acuerdos",
+  "fecha": "2026-10-31T03:30:00.000Z",
+  "estado": "pendiente",
+  "colaboracionId": "6acfd66a64d02459ba8dc6a7"
+}
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                                                                |
+| ------ | ------------- | --------------------------------------------------------------------- |
+| 400    | `ERR-VAL-1101` | Falta la descripción o está vacía                                    |
+| 400    | `ERR-EST-1102` | La colaboración no acredita participación real                        |
+| 400    | `ERR-EST-1104` | El proyecto no tiene un colectivo asociado                            |
+| 404    | `ERR-NOT-506` | No existe la colaboración                                             |
+| 404    | `ERR-NOT-305` | No existe el colectivo responsable                                    |
+| 409    | `ERR-EST-1103` | Ya existe una denuncia registrada para esta colaboración              |
+
+---
+
+### GET `/admin/denuncias`
+
+Consulta global de denuncias embebidas en los distintos colectivos, optimizada mediante agregación sin transferir documentos completos de colectivos.
+
+**Query params opcionales:**
+- `estado`: filtra por estado (`pendiente`, `en_revision`, `resuelta`, `descartada`).
+
+**Respuesta 200:** array de denuncias con información de su colectivo.
+
+```json
+[
+  {
+    "_id": "60c72b2f9b1d8b2bad000001",
+    "descripcion": "Incumplimiento reiterado de acuerdos",
+    "fecha": "2026-10-31T03:30:00.000Z",
+    "estado": "pendiente",
+    "colaboracionId": "6acfd66a64d02459ba8dc6a7",
+    "colectivoId": "6acfd66064d02459ba8dc695",
+    "colectivoNombre": "Fundación Ejemplo"
+  }
+]
+```
+
+---
+
+### GET `/admin/denuncias/:id`
+
+Obtiene el detalle administrativo de una denuncia, permitiendo al equipo de la plataforma recomponer la colaboración asociada y los datos de contacto de la persona si fuera necesario contactarla.
+
+**Respuesta 200:**
+
+```json
+{
+  "_id": "60c72b2f9b1d8b2bad000001",
+  "descripcion": "Incumplimiento reiterado de acuerdos",
+  "fecha": "2026-10-31T03:30:00.000Z",
+  "estado": "pendiente",
+  "colaboracionId": "6acfd66a64d02459ba8dc6a7",
+  "colectivoId": "6acfd66064d02459ba8dc695",
+  "colectivoNombre": "Fundación Ejemplo",
+  "colaboracion": {
+    "_id": "6acfd66a64d02459ba8dc6a7",
+    "personaColaboradora": {
+      "nombreFantasia": "Ana",
+      "contactos": [{ "tipo": "email", "valor": "ana@mail.com" }]
+    },
+    "proyecto": {
+      "titulo": "Sitio web institucional"
+    }
+  }
+}
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                                    |
+| ------ | ------------- | ----------------------------------------- |
+| 404    | `ERR-NOT-1105` | No existe una denuncia con ese identificador |
+
+---
+
+### PATCH `/admin/denuncias/:id/estado`
+
+Permite al equipo administrativo actualizar el estado de evaluación de la denuncia.
+
+**Body:**
+
+| Campo    | Tipo   | Requerido | Valores permitidos                       |
+| -------- | ------ | --------- | ---------------------------------------- |
+| `estado` | string | sí        | `en_revision`, `resuelta`, `descartada` |
+
+**Errores:**
+
+| Status | code          | Cuándo                                                  |
+| ------ | ------------- | ------------------------------------------------------- |
+| 400    | `ERR-VAL-1107` | Falta el campo `estado`                                 |
+| 400    | `ERR-VAL-1106` | El estado enviado no es válido para resolución           |
+| 404    | `ERR-NOT-1105` | No existe la denuncia a actualizar                      |
+
+---
+
 ## Enums de referencia
 
 | Enum                    | Valores                                                            |
@@ -809,3 +948,4 @@ Guarda el mensaje en la bandeja de la persona y lo **replica por email** a los c
 | `TipoCompromiso`        | `total`, `semanal`, `mensual`                                      |
 | `ModalidadColaboracion` | `gratuita`, `incentivo_economico`, `contratacion_eventual`         |
 | `TipoMedioDeContacto`   | `email`, `whatsapp`, `sms`                                         |
+| `EstadoDenuncia`        | `pendiente`, `en_revision`, `resuelta`, `descartada`               |

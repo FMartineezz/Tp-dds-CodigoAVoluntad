@@ -8,6 +8,7 @@ import perfilRoutes from "./perfilRoutes.js";
 import logroRoutes from "./logroRoutes.js";
 import swaggerRoutes from "./swaggerRoutes.js";
 import postulacionRoutes from "./postulacionRoutes.js";
+import denunciaRoutes from "./denunciaRoutes.js";
 
 const routes = [
   habilidadRoutes(),
@@ -20,6 +21,7 @@ const routes = [
   logroRoutes(),
   swaggerRoutes(),
   postulacionRoutes(),
+  denunciaRoutes(),
 ];
 
 export default routes;

@@ -17,6 +17,7 @@ import { MensajeService } from "./services/mensajeService.js";
 import { BusquedaService } from "./services/busquedaService.js";
 import { LogroService } from "./services/logroService.js";
 import { PostulacionService } from "./services/postulacionService.js";
+import { DenunciaService } from "./services/denunciaService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -28,6 +29,7 @@ import { PerfilController } from "./controllers/perfilController.js";
 import { MensajeController } from "./controllers/mensajeController.js";
 import { LogroController } from "./controllers/logroController.js";
 import { PostulacionController } from "./controllers/postulacionController.js";
+import { DenunciaController } from "./controllers/denunciaController.js";
 
 import { cierreProyectosJob } from "./cronTasks/cierreProyectoJob.js";
 
@@ -88,6 +90,10 @@ const postulacionService = new PostulacionService({
   colectivoService,
   colaboracionService,
 });
+const denunciaService = new DenunciaService({
+  colectivoRepository,
+  colaboracionRepository,
+});
 
 // Controllers: dependen de services.
 export const proyectoController = new ProyectoController({ proyectoService });
@@ -104,6 +110,7 @@ export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });
 export const postulacionController = new PostulacionController({ postulacionService });
+export const denunciaController = new DenunciaController({ denunciaService });
 
 //Job task
 export const cierreProyectos = new cierreProyectosJob({ proyectoService });
