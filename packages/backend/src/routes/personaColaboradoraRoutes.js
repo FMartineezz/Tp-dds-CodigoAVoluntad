@@ -18,21 +18,24 @@ export default function personaColaboradoraRoutes() {
     personaColaboradoraController.actualizarPersonaColaboradora,
   );
 
+  
   router.get(
     "/colaboradoras/:personaColaboradoraId/mensajes",
     mensajeController.verBandejaDeEntradaColaboradora,
   );
-
+  
   router.post(
     "/colaboradoras",
     validarPersonaColaboradora,
     personaColaboradoraController.crearPersonaColaboradora,
   );
-
+  
   router.get(
     "/colaboradoras/:id/proyectos-acordes",
     personaColaboradoraController.obtenerProyectosAcordes,
   );
+  
+  router.delete("/colaboradoras/:id", personaColaboradoraController.eliminarPersonaColaboradora);
 
   return router;
 }

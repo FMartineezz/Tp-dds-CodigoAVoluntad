@@ -103,6 +103,5 @@ export class ColectivoService {
       throw new AppError(ErrorCatalog.COLECTIVO_YA_DADO_DE_BAJA, 409, id);
     }
 
-    await this.repository.eliminarColectivo(id);
   }
 }

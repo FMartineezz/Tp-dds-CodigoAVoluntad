@@ -170,7 +170,7 @@ export class ProyectoService {
   }
 
   estaBusquedaAbierta(proyecto) {
-    if (proyecto.busquedaAbierta === false) return false;
+    if (proyecto.busquedaCerrada === true) return false;
     if (proyecto.fechaLimiteBusqueda && new Date(proyecto.fechaLimiteBusqueda) < new Date()) {
       return false;
     }

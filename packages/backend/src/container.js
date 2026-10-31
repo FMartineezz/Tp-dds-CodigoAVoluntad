@@ -29,7 +29,7 @@ import { MensajeController } from "./controllers/mensajeController.js";
 import { LogroController } from "./controllers/logroController.js";
 import { PostulacionController } from "./controllers/postulacionController.js";
 
-import { cierreProyectosJob } from "./cronTasks/CierreProyectoJob.js";
+import { cierreProyectosJob } from "./cronTasks/cierreProyectoJob.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
