@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { personaColaboradoraController } from "../container.js";
-import { mensajeController } from "../container.js";
+import * as container from "../container.js";
 import validarPersonaColaboradora from "../middlewares/validations/personaColaboradoraValidation.js";
 
-export default function personaColaboradoraRoutes() {
+export default function personaColaboradoraRoutes({
+  personaColaboradoraController,
+  mensajeController,
+} = container) {
   const router = Router();
 
   router.get("/colaboradoras", personaColaboradoraController.obtenerPersonasColaboradoras);

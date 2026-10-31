@@ -26,11 +26,12 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
 
 ```
 ───backend
-   ├─── index.js
+   ├─── index.js             # Levanta la app (buildApp) y la conexión a MongoDB
    ├─── package.json
    ├─── config               # Conexión a MongoDB
    │
    ├───src
+   │   ├─── app.js           # buildApp(routes): Express con json, cors, rutas, 404 y manejo de errores
    │   ├─── container.js     # Arma el grafo de dependencias (repositorios → services → controllers)
    │   ├─── controllers      # Encargados de la response a las request
    │   ├─── errors           # Catálogo de errores y AppError
@@ -42,11 +43,13 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
    │   └─── services         # Encargados del comportamiento del dominio, contiene la logica y reglas de negocio
    │
    └───test
-       ├─── fakes            # Repositorios en memoria que reemplazan a Mongo en los tests
-       ├─── helpers          # Arma los services con los fakes, igual que container.js
-       ├─── errors
-       ├─── models           # Tests de la capa de dominio
-       └─── services         # Tests de la capa de servicios
+       ├─── unit             # Tests unitarios
+       │   ├─── errors
+       │   ├─── models       # Capa de dominio
+       │   └─── services     # Capa de servicios, con sus dependencias moqueadas (jest.fn)
+       ├─── int              # Tests de integración con Supertest (rutas → controllers → services)
+       │   └─── utils        # buildTestApp: arma la app como container.js, con repositorios moqueados
+       └─── utils            # esperarAppError
 ```
 
 ### Cómo levantar el backend
@@ -65,10 +68,17 @@ Para probar la API a mano está la colección de Postman en `docs/CodigoAVolunta
 
 ### Tests
 
-Los tests unitarios usan [Jest](https://jestjs.io/) y cubren la capa de servicios y la de dominio. No necesitan MongoDB: los repositorios se reemplazan por fakes en memoria.
+Los tests usan [Jest](https://jestjs.io/) y ninguno necesita MongoDB:
+
+- **Unitarios** (`test/unit`): cubren la capa de dominio y la de servicios. Cada service se prueba aislado: el repositorio y los otros services que recibe por constructor se reemplazan por mocks (`jest.fn()` con `mockResolvedValue`), y se verifica con qué argumentos se los llama (`toHaveBeenCalledWith`).
+- **De integración** (`test/int`): con [Supertest](https://www.npmjs.com/package/supertest) se le hacen requests HTTP a la app real (rutas, validaciones de zod, controllers, services y `errorHandler`). Solo se moquean los repositorios y el transporter de mails.
+
+Cada test sigue la estructura preparación → ejecución → validación.
 
 ```bash
 npm run test:backend                              # desde la raíz
+npm run test:unit --workspace=backend             # solo unitarios
+npm run test:int --workspace=backend              # solo integración
 npm test --workspace=backend -- logroService      # solo los tests de un archivo
 npm run test:coverage --workspace=backend         # con reporte de cobertura
 ```

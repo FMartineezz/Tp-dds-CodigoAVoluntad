@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { perfilController } from "../container.js";
+import * as container from "../container.js";
 import validarPerfil, {
   validarActualizacionPerfil,
 } from "../middlewares/validations/perfilValidation.js";
 
-export default function proyectoRoutes() {
+export default function perfilRoutes({ perfilController } = container) {
   const router = Router();
 
   router.get("/proyectos/:idProyecto/perfiles", perfilController.obtenerPerfiles);

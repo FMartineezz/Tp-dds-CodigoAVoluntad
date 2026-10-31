@@ -1,12 +1,11 @@
 import { Router } from "express";
 import validarColectivo from "../middlewares/validations/colectivoValidation.js";
 import validarMensaje from "../middlewares/validations/mensajeValidation.js";
-import { colectivoController } from "../container.js";
-import { mensajeController } from "../container.js";
+import * as container from "../container.js";
 
 const pathColectivos = "/colectivos";
 
-export default function colectivoRoutes() {
+export default function colectivoRoutes({ colectivoController, mensajeController } = container) {
   const router = Router();
 
   router.get("/colectivos", colectivoController.obtenerColectivos);

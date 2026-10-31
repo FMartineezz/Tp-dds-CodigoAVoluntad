@@ -1,11 +1,16 @@
-import { PersonaColaboradora, TipoMedioDeContacto } from "../../src/models/personaColaboradora.js";
-import { Colaboracion } from "../../src/models/colaboracion.js";
-import { Mensaje } from "../../src/models/mensaje.js";
+import {
+  PersonaColaboradora,
+  TipoMedioDeContacto,
+} from "../../../src/models/personaColaboradora.js";
+import { Colaboracion } from "../../../src/models/colaboracion.js";
+import { Mensaje } from "../../../src/models/mensaje.js";
 
 describe("PersonaColaboradora", () => {
   test("solo exige nombre de fantasía y git; el resto tiene valores por defecto", () => {
+    // Ejecución
     const persona = new PersonaColaboradora("Ana", "github.com/ana");
 
+    // Validación
     expect(persona).toMatchObject({
       id: null,
       nombreFantasia: "Ana",
@@ -37,9 +42,13 @@ describe("Colaboracion", () => {
 
 describe("Mensaje", () => {
   test("registra la fecha de creación", () => {
+    // Preparación
     const antes = new Date();
+
+    // Ejecución
     const mensaje = new Mensaje({ nombre: "Colectivo" }, { nombreFantasia: "Ana" }, "Hola");
 
+    // Validación
     expect(mensaje.texto).toBe("Hola");
     expect(mensaje.date.getTime()).toBeGreaterThanOrEqual(antes.getTime());
   });

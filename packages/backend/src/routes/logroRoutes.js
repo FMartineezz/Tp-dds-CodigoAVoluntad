@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { logroController } from "../container.js";
+import * as container from "../container.js";
 import {
   validarLogro,
   validarActualizacionLogro,
@@ -7,7 +7,7 @@ import {
 
 const pathLogros = "/proyectos/:proyectoId/logros";
 
-export default function logroRoutes() {
+export default function logroRoutes({ logroController } = container) {
   const router = Router();
 
   router.post(pathLogros, validarLogro, logroController.crearLogro);

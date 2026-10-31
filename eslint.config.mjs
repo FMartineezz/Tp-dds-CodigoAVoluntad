@@ -11,6 +11,17 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
   {
+    files: ["packages/backend/test/**/*.{js,mjs,cjs,jsx}"],
+    plugins: { js },
+    extends: ["js/recommended"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
+    },
+  },
+  {
     files: ["packages/frontend/src/**/*.{js,jsx,mjs,cjs}"],
     ...pluginReact.configs.flat.recommended,
     settings: { react: { version: "detect" } },

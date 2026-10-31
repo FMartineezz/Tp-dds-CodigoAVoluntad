@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { proyectoController } from "../container.js";
+import * as container from "../container.js";
 import proyectoValidation from "../middlewares/validations/proyectoValidation.js";
 
 const pathProyectos = "/proyectos";
 
-export default function proyectoRoutes() {
+export default function proyectoRoutes({ proyectoController } = container) {
   const router = Router();
 
   router.get("/proyectos", proyectoController.obtenerProyectos);

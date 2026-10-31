@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { healthCheckController } from "../container.js";
+import * as container from "../container.js";
 
-export default function healthCheckRoutes() {
+export default function healthCheckRoutes({ healthCheckController } = container) {
   const router = Router();
 
   router.get("/healthCheck", healthCheckController.check);
