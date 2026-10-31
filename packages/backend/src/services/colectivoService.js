@@ -24,6 +24,8 @@ export class ColectivoService {
     const colectivoGuardado = await this.repository.guardar(nuevoColectivo);
     nuevoColectivo.id = colectivoGuardado.id;
 
+    delete nuevoColectivo.denuncias;
+
     return nuevoColectivo;
   }
 

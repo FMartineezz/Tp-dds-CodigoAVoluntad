@@ -49,6 +49,14 @@ export class ColaboracionRepository {
       .lean();
   }
 
+  async obtenerPorIdParaAdmin(id) {
+    return await this.model
+      .findById(id)
+      .populate({ path: "personaColaboradora", select: "+contactos" })
+      .populate("proyecto")
+      .lean();
+  }
+
   async contarActivasPorPerfil(proyectoId, perfilId) {
     return await this.model.countDocuments({
       proyecto: proyectoId,

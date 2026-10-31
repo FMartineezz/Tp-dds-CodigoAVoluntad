@@ -51,6 +51,9 @@
     },
     {
       "name": "Mensajes"
+    },
+    {
+      "name": "Denuncias"
     }
   ],
   "components": {
@@ -66,6 +69,90 @@
           "message": {
             "type": "string",
             "example": "El título del proyecto es requerido"
+          }
+        }
+      },
+      "EstadoDenuncia": {
+        "type": "string",
+        "enum": ["pendiente", "en_revision", "resuelta", "descartada"],
+        "description": "Estado de la denuncia."
+      },
+      "DenunciaInput": {
+        "type": "object",
+        "required": ["descripcion"],
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "example": "Incumplimiento reiterado de acuerdos y destrato en reuniones de equipo."
+          }
+        }
+      },
+      "Denuncia": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Incumplimiento reiterado de acuerdos y destrato en reuniones de equipo."
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-31T03:30:00.000Z"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoDenuncia"
+          },
+          "colaboracionId": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a7"
+          }
+        }
+      },
+      "DenunciaAdmin": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Incumplimiento reiterado de acuerdos y destrato en reuniones de equipo."
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-31T03:30:00.000Z"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoDenuncia"
+          },
+          "colaboracionId": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a7"
+          },
+          "colectivoId": {
+            "type": "string",
+            "example": "6acfd66064d02459ba8dc695"
+          },
+          "colectivoNombre": {
+            "type": "string",
+            "example": "Fundación Ejemplo"
+          }
+        }
+      },
+      "DenunciaEstadoInput": {
+        "type": "object",
+        "required": ["estado"],
+        "properties": {
+          "estado": {
+            "type": "string",
+            "enum": ["en_revision", "resuelta", "descartada"],
+            "example": "en_revision"
           }
         }
       },
@@ -2656,6 +2743,174 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/colaboraciones/{id}/denuncia": {
+      "post": {
+        "tags": ["Denuncias"],
+        "summary": "Registra una denuncia contra el colectivo asociado a una colaboración",
+        "description": "Permite que una persona que haya participado en un proyecto con la organización denuncie a la misma. El colectivo denunciado se deduce automáticamente de la colaboración.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la colaboración desde la que se origina la denuncia.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenunciaInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Denuncia registrada con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Denuncia"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación o la colaboración no acredita participación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la colaboración o el colectivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ya existe una denuncia registrada para esta colaboración.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/denuncias": {
+      "get": {
+        "tags": ["Denuncias"],
+        "summary": "Lista global de denuncias (Administración)",
+        "description": "Devuelve todas las denuncias registradas a través de los colectivos, optimizado mediante agregación.",
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "description": "Filtrar por estado de denuncia.",
+            "schema": {
+              "$ref": "#/components/schemas/EstadoDenuncia"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de denuncias.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DenunciaAdmin"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/denuncias/{id}": {
+      "get": {
+        "tags": ["Denuncias"],
+        "summary": "Detalle administrativo de una denuncia",
+        "description": "Devuelve la denuncia y la colaboración asociada completa para que la administración pueda contactar a la persona.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la denuncia.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle de la denuncia con su colaboración asociada."
+          },
+          "404": {
+            "description": "Denuncia no encontrada."
+          }
+        }
+      }
+    },
+    "/admin/denuncias/{id}/estado": {
+      "patch": {
+        "tags": ["Denuncias"],
+        "summary": "Actualizar estado administrativo de una denuncia",
+        "description": "Permite transicionar el estado de la denuncia a en_revision, resuelta o descartada.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la denuncia.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenunciaEstadoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado de la denuncia actualizado."
+          },
+          "400": {
+            "description": "Estado inválido o faltante."
+          },
+          "404": {
+            "description": "Denuncia no encontrada."
           }
         }
       }

@@ -979,6 +979,109 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Denuncias",
+      "item": [
+        {
+          "name": "Registrar denuncia desde colaboracion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Incumplimiento reiterado de acuerdos y destrato en reuniones.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colaboraciones/:id/denuncia",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones", ":id", "denuncia"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colaboracionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar denuncias (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/denuncias",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "denuncias"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener denuncia por ID con colaboracion (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/denuncias/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "denuncias", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{denunciaId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar estado de denuncia (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en_revision\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/denuncias/:id/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "denuncias", ":id", "estado"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{denunciaId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [

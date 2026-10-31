@@ -446,6 +446,39 @@ const ErrorCatalog = Object.freeze({
     message:
       "La Postulacion ya fue resuelta, asegurese de resolver postuaciones con estado PENDIENTE",
   },
+
+  // =========================
+  // DENUNCIAS
+  // =========================
+
+  DENUNCIA_DESCRIPCION_REQUERIDA: {
+    code: "ERR-VAL-1101",
+    message: "La descripción de la denuncia es requerida",
+  },
+  DENUNCIA_COLABORACION_NO_ACREDITA_PARTICIPACION: {
+    code: "ERR-EST-1102",
+    message: "La colaboración no acredita una participación válida en el proyecto",
+  },
+  DENUNCIA_DUPLICADA: {
+    code: "ERR-EST-1103",
+    message: "Ya existe una denuncia registrada para esta colaboración",
+  },
+  DENUNCIA_PROYECTO_SIN_COLECTIVO: {
+    code: "ERR-EST-1104",
+    message: "El proyecto asociado a la colaboración no tiene un colectivo responsable",
+  },
+  DENUNCIA_NO_ENCONTRADA: {
+    code: "ERR-NOT-1105",
+    message: (id) => `La denuncia ${id} no fue encontrada`,
+  },
+  DENUNCIA_ESTADO_INVALIDO: {
+    code: "ERR-VAL-1106",
+    message: "El estado de la denuncia debe ser: en_revision, resuelta o descartada",
+  },
+  DENUNCIA_ESTADO_REQUERIDO: {
+    code: "ERR-VAL-1107",
+    message: "El estado de la denuncia es requerido",
+  },
 });
 
 export default ErrorCatalog;
