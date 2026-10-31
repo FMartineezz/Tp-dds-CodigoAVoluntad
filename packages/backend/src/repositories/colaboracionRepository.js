@@ -49,6 +49,29 @@ export class ColaboracionRepository {
       .lean();
   }
 
+  async obtenerPorPersonaColaboradoraId(personaColaboradoraId) {
+  return await this.model
+    .find({ personaColaboradora: personaColaboradoraId })
+    .lean();
+  }
+
+  async obtenerPorProyectoIds(proyectoIds) {
+    return await this.model
+      .find({ proyecto: { $in: proyectoIds } })
+      .lean();
+  }
+}
+
+/*   constructor() {
+    this.colaboraciones = [];
+    this.id = 1;
+  }
+
+  guardar(colaboracion) {
+    colaboracion.id = this.id;
+    this.id++;
+    this.colaboraciones.push(colaboracion);
+
   async contarActivasPorPerfil(proyectoId, perfilId) {
     return await this.model.countDocuments({
       proyecto: proyectoId,

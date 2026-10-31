@@ -5,6 +5,7 @@ import { HabilidadRespository } from "./repositories/habilidadRepository.js";
 import { ColaboracionRepository } from "./repositories/colaboracionRepository.js";
 import { PersonaColaboradoraRepository } from "./repositories/personaColaboradoraRepository.js";
 import { MensajeRepository } from "./repositories/mensajesRepository.js";
+import { ValoracionRepository } from "./repositories/valoracionRepository.js";
 import { PostulacionRepository } from "./repositories/postulacionRepository.js";
 
 import { ProyectoService } from "./services/proyectoService.js";
@@ -16,6 +17,7 @@ import { PerfilService } from "./services/perfilService.js";
 import { MensajeService } from "./services/mensajeService.js";
 import { BusquedaService } from "./services/busquedaService.js";
 import { LogroService } from "./services/logroService.js";
+import { ValoracionService } from "./services/valoracionService.js";
 import { PostulacionService } from "./services/postulacionService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
@@ -27,6 +29,7 @@ import { HealthCheckController } from "./controllers/healthCheckController.js";
 import { PerfilController } from "./controllers/perfilController.js";
 import { MensajeController } from "./controllers/mensajeController.js";
 import { LogroController } from "./controllers/logroController.js";
+import { ValoracionController } from "./controllers/valoracionController.js";
 import { PostulacionController } from "./controllers/postulacionController.js";
 
 import { cierreProyectosJob } from "./cronTasks/cierreProyectoJob.js";
@@ -38,6 +41,7 @@ const habilidadRepository = new HabilidadRespository();
 const colaboracionRepository = new ColaboracionRepository();
 const personaColaboradoraRepository = new PersonaColaboradoraRepository();
 const mensajeRepository = new MensajeRepository();
+const valoracionRepository = new ValoracionRepository();
 const postulacionRepository = new PostulacionRepository();
 
 // Transporter de mails para las notificaciones por medios externos.
@@ -89,6 +93,11 @@ const postulacionService = new PostulacionService({
   colaboracionService,
 });
 
+const valoracionService = new ValoracionService({
+  valoracionRepository,
+  colaboracionService,
+});
+
 // Controllers: dependen de services.
 export const proyectoController = new ProyectoController({ proyectoService });
 export const colectivoController = new ColectivoController({ service: colectivoService });
@@ -103,6 +112,7 @@ export const logroController = new LogroController({ logroService });
 export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });
+export const valoracionController = new ValoracionController({ valoracionService });
 export const postulacionController = new PostulacionController({ postulacionService });
 
 //Job task
