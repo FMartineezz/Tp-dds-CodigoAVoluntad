@@ -6,6 +6,7 @@ export class Perfil {
     horas,
     tipoDeCompromiso,
     modalidadDeColaboracion,
+    cantidadMaxima = undefined,
   ) {
     this.id = null;
     this.descripcion = descripcion;
@@ -14,5 +15,6 @@ export class Perfil {
     this.horas = horas;
     this.tipoDeCompromiso = tipoDeCompromiso; // puede ser "semanales","mensuales" o "totales"
     this.modalidadDeColaboracion = modalidadDeColaboracion;
+    this.cantidadMaxima = cantidadMaxima;
   }
 }

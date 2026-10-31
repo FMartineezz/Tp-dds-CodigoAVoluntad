@@ -40,6 +40,7 @@ export const perfilSchema = zod.object({
         issue.code === "invalid_type" ? "PERFIL_MODALIDAD_REQUERIDA" : "PERFIL_MODALIDAD_FORMATO",
     }),
   }),
+  cantidadMaxima: zod.number({ invalid_type_error: "ARGUMENTO_INVALIDO" }).optional(),
 });
 
 const proyectoSchema = zod.object({
@@ -73,6 +74,7 @@ const proyectoSchema = zod.object({
     })
     .url("PROYECTO_URL_SISTEMA_INVALIDA"),
   fechaCierre: zod.coerce.date().optional(),
+  fechaLimiteBusqueda: zod.coerce.date().optional(),
 });
 
 const validarProyecto = (req, res, next) => {

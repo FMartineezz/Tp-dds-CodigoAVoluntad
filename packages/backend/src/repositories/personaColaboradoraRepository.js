@@ -25,31 +25,31 @@ export class PersonaColaboradoraRepository {
   async obtenerPorHabilidadId(habilidadesIds) {
     return await this.model.find({ habilidades: { $in: habilidadesIds } }).lean();
   }
-}
 
-/*   constructor() {
-    this.personasColaboradoras = [];
-    this.id = 1;
-  }
-
-  guardar(personaColaboradora) {
-    personaColaboradora.id = this.id;
-    this.id++;
-    this.personasColaboradoras.push(personaColaboradora);
-    return personaColaboradora;
-  }
-
-  obtenerTodas() {
-    return this.personasColaboradoras;
-  }
-
-  obtenerPorId(id) {
-    return this.personasColaboradoras.find((persona) => persona.id === id);
-  }
-
-  obtenerPorAlgunaHabilidad(codigos) {
-    return this.personasColaboradoras.filter((persona) =>
-      persona.habilidades.some((habilidad) => codigos.includes(habilidad.codigo)),
+  async eliminar(id) {
+    const colaboradora = await this.model.findOneAndUpdate(
+      { _id: id, activo: true },
+      { $set: { 
+        nombreFantasia: "UserEliminado",
+        git: `github:UserEliminado${id}`,
+        nombre: "Usuario",
+        apellido: "Eliminado",
+        pronombres: [],
+        presentacion: "Presentacion Usuario Eliminado",
+        contactos: [],
+        activo: false } },
+      { new: true }
     );
+
+    if (colaboradora) {
+      return { actualizado: true };
+    }
+
+    const existe = await this.model.findById(id);
+    if (!existe) {
+      return { actualizado: false, razon: 'NO_ENCONTRADO' };
+    }
+
+    return { actualizado: false, razon: 'YA_DADO_DE_BAJA' };
   }
-  } */
+}

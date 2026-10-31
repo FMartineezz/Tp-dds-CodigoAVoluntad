@@ -25,4 +25,11 @@ export class ColectivoController {
     const respuesta = await this.service.obtenerColectivoPorId(id);
     res.status(200).json(respuesta);
   };
+
+  eliminarColectivo = async (req, res) => {
+    const id = req.params.id;
+
+    await this.service.eliminarColectivo(id);
+    res.status(204).send();
+  }
 }

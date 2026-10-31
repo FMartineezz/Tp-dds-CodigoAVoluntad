@@ -6,6 +6,7 @@ import { ColaboracionRepository } from "./repositories/colaboracionRepository.js
 import { PersonaColaboradoraRepository } from "./repositories/personaColaboradoraRepository.js";
 import { MensajeRepository } from "./repositories/mensajesRepository.js";
 import { ValoracionRepository } from "./repositories/valoracionRepository.js";
+import { PostulacionRepository } from "./repositories/postulacionRepository.js";
 
 import { ProyectoService } from "./services/proyectoService.js";
 import { ColectivoService } from "./services/colectivoService.js";
@@ -17,6 +18,7 @@ import { MensajeService } from "./services/mensajeService.js";
 import { BusquedaService } from "./services/busquedaService.js";
 import { LogroService } from "./services/logroService.js";
 import { ValoracionService } from "./services/valoracionService.js";
+import { PostulacionService } from "./services/postulacionService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -28,8 +30,9 @@ import { PerfilController } from "./controllers/perfilController.js";
 import { MensajeController } from "./controllers/mensajeController.js";
 import { LogroController } from "./controllers/logroController.js";
 import { ValoracionController } from "./controllers/valoracionController.js";
+import { PostulacionController } from "./controllers/postulacionController.js";
 
-import { cierreProyectosJob } from "./cronTasks/CierreProyectoJob.js";
+import { cierreProyectosJob } from "./cronTasks/cierreProyectoJob.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
@@ -39,6 +42,7 @@ const colaboracionRepository = new ColaboracionRepository();
 const personaColaboradoraRepository = new PersonaColaboradoraRepository();
 const mensajeRepository = new MensajeRepository();
 const valoracionRepository = new ValoracionRepository();
+const postulacionRepository = new PostulacionRepository();
 
 // Transporter de mails para las notificaciones por medios externos.
 const mailTransporter = nodemailer.createTransport({
@@ -81,6 +85,13 @@ const logroService = new LogroService({
   proyectoService,
   proyectoRepository,
 });
+const postulacionService = new PostulacionService({
+  repository: postulacionRepository,
+  personaColaboradoraService,
+  proyectoService,
+  colectivoService,
+  colaboracionService,
+});
 
 const valoracionService = new ValoracionService({
   valoracionRepository,
@@ -102,6 +113,7 @@ export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });
 export const valoracionController = new ValoracionController({ valoracionService });
+export const postulacionController = new PostulacionController({ postulacionService });
 
 //Job task
 export const cierreProyectos = new cierreProyectosJob({ proyectoService });

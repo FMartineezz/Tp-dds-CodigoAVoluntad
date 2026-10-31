@@ -11,6 +11,10 @@ export class ColectivoRepository {
   }
 
   async obtenerTodos() {
+    return await this.model.find({ activo: true }).lean();
+  }
+
+  async obtenerTodosConEliminados() {
     return await this.model.find().lean();
   }
 
@@ -29,28 +33,23 @@ export class ColectivoRepository {
       },
     });
   }
+
+    async eliminar(id) {
+    const colectivo = await this.model.findOneAndUpdate(
+      { _id: id, activo: true },
+      { $set: { activo: false } },
+      { new: true }
+    );
+
+    if (colectivo) {
+      return { actualizado: true };
+    }
+
+    const existe = await this.model.findById(id);
+    if (!existe) {
+      return { actualizado: false, razon: 'NO_ENCONTRADO' };
+    }
+
+    return { actualizado: false, razon: 'YA_DADO_DE_BAJA' };
+  }
 }
-
-/*   constructor() {
-    this.colectivos = [];
-    this.id = 1;
-  }
-
-  agregarColectivo(colectivo) {
-    colectivo.id = this.id;
-    this.id++;
-    this.colectivos.push(colectivo);
-  }
-
-  obtenerColectivos() {
-    return this.colectivos;
-  }
-
-  obtenerColectivoPorId(id) {
-    return this.colectivos.find((c) => c.id === id) ?? null;
-  }
-
-  obtenerColectivoPorNombre(nombre) {
-    return this.colectivos.find((colectivo) => colectivo.nombre === nombre) || null;
-  }
- */

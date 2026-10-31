@@ -57,4 +57,18 @@ export class ColectivoService {
     colectivo.proyectos.push(proyectoId);
     await this.repository.agregarProyecto(colectivoId, proyectoId);
   }
+
+  async eliminarColectivo(id) {
+    const resultado = await this.repository.eliminar(id);
+
+    if (!resultado.actualizado) {
+      if (resultado.razon === 'NO_ENCONTRADO') {
+        throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
+      }
+      if (resultado.razon === 'YA_DADO_DE_BAJA') {
+        throw new AppError(ErrorCatalog.COLECTIVO_YA_DADO_DE_BAJA, 409, id);
+      }
+    }
+
+  }
 }

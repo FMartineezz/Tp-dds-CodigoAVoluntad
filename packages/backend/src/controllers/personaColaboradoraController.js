@@ -33,14 +33,20 @@ export class PersonaColaboradoraController {
 
     res.status(200).json(persona);
   };
-
+  
   obtenerProyectosAcordes = async (req, res) => {
     const id = req.params.id;
-
+    
     const proyectos = await this.busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(id);
-
-    console.log(proyectos);
-
+       
     res.status(200).json(proyectos);
+  };
+
+  eliminarPersonaColaboradora = async (req, res) => {
+    const id = req.params.id;
+
+    await this.personaColaboradoraService.eliminarPersonaColaboradora(id);
+
+    res.status(204).send();
   };
 }

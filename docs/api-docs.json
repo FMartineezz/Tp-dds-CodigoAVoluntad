@@ -11,7 +11,7 @@
       "description": "Local",
       "variables": {
         "puerto": {
-          "default": "8000",
+          "default": "3000",
           "description": "Valor de SERVER_PORT en el .env (3000 si no está definido)"
         }
       }

@@ -116,6 +116,10 @@ const ErrorCatalog = Object.freeze({
     message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
   },
 
+  HABILIDADES_INEXISTENTES_GENERICO: {
+    code: "ERR-VAL-207",
+    message: (codigos) => `Las habilidades de codigo: ${codigos.join(', ')} no existen`,
+  },
   // =========================
   // COLECTIVOS
   // =========================
@@ -160,6 +164,11 @@ const ErrorCatalog = Object.freeze({
     message: (nombre) => `Ya existe un colectivo con el nombre ${nombre}`,
   },
 
+  COLECTIVO_YA_DADO_DE_BAJA: {
+    code: "ERR-EST-508",
+    message: (id) => `El colectivo ${id} ya fue dado de baja`,
+  },
+
   // =========================
   // COLABORADORAS
   // =========================
@@ -199,6 +208,11 @@ const ErrorCatalog = Object.freeze({
     message: "El campo bloquear mensaje interno debe ser un booleano",
   },
 
+  COLABORADORA_YA_DADA_DE_BAJA: {
+    code: "ERR-EST-508",
+    message: (id) => `La persona colaboradora ${id} ya fue dada de baja`,
+  },
+
   // =========================
   // COLABORACIONES
   // =========================
@@ -232,6 +246,16 @@ const ErrorCatalog = Object.freeze({
   COLABORACION_NO_ENCONTRADA: {
     code: "ERR-NOT-506",
     message: (id) => `La colaboración ${id} no fue encontrada`,
+  },
+
+  COLABORACION_CUPO_COMPLETO: {
+    code: "ERR-EST-507",
+    message: "Se acabo el cupo maximo de colaboraciones del perfil",
+  },
+
+  COLABORACION_YA_DADA_DE_BAJA: {
+    code: "ERR-EST-508",
+    message: (id) => `La colaboración ${id} ya fue dada de baja`,
   },
 
   // =========================
@@ -412,6 +436,56 @@ const ErrorCatalog = Object.freeze({
     message: "El comentario debe tener un máximo de 500 caracteres",
   },
 
+  // POSTULACION
+  // =========================
+
+  POSTULACION_PERSONA_REQUERIDA: {
+    code: "ERR-VAL-1001",
+    message: "La persona colaboradora que se postula es requerida",
+  },
+
+  POSTULACION_ANONIMA_FORMATO: {
+    code: "ERR-VAL-1002",
+    message: "El campo anonima debe ser true o false",
+  },
+
+  POSTULACION_ESTADO_REQUERIDO: {
+    code: "ERR-VAL-1003",
+    message: "El estado de la postulación es requerido",
+  },
+
+  POSTULACION_ESTADO_INVALIDO: {
+    code: "ERR-VAL-1004",
+    message: "El estado debe ser: aceptada o rechazada",
+  },
+
+  POSTULACION_PROYECTO_FINALIZADO: {
+    code: "ERR-EST-1005",
+    message: (id) => `El proyecto ${id} está finalizado y ya no acepta postulaciones`,
+  },
+  POSTULACION_BUSQUEDA_CERRADA: {
+    code: "ERR-EST-1006",
+    message: (id) => `La búsqueda del proyecto ${id} está cerrada`,
+  },
+  POSTULACION_HABILIDAD_REQUERIDA: {
+    code: "ERR-VAL-1007",
+    message: (nombreFantasia) =>
+      `${nombreFantasia} no tiene ninguna de las habilidades requeridas por el perfil`,
+  },
+  POSTULACION_DUPLICADA: {
+    code: "ERR-EST-1008",
+    message: (nombreFantasia, perfilDescripcion) =>
+      `Ya existe una postulación pendiente de ${nombreFantasia} para el perfil: ${perfilDescripcion}`,
+  },
+  POSTULACION_NO_ENCONTRADA: {
+    code: "ERR-NOT-1009",
+    message: (id) => `La postulacion id : ${id} no fue encontrada`,
+  },
+  POSTULACION_YA_RESUELTA: {
+    code: "ERR-EST-1010",
+    message:
+      "La Postulacion ya fue resuelta, asegurese de resolver postuaciones con estado PENDIENTE",
+  },
 });
 
 export default ErrorCatalog;

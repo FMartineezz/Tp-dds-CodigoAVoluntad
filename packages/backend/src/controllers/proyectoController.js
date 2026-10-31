@@ -11,6 +11,7 @@ export class ProyectoController {
       req.body.colectivo,
       req.body.urlSistema,
       req.body.fechaCierre,
+      req.body.fechaLimiteBusqueda,
     );
     res.status(201).json(proyecto);
   };
