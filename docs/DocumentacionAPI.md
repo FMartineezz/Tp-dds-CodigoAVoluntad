@@ -342,13 +342,14 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 
 **Body:**
 
-| Campo         | Tipo     | Requerido | Notas                                                 |
-| ------------- | -------- | --------- | ----------------------------------------------------- |
-| `titulo`      | string   | sí        | no puede repetirse dentro del mismo colectivo         |
-| `descripcion` | string   | sí        |                                                       |
-| `perfiles`    | object[] | sí        | al menos un perfil (ver abajo)                        |
-| `colectivo`   | string   | sí        | **nombre** del colectivo existente (no id, no objeto) |
-| `urlSistema`  | string   | sí        | URL válida del sistema en funcionamiento              |
+| Campo           | Tipo     | Requerido | Notas                                                   |
+| --------------- | -------- | --------- | ------------------------------------------------------- |
+| `titulo`        | string   | sí        | no puede repetirse dentro del mismo colectivo           |
+| `descripcion`   | string   | sí        |                                                         |
+| `perfiles`      | object[] | sí        | al menos un perfil (ver abajo)                          |
+| `colectivo`     | string   | sí        | **nombre** del colectivo existente (no id, no objeto)   |
+| `urlSistema`    | string   | sí        | URL válida del sistema en funcionamiento                |
+| `urlDonaciones` | string   | no        | URL externa para contribuciones económicas (HTTP/HTTPS) |
 
 **Cada perfil:**
 
@@ -394,6 +395,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-VAL-107` | Falta `colectivo`                                                 |
 | 400    | `ERR-VAL-112` | `colectivo` no es un string (nombre)                              |
 | 400    | `ERR-VAL-115` | Falta `urlSistema` o no es una URL válida                         |
+| 400    | `ERR-VAL-116` | `urlDonaciones` no es una URL válida con protocolo HTTP o HTTPS   |
 | 400    | `ERR-VAL-601` | Falta la `descripcion` de un perfil                               |
 | 400    | `ERR-VAL-602` | Faltan `habilidadesRequeridas` o está vacío                       |
 | 400    | `ERR-VAL-603` | Faltan `habilidadesOpcionales` o está vacío                       |
@@ -411,23 +413,51 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 
 ### PATCH `/proyectos/:id`
 
-Cierre manual del proyecto. Después de finalizarlo ya no se pueden anotar colaboradoras ni cargar logros.
+Permite finalizar el proyecto (cierre manual) y/o actualizar el enlace externo de donaciones (`urlDonaciones`). Después de finalizarlo ya no se pueden anotar colaboradoras ni cargar logros.
 
-**Body:** por ahora la única modificación soportada es:
+**Body:**
+
+| Campo           | Tipo           | Requerido | Notas                                                                                                                                                        |
+| --------------- | -------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `finalizado`    | boolean        | no        | Debe ser `true`. No se puede volver a abrir un proyecto finalizado.                                                                                          |
+| `urlDonaciones` | string \| null | no        | URL válida (HTTP o HTTPS) para recibir contribuciones económicas. Si se envía `null` o `""`, se elimina el enlace. Si se omite, se conserva el valor actual. |
+
+Al menos uno de los campos debe estar presente en el cuerpo de la petición.
+
+**Ejemplo - Modificar o agregar URL de donaciones:**
 
 ```json
-{ "finalizado": true }
+{
+  "urlDonaciones": "https://cafecito.app/fundacion"
+}
 ```
 
-**Respuesta 200:** el proyecto actualizado, con `finalizado: true` (misma forma que el `GET`).
+**Ejemplo - Eliminar URL de donaciones:**
+
+```json
+{
+  "urlDonaciones": null
+}
+```
+
+**Ejemplo - Finalizar proyecto:**
+
+```json
+{
+  "finalizado": true
+}
+```
+
+**Respuesta 200:** el proyecto actualizado (misma forma que el `GET`).
 
 **Errores:**
 
-| Status | code          | Cuándo                                          |
-| ------ | ------------- | ----------------------------------------------- |
-| 400    | `ERR-VAL-001` | El body es distinto de `{ "finalizado": true }` |
-| 400    | `ERR-EST-109` | El proyecto ya estaba finalizado                |
-| 404    | `ERR-NOT-108` | No existe un proyecto con ese id                |
+| Status | code          | Cuándo                                                                                 |
+| ------ | ------------- | -------------------------------------------------------------------------------------- |
+| 400    | `ERR-VAL-001` | El body está vacío, contiene campos no permitidos o `finalizado` es distinto de `true` |
+| 400    | `ERR-VAL-116` | `urlDonaciones` no es una URL válida con protocolo HTTP o HTTPS                        |
+| 400    | `ERR-EST-109` | El proyecto ya estaba finalizado                                                       |
+| 404    | `ERR-NOT-108` | No existe un proyecto con ese id                                                       |
 
 ---
 

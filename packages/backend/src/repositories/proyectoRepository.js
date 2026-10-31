@@ -91,18 +91,14 @@ export class ProyectoRepository {
     return perfil;
   }
 
-  async finalizarProyecto(id) {
+  async actualizarProyecto(id, cambios) {
     return await this.model
-      .findByIdAndUpdate(
-        id,
-        {
-          $set: {
-            finalizado: true,
-          },
-        },
-        { new: true },
-      )
+      .findByIdAndUpdate(id, { $set: cambios }, { new: true, runValidators: true })
       .lean();
+  }
+
+  async finalizarProyecto(id) {
+    return await this.actualizarProyecto(id, { finalizado: true });
   }
 
   async obtenerPorAlgunaHabilidad(idsHabilidad) {

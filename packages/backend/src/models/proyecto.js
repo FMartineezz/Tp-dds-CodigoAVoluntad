@@ -19,6 +19,7 @@ export class Proyecto {
     urlSistema,
     fechaCierre = undefined,
     fechaLimiteBusqueda = undefined,
+    urlDonaciones = null,
   ) {
     this.id = null;
     this.titulo = titulo;
@@ -31,5 +32,6 @@ export class Proyecto {
     this.fechaCierre = fechaCierre;
     this.busquedaCerrada = false;
     this.fechaLimiteBusqueda = fechaLimiteBusqueda;
+    this.urlDonaciones = urlDonaciones && urlDonaciones !== "" ? urlDonaciones : null;
   }
 }

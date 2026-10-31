@@ -128,6 +128,7 @@ export class FakeProyectoRepository extends FakeRepository {
       colectivo: aId(proyecto.colectivo),
       perfiles: proyecto.perfiles.map(normalizarPerfil),
       logros: proyecto.logros ?? [],
+      urlDonaciones: proyecto.urlDonaciones ?? null,
     };
   }
 
@@ -176,11 +177,15 @@ export class FakeProyectoRepository extends FakeRepository {
     return copiar(perfil);
   }
 
-  async finalizarProyecto(id) {
+  async actualizarProyecto(id, cambios) {
     const proyecto = this.buscar(id);
     if (!proyecto) return null;
-    proyecto.finalizado = true;
+    Object.assign(proyecto, cambios);
     return copiar(proyecto);
+  }
+
+  async finalizarProyecto(id) {
+    return this.actualizarProyecto(id, { finalizado: true });
   }
 
   async obtenerPorAlgunaHabilidad(idsHabilidad) {
