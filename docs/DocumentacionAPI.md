@@ -126,6 +126,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | GET    | `/colectivos`     | Lista todos los colectivos  |
 | GET    | `/colectivos/:id` | Obtiene un colectivo por id |
 | POST   | `/colectivos`     | Crea un colectivo           |
+| PATCH  | `/colectivos/:id` | Actualiza parcialmente un colectivo |
 
 ### GET `/colectivos`
 
@@ -169,6 +170,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | `descripcion`     | string        | sí        |                                                                                                           |
 | `ubicacion`       | string (enum) | sí        | en minúsculas y sin tildes: `argentina`, `caba` o una provincia (ej. `buenos aires`, `cordoba`). Ver nota |
 | `tipoDeColectivo` | string (enum) | sí        | uno de: `fundacion`, `ong`, `asociacion barrial`, `asamblea`                                              |
+| `redesSociales`   | object[]      | no        | enlaces a redes sociales: `{ "tipo": "instagram", "url": "https://..." }` (enum TipoRedSocial)                 |
 
 > **Nota sobre `ubicacion`:** el enunciado la define como opcional, pero hoy la base de datos la exige. Si falta o no es un valor válido, la respuesta es `500`.
 
@@ -185,6 +187,25 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | 400    | `ERR-VAL-001` | `nombre` o `descripcion` no son de tipo string     |
 | 409    | `ERR-CSR-308` | Ya existe un colectivo con ese `nombre`            |
 
+### PATCH `/colectivos/:id`
+
+Actualización parcial de un colectivo. Si `redesSociales` se omite, se conservan las existentes. Si se envía un array, se reemplaza la lista completa (un array vacío `[]` las elimina todas).
+
+**Body:** campos a modificar (al menos uno requerido).
+
+**Errores:**
+
+| Status | code          | Cuándo                                                                |
+| ------ | ------------- | --------------------------------------------------------------------- |
+| 400    | `ERR-VAL-001` | Body vacío o tipos de datos inválidos                                 |
+| 400    | `ERR-VAL-1101`| `redesSociales` no es un array                                      |
+| 400    | `ERR-VAL-1102`| Falta `tipo` de red social                                          |
+| 400    | `ERR-VAL-1103`| `tipo` no pertenece al enum `TipoRedSocial`                       |
+| 400    | `ERR-VAL-1104`| `url` de red social vacía                                           |
+| 400    | `ERR-VAL-1105`| `url` inválida o no utiliza protocolo HTTP/HTTPS                    |
+| 400    | `ERR-VAL-1106`| Tipos de redes sociales duplicados dentro del colectivo               |
+| 404    | `ERR-NOT-305` | No existe un colectivo con ese id                                     |
+
 ---
 
 ## Colaboradoras
@@ -194,6 +215,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | GET    | `/colaboradoras`     | Lista todas las personas colaboradoras  |
 | GET    | `/colaboradoras/:id` | Obtiene una persona colaboradora por id |
 | POST   | `/colaboradoras`     | Registra una persona colaboradora       |
+| PATCH  | `/colaboradoras/:id` | Actualiza parcialmente una colaboradora |
 
 Los medios de contacto (`contactos`) quedan registrados internamente y **nunca** aparecen en los `GET`.
 
@@ -247,6 +269,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | `presentacion`           | string   | sí        |                                                                                  |
 | `contactos`              | object[] | no        | cero o más medios de contacto: `{ "tipo": "email", "valor": "ana@mail.com" }`    |
 | `bloquearMensajeInterno` | boolean  | no        | `true` si no quiere recibir mensajes internos de los colectivos. Default `false` |
+| `redesSociales`          | object[] | no        | enlaces a redes sociales: `{ "tipo": "github", "url": "https://..." }` (enum TipoRedSocial)       |
 
 **Medios de contacto:** `tipo` es uno de `email`, `whatsapp` o `sms` (en mayúsculas o minúsculas). Para `email`, `valor` debe ser un email válido; para `whatsapp` y `sms`, 10 dígitos juntos sin espacios ni símbolos (ej. `1127891234`).
 
@@ -271,6 +294,25 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-VAL-707` | El teléfono no tiene 10 dígitos                  |
 | 400    | `ERR-VAL-207` | Alguno de los códigos en `habilidades` no existe |
 | 400    | `ERR-VAL-001` | Algún campo de texto no es de tipo string        |
+
+### PATCH `/colaboradoras/:id`
+
+Actualización parcial de una colaboradora. Si `redesSociales` se omite, se conservan las existentes. Si se envía un array, se reemplaza la lista completa (un array vacío `[]` las elimina todas).
+
+**Body:** campos a modificar (al menos uno requerido).
+
+**Errores:**
+
+| Status | code          | Cuándo                                                                |
+| ------ | ------------- | --------------------------------------------------------------------- |
+| 400    | `ERR-VAL-001` | Body vacío o tipos de datos inválidos                                 |
+| 400    | `ERR-VAL-1101`| `redesSociales` no es un array                                      |
+| 400    | `ERR-VAL-1102`| Falta `tipo` de red social                                          |
+| 400    | `ERR-VAL-1103`| `tipo` no pertenece al enum `TipoRedSocial`                       |
+| 400    | `ERR-VAL-1104`| `url` de red social vacía                                           |
+| 400    | `ERR-VAL-1105`| `url` inválida o no utiliza protocolo HTTP/HTTPS                    |
+| 400    | `ERR-VAL-1106`| Tipos de redes sociales duplicados dentro del perfil                  |
+| 404    | `ERR-NOT-405` | No existe una persona colaboradora con ese id                         |
 
 ---
 
@@ -805,6 +847,7 @@ Guarda el mensaje en la bandeja de la persona y lo **replica por email** a los c
 | Enum                    | Valores                                                            |
 | ----------------------- | ------------------------------------------------------------------ |
 | `TipoColectivo`         | `fundacion`, `ong`, `asociacion barrial`, `asamblea`               |
+| `TipoRedSocial`         | `instagram`, `linkedin`, `github`, `facebook`, `x`, `youtube`, `tiktok` |
 | `Ubicacion`             | `argentina`, `caba` y las 23 provincias en minúsculas y sin tildes |
 | `TipoCompromiso`        | `total`, `semanal`, `mensual`                                      |
 | `ModalidadColaboracion` | `gratuita`, `incentivo_economico`, `contratacion_eventual`         |

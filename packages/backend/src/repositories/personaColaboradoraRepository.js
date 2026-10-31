@@ -26,6 +26,11 @@ export class PersonaColaboradoraRepository {
     return await this.model.find({ habilidades: { $in: habilidadesIds } }).lean();
   }
 
+  async actualizar(id, cambios) {
+    return await this.model
+      .findByIdAndUpdate(id, { $set: cambios }, { new: true, runValidators: true })
+      .lean();
+
   async eliminar(id) {
     const colaboradora = await this.model.findOneAndUpdate(
       { _id: id, activo: true },

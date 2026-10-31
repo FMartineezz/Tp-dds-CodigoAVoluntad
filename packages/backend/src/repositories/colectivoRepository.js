@@ -34,22 +34,15 @@ export class ColectivoRepository {
     });
   }
 
-    async eliminar(id) {
-    const colectivo = await this.model.findOneAndUpdate(
-      { _id: id, activo: true },
-      { $set: { activo: false } },
-      { new: true }
-    );
+  async eliminarColectivo(id) {
+    return await this.model.findByIdAndUpdate(id, {
+      activo: false,
+    });
+  }
 
-    if (colectivo) {
-      return { actualizado: true };
-    }
-
-    const existe = await this.model.findById(id);
-    if (!existe) {
-      return { actualizado: false, razon: 'NO_ENCONTRADO' };
-    }
-
-    return { actualizado: false, razon: 'YA_DADO_DE_BAJA' };
+  async actualizar(id, cambios) {
+    return await this.model
+      .findByIdAndUpdate(id, { $set: cambios }, { new: true, runValidators: true })
+      .lean();
   }
 }
