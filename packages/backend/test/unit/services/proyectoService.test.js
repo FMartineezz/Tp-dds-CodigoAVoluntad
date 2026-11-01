@@ -14,6 +14,7 @@ const perfilDeEjemplo = {
   horas: 5,
   tipoDeCompromiso: "mensual",
   modalidadDeColaboracion: "gratuita",
+  cantidadMaxima: 2,
 };
 
 const proyectoGuardado = (cambios = {}) => ({
@@ -84,6 +85,7 @@ describe("ProyectoService", () => {
         5,
         "mensual",
         "gratuita",
+        2,
       );
       expect(mockRepo.guardar).toHaveBeenCalledWith(expect.any(Proyecto));
       expect(mockRepo.guardar.mock.calls[0][0]).toMatchObject({
@@ -268,6 +270,7 @@ describe("ProyectoService", () => {
         3,
         "semanal",
         "incentivo_economico",
+        4,
       );
 
       // Validación
@@ -278,6 +281,7 @@ describe("ProyectoService", () => {
         3,
         "semanal",
         "incentivo_economico",
+        4,
       );
       expect(mockRepo.guardarPerfil).toHaveBeenCalledWith("p1", perfilCreado);
       expect(perfil).toEqual({ _id: "pf2", descripcion: "Tester" });

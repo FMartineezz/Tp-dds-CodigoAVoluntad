@@ -19,67 +19,49 @@ describe("Colaboraciones", () => {
 
   beforeEach(() => {
     ({ app, repos } = buildTestApp());
-    repos.personaColaboradora.obtenerPorId.mockResolvedValue(ana);
-    repos.proyecto.obtenerPorId.mockResolvedValue(proyecto());
   });
 
-  describe("POST /colaboraciones", () => {
-    test("responde 201 si la persona tiene alguna habilidad requerida", async () => {
+  // Las colaboraciones ya no se crean por POST: nacen de postulaciones aceptadas
+  describe("DELETE /colaboraciones/:id", () => {
+    test("responde 200 y desactiva la colaboración", async () => {
       // Preparación
-      repos.colaboracion.guardar.mockResolvedValue({ id: "col1" });
+      repos.colaboracion.obtenerPorId.mockResolvedValue({ _id: "col1", activo: true });
+      repos.colaboracion.desactivar.mockResolvedValue();
 
       // Ejecución
-      const respuesta = await request(app)
-        .post("/colaboraciones")
-        .send({ personaColaboradoraId: "pc1", proyectoId: "p1", anonima: true });
+      const respuesta = await request(app).delete("/colaboraciones/col1");
 
       // Validación
-      expect(respuesta.status).toBe(201);
-      expect(respuesta.headers.location).toBe("/colaboraciones/col1");
-      expect(respuesta.body).toMatchObject({ id: "col1", anonima: true });
+      expect(respuesta.status).toBe(200);
+      expect(respuesta.body).toEqual({ message: "Colaboración desactivada correctamente" });
+      expect(repos.colaboracion.desactivar).toHaveBeenCalledWith("col1");
     });
 
-    test("responde 400 si la persona no tiene ninguna habilidad requerida", async () => {
-      repos.personaColaboradora.obtenerPorId.mockResolvedValue({ ...ana, habilidades: ["h-otra"] });
+    test("responde 404 si la colaboración no existe", async () => {
+      repos.colaboracion.obtenerPorId.mockResolvedValue(null);
 
-      const respuesta = await request(app)
-        .post("/colaboraciones")
-        .send({ personaColaboradoraId: "pc1", proyectoId: "p1" });
+      const respuesta = await request(app).delete("/colaboraciones/inexistente");
 
-      expect(respuesta.status).toBe(400);
-      expect(respuesta.body.code).toBe(ErrorCatalog.COLABORACION_HABILIDAD_REQUERIDA.code);
+      expect(respuesta.status).toBe(404);
+      expect(respuesta.body.code).toBe(ErrorCatalog.COLABORACION_NO_ENCONTRADA.code);
+      expect(repos.colaboracion.desactivar).not.toHaveBeenCalled();
     });
 
-    test("responde 409 si el proyecto está finalizado", async () => {
-      repos.proyecto.obtenerPorId.mockResolvedValue(proyecto({ finalizado: true }));
+    test("responde 409 si la colaboración ya estaba dada de baja", async () => {
+      repos.colaboracion.obtenerPorId.mockResolvedValue({ _id: "col1", activo: false });
 
-      const respuesta = await request(app)
-        .post("/colaboraciones")
-        .send({ personaColaboradoraId: "pc1", proyectoId: "p1" });
+      const respuesta = await request(app).delete("/colaboraciones/col1");
 
       expect(respuesta.status).toBe(409);
-      expect(respuesta.body.code).toBe(ErrorCatalog.COLABORACION_PROYECTO_FINALIZADO.code);
-    });
-
-    test.each([
-      [{ proyectoId: "p1" }, ErrorCatalog.COLABORACION_PERSONA_REQUERIDA],
-      [{ personaColaboradoraId: "pc1" }, ErrorCatalog.COLABORACION_PROYECTO_REQUERIDO],
-      [
-        { personaColaboradoraId: "pc1", proyectoId: "p1", anonima: "si" },
-        ErrorCatalog.COLABORACION_ANONIMA_FORMATO,
-      ],
-    ])("con %j responde 400", async (body, error) => {
-      const respuesta = await request(app).post("/colaboraciones").send(body);
-
-      expect(respuesta.status).toBe(400);
-      expect(respuesta.body.code).toBe(error.code);
+      expect(respuesta.body.code).toBe(ErrorCatalog.COLABORACION_YA_DADA_DE_BAJA.code);
+      expect(repos.colaboracion.desactivar).not.toHaveBeenCalled();
     });
   });
 
-  test("GET /colaboraciones oculta a la persona en las anónimas", async () => {
-    // Preparación
+  test("GET /colaboraciones responde 200 con lo que devuelve el repositorio", async () => {
+    // Preparación (la ocultación de la persona en las anónimas la hace la proyección del repositorio)
     repos.colaboracion.obtenerTodas.mockResolvedValue([
-      { _id: "col1", anonima: true, personaColaboradora: ana, proyecto: proyecto() },
+      { _id: "col1", anonima: true, personaColaboradora: null, proyecto: proyecto() },
       { _id: "col2", anonima: false, personaColaboradora: ana, proyecto: proyecto() },
     ]);
 
@@ -88,12 +70,9 @@ describe("Colaboraciones", () => {
 
     // Validación
     expect(respuesta.status).toBe(200);
+    expect(respuesta.body).toHaveLength(2);
     expect(respuesta.body[0].personaColaboradora).toBeNull();
-    expect(respuesta.body[1].personaColaboradora).toEqual({
-      _id: "pc1",
-      nombreFantasia: "Ana",
-      habilidades: ["h-react"],
-    });
+    expect(respuesta.body[1].personaColaboradora._id).toBe("pc1");
   });
 
   test("GET /colaboraciones/:id responde 404 si no existe", async () => {

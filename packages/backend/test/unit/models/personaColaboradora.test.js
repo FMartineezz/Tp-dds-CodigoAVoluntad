@@ -31,12 +31,20 @@ describe("PersonaColaboradora", () => {
 });
 
 describe("Colaboracion", () => {
+  // El constructor recibe (persona, proyecto, perfil, esAnonima)
   test("por defecto no es anónima", () => {
-    expect(new Colaboracion({}, {}).anonima).toBe(false);
+    expect(new Colaboracion({}, {}, {}).anonima).toBe(false);
   });
 
   test("puede marcarse como anónima", () => {
-    expect(new Colaboracion({}, {}, true).anonima).toBe(true);
+    expect(new Colaboracion({}, {}, {}, true).anonima).toBe(true);
+  });
+
+  test("nace activa y sin fecha de baja", () => {
+    const colaboracion = new Colaboracion({}, {}, {});
+
+    expect(colaboracion.activo).toBe(true);
+    expect(colaboracion.fechaBaja).toBeUndefined();
   });
 });
 

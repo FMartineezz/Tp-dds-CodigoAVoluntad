@@ -51,7 +51,9 @@ const crearRepositoriosMock = () => ({
     guardar: jest.fn(),
     obtenerTodas: jest.fn(),
     obtenerPorId: jest.fn(),
-    obtenerPodHabilidadId: jest.fn(),
+    obtenerPorIdConContactos: jest.fn(),
+    obtenerPorHabilidadId: jest.fn(),
+    eliminar: jest.fn(),
   },
   proyecto: {
     guardar: jest.fn(),
@@ -70,7 +72,13 @@ const crearRepositoriosMock = () => ({
     actualizarLogro: jest.fn(),
     eliminarLogro: jest.fn(),
   },
-  colaboracion: { guardar: jest.fn(), obtenerTodas: jest.fn(), obtenerPorId: jest.fn() },
+  colaboracion: {
+    guardar: jest.fn(),
+    obtenerTodas: jest.fn(),
+    obtenerPorId: jest.fn(),
+    contarActivasPorPerfil: jest.fn(),
+    desactivar: jest.fn(),
+  },
   mensaje: { guardar: jest.fn(), obtenerPorColaboradoraId: jest.fn() },
 });
 

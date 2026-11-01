@@ -20,6 +20,7 @@ describe("Mensajes", () => {
     jest.spyOn(console, "log").mockImplementation(() => {});
     ({ app, repos, transporter } = buildTestApp());
     repos.colectivo.obtenerPorId.mockResolvedValue({ _id: "c1", nombre: "Fundación Ejemplo" });
+    repos.personaColaboradora.obtenerPorIdConContactos.mockResolvedValue(ana());
     repos.personaColaboradora.obtenerPorId.mockResolvedValue(ana());
   });
 
@@ -50,7 +51,7 @@ describe("Mensajes", () => {
     });
 
     test("responde 403 si la destinataria no acepta mensajes internos", async () => {
-      repos.personaColaboradora.obtenerPorId.mockResolvedValue(
+      repos.personaColaboradora.obtenerPorIdConContactos.mockResolvedValue(
         ana({ bloquearMensajeInterno: true }),
       );
 

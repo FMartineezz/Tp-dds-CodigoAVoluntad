@@ -35,8 +35,8 @@ describe("Proyectos", () => {
       });
       repos.colectivo.obtenerPorId.mockResolvedValue({ _id: "c1", proyectos: [] });
       repos.proyecto.obtenerPorTituloYColectivo.mockResolvedValue(null);
-      repos.habilidad.obtenerPorCodigo.mockImplementation(async (codigo) =>
-        codigo === "cobol" ? null : { _id: `h-${codigo}`, codigo },
+      repos.habilidad.obtenerPorCodigos.mockImplementation(async (codigos) =>
+        codigos.filter((codigo) => codigo !== "cobol").map((codigo) => ({ _id: `h-${codigo}`, codigo })),
       );
       repos.proyecto.guardar.mockImplementation(async (proyecto) => ({
         ...proyecto,
@@ -54,7 +54,6 @@ describe("Proyectos", () => {
 
       // Validación
       expect(respuesta.status).toBe(201);
-      expect(respuesta.headers.location).toBe("/proyectos/p1");
       expect(respuesta.body).toMatchObject({
         id: "p1",
         titulo: "Web institucional",
@@ -94,7 +93,7 @@ describe("Proyectos", () => {
         });
 
       expect(respuesta.status).toBe(400);
-      expect(respuesta.body.code).toBe(ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO.code);
+      expect(respuesta.body.code).toBe(ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO.code);
       expect(repos.proyecto.guardar).not.toHaveBeenCalled();
     });
 

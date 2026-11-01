@@ -79,11 +79,16 @@ describe("Personas colaboradoras", () => {
     });
   });
 
-  test("GET /colaboradoras responde 200 sin exponer contactos", async () => {
-    repos.personaColaboradora.obtenerTodas.mockResolvedValue([ana]);
+  test("GET /colaboradoras responde 200 con lo que devuelve el repositorio (los contactos se ocultan en la base)", async () => {
+    // Preparación
+    // Así devuelve el repositorio a la persona: sin contactos
+    const anaSinContactos = { _id: "pc1", nombreFantasia: "Ana", habilidades: ["h1"] };
+    repos.personaColaboradora.obtenerTodas.mockResolvedValue([anaSinContactos]);
 
+    // Ejecución
     const respuesta = await request(app).get("/colaboradoras");
 
+    // Validación
     expect(respuesta.status).toBe(200);
     expect(respuesta.body).toEqual([{ _id: "pc1", nombreFantasia: "Ana", habilidades: ["h1"] }]);
   });

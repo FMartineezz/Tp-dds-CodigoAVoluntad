@@ -25,10 +25,9 @@ describe("Perfiles de un proyecto", () => {
     ({ app, repos } = buildTestApp());
     repos.proyecto.obtenerPorId.mockResolvedValue({ _id: "p1", perfiles: [perfilGuardado] });
     repos.proyecto.obtenerPerfilPorId.mockResolvedValue(perfilGuardado);
-    repos.habilidad.obtenerPorCodigo.mockImplementation(async (codigo) => ({
-      _id: `h-${codigo}`,
-      codigo,
-    }));
+    repos.habilidad.obtenerPorCodigos.mockImplementation(async (codigos) =>
+      codigos.map((codigo) => ({ _id: `h-${codigo}`, codigo })),
+    );
   });
 
   test("GET /proyectos/:id/perfiles responde 200 con los perfiles", async () => {
@@ -110,10 +109,10 @@ describe("Perfiles de un proyecto", () => {
     expect(repos.proyecto.eliminarPerfil).toHaveBeenCalledWith("p1", "pf1");
   });
 
-  test("GET .../colaboradoras-acordes responde 200 sin exponer contactos", async () => {
+  test("GET .../colaboradoras-acordes responde 200 con las colaboradoras que da el repositorio", async () => {
     // Preparación
-    repos.personaColaboradora.obtenerPodHabilidadId.mockResolvedValue([
-      { _id: "pc1", nombreFantasia: "Ana", contactos: [{ tipo: "email", valor: "a@a.com" }] },
+    repos.personaColaboradora.obtenerPorHabilidadId.mockResolvedValue([
+      { _id: "pc1", nombreFantasia: "Ana" },
     ]);
 
     // Ejecución
@@ -122,6 +121,6 @@ describe("Perfiles de un proyecto", () => {
     // Validación
     expect(respuesta.status).toBe(200);
     expect(respuesta.body).toEqual([{ _id: "pc1", nombreFantasia: "Ana" }]);
-    expect(repos.personaColaboradora.obtenerPodHabilidadId).toHaveBeenCalledWith(["h1"]);
+    expect(repos.personaColaboradora.obtenerPorHabilidadId).toHaveBeenCalledWith(["h1"]);
   });
 });
