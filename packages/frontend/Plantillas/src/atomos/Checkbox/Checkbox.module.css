@@ -1,0 +1,28 @@
+/* Casilla de verificación con su texto. */
+.wrap { display: inline-flex; align-items: flex-start; gap: var(--space-3); min-height: 2.75rem; cursor: pointer; }
+.box {
+  appearance: none;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.15rem;
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+.box::after {
+  content: '';
+  width: 0.95rem;
+  height: 0.8rem;
+  /* tilde recortado con máscara: se pinta con el color de texto (currentColor), sin hex */
+  background-color: currentColor;
+  -webkit-mask: center / contain no-repeat url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'><path d='M1 5.2l3.4 3.3L11 1.5' fill='none' stroke='black' stroke-width='2.2'/></svg>");
+  mask: center / contain no-repeat url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'><path d='M1 5.2l3.4 3.3L11 1.5' fill='none' stroke='black' stroke-width='2.2'/></svg>");
+  transform: scale(0);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.box:checked { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+.box:checked::after { transform: scale(1); }

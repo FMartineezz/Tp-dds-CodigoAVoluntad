@@ -1,0 +1,17 @@
+/* Antetítulo chico en mayúsculas, con etiqueta de relleno opcional. */
+.eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.tag {
+  background: var(--color-fill);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  font-weight: 600;
+}

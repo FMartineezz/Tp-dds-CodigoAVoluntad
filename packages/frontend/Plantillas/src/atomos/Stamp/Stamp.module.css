@@ -1,0 +1,26 @@
+/* Sello circular rotado, de adorno. */
+.stamp {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 7rem;
+  height: 7rem;
+  padding: var(--space-3);
+  border: 3px solid var(--red-700);
+  border-radius: 50%;
+  color: var(--red-700);
+  text-align: center;
+  font: 800 0.95rem / 1.05 var(--font-display);
+  font-stretch: 75%;
+  text-transform: uppercase;
+  transform: rotate(14deg);
+  mix-blend-mode: multiply;
+  background: color-mix(in srgb, var(--red-700) 6%, transparent);
+}
+.stamp::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1.5px dashed var(--red-700);
+  border-radius: 50%;
+}

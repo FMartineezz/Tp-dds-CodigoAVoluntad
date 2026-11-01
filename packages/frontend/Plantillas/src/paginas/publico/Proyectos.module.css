@@ -1,0 +1,14 @@
+/* Estilos propios de las pantallas Proyectos. Los comunes están en plantillas/disposicion.module.css. */
+.page { display: grid; gap: var(--space-6); padding-block: var(--space-7); }
+.head { display: grid; gap: var(--space-3); }
+.filters { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--space-5); align-items: start; padding: var(--space-5); background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius); }
+.encaje { grid-column: 1 / -1; }
+.skills { grid-column: 1 / -1; border: 0; padding: 0; margin: 0; display: grid; gap: var(--space-2); }
+.skills legend { padding: 0; font-weight: 600; font-size: var(--text-small); margin-bottom: var(--space-2); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.chip { min-height: 2.75rem; padding: 0 var(--space-4); background: transparent; border: var(--border); border-radius: var(--radius); font-weight: 600; font-size: var(--text-label); cursor: pointer; }
+.chip:hover { background: var(--color-hover); }
+.chip[aria-pressed='true'] { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+.count { font-size: var(--text-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); }
+.empty { display: grid; gap: var(--space-4); justify-items: start; padding: var(--space-7); border: 2px dashed var(--color-border); border-radius: var(--radius); }
+@media (max-width: 800px) { .filters { grid-template-columns: 1fr; padding: var(--space-4); } }

@@ -1,0 +1,25 @@
+/* Estilos propios de las pantallas Inicio. Los comunes están en plantillas/disposicion.module.css. */
+/* el hero + el header ocupan ~90% del alto de la ventana */
+.hero { min-height: calc(90vh - 5rem); display: grid; align-items: center; padding-block: var(--space-6); }
+.heroIn { display: grid; grid-template-columns: 1.25fr 1fr; gap: var(--space-7); align-items: center; }
+.text { display: grid; gap: var(--space-5); justify-items: start; }
+.text h1 { font-size: clamp(3rem, 1rem + 6.2vw, 6.25rem); line-height: 0.95; }
+.btns { display: flex; gap: var(--space-5); align-items: center; flex-wrap: wrap; }
+.stage { position: relative; display: grid; place-items: center; min-height: 28rem; }
+.sun {
+  position: absolute; width: min(28rem, 95%); aspect-ratio: 1; border-radius: 50%; right: -4%; top: 0;
+  background: radial-gradient(var(--red-500) 30%, transparent 33%) 0 0 / 11px 11px;
+  mask-image: linear-gradient(160deg, #000 25%, transparent 85%);
+}
+.dot { position: absolute; width: 9rem; aspect-ratio: 1; border-radius: 50%; background: var(--blue-600); mix-blend-mode: multiply; left: 2%; bottom: 4%; }
+.ticketWrap { position: relative; width: min(25rem, 92%); }
+.stats { display: flex; gap: var(--space-7); flex-wrap: wrap; justify-content: center; padding-block: var(--space-6); }
+.sec { display: grid; gap: var(--space-5); padding-block: var(--space-6); justify-items: start; }
+.sec > ul { width: 100%; }
+.pasos { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-4); }
+@media (max-width: 980px) {
+  .hero { min-height: 0; }
+  .heroIn { grid-template-columns: 1fr; }
+}
+.charts { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+@media (max-width: 800px) { .charts { grid-template-columns: 1fr; } }

@@ -1,0 +1,7 @@
+/* Pie de página con enlaces e interruptor de modo daltónico. */
+.footer { margin-top: var(--space-8); border-top: var(--border); background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+.footer :global(span), .footer :global(a) { color: inherit; }
+.footerIn { display: flex; justify-content: space-between; align-items: center; gap: var(--space-5); flex-wrap: wrap; padding-block: var(--space-6); }
+.flinks { display: flex; gap: var(--space-2) var(--space-5); flex-wrap: wrap; font-size: var(--text-small); }
+.flinks a, .flinks button { color: var(--color-inverse-text); background: transparent; border: 0; padding: 0; min-height: 2.75rem; display: inline-flex; align-items: center; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.flinks a:hover, .flinks button:hover { color: var(--sand-400); }

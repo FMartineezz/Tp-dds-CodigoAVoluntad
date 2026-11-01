@@ -1,0 +1,4 @@
+/* Cifra grande con su etiqueta. */
+.stat { display: flex; align-items: baseline; gap: var(--space-2); }
+.value { font: 900 2rem / 1 var(--font-display); font-stretch: 70%; color: var(--color-accent); }
+.label { font-size: var(--text-label); text-transform: uppercase; letter-spacing: 0.06em; }

@@ -1,0 +1,6 @@
+/* Grilla responsive de tarjetas del MISMO alto (cada hijo se envuelve en un <li>). */
+.grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr)); grid-auto-rows: 1fr; gap: var(--space-6); }
+
+.grid > li { display: flex; }
+
+.grid > li > * { flex: 1; }

@@ -1,0 +1,8 @@
+/* Bloque gris animado que reserva lugar mientras carga algo. */
+.line, .block {
+  background: linear-gradient(100deg, var(--paper-300) 30%, var(--paper-100) 50%, var(--paper-300) 70%) 0 0 / 300% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+.line { height: 1rem; margin-bottom: var(--space-3); }
+@keyframes shimmer { to { background-position: -300% 0; } }
+@media (prefers-reduced-motion: reduce) { .line, .block { animation: none; } }

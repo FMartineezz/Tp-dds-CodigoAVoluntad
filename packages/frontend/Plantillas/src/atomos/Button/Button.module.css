@@ -1,0 +1,48 @@
+/* Botón / enlace con aspecto de botón. Es EL botón de todo el sitio. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-5);
+  border: var(--border);
+  border-radius: var(--radius);
+  font: 600 var(--text-small) / 1 var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur-fast), color var(--dur-fast), transform var(--dur-fast) var(--ease);
+}
+.lg { min-height: 3.5rem; padding: 0 var(--space-6); font-size: 1rem; }
+.full { width: 100%; }
+
+.primary { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+.primary:hover { background: var(--red-500); color: var(--ink-900); transform: rotate(-1.2deg); }
+
+.success { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+.success:hover { background: var(--green-700); border-color: var(--green-700); color: var(--paper-100); transform: rotate(-1.2deg); }
+
+.secondary { background: transparent; color: var(--color-text); }
+.secondary:hover { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+
+.danger { background: var(--red-700); border-color: var(--red-700); color: var(--paper-100); }
+.danger:hover { background: var(--color-inverse-bg); border-color: var(--color-inverse-bg); }
+
+.link {
+  min-height: var(--tap-target);
+  padding: 0 var(--space-1);
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid var(--color-accent);
+  color: var(--color-text);
+}
+.link:hover { background: var(--color-accent); color: var(--paper-100); }
+
+.btn[aria-disabled='true'] { cursor: not-allowed; opacity: 0.55; transform: none; }
+.btn[aria-busy='true'] { cursor: progress; opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .primary:hover, .success:hover { transform: none; }
+}

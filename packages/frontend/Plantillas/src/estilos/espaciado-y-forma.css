@@ -1,0 +1,36 @@
+/* =====================================================================
+   ESPACIADO, FORMA Y MOVIMIENTO
+   =====================================================================
+   --space-N     escala de espacios (base 4px). Se usa en margin, padding y gap.
+   --radius*     redondeo de esquinas: --radius (tarjetas, botones), --radius-sm (etiquetas).
+                 Poné 0 para volver a esquinas rectas.
+   --border      borde fuerte (2px) · --border-thin borde fino (1px, para tablas y paneles).
+   --shadow-print sombra dura "de impresión". Se calcula desde la tinta: cambia con --ink-900.
+   --tap-target  alto mínimo de botones y campos (≥ 44px por accesibilidad).
+   --container   ancho máximo del contenido · --gutter margen lateral. */
+
+:root {
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  --radius: 8px;
+  --radius-sm: 5px;
+  --border-w: 2px;
+  --border: var(--border-w) solid var(--color-border);
+  --border-thin: 1px solid var(--color-border);
+  --shadow-print: 4px 5px 0 color-mix(in srgb, var(--ink-900) 14%, transparent);
+  --tap-target: 3rem;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 150ms;
+
+  --container: 72rem;
+  --gutter: clamp(1.25rem, 5vw, 4rem);
+}

@@ -1,0 +1,30 @@
+/* Piezas del header con sesión: Campana (notificaciones), MenuUsuario (Mi cuenta) y BottomNav (barra inferior móvil). */
+.wrap { position: relative; }
+.btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-width: var(--tap-target); min-height: var(--tap-target); padding: 0 var(--space-3); background: transparent; border: var(--border); border-radius: var(--radius); font: 600 var(--text-small) / 1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; }
+.btn:hover, .btn[aria-expanded='true'] { background: var(--color-hover); }
+.texto { padding: 0 var(--space-4); }
+.count { position: absolute; top: -0.55rem; right: -0.55rem; min-width: 1.35rem; height: 1.35rem; display: grid; place-items: center; padding: 0 4px; background: var(--red-700); color: var(--paper-100); border: 2px solid var(--color-bg); border-radius: 99px; font-size: 0.75rem; font-weight: 700; line-height: 1; }
+.panel { position: absolute; right: 0; top: calc(100% + 0.5rem); z-index: 30; width: min(22rem, 90vw); margin: 0; padding: var(--space-3); background: var(--color-surface); border: var(--border); border-radius: var(--radius); box-shadow: var(--shadow-print); display: grid; gap: var(--space-2); list-style: none; }
+.panel ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.panel li { display: grid; gap: 2px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); font: 450 0.9375rem / 1.4 var(--font-display); font-stretch: 100%; }
+.panel li + li { border-top: 1px dashed var(--color-border); }
+.panel li small { color: var(--color-text-muted); font-family: var(--font-mono); }
+.menu { width: 15rem; padding: var(--space-2); }
+.menu li { padding: 0; }
+.menu li + li { border-top: 0; }
+.menu a, .menu button { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 100%; min-height: 2.75rem; padding: 0 var(--space-3); background: transparent; border: 0; border-radius: var(--radius-sm); color: var(--color-text); font: 500 var(--text-small) / 1 var(--font-mono); text-decoration: none; cursor: pointer; text-align: left; }
+.menu a:hover, .menu button:hover { background: var(--color-hover); }
+.link { justify-self: start; min-height: 2.75rem; padding: 0 var(--space-3); background: transparent; border: 0; font: 600 var(--text-label) / 1 var(--font-mono); color: var(--color-accent); text-decoration: underline; cursor: pointer; }
+.sw { position: relative; width: 2.4rem; height: 1.35rem; border: var(--border); border-radius: 99px; background: var(--color-surface); flex-shrink: 0; }
+.sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 0.85rem; height: 0.85rem; border-radius: 50%; background: var(--ink-900); transition: transform var(--dur-fast) var(--ease); }
+.sw.on { background: var(--color-accent); }
+.sw.on::after { transform: translateX(1.05rem); background: var(--paper-100); }
+
+.bottom { display: none; }
+@media (max-width: 800px) {
+  .bottom { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--color-surface); border-top: var(--border); padding-bottom: env(safe-area-inset-bottom); }
+  .bottom a { display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 4rem; color: var(--color-text); text-decoration: none; font-size: 0.75rem; font-weight: 600; }
+  .bottom a.act { background: var(--color-selected); box-shadow: inset 0 3px 0 var(--color-accent); }
+  .ico { position: relative; display: grid; place-items: center; }
+  .panel { position: fixed; left: var(--space-3); right: var(--space-3); top: auto; width: auto; bottom: 4.8rem; }
+}

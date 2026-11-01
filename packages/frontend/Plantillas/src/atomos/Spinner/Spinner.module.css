@@ -1,0 +1,16 @@
+/* Indicador de carga circular. */
+.block { display: inline-flex; align-items: center; gap: var(--space-3); }
+.inline { display: inline-flex; }
+.ring {
+  width: 1.1em;
+  height: 1.1em;
+  border: 3px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+/* un loader NO se apaga con reduced-motion: se hace más lento */
+@media (prefers-reduced-motion: reduce) {
+  .ring { animation-duration: 2.4s; }
+}

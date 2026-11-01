@@ -1,0 +1,18 @@
+/* Insignia de estado: color + ícono + TEXTO (nunca solo color). */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.abierto { background: var(--green-700); border-color: var(--green-700); color: var(--paper-100); }
+.cerrado { background: var(--ink-900); color: var(--paper-200); }
+.pendiente { background: var(--yellow-400); color: var(--ink-900); }
+.aceptada { background: var(--green-700); border-color: var(--green-700); color: var(--paper-100); }
+.rechazada { background: var(--red-700); border-color: var(--red-700); color: var(--paper-100); }

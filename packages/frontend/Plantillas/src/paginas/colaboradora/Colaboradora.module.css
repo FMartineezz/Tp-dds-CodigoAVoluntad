@@ -1,0 +1,21 @@
+/* Estilos propios de las pantallas Colaboradora. Los comunes están en plantillas/disposicion.module.css. */
+.link { color: var(--color-text); text-decoration: none; transition: background-color var(--dur-fast); }
+.link:hover { background: var(--color-hover); }
+.lab { display: block; margin-bottom: var(--space-3); font-size: var(--text-small); font-weight: 600; }
+.rows { display: grid; gap: var(--space-3); }
+.r { display: grid; grid-template-columns: minmax(0, 1fr) 11rem; gap: var(--space-4); align-items: center; }
+.cells { display: grid; grid-template-columns: 2fr 1.2fr 1fr; align-items: stretch; background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius); overflow: hidden; }
+.cells > div { display: flex; align-items: center; padding: var(--space-3) var(--space-4); min-height: 3.5rem; }
+.cells > div + div { border-left: var(--border); }
+.h .cells { background: var(--color-inverse-bg); color: var(--color-inverse-text); font-size: var(--text-label); text-transform: uppercase; letter-spacing: 0.06em; }
+.h .cells > div { min-height: 2.75rem; }
+.hl { background: var(--color-fill); font-weight: 600; }
+.act { display: flex; align-items: center; justify-content: stretch; }
+.act > * { width: 100%; }
+@media (max-width: 800px) {
+  .r { grid-template-columns: 1fr; gap: var(--space-2); }
+  .h { display: none; }
+  .cells { grid-template-columns: 1fr; }
+  .cells > div + div { border-left: 0; border-top: 1px dashed var(--color-border); }
+  .cells > div[data-l]::before { content: attr(data-l); margin-right: var(--space-3); font-size: var(--text-label); text-transform: uppercase; color: var(--color-text-muted); }
+}

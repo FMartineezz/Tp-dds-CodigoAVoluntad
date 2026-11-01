@@ -1,0 +1,13 @@
+/* Estilos propios de las pantallas Registro. Los comunes están en plantillas/disposicion.module.css. */
+.doors { display: grid; grid-template-columns: 1fr 1fr; min-height: calc(90vh - 5rem); }
+.door { display: grid; align-items: center; padding: var(--space-8) var(--gutter); color: inherit; text-decoration: none; transition: background-color var(--dur-fast), color var(--dur-fast); }
+.claro { background: var(--color-bg); color: var(--color-text); }
+.oscuro { background: var(--color-inverse-bg); color: var(--color-inverse-text); border-left: var(--border); }
+.claro:hover, .claro:focus-visible { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+.oscuro:hover, .oscuro:focus-visible { background: var(--sand-400); color: var(--ink-900); }
+.in { display: grid; gap: var(--space-5); max-width: 30rem; justify-self: center; width: 100%; }
+.op { font-size: var(--text-label); text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; }
+.big { font-size: clamp(2.6rem, 1rem + 5vw, 5.5rem); line-height: 0.95; color: inherit; }
+.go { display: inline-flex; align-items: center; gap: var(--space-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; min-height: var(--tap-target); padding: 0 var(--space-5); border: 2px solid currentColor; border-radius: var(--radius); justify-self: start; }
+.go svg { transform: rotate(180deg); }
+@media (max-width: 800px) { .doors { grid-template-columns: 1fr; min-height: 0; } .oscuro { border-left: 0; border-top: var(--border); } .door { padding-block: var(--space-7); } }
