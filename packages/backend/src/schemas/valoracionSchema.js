@@ -17,6 +17,14 @@ const valoracionSchema = new mongoose.Schema(
       enum: Object.values(TipoEvaluador),
       required: true,
     },
+    autor: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+    },
+    destinatario: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+    },
     puntaje: {
       type: Number,
       required: true,
@@ -29,9 +37,8 @@ const valoracionSchema = new mongoose.Schema(
     },
     comentario: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
-      minlength: 1,
       maxlength: 500,
     },
     createdAt: { type: Date, select: false },

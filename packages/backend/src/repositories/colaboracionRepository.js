@@ -49,10 +49,18 @@ export class ColaboracionRepository {
       .lean();
   }
 
+  async obtenerPorIdCompleto(id) {
+    return await this.model
+      .findById(id)
+      .populate("personaColaboradora")
+      .populate("proyecto")
+      .lean();
+  }
+
   async obtenerPorPersonaColaboradoraId(personaColaboradoraId) {
-  return await this.model
-    .find({ personaColaboradora: personaColaboradoraId })
-    .lean();
+    return await this.model
+      .find({ personaColaboradora: personaColaboradoraId })
+      .lean();
   }
 
   async obtenerPorProyectoIds(proyectoIds) {
@@ -60,17 +68,6 @@ export class ColaboracionRepository {
       .find({ proyecto: { $in: proyectoIds } })
       .lean();
   }
-}
-
-/*   constructor() {
-    this.colaboraciones = [];
-    this.id = 1;
-  }
-
-  guardar(colaboracion) {
-    colaboracion.id = this.id;
-    this.id++;
-    this.colaboraciones.push(colaboracion);
 
   async contarActivasPorPerfil(proyectoId, perfilId) {
     return await this.model.countDocuments({
@@ -86,7 +83,6 @@ export class ColaboracionRepository {
       {
         activo: false,
         fechaBaja: new Date(),
-        //bajaPor: OrigenBaja.ADMIN, // resolver cuando se implemente la autenticación y autorización para obtener el usuario que realiza la baja
       },
       { new: true },
     );

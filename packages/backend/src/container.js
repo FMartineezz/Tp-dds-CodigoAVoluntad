@@ -95,7 +95,10 @@ const postulacionService = new PostulacionService({
 
 const valoracionService = new ValoracionService({
   valoracionRepository,
-  colaboracionService,
+  colaboracionRepository,
+  proyectoRepository,
+  colectivoRepository,
+  personaColaboradoraRepository,
 });
 
 // Controllers: dependen de services.

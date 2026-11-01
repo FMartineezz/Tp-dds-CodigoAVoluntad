@@ -1,10 +1,12 @@
 import { z as zod } from "zod";
 import { TipoEvaluador } from "../../models/valoracion.js";
+import { AppError } from "../../errors/appError.js";
+import ErrorCatalog from "../../errors/errorCatalog.js";
 
 export const valoracionSchema = zod.object({
   colaboracionId: zod.any().refine((valor) => valor !== undefined && valor !== null, {
     message: "VALORACION_COLABORACION_ID_INVALIDO",
-}),
+  }),
   evaluador: zod.enum(
     [TipoEvaluador.PERSONA, TipoEvaluador.COLECTIVO],
     { errorMap: () => ({ message: "VALORACION_EVALUADOR_TIPO_FORMATO" }) }
@@ -18,8 +20,9 @@ export const valoracionSchema = zod.object({
   comentario: zod
     .string({ invalid_type_error: "VALORACION_COMENTARIO_FORMATO" })
     .trim()
-    .min(1, "VALORACION_COMENTARIO_REQUERIDO")
-    .max(500, "VALORACION_COMENTARIO_LARGO"),
+    .max(500, "VALORACION_COMENTARIO_LARGO")
+    .optional()
+    .nullable(),
 });
 
 export const validarValoracion = (req, res, next) => {
@@ -33,3 +36,5 @@ export const validarValoracion = (req, res, next) => {
   req.body = resultado.data;
   next();
 };
+
+export default validarValoracion;

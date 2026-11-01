@@ -3,7 +3,8 @@ export class ValoracionController {
     this.valoracionService = valoracionService;
   }
 
-  // esto habria q cambiarlo (quitar evaluador) vuando tengamos la autenticacion y el evaluador se obtenga del token
+  // La autenticación se integrará desde otra rama; actualmente el evaluador indica el rol
+  // ("colectivo" | "persona") y las partes (autor y destinatario) se derivan internamente.
   crearValoracion = async (req, res) => {
     const valoracion = await this.valoracionService.crearValoracion(
       req.body.colaboracionId,
@@ -21,15 +22,15 @@ export class ValoracionController {
     let valoraciones;
 
     if (personaColaboradoraId) {
-      valoraciones =
-        await this.valoracionService.obtenerValoracionesPersona(
-          personaColaboradoraId,
-        );
+      valoraciones = await this.valoracionService.obtenerValoracionesPersona(
+        personaColaboradoraId,
+        req.query,
+      );
     } else {
-      valoraciones =
-        await this.valoracionService.obtenerValoracionesColectivo(
-          colectivoId,
-        );
+      valoraciones = await this.valoracionService.obtenerValoracionesColectivo(
+        colectivoId,
+        req.query,
+      );
     }
 
     res.status(200).json(valoraciones);

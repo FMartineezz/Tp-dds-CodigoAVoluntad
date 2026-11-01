@@ -35,6 +35,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | [Colaboraciones](#colaboraciones) | `GET /colaboraciones`, `GET /colaboraciones/:id`, `POST /colaboraciones`                                          |
 | [Búsquedas](#búsquedas)           | `GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes`, `GET /colaboradoras/:id/proyectos-acordes` |
 | [Mensajes](#mensajes)             | `POST /colectivos/:colectivoId/mensajes`, `GET /colaboradoras/:personaColaboradoraId/mensajes`                    |
+| [Valoraciones](#valoraciones)     | `POST /valoraciones`, `GET /personaColaboradora/:personaColaboradoraId/valoraciones`, `GET /colectivo/:colectivoId/valoraciones` |
 
 ---
 
@@ -800,6 +801,124 @@ Guarda el mensaje en la bandeja de la persona y lo **replica por email** a los c
 
 ---
 
+## Valoraciones
+
+Sistema de valoraciones mutuas entre colectivos y personas colaboradoras al finalizar una colaboración.
+
+- **Regla de finalización:** Una valoración solo puede realizarse cuando la colaboración ha finalizado (el proyecto al que pertenece fue marcado como finalizado o la colaboración fue dada de baja/desactivada).
+- **Mutuas y únicas:** Cada parte (colectivo y colaboradora) puede realizar como máximo **una** valoración por colaboración.
+- **Puntaje y comentario:** El puntaje debe ser un entero entre 1 y 5. El comentario es opcional (hasta 500 caracteres).
+- **Derivación de partes y alcance de autenticación:** El autor y destinatario se calculan estrictamente a nivel interno en base a la colaboración y al tipo de evaluador (`colectivo` -> autor Colectivo, destinatario Persona; `persona` -> autor Persona, destinatario Colectivo). Nunca deben recibirse desde el request. La verificación de la identidad del solicitante no forma parte del alcance de esta funcionalidad (se implementa en otra rama), por lo que no se requiere ni acepta `evaluadorId` en el payload.
+
+| Método | Path                                                      | Descripción                                                                 |
+| ------ | --------------------------------------------------------- | --------------------------------------------------------------------------- |
+| POST   | `/valoraciones`                                           | Registra una valoración sobre una colaboración finalizada                   |
+| GET    | `/personaColaboradora/:personaColaboradoraId/valoraciones`| Obtiene el historial público de valoraciones recibidas por la colaboradora |
+| GET    | `/colectivo/:colectivoId/valoraciones`                    | Obtiene el historial público de valoraciones recibidas por el colectivo     |
+
+### POST `/valoraciones`
+
+**Body:**
+
+```json
+{
+  "colaboracionId": "6acfd66a64d02459ba8dc6a8",
+  "evaluador": "colectivo",
+  "puntaje": 5,
+  "comentario": "Excelente desempeño técnico y gran compromiso con la causa."
+}
+```
+
+- `colaboracionId` (string ObjectId, requerido).
+- `evaluador` (`"colectivo"` | `"persona"`, requerido).
+- `puntaje` (entero entre 1 y 5, requerido).
+- `comentario` (string hasta 500 caracteres, opcional).
+
+**Respuesta 201:**
+
+```json
+{
+  "_id": "6acfd66a64d02459ba8dc6b0",
+  "colaboracion": "6acfd66a64d02459ba8dc6a8",
+  "evaluador": "colectivo",
+  "puntaje": 5,
+  "comentario": "Excelente desempeño técnico y gran compromiso con la causa.",
+  "autor": "6acfd66a64d02459ba8dc6a9",
+  "destinatario": "6acfd66a64d02459ba8dc6a7"
+}
+```
+
+**Errores:**
+
+| Status | code           | Cuándo                                                                  |
+| ------ | -------------- | ----------------------------------------------------------------------- |
+| 400    | `ERR-VAL-1101` | Falta el id de la colaboración                                          |
+| 400    | `ERR-VAL-1102` | Tipo de evaluador inválido (debe ser `colectivo` o `persona`)           |
+| 400    | `ERR-VAL-1106` | El puntaje no es un número entero                                       |
+| 400    | `ERR-VAL-1107` | El puntaje está fuera del rango 1 a 5                                   |
+| 400    | `ERR-VAL-1109` | El comentario supera los 500 caracteres                                 |
+| 400    | `ERR-EST-1110` | La parte evaluadora ya calificó esta colaboración                       |
+| 400    | `ERR-EST-1111` | La colaboración no ha finalizado (está activa y el proyecto no finalizó)|
+| 404    | `ERR-NOT-506`  | No existe una colaboración con ese id                                   |
+
+### GET `/personaColaboradora/:personaColaboradoraId/valoraciones`
+
+Obtiene el historial público de valoraciones recibidas por la persona colaboradora (calificaciones emitidas por colectivos hacia ella). No expone datos de contacto privados ni identificadores internos de autor/destinatario.
+
+**Query params opcionales:**
+- `direccion`: `"recibidas"` (default), `"emitidas"` (valoraciones hechas por la persona), `"todas"`.
+
+**Respuesta 200:**
+
+```json
+[
+  {
+    "_id": "6acfd66a64d02459ba8dc6b0",
+    "colaboracion": "6acfd66a64d02459ba8dc6a8",
+    "evaluador": "colectivo",
+    "puntaje": 5,
+    "comentario": "Excelente desempeño técnico y gran compromiso con la causa.",
+    "createdAt": "2026-10-31T20:15:00.000Z"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                                        |
+| ------ | ------------- | --------------------------------------------- |
+| 404    | `ERR-NOT-405` | No existe una persona colaboradora con ese id |
+
+### GET `/colectivo/:colectivoId/valoraciones`
+
+Obtiene el historial público de valoraciones recibidas por el colectivo (calificaciones emitidas por colaboradoras hacia la organización). No expone datos de contacto privados ni identificadores internos de autor/destinatario.
+
+**Query params opcionales:**
+- `direccion`: `"recibidas"` (default), `"emitidas"`, `"todas"`.
+
+**Respuesta 200:**
+
+```json
+[
+  {
+    "_id": "6acfd66a64d02459ba8dc6b1",
+    "colaboracion": "6acfd66a64d02459ba8dc6a8",
+    "evaluador": "persona",
+    "puntaje": 4,
+    "comentario": "Muy buena comunicación y apoyo durante el desarrollo.",
+    "createdAt": "2026-10-31T20:30:00.000Z"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                              |
+| ------ | ------------- | ----------------------------------- |
+| 404    | `ERR-NOT-305` | No existe un colectivo con ese id   |
+
+---
+
 ## Enums de referencia
 
 | Enum                    | Valores                                                            |
@@ -809,3 +928,4 @@ Guarda el mensaje en la bandeja de la persona y lo **replica por email** a los c
 | `TipoCompromiso`        | `total`, `semanal`, `mensual`                                      |
 | `ModalidadColaboracion` | `gratuita`, `incentivo_economico`, `contratacion_eventual`         |
 | `TipoMedioDeContacto`   | `email`, `whatsapp`, `sms`                                         |
+| `TipoEvaluador`         | `colectivo`, `persona`                                             |
