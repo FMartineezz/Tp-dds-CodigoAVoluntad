@@ -1563,7 +1563,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos, colectivo o habilidad inexistente. Códigos posibles: `ERR-VAL-101`, `ERR-VAL-102`, `ERR-VAL-103`, `ERR-VAL-107`, `ERR-VAL-112`, `ERR-VAL-115`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-NOT-306`, `ERR-VAL-207`, `ERR-VAL-001`",
+            "description": "Datos inválidos, colectivo o habilidad inexistente. Códigos posibles: `ERR-VAL-101`, `ERR-VAL-102`, `ERR-VAL-103`, `ERR-VAL-107`, `ERR-VAL-112`, `ERR-VAL-115`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-NOT-306`, `ERR-VAL-208`, `ERR-VAL-001`",
             "content": {
               "application/json": {
                 "schema": {
@@ -1835,7 +1835,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-VAL-207`, `ERR-VAL-001`",
+            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-VAL-208`, `ERR-VAL-001`",
             "content": {
               "application/json": {
                 "schema": {
@@ -1972,7 +1972,7 @@
             }
           },
           "400": {
-            "description": "Body vacío, datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-001`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-VAL-207`",
+            "description": "Body vacío, datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-001`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-VAL-208`",
             "content": {
               "application/json": {
                 "schema": {

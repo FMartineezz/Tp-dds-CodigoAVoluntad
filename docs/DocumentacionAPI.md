@@ -405,7 +405,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-VAL-609` | `tipoDeCompromiso` no es un valor válido                          |
 | 400    | `ERR-VAL-610` | `modalidadDeColaboracion` no es un valor válido                   |
 | 400    | `ERR-NOT-306` | No existe un colectivo con ese nombre                             |
-| 400    | `ERR-VAL-207` | Alguno de los códigos de habilidad no existe                      |
+| 400    | `ERR-VAL-208` | Alguno de los códigos de habilidad no existe                      |
 | 400    | `ERR-VAL-001` | Algún campo de texto no es de tipo string, u `horas` no es número |
 | 409    | `ERR-CSR-110` | El colectivo ya tiene un proyecto con ese título                  |
 
@@ -504,7 +504,7 @@ Modificación parcial: se manda solo lo que cambia, pero al menos un campo. Si v
 | ------ | ----------------------------- | --------------------------------------------- |
 | 400    | `ERR-VAL-001`                 | El body está vacío o un campo es de otro tipo |
 | 400    | `ERR-VAL-601` a `ERR-VAL-610` | Algún campo enviado no pasa la validación     |
-| 400    | `ERR-VAL-207`                 | Algún código de habilidad no existe           |
+| 400    | `ERR-VAL-208`                 | Algún código de habilidad no existe           |
 | 404    | `ERR-NOT-108`                 | No existe un proyecto con ese id              |
 | 404    | `ERR-NOT-611`                 | El proyecto no tiene un perfil con ese id     |
 

@@ -117,7 +117,7 @@ const ErrorCatalog = Object.freeze({
   },
 
   HABILIDADES_INEXISTENTES_GENERICO: {
-    code: "ERR-VAL-207",
+    code: "ERR-VAL-208",
     message: (codigos) => `Las habilidades de codigo: ${codigos.join(', ')} no existen`,
   },
   // =========================
@@ -209,7 +209,7 @@ const ErrorCatalog = Object.freeze({
   },
 
   COLABORADORA_YA_DADA_DE_BAJA: {
-    code: "ERR-EST-508",
+    code: "ERR-EST-408",
     message: (id) => `La persona colaboradora ${id} ya fue dada de baja`,
   },
 
@@ -254,7 +254,7 @@ const ErrorCatalog = Object.freeze({
   },
 
   COLABORACION_YA_DADA_DE_BAJA: {
-    code: "ERR-EST-508",
+    code: "ERR-EST-608",
     message: (id) => `La colaboración ${id} ya fue dada de baja`,
   },
 
