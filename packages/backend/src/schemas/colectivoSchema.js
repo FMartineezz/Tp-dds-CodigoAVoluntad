@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Colectivo, TipoColectivo, UBICACION_VALIDA } from "../models/colectivo.js";
+import { denunciaSchema } from "./denunciaSchema.js";
 
 const colectivoSchema = new mongoose.Schema(
   {
@@ -37,6 +38,11 @@ const colectivoSchema = new mongoose.Schema(
         },
       ],
       required: true,
+    },
+    denuncias: {
+      type: [denunciaSchema],
+      default: [],
+      select: false,
     },
     activo: {
       type: Boolean,

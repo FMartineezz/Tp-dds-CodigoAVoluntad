@@ -7,6 +7,7 @@ import { PerfilService } from "../../src/services/perfilService.js";
 import { MensajeService } from "../../src/services/mensajeService.js";
 import { BusquedaService } from "../../src/services/busquedaService.js";
 import { LogroService } from "../../src/services/logroService.js";
+import { DenunciaService } from "../../src/services/denunciaService.js";
 import { ValoracionService } from "../../src/services/valoracionService.js";
 import {
   FakeHabilidadRepository,
@@ -60,6 +61,12 @@ export function crearContexto({ transporter = new FakeTransporter() } = {}) {
     transporter,
   });
   const logroService = new LogroService({ proyectoService, proyectoRepository: repos.proyecto });
+
+  const denunciaService = new DenunciaService({
+    colectivoRepository: repos.colectivo,
+    colaboracionRepository: repos.colaboracion,
+  });
+
   const valoracionService = new ValoracionService({
     valoracionRepository: repos.valoracion,
     colaboracionRepository: repos.colaboracion,
@@ -80,6 +87,7 @@ export function crearContexto({ transporter = new FakeTransporter() } = {}) {
     colaboracionService,
     mensajeService,
     logroService,
+    denunciaService,
     valoracionService,
   };
 }
