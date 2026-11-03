@@ -49,36 +49,28 @@ export class ColaboracionRepository {
       .lean();
   }
 
-<<<<<<< HEAD
   async obtenerPorIdParaAdmin(id) {
     return await this.model
       .findById(id)
-      .populate({ path: "personaColaboradora", select: "+contactos" })
-=======
+      .populate({ path: "personaColaboradora", select: "+contactos" });
+  }
+
   async obtenerPorIdCompleto(id) {
     return await this.model
       .findById(id)
       .populate("personaColaboradora")
->>>>>>> entrega3
       .populate("proyecto")
       .lean();
   }
 
-<<<<<<< HEAD
-=======
   async obtenerPorPersonaColaboradoraId(personaColaboradoraId) {
-    return await this.model
-      .find({ personaColaboradora: personaColaboradoraId })
-      .lean();
+    return await this.model.find({ personaColaboradora: personaColaboradoraId }).lean();
   }
 
   async obtenerPorProyectoIds(proyectoIds) {
-    return await this.model
-      .find({ proyecto: { $in: proyectoIds } })
-      .lean();
+    return await this.model.find({ proyecto: { $in: proyectoIds } }).lean();
   }
 
->>>>>>> entrega3
   async contarActivasPorPerfil(proyectoId, perfilId) {
     return await this.model.countDocuments({
       proyecto: proyectoId,

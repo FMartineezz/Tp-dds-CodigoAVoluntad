@@ -115,7 +115,7 @@ const ErrorCatalog = {
     code: "ERR-VAL-207",
     message: (codigo) =>
       Array.isArray(codigo)
-        ? `Las habilidades de codigo: ${codigo.join(', ')} no existen`
+        ? `Las habilidades de codigo: ${codigo.join(", ")} no existen`
         : `La habilidad de codigo ${codigo} no existe`,
   },
   // =========================
@@ -495,7 +495,6 @@ const ErrorCatalog = {
     message:
       "La Postulacion ya fue resuelta, asegurese de resolver postuaciones con estado PENDIENTE",
   },
-<<<<<<< HEAD
 
   // =========================
   // DENUNCIAS
@@ -529,7 +528,6 @@ const ErrorCatalog = {
     code: "ERR-VAL-1107",
     message: "El estado de la denuncia es requerido",
   },
-=======
 };
 
 Object.defineProperty(ErrorCatalog, "HABILIDADES_INEXISTENTES_GENERICO", {
@@ -537,7 +535,6 @@ Object.defineProperty(ErrorCatalog, "HABILIDADES_INEXISTENTES_GENERICO", {
   enumerable: false,
   writable: false,
   configurable: false,
->>>>>>> entrega3
 });
 
 Object.freeze(ErrorCatalog);
