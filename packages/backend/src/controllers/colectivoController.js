@@ -11,6 +11,7 @@ export class ColectivoController {
       req.body.tipoDeColectivo,
       req.body.proyectos,
     );
+    delete respuesta.denuncias;
     res.status(201).location(`/colectivos/${respuesta.id}`).json(respuesta);
   };
 

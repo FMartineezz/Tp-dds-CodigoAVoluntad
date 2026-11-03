@@ -1,4 +1,4 @@
-const ErrorCatalog = Object.freeze({
+const ErrorCatalog = {
   // =========================
   // GENERALES
   // =========================
@@ -116,14 +116,14 @@ const ErrorCatalog = Object.freeze({
     message: (id) => `Ya existe una habilidad con ese título y descripción, y su id es: ${id}`,
   },
 
-  HABILIDAD_INEXISTENTE_GENERICO: {
-    code: "ERR-VAL-207",
-    message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
-  },
-
   HABILIDADES_INEXISTENTES_GENERICO: {
     code: "ERR-VAL-207",
     message: (codigos) => `Las habilidades de codigo: ${codigos.join(", ")} no existen`,
+
+    message: (codigo) =>
+      Array.isArray(codigo)
+        ? `Las habilidades de codigo: ${codigo.join(", ")} no existen`
+        : `La habilidad de codigo ${codigo} no existe`,
   },
   // =========================
   // COLECTIVOS
@@ -170,7 +170,7 @@ const ErrorCatalog = Object.freeze({
   },
 
   COLECTIVO_YA_DADO_DE_BAJA: {
-    code: "ERR-EST-508",
+    code: "ERR-EST-309",
     message: (id) => `El colectivo ${id} ya fue dado de baja`,
   },
 
@@ -214,7 +214,7 @@ const ErrorCatalog = Object.freeze({
   },
 
   COLABORADORA_YA_DADA_DE_BAJA: {
-    code: "ERR-EST-508",
+    code: "ERR-EST-408",
     message: (id) => `La persona colaboradora ${id} ya fue dada de baja`,
   },
 
@@ -401,6 +401,57 @@ const ErrorCatalog = Object.freeze({
   },
 
   // =========================
+  // VALORACIONES
+  // =========================
+
+  VALORACION_COLABORACION_ID_INVALIDO: {
+    code: "ERR-VAL-1101",
+    message: "El id de la colaboración es requerido",
+  },
+  VALORACION_EVALUADOR_TIPO_FORMATO: {
+    code: "ERR-VAL-1102",
+    message: "El tipo de evaluador no es válido",
+  },
+  VALORACION_PUNTAJE_REQUERIDO: {
+    code: "ERR-VAL-1104",
+    message: "El puntaje es requerido",
+  },
+  VALORACION_COMENTARIO_REQUERIDO: {
+    code: "ERR-VAL-1105",
+    message: "El comentario es requerido",
+  },
+
+  VALORACION_PUNTAJE_FORMATO: {
+    code: "ERR-VAL-1106",
+    message: "El puntaje debe ser un número entero entre 1 y 5",
+  },
+
+  VALORACION_PUNTAJE_RANGO: {
+    code: "ERR-VAL-1107",
+    message: "El puntaje debe estar entre 1 y 5",
+  },
+
+  VALORACION_COMENTARIO_FORMATO: {
+    code: "ERR-VAL-1108",
+    message: "El comentario debe ser un texto de entre 1 y 500 caracteres",
+  },
+
+  VALORACION_COMENTARIO_LARGO: {
+    code: "ERR-VAL-1109",
+    message: "El comentario debe tener un máximo de 500 caracteres",
+  },
+
+  VALORACION_EXISTENTE: {
+    code: "ERR-EST-1110",
+    message: (colaboracionId, evaluador) =>
+      `Ya existe una valoración para la colaboración con id ${colaboracionId} y el evaluador ${evaluador}`,
+  },
+
+  VALORACION_COLABORACION_NO_FINALIZADA: {
+    code: "ERR-EST-1111",
+    message: "No se puede valorar una colaboración que no ha finalizado",
+  },
+
   // POSTULACION
   // =========================
 
@@ -451,6 +502,48 @@ const ErrorCatalog = Object.freeze({
     message:
       "La Postulacion ya fue resuelta, asegurese de resolver postuaciones con estado PENDIENTE",
   },
+
+  // =========================
+  // DENUNCIAS
+  // =========================
+
+  DENUNCIA_DESCRIPCION_REQUERIDA: {
+    code: "ERR-VAL-1101",
+    message: "La descripción de la denuncia es requerida",
+  },
+  DENUNCIA_COLABORACION_NO_ACREDITA_PARTICIPACION: {
+    code: "ERR-EST-1102",
+    message: "La colaboración no acredita una participación válida en el proyecto",
+  },
+  DENUNCIA_DUPLICADA: {
+    code: "ERR-EST-1103",
+    message: "Ya existe una denuncia registrada para esta colaboración",
+  },
+  DENUNCIA_PROYECTO_SIN_COLECTIVO: {
+    code: "ERR-EST-1104",
+    message: "El proyecto asociado a la colaboración no tiene un colectivo responsable",
+  },
+  DENUNCIA_NO_ENCONTRADA: {
+    code: "ERR-NOT-1105",
+    message: (id) => `La denuncia ${id} no fue encontrada`,
+  },
+  DENUNCIA_ESTADO_INVALIDO: {
+    code: "ERR-VAL-1106",
+    message: "El estado de la denuncia debe ser: en_revision, resuelta o descartada",
+  },
+  DENUNCIA_ESTADO_REQUERIDO: {
+    code: "ERR-VAL-1107",
+    message: "El estado de la denuncia es requerido",
+  },
+};
+
+Object.defineProperty(ErrorCatalog, "HABILIDADES_INEXISTENTES_GENERICO", {
+  value: ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO,
+  enumerable: false,
+  writable: false,
+  configurable: false,
 });
+
+Object.freeze(ErrorCatalog);
 
 export default ErrorCatalog;
