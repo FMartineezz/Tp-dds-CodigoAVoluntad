@@ -23,19 +23,20 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 
 ### Índice
 
-| Recurso                           | Endpoints                                                                                                         |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| [Health Check](#health-check)     | `GET /healthCheck`                                                                                                |
-| [Habilidades](#habilidades)       | `GET /habilidades`, `GET /habilidades/:id`, `POST /habilidades`                                                   |
-| [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`                                                      |
-| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `POST /colaboradoras`                                             |
-| [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `POST /proyectos`, `PATCH /proyectos/:id`                                 |
-| [Perfiles](#perfiles)             | `GET`, `POST /proyectos/:idProyecto/perfiles`; `GET`, `PATCH`, `DELETE /proyectos/:idProyecto/perfiles/:idPerfil` |
-| [Logros](#logros)                 | `GET`, `POST /proyectos/:proyectoId/logros`; `GET`, `PATCH`, `DELETE /proyectos/:proyectoId/logros/:logroId`      |
-| [Colaboraciones](#colaboraciones) | `GET /colaboraciones`, `GET /colaboraciones/:id`, `POST /colaboraciones`                                          |
-| [Búsquedas](#búsquedas)           | `GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes`, `GET /colaboradoras/:id/proyectos-acordes` |
-| [Mensajes](#mensajes)             | `POST /colectivos/:colectivoId/mensajes`, `GET /colaboradoras/:personaColaboradoraId/mensajes`                    |
-| [Denuncias](#denuncias)           | `POST /colaboraciones/:id/denuncia`, `GET /admin/denuncias`, `GET /admin/denuncias/:id`, `PATCH /admin/denuncias/:id/estado` |
+| Recurso                           | Endpoints                                                                                                                        |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| [Health Check](#health-check)     | `GET /healthCheck`                                                                                                               |
+| [Habilidades](#habilidades)       | `GET /habilidades`, `GET /habilidades/:id`, `POST /habilidades`                                                                  |
+| [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`                                                                     |
+| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `POST /colaboradoras`                                                            |
+| [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `POST /proyectos`, `PATCH /proyectos/:id`                                                |
+| [Perfiles](#perfiles)             | `GET`, `POST /proyectos/:idProyecto/perfiles`; `GET`, `PATCH`, `DELETE /proyectos/:idProyecto/perfiles/:idPerfil`                |
+| [Logros](#logros)                 | `GET`, `POST /proyectos/:proyectoId/logros`; `GET`, `PATCH`, `DELETE /proyectos/:proyectoId/logros/:logroId`                     |
+| [Colaboraciones](#colaboraciones) | `GET /colaboraciones`, `GET /colaboraciones/:id`, `POST /colaboraciones`                                                         |
+| [Búsquedas](#búsquedas)           | `GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes`, `GET /colaboradoras/:id/proyectos-acordes`                |
+| [Mensajes](#mensajes)             | `POST /colectivos/:colectivoId/mensajes`, `GET /colaboradoras/:personaColaboradoraId/mensajes`                                   |
+| [Denuncias](#denuncias)           | `POST /colaboraciones/:id/denuncia`, `GET /admin/denuncias`, `GET /admin/denuncias/:id`, `PATCH /admin/denuncias/:id/estado`     |
+| [Valoraciones](#valoraciones)     | `POST /valoraciones`, `GET /personaColaboradora/:personaColaboradoraId/valoraciones`, `GET /colectivo/:colectivoId/valoraciones` |
 
 ---
 
@@ -207,7 +208,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
   {
     "_id": "6acfd66264d02459ba8dc6a0",
     "nombreFantasia": "devSolidario",
-    "git": "https://github.com/devSolidario",
+    "git": "[https://github.com/devSolidario](https://github.com/devSolidario)",
     "nombre": "Ana",
     "apellido": "Pérez",
     "habilidades": ["6acfd66164d02459ba8dc69c"],
@@ -308,13 +309,13 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
       }
     ],
     "colectivo": "6acfd66164d02459ba8dc69f",
-    "urlSistema": "https://fundacion.org",
+    "urlSistema": "[https://fundacion.org](https://fundacion.org)",
     "logros": [
       {
         "_id": "6acfd66a64d02459ba8dc6a9",
         "descripcion": "MVP publicado",
         "porcentaje": 60,
-        "urlCodigoFuente": "https://github.com/fundacion/web",
+        "urlCodigoFuente": "[https://github.com/fundacion/web](https://github.com/fundacion/web)",
         "createdAt": "2026-10-14T19:22:18.292Z",
         "updatedAt": "2026-10-14T19:22:18.292Z"
       }
@@ -369,7 +370,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
   "titulo": "Sitio web institucional",
   "descripcion": "Sitio de la fundación",
   "colectivo": "Fundación Ejemplo",
-  "urlSistema": "https://fundacion.org",
+  "urlSistema": "[https://fundacion.org](https://fundacion.org)",
   "perfiles": [
     {
       "descripcion": "Desarrollo front",
@@ -561,7 +562,7 @@ Los logros dan trazabilidad al avance del proyecto. Cada uno aporta un porcentaj
   "_id": "6acfd66a64d02459ba8dc6a9",
   "descripcion": "MVP publicado",
   "porcentaje": 60,
-  "urlCodigoFuente": "https://github.com/fundacion/web",
+  "urlCodigoFuente": "[https://github.com/fundacion/web](https://github.com/fundacion/web)",
   "createdAt": "2026-10-14T19:22:18.292Z",
   "updatedAt": "2026-10-14T19:22:18.292Z"
 }
@@ -807,12 +808,12 @@ Permite que una persona que haya participado en un proyecto con una organizació
 
 > **Aviso de seguridad y autenticación:** Actualmente el backend no cuenta con un sistema de autenticación ni control de acceso por roles (RBAC). Las rutas administrativas bajo `/admin/` están formalmente separadas de las rutas operativas, pero **no se encuentran protegidas técnicamente frente a terceros no autorizados** hasta tanto se implemente una capa transversal de autenticación.
 
-| Método | Path                           | Descripción                                                       |
-| ------ | ------------------------------ | ----------------------------------------------------------------- |
+| Método | Path                           | Descripción                                                           |
+| ------ | ------------------------------ | --------------------------------------------------------------------- |
 | POST   | `/colaboraciones/:id/denuncia` | Registra una denuncia contra el colectivo asociado a una colaboración |
-| GET    | `/admin/denuncias`             | Lista global de denuncias para evaluación administrativa          |
-| GET    | `/admin/denuncias/:id`         | Detalle de una denuncia junto a la colaboración y contacto        |
-| PATCH  | `/admin/denuncias/:id/estado`  | Actualiza el estado administrativo de una denuncia                |
+| GET    | `/admin/denuncias`             | Lista global de denuncias para evaluación administrativa              |
+| GET    | `/admin/denuncias/:id`         | Detalle de una denuncia junto a la colaboración y contacto            |
+| PATCH  | `/admin/denuncias/:id/estado`  | Actualiza el estado administrativo de una denuncia                    |
 
 ### POST `/colaboraciones/:id/denuncia`
 
@@ -820,11 +821,12 @@ Registra una denuncia contra el colectivo responsable del proyecto en el cual se
 
 **Body:**
 
-| Campo         | Tipo   | Requerido | Notas                               |
-| ------------- | ------ | --------- | ----------------------------------- |
+| Campo         | Tipo   | Requerido | Notas                                 |
+| ------------- | ------ | --------- | ------------------------------------- |
 | `descripcion` | string | sí        | Explicación de lo ocurrido (no vacío) |
 
 **Reglas de negocio:**
+
 - La colaboración debe existir.
 - La colaboración debe acreditar participación real en el proyecto (tanto colaboraciones activas como finalizadas / dadas de baja son válidas).
 - El proyecto debe tener un colectivo asociado.
@@ -847,22 +849,21 @@ Registra una denuncia contra el colectivo responsable del proyecto en el cual se
 
 **Errores:**
 
-| Status | code          | Cuándo                                                                |
-| ------ | ------------- | --------------------------------------------------------------------- |
-| 400    | `ERR-VAL-1101` | Falta la descripción o está vacía                                    |
-| 400    | `ERR-EST-1102` | La colaboración no acredita participación real                        |
-| 400    | `ERR-EST-1104` | El proyecto no tiene un colectivo asociado                            |
-| 404    | `ERR-NOT-506` | No existe la colaboración                                             |
-| 404    | `ERR-NOT-305` | No existe el colectivo responsable                                    |
-| 409    | `ERR-EST-1103` | Ya existe una denuncia registrada para esta colaboración              |
-
----
+| Status | code           | Cuándo                                                   |
+| ------ | -------------- | -------------------------------------------------------- |
+| 400    | `ERR-VAL-1101` | Falta la descripción o está vacía                        |
+| 400    | `ERR-EST-1102` | La colaboración no acredita participación real           |
+| 400    | `ERR-EST-1104` | El proyecto no tiene un colectivo asociado               |
+| 404    | `ERR-NOT-506`  | No existe la colaboración                                |
+| 404    | `ERR-NOT-305`  | No existe el colectivo responsable                       |
+| 409    | `ERR-EST-1103` | Ya existe una denuncia registrada para esta colaboración |
 
 ### GET `/admin/denuncias`
 
 Consulta global de denuncias embebidas en los distintos colectivos, optimizada mediante agregación sin transferir documentos completos de colectivos.
 
 **Query params opcionales:**
+
 - `estado`: filtra por estado (`pendiente`, `en_revision`, `resuelta`, `descartada`).
 
 **Respuesta 200:** array de denuncias con información de su colectivo.
@@ -880,8 +881,6 @@ Consulta global de denuncias embebidas en los distintos colectivos, optimizada m
   }
 ]
 ```
-
----
 
 ### GET `/admin/denuncias/:id`
 
@@ -913,11 +912,9 @@ Obtiene el detalle administrativo de una denuncia, permitiendo al equipo de la p
 
 **Errores:**
 
-| Status | code          | Cuándo                                    |
-| ------ | ------------- | ----------------------------------------- |
+| Status | code           | Cuándo                                       |
+| ------ | -------------- | -------------------------------------------- |
 | 404    | `ERR-NOT-1105` | No existe una denuncia con ese identificador |
-
----
 
 ### PATCH `/admin/denuncias/:id/estado`
 
@@ -925,17 +922,137 @@ Permite al equipo administrativo actualizar el estado de evaluación de la denun
 
 **Body:**
 
-| Campo    | Tipo   | Requerido | Valores permitidos                       |
-| -------- | ------ | --------- | ---------------------------------------- |
+| Campo    | Tipo   | Requerido | Valores permitidos                      |
+| -------- | ------ | --------- | --------------------------------------- |
 | `estado` | string | sí        | `en_revision`, `resuelta`, `descartada` |
 
 **Errores:**
 
-| Status | code          | Cuándo                                                  |
-| ------ | ------------- | ------------------------------------------------------- |
-| 400    | `ERR-VAL-1107` | Falta el campo `estado`                                 |
-| 400    | `ERR-VAL-1106` | El estado enviado no es válido para resolución           |
-| 404    | `ERR-NOT-1105` | No existe la denuncia a actualizar                      |
+| Status | code           | Cuándo                                         |
+| ------ | -------------- | ---------------------------------------------- |
+| 400    | `ERR-VAL-1107` | Falta el campo `estado`                        |
+| 400    | `ERR-VAL-1106` | El estado enviado no es válido para resolución |
+| 404    | `ERR-NOT-1105` | No existe la denuncia a actualizar             |
+
+---
+
+## Valoraciones
+
+Sistema de valoraciones mutuas entre colectivos y personas colaboradoras al finalizar una colaboración.
+
+- **Regla de finalización:** Una valoración solo puede realizarse cuando la colaboración ha finalizado (el proyecto al que pertenece fue marcado como finalizado o la colaboración fue dada de baja/desactivada).
+- **Mutuas y únicas:** Cada parte (colectivo y colaboradora) puede realizar como máximo **una** valoración por colaboración.
+- **Puntaje y comentario:** El puntaje debe ser un entero entre 1 y 5. El comentario es opcional (hasta 500 caracteres).
+- **Derivación de partes y alcance de autenticación:** El autor y destinatario se calculan estrictamente a nivel interno en base a la colaboración y al tipo de evaluador (`colectivo` -> autor Colectivo, destinatario Persona; `persona` -> autor Persona, destinatario Colectivo). Nunca deben recibirse desde el request. La verificación de la identidad del solicitante no forma parte del alcance de esta funcionalidad (se implementa en otra rama), por lo que no se requiere ni acepta `evaluadorId` en el payload.
+
+| Método | Path                                                       | Descripción                                                                |
+| ------ | ---------------------------------------------------------- | -------------------------------------------------------------------------- |
+| POST   | `/valoraciones`                                            | Registra una valoración sobre una colaboración finalizada                  |
+| GET    | `/personaColaboradora/:personaColaboradoraId/valoraciones` | Obtiene el historial público de valoraciones recibidas por la colaboradora |
+| GET    | `/colectivo/:colectivoId/valoraciones`                     | Obtiene el historial público de valoraciones recibidas por el colectivo    |
+
+### POST `/valoraciones`
+
+**Body:**
+
+```json
+{
+  "colaboracionId": "6acfd66a64d02459ba8dc6a8",
+  "evaluador": "colectivo",
+  "puntaje": 5,
+  "comentario": "Excelente desempeño técnico y gran compromiso con la causa."
+}
+```
+
+- `colaboracionId` (string ObjectId, requerido).
+- `evaluador` (`"colectivo"` | `"persona"`, requerido).
+- `puntaje` (entero entre 1 y 5, requerido).
+- `comentario` (string hasta 500 caracteres, opcional).
+
+**Respuesta 201:**
+
+```json
+{
+  "_id": "6acfd66a64d02459ba8dc6b0",
+  "colaboracion": "6acfd66a64d02459ba8dc6a8",
+  "evaluador": "colectivo",
+  "puntaje": 5,
+  "comentario": "Excelente desempeño técnico y gran compromiso con la causa.",
+  "autor": "6acfd66a64d02459ba8dc6a9",
+  "destinatario": "6acfd66a64d02459ba8dc6a7"
+}
+```
+
+**Errores:**
+
+| Status | code           | Cuándo                                                                   |
+| ------ | -------------- | ------------------------------------------------------------------------ |
+| 400    | `ERR-VAL-1101` | Falta el id de la colaboración                                           |
+| 400    | `ERR-VAL-1102` | Tipo de evaluador inválido (debe ser `colectivo` o `persona`)            |
+| 400    | `ERR-VAL-1106` | El puntaje no es un número entero                                        |
+| 400    | `ERR-VAL-1107` | El puntaje está fuera del rango 1 a 5                                    |
+| 400    | `ERR-VAL-1109` | El comentario supera los 500 caracteres                                  |
+| 400    | `ERR-EST-1110` | La parte evaluadora ya calificó esta colaboración                        |
+| 400    | `ERR-EST-1111` | La colaboración no ha finalizado (está activa y el proyecto no finalizó) |
+| 404    | `ERR-NOT-506`  | No existe una colaboración con ese id                                    |
+
+### GET `/personaColaboradora/:personaColaboradoraId/valoraciones`
+
+Obtiene el historial público de valoraciones recibidas por la persona colaboradora (calificaciones emitidas por colectivos hacia ella). No expone datos de contacto privados ni identificadores internos de autor/destinatario.
+
+**Query params opcionales:**
+
+- `direccion`: `"recibidas"` (default), `"emitidas"` (valoraciones hechas por la persona), `"todas"`.
+
+**Respuesta 200:**
+
+```json
+[
+  {
+    "_id": "6acfd66a64d02459ba8dc6b0",
+    "colaboracion": "6acfd66a64d02459ba8dc6a8",
+    "evaluador": "colectivo",
+    "puntaje": 5,
+    "comentario": "Excelente desempeño técnico y gran compromiso con la causa.",
+    "createdAt": "2026-10-31T20:15:00.000Z"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                                        |
+| ------ | ------------- | --------------------------------------------- |
+| 404    | `ERR-NOT-405` | No existe una persona colaboradora con ese id |
+
+### GET `/colectivo/:colectivoId/valoraciones`
+
+Obtiene el historial público de valoraciones recibidas por el colectivo (calificaciones emitidas por colaboradoras hacia la organización). No expone datos de contacto privados ni identificadores internos de autor/destinatario.
+
+**Query params opcionales:**
+
+- `direccion`: `"recibidas"` (default), `"emitidas"`, `"todas"`.
+
+**Respuesta 200:**
+
+```json
+[
+  {
+    "_id": "6acfd66a64d02459ba8dc6b1",
+    "colaboracion": "6acfd66a64d02459ba8dc6a8",
+    "evaluador": "persona",
+    "puntaje": 4,
+    "comentario": "Muy buena comunicación y apoyo durante el desarrollo.",
+    "createdAt": "2026-10-31T20:30:00.000Z"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                            |
+| ------ | ------------- | --------------------------------- |
+| 404    | `ERR-NOT-305` | No existe un colectivo con ese id |
 
 ---
 
@@ -949,3 +1066,4 @@ Permite al equipo administrativo actualizar el estado de evaluación de la denun
 | `ModalidadColaboracion` | `gratuita`, `incentivo_economico`, `contratacion_eventual`         |
 | `TipoMedioDeContacto`   | `email`, `whatsapp`, `sms`                                         |
 | `EstadoDenuncia`        | `pendiente`, `en_revision`, `resuelta`, `descartada`               |
+| `TipoEvaluador`         | `colectivo`, `persona`                                             |

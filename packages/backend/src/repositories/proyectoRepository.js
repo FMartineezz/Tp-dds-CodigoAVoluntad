@@ -196,6 +196,11 @@ export class ProyectoRepository {
     );
     console.log(resultado);
   }
+
+  async obtenerPorColectivoId(colectivoId) {
+    return await this.model.find({ colectivo: colectivoId }).lean();
+  }
+  
 }
 
 /*   constructor() {

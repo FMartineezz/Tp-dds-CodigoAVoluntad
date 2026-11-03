@@ -54,6 +54,9 @@
     },
     {
       "name": "Denuncias"
+    },
+    {
+      "name": "Valoraciones"
     }
   ],
   "components": {
@@ -915,6 +918,112 @@
           }
         },
         "description": "Todos los campos son opcionales. Los que vienen se validan igual que en el alta."
+      },
+      "ValoracionInput": {
+        "type": "object",
+        "required": ["colaboracionId", "evaluador", "puntaje"],
+        "properties": {
+          "colaboracionId": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8",
+            "description": "ID de la colaboración finalizada a evaluar."
+          },
+          "evaluador": {
+            "type": "string",
+            "enum": ["colectivo", "persona"],
+            "example": "colectivo",
+            "description": "Indica si quien valora es el colectivo o la persona colaboradora."
+          },
+          "puntaje": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5,
+            "description": "Puntaje entero de 1 a 5."
+          },
+          "comentario": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "Excelente compromiso y calidad técnica en la colaboración.",
+            "description": "Comentario opcional de hasta 500 caracteres."
+          }
+        }
+      },
+      "Valoracion": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6b0"
+          },
+          "colaboracion": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8"
+          },
+          "evaluador": {
+            "type": "string",
+            "enum": ["colectivo", "persona"],
+            "example": "colectivo"
+          },
+          "puntaje": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "comentario": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "Excelente compromiso y calidad técnica en la colaboración."
+          },
+          "autor": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a9",
+            "description": "ID del colectivo o persona colaboradora que emitió la valoración."
+          },
+          "destinatario": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a7",
+            "description": "ID del colectivo o persona colaboradora que recibió la valoración."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ValoracionPublica": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6b0"
+          },
+          "colaboracion": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8"
+          },
+          "evaluador": {
+            "type": "string",
+            "enum": ["colectivo", "persona"],
+            "example": "colectivo"
+          },
+          "puntaje": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "comentario": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "Excelente compromiso y calidad técnica en la colaboración."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     }
   },
@@ -2911,6 +3020,163 @@
           },
           "404": {
             "description": "Denuncia no encontrada."
+          }
+        }
+      }
+    },
+    "/valoraciones": {
+      "post": {
+        "tags": ["Valoraciones"],
+        "summary": "Registra una valoración sobre una colaboración finalizada",
+        "description": "Permite calificar a la contraparte de una colaboración concluida (el proyecto finalizó o la colaboración fue dada de baja). Cada parte puede calificar como máximo una vez. Autor y destinatario se calculan internamente.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValoracionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Valoración registrada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Valoracion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos, colaboración no finalizada o valoración ya existente de esta parte",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colaboración no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/personaColaboradora/{personaColaboradoraId}/valoraciones": {
+      "get": {
+        "tags": ["Valoraciones"],
+        "summary": "Historial público de valoraciones de una colaboradora",
+        "description": "Devuelve las valoraciones recibidas por la persona colaboradora (evaluadas por colectivos).",
+        "parameters": [
+          {
+            "name": "personaColaboradoraId",
+            "in": "path",
+            "required": true,
+            "description": "ID de la persona colaboradora",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direccion",
+            "in": "query",
+            "required": false,
+            "description": "Filtro de dirección: 'recibidas' (default), 'emitidas', o 'todas'",
+            "schema": {
+              "type": "string",
+              "enum": ["recibidas", "emitidas", "todas"],
+              "default": "recibidas"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de valoraciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ValoracionPublica"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Persona colaboradora no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colectivo/{colectivoId}/valoraciones": {
+      "get": {
+        "tags": ["Valoraciones"],
+        "summary": "Historial público de valoraciones de un colectivo",
+        "description": "Devuelve las valoraciones recibidas por el colectivo (evaluadas por colaboradoras).",
+        "parameters": [
+          {
+            "name": "colectivoId",
+            "in": "path",
+            "required": true,
+            "description": "ID del colectivo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direccion",
+            "in": "query",
+            "required": false,
+            "description": "Filtro de dirección: 'recibidas' (default), 'emitidas', o 'todas'",
+            "schema": {
+              "type": "string",
+              "enum": ["recibidas", "emitidas", "todas"],
+              "default": "recibidas"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de valoraciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ValoracionPublica"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colectivo no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
