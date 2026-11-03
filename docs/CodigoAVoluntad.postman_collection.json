@@ -294,7 +294,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"titulo\": \"Plataforma de Donaciones Comunitarias\",\n  \"descripcion\": \"Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.\",\n  \"colectivo\": \"Colectivo Ambiental CABA\",\n  \"urlSistema\": \"https://donaciones.colectivoambiental.org\",\n  \"perfiles\": [\n    {\n      \"descripcion\": \"Desarrollo frontend\",\n      \"habilidadesRequeridas\": [\n        \"programacion_en_java_script\"\n      ],\n      \"habilidadesOpcionales\": [\n        \"desarrollo_con_node_js_y_express\"\n      ],\n      \"horas\": 10,\n      \"tipoDeCompromiso\": \"semanal\",\n      \"modalidadDeColaboracion\": \"gratuita\"\n    }\n  ]\n}",
+              "raw": "{\n  \"titulo\": \"Plataforma de Donaciones Comunitarias\",\n  \"descripcion\": \"Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.\",\n  \"colectivo\": \"Colectivo Ambiental CABA\",\n  \"urlSistema\": \"https://donaciones.colectivoambiental.org\",\n  \"perfiles\": [\n    {\n      \"descripcion\": \"Desarrollo frontend\",\n      \"habilidadesRequeridas\": [\n        \"programacion_en_java_script\"\n      ],\n      \"habilidadesOpcionales\": [\n        \"desarrollo_con_node_js_y_express\"\n      ],\n      \"horas\": 10,\n      \"tipoDeCompromiso\": \"semanal\",\n      \"modalidadDeColaboracion\": \"gratuita\"\n    }\n  ],\n  \"urlDonaciones\": \"https://cafecito.app/colectivoambiental\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -329,6 +329,39 @@
           "request": {
             "method": "GET",
             "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{proyectoId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar urlDonaciones",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"urlDonaciones\": \"https://cafecito.app/colectivoambiental-nuevo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseUrl}}/proyectos/:id",
               "host": ["{{baseUrl}}"],

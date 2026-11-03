@@ -77,6 +77,11 @@ const ErrorCatalog = {
     message: "La URL del sistema debe ser una URL válida",
   },
 
+  PROYECTO_URL_DONACIONES_INVALIDA: {
+    code: "ERR-VAL-116",
+    message: "La URL de donaciones debe ser una URL válida",
+  },
+
   // =========================
   // HABILIDADES
   // =========================
@@ -111,8 +116,10 @@ const ErrorCatalog = {
     message: (id) => `Ya existe una habilidad con ese título y descripción, y su id es: ${id}`,
   },
 
-  HABILIDAD_INEXISTENTE_GENERICO: {
+  HABILIDADES_INEXISTENTES_GENERICO: {
     code: "ERR-VAL-207",
+    message: (codigos) => `Las habilidades de codigo: ${codigos.join(", ")} no existen`,
+
     message: (codigo) =>
       Array.isArray(codigo)
         ? `Las habilidades de codigo: ${codigo.join(", ")} no existen`
