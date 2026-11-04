@@ -95,14 +95,97 @@ export class FakeColectivoRepository extends FakeRepository {
     const res = { ...cambios };
     if (res.proyectos) res.proyectos = res.proyectos.map(aId);
     return res;
+      denuncias: colectivo.denuncias ?? [],
+    };
+  }
+
+  // Las consultas públicas de colectivo no exponen denuncias (simulando select: false de Mongoose)
+  sinDenuncias(colectivo) {
+    if (!colectivo) return null;
+    const copia = copiar(colectivo);
+    delete copia.denuncias;
+    return copia;
+  }
+
+  async obtenerPorId(id) {
+    return this.sinDenuncias(this.buscar(id));
+  }
+
+  async obtenerTodos() {
+    return this.documentos.map((c) => this.sinDenuncias(c));
   }
 
   async obtenerPorNombre(nombre) {
-    return copiar(this.documentos.find((c) => c.nombre === nombre)) ?? null;
+    return this.sinDenuncias(this.documentos.find((c) => c.nombre === nombre));
   }
 
   async agregarProyecto(colectivoId, proyectoId) {
     this.buscar(colectivoId)?.proyectos.push(aId(proyectoId));
+  }
+
+  async guardarDenuncia(colectivoId, denuncia) {
+    const colectivo = this.buscar(colectivoId);
+    if (!colectivo) return null;
+    const { id, ...datos } = copiar(denuncia);
+    const denunciaGuardada = {
+      ...datos,
+      _id: nuevoId(),
+      colaboracionId: aId(denuncia.colaboracionId),
+    };
+    if (!colectivo.denuncias) colectivo.denuncias = [];
+    colectivo.denuncias.push(denunciaGuardada);
+    return { ...copiar(denunciaGuardada), id: denunciaGuardada._id };
+  }
+
+  async existeDenunciaParaColaboracion(colaboracionId) {
+    return this.documentos.some((c) =>
+      (c.denuncias ?? []).some((d) => mismoId(d.colaboracionId, colaboracionId)),
+    );
+  }
+
+  async obtenerTodasLasDenuncias(filtro = {}) {
+    const resultado = [];
+    for (const c of this.documentos) {
+      for (const d of c.denuncias ?? []) {
+        if (!filtro.estado || d.estado === filtro.estado) {
+          resultado.push({
+            ...copiar(d),
+            colectivoId: c._id,
+            colectivoNombre: c.nombre,
+          });
+        }
+      }
+    }
+    return resultado;
+  }
+
+  async obtenerDenunciaPorId(denunciaId) {
+    for (const c of this.documentos) {
+      const d = (c.denuncias ?? []).find((denuncia) => mismoId(denuncia._id, denunciaId));
+      if (d) {
+        return {
+          ...copiar(d),
+          colectivoId: c._id,
+          colectivoNombre: c.nombre,
+        };
+      }
+    }
+    return null;
+  }
+
+  async actualizarEstadoDenuncia(denunciaId, nuevoEstado) {
+    for (const c of this.documentos) {
+      const d = (c.denuncias ?? []).find((denuncia) => mismoId(denuncia._id, denunciaId));
+      if (d) {
+        d.estado = nuevoEstado;
+        return {
+          ...copiar(d),
+          colectivoId: c._id,
+          colectivoNombre: c.nombre,
+        };
+      }
+    }
+    return null;
   }
 }
 
@@ -158,6 +241,7 @@ export class FakeProyectoRepository extends FakeRepository {
       colectivo: aId(proyecto.colectivo),
       perfiles: proyecto.perfiles.map(normalizarPerfil),
       logros: proyecto.logros ?? [],
+      urlDonaciones: proyecto.urlDonaciones ?? null,
     };
   }
 
@@ -206,11 +290,15 @@ export class FakeProyectoRepository extends FakeRepository {
     return copiar(perfil);
   }
 
-  async finalizarProyecto(id) {
+  async actualizarProyecto(id, cambios) {
     const proyecto = this.buscar(id);
     if (!proyecto) return null;
-    proyecto.finalizado = true;
+    Object.assign(proyecto, cambios);
     return copiar(proyecto);
+  }
+
+  async finalizarProyecto(id) {
+    return this.actualizarProyecto(id, { finalizado: true });
   }
 
   async obtenerPorAlgunaHabilidad(idsHabilidad) {
@@ -256,6 +344,10 @@ export class FakeProyectoRepository extends FakeRepository {
     proyecto.logros = proyecto.logros.filter((l) => l !== logro);
     return copiar(logro);
   }
+
+  async obtenerPorColectivoId(colectivoId) {
+    return this.documentos.filter((p) => mismoId(p.colectivo, colectivoId)).map(copiar);
+  }
 }
 
 // Las lecturas hacen el equivalente a .populate("personaColaboradora").populate("proyecto")
@@ -291,6 +383,35 @@ export class FakeColaboracionRepository extends FakeRepository {
   async obtenerPorId(id) {
     const colaboracion = this.buscar(id);
     return colaboracion ? this.popular(colaboracion) : null;
+  }
+
+  async obtenerPorIdParaAdmin(id) {
+    const colaboracion = this.buscar(id);
+    return colaboracion ? this.popular(colaboracion) : null;
+  }
+  async obtenerPorIdCompleto(id) {
+    const colaboracion = this.buscar(id);
+    return colaboracion ? this.popular(colaboracion) : null;
+  }
+
+  async obtenerPorPersonaColaboradoraId(personaColaboradoraId) {
+    return this.documentos
+      .filter((c) => mismoId(c.personaColaboradora, personaColaboradoraId))
+      .map((c) => this.popular(c));
+  }
+
+  async obtenerPorProyectoIds(proyectoIds) {
+    return this.documentos
+      .filter((c) => proyectoIds.some((pId) => mismoId(c.proyecto, pId)))
+      .map((c) => this.popular(c));
+  }
+
+  async desactivar(id) {
+    const colaboracion = this.buscar(id);
+    if (!colaboracion) return null;
+    colaboracion.activo = false;
+    colaboracion.fechaBaja = new Date();
+    return copiar(colaboracion);
   }
 }
 
@@ -330,5 +451,78 @@ export class FakeTransporter {
   async sendMail(opciones) {
     if (this.falla) throw new Error("SMTP caído");
     this.enviados.push(opciones);
+  }
+}
+
+export class FakeValoracionRepository extends FakeRepository {
+  async guardar(valoracion) {
+    const duplicado = this.documentos.find(
+      (v) =>
+        mismoId(v.colaboracion, valoracion.colaboracion) && v.evaluador === valoracion.evaluador,
+    );
+    if (duplicado) {
+      const err = new Error("E11000 duplicate key error");
+      err.code = 11000;
+      throw err;
+    }
+    return super.guardar(valoracion);
+  }
+
+  async obtenerPorColaboracionIds(colaboracionIds, { evaluador } = {}) {
+    return this.documentos
+      .filter((v) => colaboracionIds.some((cId) => mismoId(v.colaboracion, cId)))
+      .filter((v) => !evaluador || v.evaluador === evaluador)
+      .map((v) => {
+        const c = copiar(v);
+        delete c.autor;
+        delete c.destinatario;
+        return c;
+      });
+  }
+
+  async obtenerPorColaboracionIdYEvaluador(colaboracionId, evaluador) {
+    return (
+      copiar(
+        this.documentos.find(
+          (v) => mismoId(v.colaboracion, colaboracionId) && v.evaluador === evaluador,
+        ),
+      ) ?? null
+    );
+  }
+
+  async obtenerPorColaboracionId(colaboracionId) {
+    return this.documentos.filter((v) => mismoId(v.colaboracion, colaboracionId)).map(copiar);
+  }
+
+  async obtenerPorPersonaColaboradoraId(personaColaboradoraId, { direccion = "recibidas" } = {}) {
+    return this.documentos
+      .filter((v) => {
+        if (direccion === "recibidas") return mismoId(v.destinatario, personaColaboradoraId);
+        if (direccion === "emitidas") return mismoId(v.autor, personaColaboradoraId);
+        return (
+          mismoId(v.destinatario, personaColaboradoraId) || mismoId(v.autor, personaColaboradoraId)
+        );
+      })
+      .map((v) => {
+        const c = copiar(v);
+        delete c.autor;
+        delete c.destinatario;
+        return c;
+      });
+  }
+
+  async obtenerPorColectivoId(colectivoId, { direccion = "recibidas" } = {}) {
+    return this.documentos
+      .filter((v) => {
+        if (direccion === "recibidas") return mismoId(v.destinatario, colectivoId);
+        if (direccion === "emitidas") return mismoId(v.autor, colectivoId);
+        return mismoId(v.destinatario, colectivoId) || mismoId(v.autor, colectivoId);
+      })
+      .map((v) => {
+        const c = copiar(v);
+        delete c.autor;
+        delete c.destinatario;
+        return c;
+      });
   }
 }

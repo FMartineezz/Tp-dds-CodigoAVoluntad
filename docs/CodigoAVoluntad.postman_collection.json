@@ -39,12 +39,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/habilidades",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "habilidades"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["habilidades"]
             }
           },
           "response": []
@@ -65,12 +61,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/habilidades",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "habilidades"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["habilidades"]
             }
           },
           "response": [],
@@ -127,13 +119,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/habilidades/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "habilidades",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["habilidades", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -325,12 +312,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras"]
             }
           },
           "response": []
@@ -351,12 +334,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboradoras",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras"]
             }
           },
           "response": [],
@@ -382,13 +361,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -625,7 +599,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"titulo\": \"Plataforma de Donaciones Comunitarias\",\n  \"descripcion\": \"Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.\",\n  \"colectivo\": \"Colectivo Ambiental CABA\",\n  \"urlSistema\": \"https://donaciones.colectivoambiental.org\",\n  \"perfiles\": [\n    {\n      \"descripcion\": \"Desarrollo frontend\",\n      \"habilidadesRequeridas\": [\n        \"programacion_en_java_script\"\n      ],\n      \"habilidadesOpcionales\": [\n        \"desarrollo_con_node_js_y_express\"\n      ],\n      \"horas\": 10,\n      \"tipoDeCompromiso\": \"semanal\",\n      \"modalidadDeColaboracion\": \"gratuita\"\n    }\n  ]\n}",
+              "raw": "{\n  \"titulo\": \"Plataforma de Donaciones Comunitarias\",\n  \"descripcion\": \"Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.\",\n  \"colectivo\": \"Colectivo Ambiental CABA\",\n  \"urlSistema\": \"https://donaciones.colectivoambiental.org\",\n  \"perfiles\": [\n    {\n      \"descripcion\": \"Desarrollo frontend\",\n      \"habilidadesRequeridas\": [\n        \"programacion_en_java_script\"\n      ],\n      \"habilidadesOpcionales\": [\n        \"desarrollo_con_node_js_y_express\"\n      ],\n      \"horas\": 10,\n      \"tipoDeCompromiso\": \"semanal\",\n      \"modalidadDeColaboracion\": \"gratuita\"\n    }\n  ],\n  \"urlDonaciones\": \"https://cafecito.app/colectivoambiental\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -673,6 +647,39 @@
                 "proyectos",
                 ":id"
               ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{proyectoId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar urlDonaciones",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"urlDonaciones\": \"https://cafecito.app/colectivoambiental-nuevo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -1062,14 +1069,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros"]
             }
           },
           "response": []
@@ -1081,14 +1082,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros"]
             }
           },
           "response": []
@@ -1100,15 +1095,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros",
-                "{{logroId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros", "{{logroId}}"]
             }
           },
           "response": []
@@ -1134,15 +1122,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros",
-                "{{logroId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros", "{{logroId}}"]
             }
           },
           "response": []
@@ -1154,15 +1135,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "logros",
-                "{{logroId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "logros", "{{logroId}}"]
             }
           },
           "response": []
@@ -1190,14 +1164,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
             }
           },
           "response": []
@@ -1218,14 +1186,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
             }
           },
           "response": []
@@ -1237,15 +1199,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles",
-                "{{perfilId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}"]
             }
           },
           "response": []
@@ -1266,15 +1221,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles",
-                "{{perfilId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}"]
             }
           },
           "response": []
@@ -1286,15 +1234,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles",
-                "{{perfilId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}"]
             }
           },
           "response": []
@@ -1306,9 +1247,7 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}/colaboradoras-acordes",
-              "host": [
-                "{{baseUrl}}"
-              ],
+              "host": ["{{baseUrl}}"],
               "path": [
                 "proyectos",
                 "{{proyectoId}}",
@@ -1364,6 +1303,275 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Denuncias",
+      "item": [
+        {
+          "name": "Registrar denuncia desde colaboracion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Incumplimiento reiterado de acuerdos y destrato en reuniones.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/colaboraciones/:id/denuncia",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones", ":id", "denuncia"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colaboracionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar denuncias (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/denuncias",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "denuncias"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener denuncia por ID con colaboracion (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/denuncias/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "denuncias", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{denunciaId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar estado de denuncia (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en_revision\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/denuncias/:id/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "denuncias", ":id", "estado"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{denunciaId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Valoraciones",
+      "item": [
+        {
+          "name": "Crear valoración (Colectivo -> Persona)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"colaboracionId\": \"{{colaboracionId}}\",\n  \"evaluador\": \"colectivo\",\n  \"puntaje\": 5,\n  \"comentario\": \"Excelente compromiso y calidad técnica en la colaboración.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/valoraciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["valoraciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear valoración (Persona -> Colectivo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"colaboracionId\": \"{{colaboracionId}}\",\n  \"evaluador\": \"persona\",\n  \"puntaje\": 4,\n  \"comentario\": \"Muy buena predisposición y claridad de objetivos por parte de la organización.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/valoraciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["valoraciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener historial público de valoraciones de Persona",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/personaColaboradora/{{colaboradoraId}}/valoraciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["personaColaboradora", "{{colaboradoraId}}", "valoraciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener historial público de valoraciones de Colectivo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colectivo/{{colectivoId}}/valoraciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivo", "{{colectivoId}}", "valoraciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Error - Colaboración no finalizada (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"colaboracionId\": \"{{colaboracionId}}\",\n  \"evaluador\": \"colectivo\",\n  \"puntaje\": 5,\n  \"comentario\": \"Intento de valorar antes de finalizar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/valoraciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["valoraciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Error - Valoración duplicada (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"colaboracionId\": \"{{colaboracionId}}\",\n  \"evaluador\": \"colectivo\",\n  \"puntaje\": 4,\n  \"comentario\": \"Intento de calificar dos veces por la misma parte\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/valoraciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["valoraciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Error - Puntaje inválido (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"colaboracionId\": \"{{colaboracionId}}\",\n  \"evaluador\": \"persona\",\n  \"puntaje\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/valoraciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["valoraciones"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -1404,15 +1612,7 @@
       "value": ""
     },
     {
-      "key": "proyectoId",
-      "value": ""
-    },
-    {
-      "key": "logroId",
-      "value": ""
-    },
-    {
-      "key": "perfilId",
+      "key": "denunciaId",
       "value": ""
     }
   ]

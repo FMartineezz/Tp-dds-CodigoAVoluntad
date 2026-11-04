@@ -9,6 +9,7 @@ body:
       "descripcion": "Desarrollo de una app web para gestionar entregas de alimentos e insumos en el barrio.",
       "colectivo": "Colectivo Ambiental CABA",
       "urlSistema": "https://donaciones.colectivoambiental.org",
+      "urlDonaciones": "https://cafecito.app/colectivoambiental",
       "perfiles": [
         {
           "descripcion": "Desarrollo frontend",

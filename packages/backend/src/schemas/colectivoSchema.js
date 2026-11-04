@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Colectivo, TipoColectivo, UBICACION_VALIDA } from "../models/colectivo.js";
 import { TipoRedSocial } from "../models/redSocial.js";
+import { denunciaSchema } from "./denunciaSchema.js";
 
 const colectivoSchema = new mongoose.Schema(
   {
@@ -78,6 +79,10 @@ const colectivoSchema = new mongoose.Schema(
         },
         message: "No se permiten tipos de redes sociales duplicados",
       },
+    denuncias: {
+      type: [denunciaSchema],
+      default: [],
+      select: false,
     },
     activo: {
       type: Boolean,

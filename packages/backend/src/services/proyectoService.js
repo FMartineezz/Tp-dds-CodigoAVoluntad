@@ -10,6 +10,16 @@ export class ProyectoService {
     this.personaColaboradoraService = personaColaboradoraService;
   }
 
+  validarUrlHttp(url) {
+    if (!url || typeof url !== "string") return false;
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
+  }
+
   async crearProyecto(
     titulo,
     descripcion,
@@ -18,6 +28,7 @@ export class ProyectoService {
     urlSistema,
     fechaCierre,
     fechaLimiteBusqueda,
+    urlDonaciones,
   ) {
     //en vez de nombre, usar id
     const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
@@ -36,6 +47,12 @@ export class ProyectoService {
       );
     }
 
+    if (urlDonaciones !== undefined && urlDonaciones !== null && urlDonaciones !== "") {
+      if (!this.validarUrlHttp(urlDonaciones)) {
+        throw new AppError(ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA, 400);
+      }
+    }
+
     //consultar si vale la pena
     const perfilesCreados = await Promise.all(
       perfiles.map((perfil) =>
@@ -51,6 +68,8 @@ export class ProyectoService {
       ),
     );
 
+    const urlDonacionesFinal = urlDonaciones && urlDonaciones !== "" ? urlDonaciones : null;
+
     const proyectoNuevo = new Proyecto(
       titulo,
       descripcion,
@@ -59,6 +78,7 @@ export class ProyectoService {
       urlSistema,
       fechaCierre,
       fechaLimiteBusqueda,
+      urlDonacionesFinal,
     );
     const proyectoGuardado = await this.proyectoRepository.guardar(proyectoNuevo);
     proyectoNuevo.id = proyectoGuardado.id;
@@ -103,13 +123,52 @@ export class ProyectoService {
   }
 
   async actualizarProyecto(id, cambios = {}) {
-    const campos = Object.keys(cambios);
-
-    if (campos.length !== 1 || campos[0] !== "finalizado" || cambios.finalizado !== true) {
+    if (!cambios || typeof cambios !== "object" || Array.isArray(cambios)) {
       throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
 
-    return await this.finalizarProyecto(id);
+    const campos = Object.keys(cambios);
+    if (campos.length === 0) {
+      throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+    }
+
+    const camposPermitidos = ["finalizado", "urlDonaciones"];
+    const tieneCamposNoPermitidos = campos.some((campo) => !camposPermitidos.includes(campo));
+    if (tieneCamposNoPermitidos) {
+      throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+    }
+
+    const proyecto = await this.proyectoRepository.obtenerPorId(id);
+    if (!proyecto) {
+      throw new AppError(ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
+    }
+
+    const actualizaciones = {};
+
+    if (cambios.finalizado !== undefined) {
+      if (cambios.finalizado !== true) {
+        throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+      }
+      if (proyecto.finalizado) {
+        throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, id);
+      }
+      actualizaciones.finalizado = true;
+    }
+
+    if (cambios.urlDonaciones !== undefined) {
+      if (cambios.urlDonaciones === null || cambios.urlDonaciones === "") {
+        actualizaciones.urlDonaciones = null;
+      } else if (typeof cambios.urlDonaciones === "string") {
+        if (!this.validarUrlHttp(cambios.urlDonaciones)) {
+          throw new AppError(ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA, 400);
+        }
+        actualizaciones.urlDonaciones = cambios.urlDonaciones;
+      } else {
+        throw new AppError(ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA, 400);
+      }
+    }
+
+    return await this.proyectoRepository.actualizarProyecto(id, actualizaciones);
   }
 
   async agregarPerfil(

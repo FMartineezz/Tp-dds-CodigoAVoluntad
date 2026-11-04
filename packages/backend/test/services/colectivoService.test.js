@@ -18,6 +18,7 @@ describe("ColectivoService", () => {
     );
 
     expect(colectivo).toMatchObject({ nombre: "Fundación", proyectos: [] });
+    expect(colectivo).not.toHaveProperty("denuncias");
     expect(await ctx.colectivoService.obtenerColectivoPorId(colectivo.id)).toMatchObject({
       nombre: "Fundación",
     });

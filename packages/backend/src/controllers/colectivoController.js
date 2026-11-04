@@ -12,6 +12,7 @@ export class ColectivoController {
       req.body.proyectos,
       req.body.redesSociales,
     );
+    delete respuesta.denuncias;
     res.status(201).location(`/colectivos/${respuesta.id}`).json(respuesta);
   };
 

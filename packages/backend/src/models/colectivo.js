@@ -50,6 +50,7 @@ class Colectivo {
     this.proyectos = proyectos;
     this.activo = true;
     this.redesSociales = redesSociales;
+    this.denuncias = [];
   }
 
   cargarProyecto(proyecto) {
