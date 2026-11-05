@@ -161,12 +161,7 @@
       },
       "TipoColectivo": {
         "type": "string",
-        "enum": [
-          "fundacion",
-          "ong",
-          "asociacion barrial",
-          "asamblea"
-        ],
+        "enum": ["fundacion", "ong", "asociacion barrial", "asamblea"],
         "description": "Tipo de colectivo."
       },
       "Ubicacion": {
@@ -203,37 +198,22 @@
       },
       "TipoDeCompromiso": {
         "type": "string",
-        "enum": [
-          "total",
-          "semanal",
-          "mensual"
-        ],
+        "enum": ["total", "semanal", "mensual"],
         "description": "Cómo se miden las horas de dedicación."
       },
       "ModalidadColaboracion": {
         "type": "string",
-        "enum": [
-          "gratuita",
-          "incentivo_economico",
-          "contratacion_eventual"
-        ],
+        "enum": ["gratuita", "incentivo_economico", "contratacion_eventual"],
         "description": "Modalidad de la colaboración."
       },
       "TipoMedioDeContacto": {
         "type": "string",
-        "enum": [
-          "email",
-          "whatsapp",
-          "sms"
-        ],
+        "enum": ["email", "whatsapp", "sms"],
         "description": "Tipo de medio de contacto (se acepta en mayúsculas o minúsculas)."
       },
       "HabilidadInput": {
         "type": "object",
-        "required": [
-          "titulo",
-          "descripcion"
-        ],
+        "required": ["titulo", "descripcion"],
         "properties": {
           "titulo": {
             "type": "string",
@@ -306,12 +286,7 @@
       },
       "ColectivoInput": {
         "type": "object",
-        "required": [
-          "nombre",
-          "descripcion",
-          "ubicacion",
-          "tipoDeColectivo"
-        ],
+        "required": ["nombre", "descripcion", "ubicacion", "tipoDeColectivo"],
         "properties": {
           "nombre": {
             "type": "string",
@@ -401,10 +376,7 @@
       },
       "MedioDeContacto": {
         "type": "object",
-        "required": [
-          "tipo",
-          "valor"
-        ],
+        "required": ["tipo", "valor"],
         "description": "Para email, `valor` debe ser un email válido; para sms y whatsapp, 10 dígitos sin espacios ni símbolos.",
         "properties": {
           "tipo": {
@@ -418,12 +390,7 @@
       },
       "PersonaColaboradoraInput": {
         "type": "object",
-        "required": [
-          "nombreFantasia",
-          "git",
-          "habilidades",
-          "presentacion"
-        ],
+        "required": ["nombreFantasia", "git", "habilidades", "presentacion"],
         "properties": {
           "nombreFantasia": {
             "type": "string",
@@ -702,11 +669,7 @@
       },
       "LogroInput": {
         "type": "object",
-        "required": [
-          "descripcion",
-          "porcentaje",
-          "urlCodigoFuente"
-        ],
+        "required": ["descripcion", "porcentaje", "urlCodigoFuente"],
         "properties": {
           "descripcion": {
             "type": "string",
@@ -763,13 +726,7 @@
       },
       "ProyectoInput": {
         "type": "object",
-        "required": [
-          "titulo",
-          "descripcion",
-          "perfiles",
-          "colectivo",
-          "urlSistema"
-        ],
+        "required": ["titulo", "descripcion", "perfiles", "colectivo", "urlSistema"],
         "properties": {
           "titulo": {
             "type": "string",
@@ -869,10 +826,7 @@
       },
       "ColaboracionInput": {
         "type": "object",
-        "required": [
-          "personaColaboradoraId",
-          "proyectoId"
-        ],
+        "required": ["personaColaboradoraId", "proyectoId"],
         "properties": {
           "personaColaboradoraId": {
             "type": "string",
@@ -927,10 +881,7 @@
       },
       "MensajeInput": {
         "type": "object",
-        "required": [
-          "personaColaboradoraId",
-          "texto"
-        ],
+        "required": ["personaColaboradoraId", "texto"],
         "properties": {
           "personaColaboradoraId": {
             "type": "string",
@@ -1053,23 +1004,12 @@
       },
       "TipoRedSocial": {
         "type": "string",
-        "enum": [
-          "instagram",
-          "linkedin",
-          "github",
-          "facebook",
-          "x",
-          "youtube",
-          "tiktok"
-        ],
+        "enum": ["instagram", "linkedin", "github", "facebook", "x", "youtube", "tiktok"],
         "description": "Plataforma a la que pertenece el enlace de la red social (se acepta en mayúsculas o minúsculas)."
       },
       "RedSocial": {
         "type": "object",
-        "required": [
-          "tipo",
-          "url"
-        ],
+        "required": ["tipo", "url"],
         "description": "Enlace a red social embebido. Requiere protocolo HTTP o HTTPS.",
         "properties": {
           "tipo": {
@@ -1176,6 +1116,9 @@
                 "url": "https://youtube.com/@ecorenovado"
               }
             ]
+          }
+        }
+      },
       "ValoracionInput": {
         "type": "object",
         "required": ["colaboracionId", "evaluador", "puntaje"],
@@ -1287,9 +1230,7 @@
   "paths": {
     "/healthCheck": {
       "get": {
-        "tags": [
-          "Health Check"
-        ],
+        "tags": ["Health Check"],
         "summary": "Estado del servidor",
         "responses": {
           "200": {
@@ -1321,9 +1262,7 @@
     },
     "/habilidades": {
       "get": {
-        "tags": [
-          "Habilidades"
-        ],
+        "tags": ["Habilidades"],
         "summary": "Listar habilidades",
         "responses": {
           "200": {
@@ -1352,9 +1291,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Habilidades"
-        ],
+        "tags": ["Habilidades"],
         "summary": "Crear una habilidad",
         "requestBody": {
           "required": true,
@@ -1420,9 +1357,7 @@
     },
     "/habilidades/{id}": {
       "get": {
-        "tags": [
-          "Habilidades"
-        ],
+        "tags": ["Habilidades"],
         "summary": "Obtener una habilidad",
         "parameters": [
           {
@@ -1476,9 +1411,7 @@
     },
     "/colectivos": {
       "get": {
-        "tags": [
-          "Colectivos"
-        ],
+        "tags": ["Colectivos"],
         "summary": "Listar colectivos",
         "responses": {
           "200": {
@@ -1507,9 +1440,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Colectivos"
-        ],
+        "tags": ["Colectivos"],
         "summary": "Crear un colectivo",
         "requestBody": {
           "required": true,
@@ -1575,9 +1506,7 @@
     },
     "/colectivos/{id}": {
       "get": {
-        "tags": [
-          "Colectivos"
-        ],
+        "tags": ["Colectivos"],
         "summary": "Obtener un colectivo",
         "parameters": [
           {
@@ -1629,9 +1558,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Colectivos"
-        ],
+        "tags": ["Colectivos"],
         "summary": "Actualizar parcialmente un colectivo",
         "description": "Actualiza los campos provistos del colectivo. Si `redesSociales` no se envía, se conservan los enlaces existentes. Si se envía una lista, se reemplaza la lista completa. Si se envía `[]`, se eliminan todos. Rechaza tipos duplicados, tipos inválidos o URLs inválidas.",
         "parameters": [
@@ -1739,9 +1666,7 @@
     },
     "/colectivos/{colectivoId}/mensajes": {
       "post": {
-        "tags": [
-          "Mensajes"
-        ],
+        "tags": ["Mensajes"],
         "summary": "Enviar un mensaje interno a una colaboradora",
         "description": "Guarda el mensaje en la bandeja de la colaboradora y lo replica por email a sus contactos registrados. Si el envío del mail falla, el mensaje interno se guarda igual.",
         "parameters": [
@@ -1834,9 +1759,7 @@
     },
     "/colaboradoras": {
       "get": {
-        "tags": [
-          "Colaboradoras"
-        ],
+        "tags": ["Colaboradoras"],
         "summary": "Listar colaboradoras",
         "description": "No incluye los medios de contacto.",
         "responses": {
@@ -1866,9 +1789,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Colaboradoras"
-        ],
+        "tags": ["Colaboradoras"],
         "summary": "Registrar una colaboradora",
         "requestBody": {
           "required": true,
@@ -1920,9 +1841,7 @@
     },
     "/colaboradoras/{id}": {
       "get": {
-        "tags": [
-          "Colaboradoras"
-        ],
+        "tags": ["Colaboradoras"],
         "summary": "Obtener una colaboradora",
         "description": "No incluye los medios de contacto.",
         "parameters": [
@@ -1975,9 +1894,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Colaboradoras"
-        ],
+        "tags": ["Colaboradoras"],
         "summary": "Actualizar parcialmente una colaboradora",
         "description": "Actualiza los campos provistos. Si `redesSociales` no se envía, se conservan los enlaces existentes. Si se envía una lista, se reemplaza la lista completa. Si se envía `[]`, se eliminan todos. Rechaza tipos duplicados, tipos inválidos o URLs inválidas.",
         "parameters": [
@@ -2085,9 +2002,7 @@
     },
     "/colaboradoras/{personaColaboradoraId}/mensajes": {
       "get": {
-        "tags": [
-          "Mensajes"
-        ],
+        "tags": ["Mensajes"],
         "summary": "Bandeja de entrada de una colaboradora",
         "description": "Mensajes recibidos, del más viejo al más nuevo.",
         "parameters": [
@@ -2145,9 +2060,7 @@
     },
     "/colaboradoras/{id}/proyectos-acordes": {
       "get": {
-        "tags": [
-          "Búsquedas"
-        ],
+        "tags": ["Búsquedas"],
         "summary": "Proyectos acordes a las habilidades de una colaboradora",
         "description": "Proyectos no finalizados con al menos un perfil que requiera alguna de sus habilidades.",
         "parameters": [
@@ -2205,9 +2118,7 @@
     },
     "/proyectos": {
       "get": {
-        "tags": [
-          "Proyectos"
-        ],
+        "tags": ["Proyectos"],
         "summary": "Listar proyectos",
         "responses": {
           "200": {
@@ -2236,9 +2147,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Proyectos"
-        ],
+        "tags": ["Proyectos"],
         "summary": "Crear un proyecto",
         "requestBody": {
           "required": true,
@@ -2304,9 +2213,7 @@
     },
     "/proyectos/{id}": {
       "get": {
-        "tags": [
-          "Proyectos"
-        ],
+        "tags": ["Proyectos"],
         "summary": "Obtener un proyecto",
         "parameters": [
           {
@@ -2379,15 +2286,11 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "finalizado"
-                ],
+                "required": ["finalizado"],
                 "properties": {
                   "finalizado": {
                     "type": "boolean",
-                    "enum": [
-                      true
-                    ]
+                    "enum": [true]
                   }
                 }
               }
@@ -2448,9 +2351,7 @@
     },
     "/proyectos/{idProyecto}/perfiles": {
       "get": {
-        "tags": [
-          "Perfiles"
-        ],
+        "tags": ["Perfiles"],
         "summary": "Listar los perfiles de un proyecto",
         "parameters": [
           {
@@ -2505,9 +2406,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Perfiles"
-        ],
+        "tags": ["Perfiles"],
         "summary": "Agregar un perfil a un proyecto",
         "description": "Hoy no se verifica que el proyecto exista: con un id válido pero inexistente responde 201 con `null`.",
         "parameters": [
@@ -2572,9 +2471,7 @@
     },
     "/proyectos/{idProyecto}/perfiles/{idPerfil}": {
       "get": {
-        "tags": [
-          "Perfiles"
-        ],
+        "tags": ["Perfiles"],
         "summary": "Obtener un perfil",
         "parameters": [
           {
@@ -2636,9 +2533,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Perfiles"
-        ],
+        "tags": ["Perfiles"],
         "summary": "Modificar un perfil",
         "description": "Modificación parcial. Las habilidades se indican por código y reemplazan a las anteriores.",
         "parameters": [
@@ -2725,9 +2620,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Perfiles"
-        ],
+        "tags": ["Perfiles"],
         "summary": "Eliminar un perfil",
         "parameters": [
           {
@@ -2791,9 +2684,7 @@
     },
     "/proyectos/{idProyecto}/perfiles/{idPerfil}/colaboradoras-acordes": {
       "get": {
-        "tags": [
-          "Búsquedas"
-        ],
+        "tags": ["Búsquedas"],
         "summary": "Colaboradoras acordes a un perfil",
         "description": "Colaboradoras con al menos una de las habilidades requeridas del perfil. No incluye medios de contacto.",
         "parameters": [
@@ -2861,9 +2752,7 @@
     },
     "/proyectos/{proyectoId}/logros": {
       "post": {
-        "tags": [
-          "Logros"
-        ],
+        "tags": ["Logros"],
         "summary": "Cargar un logro en un proyecto",
         "parameters": [
           {
@@ -2939,9 +2828,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Logros"
-        ],
+        "tags": ["Logros"],
         "summary": "Listar los logros de un proyecto",
         "parameters": [
           {
@@ -2998,9 +2885,7 @@
     },
     "/colaboraciones": {
       "get": {
-        "tags": [
-          "Colaboraciones"
-        ],
+        "tags": ["Colaboraciones"],
         "summary": "Listar colaboraciones",
         "description": "Las anónimas tienen `personaColaboradora: null`.",
         "responses": {
@@ -3030,9 +2915,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Colaboraciones"
-        ],
+        "tags": ["Colaboraciones"],
         "summary": "Anotar una colaboradora a un proyecto",
         "description": "La colaboradora debe tener al menos una de las habilidades requeridas de algún perfil del proyecto.",
         "requestBody": {
@@ -3106,9 +2989,7 @@
     },
     "/colaboraciones/{id}": {
       "get": {
-        "tags": [
-          "Colaboraciones"
-        ],
+        "tags": ["Colaboraciones"],
         "summary": "Obtener una colaboración",
         "parameters": [
           {
@@ -3162,9 +3043,7 @@
     },
     "/proyectos/{proyectoId}/logros/{logroId}": {
       "get": {
-        "tags": [
-          "Logros"
-        ],
+        "tags": ["Logros"],
         "summary": "Obtener un logro",
         "parameters": [
           {
@@ -3226,9 +3105,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Logros"
-        ],
+        "tags": ["Logros"],
         "summary": "Modificar un logro",
         "description": "Modificación parcial. Si cambia el porcentaje, el total del proyecto (contando el valor nuevo en lugar del anterior) no puede superar 100%.",
         "parameters": [
@@ -3315,9 +3192,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Logros"
-        ],
+        "tags": ["Logros"],
         "summary": "Eliminar un logro",
         "parameters": [
           {

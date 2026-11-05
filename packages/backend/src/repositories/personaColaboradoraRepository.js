@@ -19,7 +19,7 @@ export class PersonaColaboradoraRepository {
   }
 
   async obtenerPorIdConContactos(id) {
-    return await this.model.findById(id).lean().select('+contactos');
+    return await this.model.findById(id).lean().select("+contactos");
   }
 
   async obtenerPorHabilidadId(habilidadesIds) {
@@ -30,20 +30,24 @@ export class PersonaColaboradoraRepository {
     return await this.model
       .findByIdAndUpdate(id, { $set: cambios }, { new: true, runValidators: true })
       .lean();
+  }
 
   async eliminar(id) {
     const colaboradora = await this.model.findOneAndUpdate(
       { _id: id, activo: true },
-      { $set: { 
-        nombreFantasia: "UserEliminado",
-        git: `github:UserEliminado${id}`,
-        nombre: "Usuario",
-        apellido: "Eliminado",
-        pronombres: [],
-        presentacion: "Presentacion Usuario Eliminado",
-        contactos: [],
-        activo: false } },
-      { new: true }
+      {
+        $set: {
+          nombreFantasia: "UserEliminado",
+          git: `github:UserEliminado${id}`,
+          nombre: "Usuario",
+          apellido: "Eliminado",
+          pronombres: [],
+          presentacion: "Presentacion Usuario Eliminado",
+          contactos: [],
+          activo: false,
+        },
+      },
+      { new: true },
     );
 
     if (colaboradora) {
@@ -52,9 +56,9 @@ export class PersonaColaboradoraRepository {
 
     const existe = await this.model.findById(id);
     if (!existe) {
-      return { actualizado: false, razon: 'NO_ENCONTRADO' };
+      return { actualizado: false, razon: "NO_ENCONTRADO" };
     }
 
-    return { actualizado: false, razon: 'YA_DADO_DE_BAJA' };
+    return { actualizado: false, razon: "YA_DADO_DE_BAJA" };
   }
 }
