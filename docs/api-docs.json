@@ -303,6 +303,19 @@
           },
           "tipoDeColectivo": {
             "$ref": "#/components/schemas/TipoColectivo"
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales del colectivo (opcional). No se permiten tipos repetidos.",
+            "example": [
+              {
+                "tipo": "instagram",
+                "url": "https://instagram.com/colectivoambiental"
+              }
+            ]
           }
         }
       },
@@ -345,6 +358,19 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales públicas del colectivo.",
+            "example": [
+              {
+                "tipo": "instagram",
+                "url": "https://instagram.com/colectivoambiental"
+              }
+            ]
           }
         }
       },
@@ -410,6 +436,23 @@
             "type": "boolean",
             "default": false,
             "description": "Si es true, los colectivos no pueden enviarle mensajes internos."
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales (opcional). No se permiten tipos repetidos.",
+            "example": [
+              {
+                "tipo": "github",
+                "url": "https://github.com/devneko"
+              },
+              {
+                "tipo": "linkedin",
+                "url": "https://linkedin.com/in/devneko"
+              }
+            ]
           }
         }
       },
@@ -466,6 +509,19 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales públicas de la colaboradora.",
+            "example": [
+              {
+                "tipo": "github",
+                "url": "https://github.com/devneko"
+              }
+            ]
           }
         }
       },
@@ -499,6 +555,19 @@
           },
           "bloquearMensajeInterno": {
             "type": "boolean"
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales.",
+            "example": [
+              {
+                "tipo": "github",
+                "url": "https://github.com/devneko"
+              }
+            ]
           }
         }
       },
@@ -933,6 +1002,123 @@
         },
         "description": "Todos los campos son opcionales. Los que vienen se validan igual que en el alta."
       },
+      "TipoRedSocial": {
+        "type": "string",
+        "enum": ["instagram", "linkedin", "github", "facebook", "x", "youtube", "tiktok"],
+        "description": "Plataforma a la que pertenece el enlace de la red social (se acepta en mayúsculas o minúsculas)."
+      },
+      "RedSocial": {
+        "type": "object",
+        "required": ["tipo", "url"],
+        "description": "Enlace a red social embebido. Requiere protocolo HTTP o HTTPS.",
+        "properties": {
+          "tipo": {
+            "$ref": "#/components/schemas/TipoRedSocial"
+          },
+          "url": {
+            "type": "string",
+            "description": "Dirección URL válida del perfil (protocolo HTTP o HTTPS obligatorio).",
+            "example": "https://github.com/devneko"
+          }
+        }
+      },
+      "PersonaColaboradoraUpdate": {
+        "type": "object",
+        "description": "Campos para actualización parcial de colaboradora. Debe enviarse al menos un campo.",
+        "minProperties": 1,
+        "properties": {
+          "nombreFantasia": {
+            "type": "string",
+            "example": "DevNekoUpdated"
+          },
+          "git": {
+            "type": "string",
+            "example": "https://github.com/devneko-updated"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Lucía"
+          },
+          "apellido": {
+            "type": "string",
+            "example": "Gómez"
+          },
+          "habilidades": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "desarrollo_web_react"
+            }
+          },
+          "pronombres": {
+            "type": "string",
+            "example": "ella"
+          },
+          "presentacion": {
+            "type": "string",
+            "example": "Desarrolladora Fullstack interesada en impacto social."
+          },
+          "bloquearMensajeInterno": {
+            "type": "boolean",
+            "example": false
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Lista completa de redes sociales que reemplaza las existentes. Omitir para conservarlas; enviar array vacío para eliminarlas.",
+            "example": [
+              {
+                "tipo": "github",
+                "url": "https://github.com/devneko-updated"
+              },
+              {
+                "tipo": "x",
+                "url": "https://x.com/devneko"
+              }
+            ]
+          }
+        }
+      },
+      "ColectivoUpdate": {
+        "type": "object",
+        "description": "Campos para actualización parcial de colectivo. Debe enviarse al menos un campo.",
+        "minProperties": 1,
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "example": "Colectivo Ambiental Renovado"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Promovemos el cuidado del ambiente y huertas comunitarias."
+          },
+          "ubicacion": {
+            "$ref": "#/components/schemas/Ubicacion"
+          },
+          "tipoDeColectivo": {
+            "$ref": "#/components/schemas/TipoColectivo"
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Lista completa de redes sociales que reemplaza las existentes. Omitir para conservarlas; enviar array vacío para eliminarlas.",
+            "example": [
+              {
+                "tipo": "instagram",
+                "url": "https://instagram.com/eco_renovado"
+              },
+              {
+                "tipo": "youtube",
+                "url": "https://youtube.com/@ecorenovado"
+              }
+            ]
+          }
+        }
+      },
       "ValoracionInput": {
         "type": "object",
         "required": ["colaboracionId", "evaluador", "puntaje"],
@@ -1278,7 +1464,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-301`, `ERR-VAL-302`, `ERR-VAL-304`, `ERR-VAL-307`, `ERR-VAL-001`",
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-301`, `ERR-VAL-302`, `ERR-VAL-304`, `ERR-VAL-307`, `ERR-VAL-001`, `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`",
             "content": {
               "application/json": {
                 "schema": {
@@ -1361,6 +1547,112 @@
           },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Colectivos"],
+        "summary": "Actualizar parcialmente un colectivo",
+        "description": "Actualiza los campos provistos del colectivo. Si `redesSociales` no se envía, se conservan los enlaces existentes. Si se envía una lista, se reemplaza la lista completa. Si se envía `[]`, se eliminan todos. Rechaza tipos duplicados, tipos inválidos o URLs inválidas.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id del colectivo",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66164d02459ba8dc69f"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ColectivoUpdate"
+              },
+              "examples": {
+                "actualizarRedes": {
+                  "summary": "Actualizar redes sociales",
+                  "value": {
+                    "redesSociales": [
+                      {
+                        "tipo": "instagram",
+                        "url": "https://instagram.com/eco_nuevo"
+                      },
+                      {
+                        "tipo": "youtube",
+                        "url": "https://youtube.com/@eco_nuevo"
+                      }
+                    ]
+                  }
+                },
+                "eliminarRedes": {
+                  "summary": "Eliminar todas las redes sociales",
+                  "value": {
+                    "redesSociales": []
+                  }
+                },
+                "sinRedesSociales": {
+                  "summary": "Actualizar otros campos conservando redes existentes",
+                  "value": {
+                    "descripcion": "Nueva descripción del colectivo"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Colectivo actualizado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Colectivo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-1105",
+                  "message": "La URL de la red social debe ser una URL válida con protocolo HTTP o HTTPS"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colectivo no encontrado. Código: `ERR-NOT-305`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-305",
+                  "message": "El colectivo no fue encontrado"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1521,7 +1813,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-401`, `ERR-VAL-402`, `ERR-VAL-403`, `ERR-VAL-404`, `ERR-VAL-406`, `ERR-VAL-407`, `ERR-VAL-701`, `ERR-VAL-702`, `ERR-VAL-703`, `ERR-VAL-704`, `ERR-VAL-705`, `ERR-VAL-706`, `ERR-VAL-707`, `ERR-VAL-207`, `ERR-VAL-001`",
+            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-401`, `ERR-VAL-402`, `ERR-VAL-403`, `ERR-VAL-404`, `ERR-VAL-406`, `ERR-VAL-407`, `ERR-VAL-701`, `ERR-VAL-702`, `ERR-VAL-703`, `ERR-VAL-704`, `ERR-VAL-705`, `ERR-VAL-706`, `ERR-VAL-707`, `ERR-VAL-207`, `ERR-VAL-001`, `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`",
             "content": {
               "application/json": {
                 "schema": {
@@ -1591,6 +1883,112 @@
           },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Colaboradoras"],
+        "summary": "Actualizar parcialmente una colaboradora",
+        "description": "Actualiza los campos provistos. Si `redesSociales` no se envía, se conservan los enlaces existentes. Si se envía una lista, se reemplaza la lista completa. Si se envía `[]`, se eliminan todos. Rechaza tipos duplicados, tipos inválidos o URLs inválidas.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id de la colaboradora",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonaColaboradoraUpdate"
+              },
+              "examples": {
+                "actualizarRedes": {
+                  "summary": "Actualizar redes sociales",
+                  "value": {
+                    "redesSociales": [
+                      {
+                        "tipo": "github",
+                        "url": "https://github.com/devneko-nuevo"
+                      },
+                      {
+                        "tipo": "linkedin",
+                        "url": "https://linkedin.com/in/devneko"
+                      }
+                    ]
+                  }
+                },
+                "eliminarRedes": {
+                  "summary": "Eliminar todas las redes sociales",
+                  "value": {
+                    "redesSociales": []
+                  }
+                },
+                "sinRedesSociales": {
+                  "summary": "Actualizar otros campos conservando redes existentes",
+                  "value": {
+                    "presentacion": "Nueva bio sin tocar redes sociales"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Colaboradora actualizada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-1106",
+                  "message": "No se permiten tipos de redes sociales duplicados"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colaboradora no encontrada. Código: `ERR-NOT-405`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-405",
+                  "message": "La colaboradora no fue encontrada"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1888,18 +2286,11 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["finalizado"],
                 "properties": {
                   "finalizado": {
                     "type": "boolean",
-                    "enum": [true],
-                    "description": "Cierre manual del proyecto."
-                  },
-                  "urlDonaciones": {
-                    "type": "string",
-                    "format": "uri",
-                    "nullable": true,
-                    "description": "Enlace externo para donaciones (HTTP o HTTPS). Enviar null o cadena vacía para eliminarlo.",
-                    "example": "https://cafecito.app/mi-proyecto"
+                    "enum": [true]
                   }
                 }
               }

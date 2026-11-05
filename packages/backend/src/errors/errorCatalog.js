@@ -504,35 +504,74 @@ const ErrorCatalog = {
   },
 
   // =========================
+  // REDES SOCIALES
+  // =========================
+
+  RED_SOCIAL_FORMATO: {
+    code: "ERR-VAL-1101",
+    message: "Las redes sociales deben ser una lista",
+  },
+
+  RED_SOCIAL_TIPO_REQUERIDO: {
+    code: "ERR-VAL-1102",
+    message: "El tipo de red social es requerido",
+  },
+
+  RED_SOCIAL_TIPO_INVALIDO: {
+    code: "ERR-VAL-1103",
+    message: (tipo) =>
+      tipo ? `El tipo de red social ${tipo} no es válido` : "El tipo de red social no es válido",
+  },
+
+  RED_SOCIAL_URL_REQUERIDA: {
+    code: "ERR-VAL-1104",
+    message: "La URL de la red social es requerida",
+  },
+
+  RED_SOCIAL_URL_INVALIDA: {
+    code: "ERR-VAL-1105",
+    message: (url) =>
+      url
+        ? `La URL ${url} no es válida, debe utilizar protocolo HTTP o HTTPS`
+        : "La URL de la red social debe ser una URL válida con protocolo HTTP o HTTPS",
+  },
+
+  RED_SOCIAL_TIPO_DUPLICADO: {
+    code: "ERR-VAL-1106",
+    message: (tipo) =>
+      tipo
+        ? `No se permiten tipos de redes sociales duplicados: ${tipo}`
+        : "No se permiten dos enlaces correspondientes al mismo tipo de red social",
+  },
   // DENUNCIAS
   // =========================
 
   DENUNCIA_DESCRIPCION_REQUERIDA: {
-    code: "ERR-VAL-1101",
+    code: "ERR-VAL-1201",
     message: "La descripción de la denuncia es requerida",
   },
   DENUNCIA_COLABORACION_NO_ACREDITA_PARTICIPACION: {
-    code: "ERR-EST-1102",
+    code: "ERR-EST-1202",
     message: "La colaboración no acredita una participación válida en el proyecto",
   },
   DENUNCIA_DUPLICADA: {
-    code: "ERR-EST-1103",
+    code: "ERR-EST-1203",
     message: "Ya existe una denuncia registrada para esta colaboración",
   },
   DENUNCIA_PROYECTO_SIN_COLECTIVO: {
-    code: "ERR-EST-1104",
+    code: "ERR-EST-1204",
     message: "El proyecto asociado a la colaboración no tiene un colectivo responsable",
   },
   DENUNCIA_NO_ENCONTRADA: {
-    code: "ERR-NOT-1105",
+    code: "ERR-NOT-1205",
     message: (id) => `La denuncia ${id} no fue encontrada`,
   },
   DENUNCIA_ESTADO_INVALIDO: {
-    code: "ERR-VAL-1106",
+    code: "ERR-VAL-1206",
     message: "El estado de la denuncia debe ser: en_revision, resuelta o descartada",
   },
   DENUNCIA_ESTADO_REQUERIDO: {
-    code: "ERR-VAL-1107",
+    code: "ERR-VAL-1207",
     message: "El estado de la denuncia es requerido",
   },
 };

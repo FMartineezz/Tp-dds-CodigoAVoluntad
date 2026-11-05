@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { personaColaboradoraController } from "../container.js";
 import { mensajeController } from "../container.js";
-import validarPersonaColaboradora from "../middlewares/validations/personaColaboradoraValidation.js";
+import validarPersonaColaboradora, {
+  validarActualizacionColaboradora,
+} from "../middlewares/validations/personaColaboradoraValidation.js";
 
 export default function personaColaboradoraRoutes() {
   const router = Router();
@@ -9,6 +11,13 @@ export default function personaColaboradoraRoutes() {
   router.get("/colaboradoras", personaColaboradoraController.obtenerPersonasColaboradoras);
 
   router.get("/colaboradoras/:id", personaColaboradoraController.obtenerPersonaColaboradoraPorId);
+
+  router.patch(
+    "/colaboradoras/:id",
+    validarActualizacionColaboradora,
+    personaColaboradoraController.actualizarPersonaColaboradora,
+  );
+
   
   router.get(
     "/colaboradoras/:personaColaboradoraId/mensajes",

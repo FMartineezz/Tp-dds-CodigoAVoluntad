@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Colectivo, TipoColectivo, UBICACION_VALIDA } from "../models/colectivo.js";
+import { TipoRedSocial } from "../models/redSocial.js";
 import { denunciaSchema } from "./denunciaSchema.js";
 
 const colectivoSchema = new mongoose.Schema(
@@ -39,20 +40,60 @@ const colectivoSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    denuncias: {
-      type: [denunciaSchema],
-      default: [],
-      select: false,
-    },
-    activo: {
-      type: Boolean,
+    redesSociales: {
+      type: [
+        {
+          tipo: {
+            type: String,
+            enum: {
+              values: Object.values(TipoRedSocial),
+            },
+            required: true,
+          },
+          url: {
+            type: String,
+            required: true,
+            validate: {
+              validator: function (v) {
+                if (typeof v !== "string" || !v.trim()) return false;
+                try {
+                  const parsed = new URL(v);
+                  return parsed.protocol === "http:" || parsed.protocol === "https:";
+                } catch {
+                  return false;
+                }
+              },
+              message: "La URL de la red social debe ser válida con protocolo HTTP o HTTPS",
+            },
+          },
+          _id: false,
+        },
+      ],
       required: false,
-      default: true,
-      select: false,
+      default: [],
+      validate: {
+        validator: function (redes) {
+          if (!Array.isArray(redes)) return true;
+          const tipos = redes.map((r) => (r.tipo?.toLowerCase ? r.tipo.toLowerCase() : r.tipo));
+          return new Set(tipos).size === tipos.length;
+        },
+        message: "No se permiten tipos de redes sociales duplicados",
+      },
+      denuncias: {
+        type: [denunciaSchema],
+        default: [],
+        select: false,
+      },
+      activo: {
+        type: Boolean,
+        required: false,
+        default: true,
+        select: false,
+      },
+      createdAt: { type: Date, select: false },
+      updatedAt: { type: Date, select: false },
+      __v: { type: Number, select: false },
     },
-    createdAt: { type: Date, select: false },
-    updatedAt: { type: Date, select: false },
-    __v: { type: Number, select: false },
   },
   {
     timestamps: true,

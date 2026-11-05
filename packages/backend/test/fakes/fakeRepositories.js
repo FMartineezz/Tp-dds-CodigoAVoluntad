@@ -52,6 +52,16 @@ class FakeRepository {
   async obtenerTodos() {
     return this.documentos.map(copiar);
   }
+
+  async actualizar(id, cambios) {
+    const documento = this.buscar(id);
+    if (!documento) return null;
+    const { id: _, _id: __, ...resto } = cambios;
+    const datos = copiar(resto);
+    const datosNormalizados = this.normalizarParcial ? this.normalizarParcial(datos) : datos;
+    Object.assign(documento, datosNormalizados);
+    return { ...copiar(documento), id: documento._id };
+  }
 }
 
 export class FakeHabilidadRepository extends FakeRepository {
@@ -77,6 +87,14 @@ export class FakeColectivoRepository extends FakeRepository {
     return {
       ...colectivo,
       proyectos: (colectivo.proyectos ?? []).map(aId),
+      redesSociales: colectivo.redesSociales ?? [],
+    };
+  }
+
+  normalizarParcial(cambios) {
+    const res = { ...cambios };
+    if (res.proyectos) res.proyectos = res.proyectos.map(aId);
+    return res;
       denuncias: colectivo.denuncias ?? [],
     };
   }
@@ -173,7 +191,17 @@ export class FakeColectivoRepository extends FakeRepository {
 
 export class FakePersonaColaboradoraRepository extends FakeRepository {
   normalizar(persona) {
-    return { ...persona, habilidades: persona.habilidades.map(aId) };
+    return {
+      ...persona,
+      habilidades: (persona.habilidades ?? []).map(aId),
+      redesSociales: persona.redesSociales ?? [],
+    };
+  }
+
+  normalizarParcial(cambios) {
+    const res = { ...cambios };
+    if (res.habilidades) res.habilidades = res.habilidades.map(aId);
+    return res;
   }
 
   async obtenerTodas() {
