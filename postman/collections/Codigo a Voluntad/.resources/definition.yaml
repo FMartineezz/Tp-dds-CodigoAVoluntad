@@ -1,0 +1,12 @@
+$kind: collection
+description: ""
+variables:
+  baseUrl: http://localhost:8000
+  habilidadId: ""
+  colectivoId: ""
+  colaboradoraId: ""
+  proyectoId: ""
+  perfilId: ""
+  perfilNuevoId: ""
+  colaboracionId: ""
+  logroId: ""

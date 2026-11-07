@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/colectivos"
+method: GET
+order: 1000

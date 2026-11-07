@@ -10,9 +10,7 @@ export class BusquedaService {
       habilidad.toString(),
     );
 
-    return this.personaColaboradoraService.obtenerPersonasConAlgunaHabilidad(
-      idsHabilidadesRequeridas,
-    );
+    return this.personaColaboradoraService.obtenerPersonasConAlgunaHabilidad(idsHabilidadesRequeridas);
   }
 
   async obtenerProyectosAcordesALaPersonaColaboradora(personaColaboradoraId) {

@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/proyectos/:id"
+method: PATCH
+headers:
+  Content-Type: application/json
+pathVariables:
+  id: "{{proyectoId}}"
+body:
+  type: json
+  content: |-
+    {
+      "finalizado": true
+    }
+order: 1000

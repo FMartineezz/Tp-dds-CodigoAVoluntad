@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilNuevoId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "horas": 12,
+      "habilidadesOpcionales": [
+        "programacion_en_java_script",
+        "desarrollo_con_node_js_y_express"
+      ]
+    }
+order: 4000

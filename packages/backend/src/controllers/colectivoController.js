@@ -10,8 +10,17 @@ export class ColectivoController {
       req.body.ubicacion,
       req.body.tipoDeColectivo,
       req.body.proyectos,
+      req.body.redesSociales,
     );
+    delete respuesta.denuncias;
     res.status(201).location(`/colectivos/${respuesta.id}`).json(respuesta);
+  };
+
+  actualizarColectivo = async (req, res) => {
+    const id = req.params.id;
+
+    const respuesta = await this.service.actualizarColectivo(id, req.body);
+    res.status(200).json(respuesta);
   };
 
   obtenerColectivos = async (req, res) => {
@@ -24,5 +33,12 @@ export class ColectivoController {
 
     const respuesta = await this.service.obtenerColectivoPorId(id);
     res.status(200).json(respuesta);
+  };
+
+  eliminarColectivo = async (req, res) => {
+    const id = req.params.id;
+
+    const respuesta = await this.service.eliminarColectivo(id);
+    res.status(204).json(respuesta);
   };
 }

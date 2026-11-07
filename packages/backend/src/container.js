@@ -1,9 +1,12 @@
+import nodemailer from "nodemailer";
 import { ProyectoRepository } from "./repositories/proyectoRepository.js";
 import { ColectivoRepository } from "./repositories/colectivoRepository.js";
 import { HabilidadRespository } from "./repositories/habilidadRepository.js";
 import { ColaboracionRepository } from "./repositories/colaboracionRepository.js";
 import { PersonaColaboradoraRepository } from "./repositories/personaColaboradoraRepository.js";
 import { MensajeRepository } from "./repositories/mensajesRepository.js";
+import { ValoracionRepository } from "./repositories/valoracionRepository.js";
+import { PostulacionRepository } from "./repositories/postulacionRepository.js";
 
 import { ProyectoService } from "./services/proyectoService.js";
 import { ColectivoService } from "./services/colectivoService.js";
@@ -14,6 +17,10 @@ import { PerfilService } from "./services/perfilService.js";
 import { MensajeService } from "./services/mensajeService.js";
 import { BusquedaService } from "./services/busquedaService.js";
 import { EstadisticasService } from "./services/estadisticasService.js";
+import { LogroService } from "./services/logroService.js";
+import { ValoracionService } from "./services/valoracionService.js";
+import { PostulacionService } from "./services/postulacionService.js";
+import { DenunciaService } from "./services/denunciaService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -24,6 +31,12 @@ import { HealthCheckController } from "./controllers/healthCheckController.js";
 import { PerfilController } from "./controllers/perfilController.js";
 import { MensajeController } from "./controllers/mensajeController.js";
 import { EstadisticasController } from "./controllers/estadisticasController.js";
+import { LogroController } from "./controllers/logroController.js";
+import { ValoracionController } from "./controllers/valoracionController.js";
+import { PostulacionController } from "./controllers/postulacionController.js";
+import { DenunciaController } from "./controllers/denunciaController.js";
+
+import { cierreProyectosJob } from "./cronTasks/cierreProyectoJob.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
@@ -32,6 +45,19 @@ const habilidadRepository = new HabilidadRespository();
 const colaboracionRepository = new ColaboracionRepository();
 const personaColaboradoraRepository = new PersonaColaboradoraRepository();
 const mensajeRepository = new MensajeRepository();
+const valoracionRepository = new ValoracionRepository();
+const postulacionRepository = new PostulacionRepository();
+
+// Transporter de mails para las notificaciones por medios externos.
+const mailTransporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
 
 // Services: dependen de repositorios y de otros services ya creados.
 const habilidadService = new HabilidadService({ repository: habilidadRepository });
@@ -56,12 +82,38 @@ const mensajeService = new MensajeService({
   repository: mensajeRepository,
   colectivoService,
   personaColaboradoraService,
+  transporter: mailTransporter,
+});
+
+const logroService = new LogroService({
+  proyectoService,
+  proyectoRepository,
+});
+const postulacionService = new PostulacionService({
+  repository: postulacionRepository,
+  personaColaboradoraService,
+  proyectoService,
+  colectivoService,
+  colaboracionService,
+});
+const denunciaService = new DenunciaService({
+  colectivoRepository,
+  colaboracionRepository,
+});
+
+const valoracionService = new ValoracionService({
+  valoracionRepository,
+  colaboracionRepository,
+  proyectoRepository,
+  colectivoRepository,
+  personaColaboradoraRepository,
 });
 const estadisticasService = new EstadisticasService({
   colaboracionService,
   colectivoService,
   proyectoService,
   personaColaboradoraService,
+  postulacionService,
 });
 
 // Controllers: dependen de services.
@@ -73,7 +125,15 @@ export const personaColaboradoraController = new PersonaColaboradoraController({
   personaColaboradoraService,
   busquedaService,
 });
+
+export const logroController = new LogroController({ logroService });
 export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });
 export const estadisticasController = new EstadisticasController({ estadisticasService });
+export const valoracionController = new ValoracionController({ valoracionService });
+export const postulacionController = new PostulacionController({ postulacionService });
+export const denunciaController = new DenunciaController({ denunciaService });
+
+//Job task
+export const cierreProyectos = new cierreProyectosJob({ proyectoService });

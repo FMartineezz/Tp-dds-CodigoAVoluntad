@@ -16,7 +16,7 @@ export class HabilidadService {
 
     const habilidad = new Habilidad(titulo, descripcion);
     const habilidadGuardada = await this.repository.guardar(habilidad);
-    habilidad.id = habilidadGuardada;
+    habilidad.id = habilidadGuardada.id;
 
     return habilidad;
   }
@@ -45,6 +45,6 @@ export class HabilidadService {
   }
 
   async obtenerHabilidadesPorCodigos(codigos) {
-    return await this.habilidadRepository.obtenerHabilidadesPorCodigos(codigos);
+    return await this.repository.obtenerPorCodigos(codigos);
   }
 }

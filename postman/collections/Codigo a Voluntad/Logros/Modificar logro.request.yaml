@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/proyectos/{{proyectoId}}/logros/{{logroId}}"
+method: PATCH
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "descripcion": "Backend implementado y probado",
+      "porcentaje": 50,
+      "urlCodigoFuente": "https://github.com/usuario/proyecto"
+    }
+order: 4000

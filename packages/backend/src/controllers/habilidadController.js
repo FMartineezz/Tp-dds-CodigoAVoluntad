@@ -4,7 +4,10 @@ export class HabilidadController {
   }
 
   crearHabilidad = async (req, res) => {
-    const respuesta = await this.habilidadService.crearHabilidad(req.body.titulo, req.body.descripcion);
+    const respuesta = await this.habilidadService.crearHabilidad(
+      req.body.titulo,
+      req.body.descripcion,
+    );
     res.status(201).location(`/habilidades/${respuesta.id}`).json(respuesta);
   };
 

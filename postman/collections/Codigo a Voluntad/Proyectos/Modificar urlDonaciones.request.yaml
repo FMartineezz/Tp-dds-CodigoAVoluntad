@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/proyectos/:id"
+method: PATCH
+headers:
+  Content-Type: application/json
+pathVariables:
+  id: "{{proyectoId}}"
+body:
+  type: json
+  content: |-
+    {
+      "urlDonaciones": "https://cafecito.app/colectivoambiental-nuevo"
+    }
+order: 4000

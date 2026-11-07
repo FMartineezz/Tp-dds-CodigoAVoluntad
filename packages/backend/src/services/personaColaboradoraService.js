@@ -1,11 +1,11 @@
 import { PersonaColaboradora } from "../models/personaColaboradora.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
+import { validarYNormalizarRedesSociales } from "./redSocialService.js";
 
 export class PersonaColaboradoraService {
   constructor({ personaColaboradoraRepository, habilidadService }) {
     this.personaColaboradoraRepository = personaColaboradoraRepository;
-
     this.habilidadService = habilidadService;
   }
 
@@ -19,7 +19,10 @@ export class PersonaColaboradoraService {
     presentacion,
     contactos,
     bloquearMensajeInterno,
+    redesSociales = [],
   ) {
+    const redesValidadas = validarYNormalizarRedesSociales(redesSociales) ?? [];
+
     const habilidadesEncontradas = await Promise.all(
       habilidades.map((codigo) => {
         return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
@@ -36,6 +39,7 @@ export class PersonaColaboradoraService {
       presentacion,
       contactos,
       bloquearMensajeInterno,
+      redesValidadas,
     );
     const personaColaboradoraGuardada =
       await this.personaColaboradoraRepository.guardar(personaColaboradora);
@@ -44,12 +48,40 @@ export class PersonaColaboradoraService {
     return personaColaboradora;
   }
 
-  //Vista expuesta (sin contactos)
+  async actualizarPersonaColaboradora(id, cambios = {}) {
+    if (!cambios || Object.keys(cambios).length === 0) {
+      throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+    }
+
+    const persona = await this.personaColaboradoraRepository.obtenerPorId(id);
+    if (!persona) {
+      throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+    }
+
+    const cambiosPreparados = { ...cambios };
+
+    if (cambios.redesSociales !== undefined) {
+      cambiosPreparados.redesSociales = validarYNormalizarRedesSociales(cambios.redesSociales);
+    }
+
+    if (cambios.habilidades !== undefined) {
+      cambiosPreparados.habilidades = await Promise.all(
+        cambios.habilidades.map((codigo) =>
+          this.habilidadService.obtenerHabilidadPorCodigo(codigo),
+        ),
+      );
+    }
+
+    return await this.personaColaboradoraRepository.actualizar(id, cambiosPreparados);
+  }
+
+  async actualizar(id, cambios) {
+    return await this.actualizarPersonaColaboradora(id, cambios);
+  }
+
+  // Vista expuesta (sin contactos)
   async obtenerPersonasColaboradoras() {
-    const personasColaboradoras = await this.personaColaboradoraRepository.obtenerTodas();
-    return personasColaboradoras.map((personaColaboradora) =>
-      this.ocultarContactos(personaColaboradora),
-    );
+    return await this.personaColaboradoraRepository.obtenerTodas();
   }
 
   async obtenerPersonaColaboradoraPorId(id) {
@@ -59,17 +91,16 @@ export class PersonaColaboradoraService {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
     }
 
-    return this.ocultarContactos(personaColaboradora);
+    return personaColaboradora;
   }
 
   async obtenerPersonasConAlgunaHabilidad(idsHabilidades) {
-    const personasColaboradoras =
-      await this.personaColaboradoraRepository.obtenerPodHabilidadId(idsHabilidades);
-    return personasColaboradoras.map((persona) => this.ocultarContactos(persona));
+    return await this.personaColaboradoraRepository.obtenerPorHabilidadId(idsHabilidades);
   }
 
   async obtenerPersonaColaboradoraPorIdConContactos(id) {
-    const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorId(id);
+    const personaColaboradora =
+      await this.personaColaboradoraRepository.obtenerPorIdConContactos(id);
 
     if (!personaColaboradora) {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
@@ -87,12 +118,22 @@ export class PersonaColaboradoraService {
   //Estadisticas
   async obtenerEstadisticas() {
     const resultado = await this.personaColaboradoraRepository.obtenerEstadisticas();
-    const { total, bloqueanMensajes, conContactos, promedioHabilidades } = resultado[0] ?? {
+    const {
+      total,
+      bloqueanMensajes,
+      promedioHabilidadesPorPersona,
+      promedioPostulacionesPorPersona,
+    } = resultado[0] ?? {
       total: 0,
       bloqueanMensajes: 0,
-      conContactos: 0,
-      promedioHabilidades: 0,
+      promedioHabilidadesPorPersona: 0,
+      promedioPostulacionesPorPersona: 0,
     };
-    return { total, bloqueanMensajes, conContactos, promedioHabilidades };
+    return {
+      total,
+      bloqueanMensajes,
+      promedioHabilidadesPorPersona,
+      promedioPostulacionesPorPersona,
+    };
   }
 }

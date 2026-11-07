@@ -1,4 +1,4 @@
-const ErrorCatalog = Object.freeze({
+const ErrorCatalog = {
   // =========================
   // GENERALES
   // =========================
@@ -62,6 +62,26 @@ const ErrorCatalog = Object.freeze({
     message: "El colectivo debe ser el nombre del mismo",
   },
 
+  PROYECTO_PORCENTAJE_MAXIMO: {
+    code: "ERR-EST-113",
+    message: "El porcentaje de un proyecto no puede superar el 100%",
+  },
+
+  PROYECTO_LOGRO_NO_ENCONTRADO: {
+    code: "ERR-NOT-114",
+    message: (id) => `El proyecto no contiene el logro ${id}`,
+  },
+
+  PROYECTO_URL_SISTEMA_INVALIDA: {
+    code: "ERR-VAL-115",
+    message: "La URL del sistema debe ser una URL válida",
+  },
+
+  PROYECTO_URL_DONACIONES_INVALIDA: {
+    code: "ERR-VAL-116",
+    message: "La URL de donaciones debe ser una URL válida",
+  },
+
   // =========================
   // HABILIDADES
   // =========================
@@ -96,11 +116,15 @@ const ErrorCatalog = Object.freeze({
     message: (id) => `Ya existe una habilidad con ese título y descripción, y su id es: ${id}`,
   },
 
-  HABILIDAD_INEXISTENTE_GENERICO: {
+  HABILIDADES_INEXISTENTES_GENERICO: {
     code: "ERR-VAL-207",
-    message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
-  },
+    message: (codigos) => `Las habilidades de codigo: ${codigos.join(", ")} no existen`,
 
+    message: (codigo) =>
+      Array.isArray(codigo)
+        ? `Las habilidades de codigo: ${codigo.join(", ")} no existen`
+        : `La habilidad de codigo ${codigo} no existe`,
+  },
   // =========================
   // COLECTIVOS
   // =========================
@@ -145,6 +169,11 @@ const ErrorCatalog = Object.freeze({
     message: (nombre) => `Ya existe un colectivo con el nombre ${nombre}`,
   },
 
+  COLECTIVO_YA_DADO_DE_BAJA: {
+    code: "ERR-EST-309",
+    message: (id) => `El colectivo ${id} ya fue dado de baja`,
+  },
+
   // =========================
   // COLABORADORAS
   // =========================
@@ -184,6 +213,11 @@ const ErrorCatalog = Object.freeze({
     message: "El campo bloquear mensaje interno debe ser un booleano",
   },
 
+  COLABORADORA_YA_DADA_DE_BAJA: {
+    code: "ERR-EST-408",
+    message: (id) => `La persona colaboradora ${id} ya fue dada de baja`,
+  },
+
   // =========================
   // COLABORACIONES
   // =========================
@@ -219,6 +253,16 @@ const ErrorCatalog = Object.freeze({
     message: (id) => `La colaboración ${id} no fue encontrada`,
   },
 
+  COLABORACION_CUPO_COMPLETO: {
+    code: "ERR-EST-507",
+    message: "Se acabo el cupo maximo de colaboraciones del perfil",
+  },
+
+  COLABORACION_YA_DADA_DE_BAJA: {
+    code: "ERR-EST-508",
+    message: (id) => `La colaboración ${id} ya fue dada de baja`,
+  },
+
   // =========================
   // Perfiles
   // =========================
@@ -231,11 +275,6 @@ const ErrorCatalog = Object.freeze({
   PERFIL_HABILIDADES_REQUERIDAS: {
     code: "ERR-VAL-602",
     message: "Las habilidades requeridas son obligatorias",
-  },
-
-  PERFIL_HABILIDADES_OPCIONALES: {
-    code: "ERR-VAL-603",
-    message: "Las habilidades opcionales son obligatorias",
   },
 
   PERFIL_HORAS_REQUERIDAS: {
@@ -341,5 +380,209 @@ const ErrorCatalog = Object.freeze({
     code: "ERR-VAL-804",
     message: "El texto del mensaje debe ser un texto",
   },
+
+  // =========================
+  // LOGROS
+  // =========================
+
+  LOGRO_DESCRIPCION_INVALIDA: {
+    code: "ERR-VAL-901",
+    message: "La descripción del logro es requerida y debe ser un texto",
+  },
+
+  LOGRO_PORCENTAJE_INVALIDO: {
+    code: "ERR-VAL-902",
+    message: "El porcentaje debe ser un numero positivo y menor o igual a 100",
+  },
+
+  LOGRO_URL_INVALIDA: {
+    code: "ERR-VAL-903",
+    message: "La URL del código fuente debe ser una URL válida",
+  },
+
+  // =========================
+  // VALORACIONES
+  // =========================
+
+  VALORACION_COLABORACION_ID_INVALIDO: {
+    code: "ERR-VAL-1101",
+    message: "El id de la colaboración es requerido",
+  },
+  VALORACION_EVALUADOR_TIPO_FORMATO: {
+    code: "ERR-VAL-1102",
+    message: "El tipo de evaluador no es válido",
+  },
+  VALORACION_PUNTAJE_REQUERIDO: {
+    code: "ERR-VAL-1104",
+    message: "El puntaje es requerido",
+  },
+  VALORACION_COMENTARIO_REQUERIDO: {
+    code: "ERR-VAL-1105",
+    message: "El comentario es requerido",
+  },
+
+  VALORACION_PUNTAJE_FORMATO: {
+    code: "ERR-VAL-1106",
+    message: "El puntaje debe ser un número entero entre 1 y 5",
+  },
+
+  VALORACION_PUNTAJE_RANGO: {
+    code: "ERR-VAL-1107",
+    message: "El puntaje debe estar entre 1 y 5",
+  },
+
+  VALORACION_COMENTARIO_FORMATO: {
+    code: "ERR-VAL-1108",
+    message: "El comentario debe ser un texto de entre 1 y 500 caracteres",
+  },
+
+  VALORACION_COMENTARIO_LARGO: {
+    code: "ERR-VAL-1109",
+    message: "El comentario debe tener un máximo de 500 caracteres",
+  },
+
+  VALORACION_EXISTENTE: {
+    code: "ERR-EST-1110",
+    message: (colaboracionId, evaluador) =>
+      `Ya existe una valoración para la colaboración con id ${colaboracionId} y el evaluador ${evaluador}`,
+  },
+
+  VALORACION_COLABORACION_NO_FINALIZADA: {
+    code: "ERR-EST-1111",
+    message: "No se puede valorar una colaboración que no ha finalizado",
+  },
+
+  // POSTULACION
+  // =========================
+
+  POSTULACION_PERSONA_REQUERIDA: {
+    code: "ERR-VAL-1001",
+    message: "La persona colaboradora que se postula es requerida",
+  },
+
+  POSTULACION_ANONIMA_FORMATO: {
+    code: "ERR-VAL-1002",
+    message: "El campo anonima debe ser true o false",
+  },
+
+  POSTULACION_ESTADO_REQUERIDO: {
+    code: "ERR-VAL-1003",
+    message: "El estado de la postulación es requerido",
+  },
+
+  POSTULACION_ESTADO_INVALIDO: {
+    code: "ERR-VAL-1004",
+    message: "El estado debe ser: aceptada o rechazada",
+  },
+
+  POSTULACION_PROYECTO_FINALIZADO: {
+    code: "ERR-EST-1005",
+    message: (id) => `El proyecto ${id} está finalizado y ya no acepta postulaciones`,
+  },
+  POSTULACION_BUSQUEDA_CERRADA: {
+    code: "ERR-EST-1006",
+    message: (id) => `La búsqueda del proyecto ${id} está cerrada`,
+  },
+  POSTULACION_HABILIDAD_REQUERIDA: {
+    code: "ERR-VAL-1007",
+    message: (nombreFantasia) =>
+      `${nombreFantasia} no tiene ninguna de las habilidades requeridas por el perfil`,
+  },
+  POSTULACION_DUPLICADA: {
+    code: "ERR-EST-1008",
+    message: (nombreFantasia, perfilDescripcion) =>
+      `Ya existe una postulación pendiente de ${nombreFantasia} para el perfil: ${perfilDescripcion}`,
+  },
+  POSTULACION_NO_ENCONTRADA: {
+    code: "ERR-NOT-1009",
+    message: (id) => `La postulacion id : ${id} no fue encontrada`,
+  },
+  POSTULACION_YA_RESUELTA: {
+    code: "ERR-EST-1010",
+    message:
+      "La Postulacion ya fue resuelta, asegurese de resolver postuaciones con estado PENDIENTE",
+  },
+
+  // =========================
+  // REDES SOCIALES
+  // =========================
+
+  RED_SOCIAL_FORMATO: {
+    code: "ERR-VAL-1101",
+    message: "Las redes sociales deben ser una lista",
+  },
+
+  RED_SOCIAL_TIPO_REQUERIDO: {
+    code: "ERR-VAL-1102",
+    message: "El tipo de red social es requerido",
+  },
+
+  RED_SOCIAL_TIPO_INVALIDO: {
+    code: "ERR-VAL-1103",
+    message: (tipo) =>
+      tipo ? `El tipo de red social ${tipo} no es válido` : "El tipo de red social no es válido",
+  },
+
+  RED_SOCIAL_URL_REQUERIDA: {
+    code: "ERR-VAL-1104",
+    message: "La URL de la red social es requerida",
+  },
+
+  RED_SOCIAL_URL_INVALIDA: {
+    code: "ERR-VAL-1105",
+    message: (url) =>
+      url
+        ? `La URL ${url} no es válida, debe utilizar protocolo HTTP o HTTPS`
+        : "La URL de la red social debe ser una URL válida con protocolo HTTP o HTTPS",
+  },
+
+  RED_SOCIAL_TIPO_DUPLICADO: {
+    code: "ERR-VAL-1106",
+    message: (tipo) =>
+      tipo
+        ? `No se permiten tipos de redes sociales duplicados: ${tipo}`
+        : "No se permiten dos enlaces correspondientes al mismo tipo de red social",
+  },
+  // DENUNCIAS
+  // =========================
+
+  DENUNCIA_DESCRIPCION_REQUERIDA: {
+    code: "ERR-VAL-1201",
+    message: "La descripción de la denuncia es requerida",
+  },
+  DENUNCIA_COLABORACION_NO_ACREDITA_PARTICIPACION: {
+    code: "ERR-EST-1202",
+    message: "La colaboración no acredita una participación válida en el proyecto",
+  },
+  DENUNCIA_DUPLICADA: {
+    code: "ERR-EST-1203",
+    message: "Ya existe una denuncia registrada para esta colaboración",
+  },
+  DENUNCIA_PROYECTO_SIN_COLECTIVO: {
+    code: "ERR-EST-1204",
+    message: "El proyecto asociado a la colaboración no tiene un colectivo responsable",
+  },
+  DENUNCIA_NO_ENCONTRADA: {
+    code: "ERR-NOT-1205",
+    message: (id) => `La denuncia ${id} no fue encontrada`,
+  },
+  DENUNCIA_ESTADO_INVALIDO: {
+    code: "ERR-VAL-1206",
+    message: "El estado de la denuncia debe ser: en_revision, resuelta o descartada",
+  },
+  DENUNCIA_ESTADO_REQUERIDO: {
+    code: "ERR-VAL-1207",
+    message: "El estado de la denuncia es requerido",
+  },
+};
+
+Object.defineProperty(ErrorCatalog, "HABILIDADES_INEXISTENTES_GENERICO", {
+  value: ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO,
+  enumerable: false,
+  writable: false,
+  configurable: false,
 });
+
+Object.freeze(ErrorCatalog);
+
 export default ErrorCatalog;

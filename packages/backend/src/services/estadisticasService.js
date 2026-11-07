@@ -4,18 +4,30 @@ export class EstadisticasService {
     colectivoService,
     proyectoService,
     personaColaboradoraService,
+    postulacionService,
   }) {
     this.colaboracionService = colaboracionService;
     this.colectivoService = colectivoService;
     this.proyectoService = proyectoService;
     this.personaColaboradoraService = personaColaboradoraService;
+    this.postulacionService = postulacionService;
   }
 
   async obtenerEstadisticas() {
-    const colaboraciones = await this.colaboracionService.obtenerEstadisticas();
-    const colectivos = await this.colectivoService.obtenerEstadisticas();
+    const estadisticasColaboraciones = await this.colaboracionService.obtenerEstadisticas();
+    const estadisticasColectivos = await this.colectivoService.obtenerEstadisticas();
     const proyectos = await this.proyectoService.obtenerEstadisticas();
-    const personasColaboradoras = await this.personaColaboradoraService.obtenerEstadisticas();
-    return { colaboraciones, colectivos, proyectos, personasColaboradoras };
+    const estadisticasPersonasColaboradoras =
+      await this.personaColaboradoraService.obtenerEstadisticas();
+    const postulacion = await this.postulacionService.obtenerEstadisticas();
+
+    const estadisticasProyectos = { proyectos, postulacionesPorProyecto: postulacion };
+
+    return {
+      estadisticasColaboraciones,
+      estadisticasColectivos,
+      estadisticasProyectos,
+      estadisticasPersonasColaboradoras,
+    };
   }
 }

@@ -3,16 +3,6 @@ export class ColaboracionController {
     this.colaboracionService = colaboracionService;
   }
 
-  crearColaboracion = async (req, res) => {
-    const colaboracion = await this.colaboracionService.crearColaboracion(
-      req.body.personaColaboradoraId,
-      req.body.proyectoId,
-      req.body.anonima,
-    );
-
-    res.status(201).location(`/colaboraciones/${colaboracion.id}`).json(colaboracion);
-  };
-
   obtenerColaboraciones = async (req, res) => {
     const colaboraciones = await this.colaboracionService.obtenerColaboraciones();
 
@@ -26,4 +16,11 @@ export class ColaboracionController {
 
     res.status(200).json(colaboracion);
   };
+
+  desactivarColaboracion = async (req, res) => {
+    const id = req.params.id;
+
+    await this.colaboracionService.desactivarColaboracion(id);
+    res.status(200).json( { message: "Colaboración desactivada correctamente" });
+  }
 }

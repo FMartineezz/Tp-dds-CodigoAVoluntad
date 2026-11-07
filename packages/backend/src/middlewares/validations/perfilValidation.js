@@ -13,4 +13,22 @@ const validarPerfil = (req, res, next) => {
   next();
 };
 
+const validarActualizacionPerfil = (req, res, next) => {
+  const schemaActualizacion = perfilSchema.partial();
+  const resultado = schemaActualizacion.safeParse(req.body);
+
+  if (!resultado.success) {
+    const codigo = resultado.error.issues[0].message;
+    throw new AppError(ErrorCatalog[codigo], 400);
+  }
+
+  if (Object.keys(resultado.data).length === 0) {
+    throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+  }
+
+  req.body = resultado.data;
+  next();
+};
+
+export { validarActualizacionPerfil };
 export default validarPerfil;

@@ -9,44 +9,37 @@ export class ColaboracionService {
     this.proyectoService = proyectoService;
   }
 
-  async crearColaboracion(personaId, proyectoId, anonima) {
+  async crearColaboracion(personaId, proyectoId, perfilId, anonima) {
     const persona =
       await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
     const proyecto = await this.proyectoService.obtenerProyectoPorId(proyectoId);
+    const perfil = await this.proyectoService.obtenerPerfilPorId(proyectoId, perfilId);
 
     if (proyecto.finalizado) {
       throw new AppError(ErrorCatalog.COLABORACION_PROYECTO_FINALIZADO, 409, proyectoId);
     }
 
-    const tieneHabilidadRequerida = proyecto.perfiles.some((perfil) =>
-      perfil.habilidadesRequeridas.some((habilidadPerfil) =>
-        persona.habilidades.some(
-          (habilidadPersona) => habilidadPersona.toString() === habilidadPerfil.toString(),
-        ),
-      ),
-    );
-
-    if (!tieneHabilidadRequerida) {
-      throw new AppError(
-        ErrorCatalog.COLABORACION_HABILIDAD_REQUERIDA,
-        400,
-        persona.nombreFantasia,
-        proyecto.titulo,
-        proyecto.colectivo.nombre,
+    // Cupo: si el perfil no tiene cantidadMaxima, no hay límite
+    if (perfil.cantidadMaxima !== undefined && perfil.cantidadMaxima !== null) {
+      const ocupados = await this.colaboracionRepository.contarActivasPorPerfil(
+        proyectoId,
+        perfilId,
       );
+
+      if (ocupados >= perfil.cantidadMaxima) {
+        throw new AppError(ErrorCatalog.COLABORACION_CUPO_COMPLETO, 409, perfil.descripcion);
+      }
     }
 
-    const colaboracion = new Colaboracion(persona, proyecto, anonima);
+    const colaboracion = new Colaboracion(persona, proyecto, perfil, anonima);
     const colaboracionGuardada = await this.colaboracionRepository.guardar(colaboracion);
     colaboracion.id = colaboracionGuardada.id;
 
     return colaboracion;
   }
 
-  //revisar ocultarSiEsAnonima
   async obtenerColaboraciones() {
-    const colaboraciones = await this.colaboracionRepository.obtenerTodas();
-    return colaboraciones.map((colaboracion) => this.ocultarSiEsAnonima(colaboracion));
+    return await this.colaboracionRepository.obtenerTodas();
   }
 
   async obtenerColaboracionPorId(id) {
@@ -56,17 +49,21 @@ export class ColaboracionService {
       throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);
     }
 
-    return this.ocultarSiEsAnonima(colaboracion);
+    return colaboracion;
   }
 
-  //agregar esto en la query de la db?. para no traer la info y despues mapearla
-  ocultarSiEsAnonima(colaboracion) {
-    return {
-      ...colaboracion,
-      personaColaboradora: colaboracion.anonima
-        ? null
-        : this.personaColaboradoraService.ocultarContactos(colaboracion.personaColaboradora),
-    };
+  async desactivarColaboracion(id) {
+    const colaboracion = await this.colaboracionRepository.obtenerPorId(id);
+
+    if (!colaboracion) {
+      throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, id);
+    }
+
+    if (!colaboracion.activo) {
+      throw new AppError(ErrorCatalog.COLABORACION_YA_DADA_DE_BAJA, 409, id);
+    }
+
+    await this.colaboracionRepository.desactivar(id);
   }
 
   //Estadisticas

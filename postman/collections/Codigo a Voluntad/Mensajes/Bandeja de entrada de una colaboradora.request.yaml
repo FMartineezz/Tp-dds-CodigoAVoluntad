@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/colaboradoras/{{colaboradoraId}}/mensajes"
+method: GET
+order: 2000

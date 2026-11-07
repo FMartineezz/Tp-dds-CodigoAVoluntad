@@ -11,12 +11,27 @@ export const ModalidadColaboracion = Object.freeze({
 });
 
 export class Proyecto {
-  constructor(titulo, descripcion, perfiles, colectivo) {
+  constructor(
+    titulo,
+    descripcion,
+    perfiles,
+    colectivo,
+    urlSistema,
+    fechaCierre = undefined,
+    fechaLimiteBusqueda = undefined,
+    urlDonaciones = null,
+  ) {
     this.id = null;
     this.titulo = titulo;
     this.descripcion = descripcion;
     this.perfiles = perfiles;
     this.colectivo = colectivo;
+    this.urlSistema = urlSistema;
+    this.logros = [];
     this.finalizado = false;
+    this.fechaCierre = fechaCierre;
+    this.busquedaCerrada = false;
+    this.fechaLimiteBusqueda = fechaLimiteBusqueda;
+    this.urlDonaciones = urlDonaciones && urlDonaciones !== "" ? urlDonaciones : null;
   }
 }

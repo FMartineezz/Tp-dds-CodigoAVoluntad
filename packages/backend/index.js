@@ -5,11 +5,13 @@ import routes from "./src/routes/routes.js";
 import errorHandler from "./src/middlewares/errorHandler.js";
 import ErrorCatalog from "./src/errors/errorCatalog.js";
 import { MongoDBClient } from "./config/database.js";
+import { cierreProyectos } from "./src/container.js";
 
 const port = process.env.SERVER_PORT || 3000;
 
 const app = express();
 app.use(express.json());
+app.set("trust proxy", 1);
 
 app.use(
   cors({
@@ -28,6 +30,8 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 MongoDBClient.connect();
+
+cierreProyectos.iniciar();
 
 app.listen(port, () => {
   console.log("Backend escuchando en puerto " + port);

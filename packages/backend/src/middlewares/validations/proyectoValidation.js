@@ -19,10 +19,9 @@ export const perfilSchema = zod.object({
     .min(1, "PERFIL_HABILIDADES_REQUERIDAS"),
   habilidadesOpcionales: zod
     .array(zod.string({ invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO" }), {
-      required_error: "PERFIL_HABILIDADES_OPCIONALES",
       invalid_type_error: "PERFIL_HABILIDADES_OPCIONALES_FORMATO",
     })
-    .min(1, "PERFIL_HABILIDADES_OPCIONALES"),
+    .default([]),
   horas: zod.number({
     required_error: "PERFIL_HORAS_REQUERIDAS",
     invalid_type_error: "ARGUMENTO_INVALIDO",
@@ -41,7 +40,25 @@ export const perfilSchema = zod.object({
         issue.code === "invalid_type" ? "PERFIL_MODALIDAD_REQUERIDA" : "PERFIL_MODALIDAD_FORMATO",
     }),
   }),
+  cantidadMaxima: zod.number({ invalid_type_error: "ARGUMENTO_INVALIDO" }).optional(),
 });
+
+export const urlDonacionesSchema = zod
+  .string({ invalid_type_error: "PROYECTO_URL_DONACIONES_INVALIDA" })
+  .nullable()
+  .optional()
+  .refine(
+    (val) => {
+      if (val === undefined || val === null || val === "") return true;
+      try {
+        const parsed = new URL(val);
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    { message: "PROYECTO_URL_DONACIONES_INVALIDA" },
+  );
 
 const proyectoSchema = zod.object({
   titulo: zod
@@ -67,7 +84,30 @@ const proyectoSchema = zod.object({
     required_error: "PROYECTO_COLECTIVO_REQUERIDO",
     invalid_type_error: "PROYECTO_COLECTIVO_FORMATO",
   }),
+  urlSistema: zod
+    .string({
+      required_error: "PROYECTO_URL_SISTEMA_INVALIDA",
+      invalid_type_error: "PROYECTO_URL_SISTEMA_INVALIDA",
+    })
+    .url("PROYECTO_URL_SISTEMA_INVALIDA"),
+  fechaCierre: zod.coerce.date().optional(),
+  fechaLimiteBusqueda: zod.coerce.date().optional(),
+  urlDonaciones: urlDonacionesSchema,
 });
+
+export const proyectoActualizacionSchema = zod
+  .object({
+    finalizado: zod
+      .literal(true, {
+        errorMap: () => ({ message: "ARGUMENTO_INVALIDO" }),
+      })
+      .optional(),
+    urlDonaciones: urlDonacionesSchema,
+  })
+  .strict({ message: "ARGUMENTO_INVALIDO" })
+  .refine((datos) => Object.keys(datos).length > 0, {
+    message: "ARGUMENTO_INVALIDO",
+  });
 
 const validarProyecto = (req, res, next) => {
   const resultado = proyectoSchema.safeParse(req.body);
@@ -80,4 +120,17 @@ const validarProyecto = (req, res, next) => {
   next();
 };
 
+export const validarActualizacionProyecto = (req, res, next) => {
+  const resultado = proyectoActualizacionSchema.safeParse(req.body);
+
+  if (!resultado.success) {
+    const codigo = resultado.error.issues[0].message;
+    throw new AppError(ErrorCatalog[codigo], 400);
+  }
+
+  req.body = resultado.data;
+  next();
+};
+
+export { validarActualizacionProyecto as validarActualizacion };
 export default validarProyecto;

@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/colectivos/{{colectivoId}}/mensajes"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "personaColaboradoraId": "{{colaboradoraId}}",
+      "texto": "¡Hola! Tu perfil encaja con nuestro proyecto de donaciones."
+    }
+order: 1000

@@ -18,22 +18,68 @@ export class PersonaColaboradoraRepository {
     return await this.model.findById(id).lean();
   }
 
-  async obtenerPodHabilidadId(habilidadesIds) {
+  async obtenerPorIdConContactos(id) {
+    return await this.model.findById(id).lean().select("+contactos");
+  }
+
+  async obtenerPorHabilidadId(habilidadesIds) {
     return await this.model.find({ habilidades: { $in: habilidadesIds } }).lean();
+  }
+
+  async actualizar(id, cambios) {
+    return await this.model
+      .findByIdAndUpdate(id, { $set: cambios }, { new: true, runValidators: true })
+      .lean();
+  }
+
+  async eliminar(id) {
+    const colaboradora = await this.model.findOneAndUpdate(
+      { _id: id, activo: true },
+      {
+        $set: {
+          nombreFantasia: "UserEliminado",
+          git: `github:UserEliminado${id}`,
+          nombre: "Usuario",
+          apellido: "Eliminado",
+          pronombres: [],
+          presentacion: "Presentacion Usuario Eliminado",
+          contactos: [],
+          activo: false,
+        },
+      },
+      { new: true },
+    );
+
+    if (colaboradora) {
+      return { actualizado: true };
+    }
+
+    const existe = await this.model.findById(id);
+    if (!existe) {
+      return { actualizado: false, razon: "NO_ENCONTRADO" };
+    }
+
+    return { actualizado: false, razon: "YA_DADO_DE_BAJA" };
   }
 
   //Estadisticas
   async obtenerEstadisticas() {
     return await this.model.aggregate([
       {
+        $lookup: {
+          from: "postulaciones",
+          localField: "_id",
+          foreignField: "personaColaboradora",
+          as: "postulacionesInfo",
+        },
+      },
+      {
         $group: {
           _id: null,
           total: { $sum: 1 },
           bloqueanMensajes: { $sum: { $cond: ["$bloquearMensajeInterno", 1, 0] } },
-          conContactos: {
-            $sum: { $cond: [{ $gt: [{ $size: { $ifNull: ["$contactos", []] } }, 0] }, 1, 0] },
-          },
-          promedioHabilidades: { $avg: { $size: "$habilidades" } },
+          promedioHabilidadesPorPersona: { $avg: { $size: "$habilidades" } },
+          promedioPostulacionesPorPersona: { $avg: { $size: "$postulacionesInfo" } },
         },
       },
       {
@@ -41,37 +87,10 @@ export class PersonaColaboradoraRepository {
           _id: 0,
           total: 1,
           bloqueanMensajes: 1,
-          conContactos: 1,
-          promedioHabilidades: { $round: ["$promedioHabilidades", 2] },
+          promedioHabilidadesPorPersona: { $round: ["$promedioHabilidadesPorPersona", 2] },
+          promedioPostulacionesPorPersona: { $round: ["$promedioPostulacionesPorPersona", 2] },
         },
       },
     ]);
   }
 }
-
-/*   constructor() {
-    this.personasColaboradoras = [];
-    this.id = 1;
-  }
-
-  guardar(personaColaboradora) {
-    personaColaboradora.id = this.id;
-    this.id++;
-    this.personasColaboradoras.push(personaColaboradora);
-    return personaColaboradora;
-  }
-
-  obtenerTodas() {
-    return this.personasColaboradoras;
-  }
-
-  obtenerPorId(id) {
-    return this.personasColaboradoras.find((persona) => persona.id === id);
-  }
-
-  obtenerPorAlgunaHabilidad(codigos) {
-    return this.personasColaboradoras.filter((persona) =>
-      persona.habilidades.some((habilidad) => codigos.includes(habilidad.codigo)),
-    );
-  }
-  } */

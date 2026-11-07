@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/proyectos/:id"
+method: GET
+pathVariables:
+  id: "{{proyectoId}}"
+order: 3000

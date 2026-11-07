@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/colectivos/:id"
+method: GET
+pathVariables:
+  id: "{{colectivoId}}"
+order: 3000
