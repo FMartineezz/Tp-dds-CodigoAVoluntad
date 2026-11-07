@@ -104,6 +104,13 @@ export class ColectivoService {
     if (colectivo.activo) {
       throw new AppError(ErrorCatalog.COLECTIVO_YA_DADO_DE_BAJA, 409, id);
     }
+  }
 
+  //Estadisticas
+  async obtenerEstadisticas() {
+    const porUbicacion = await this.repository.contarPorUbicacion();
+    const total = porUbicacion.reduce((suma, grupo) => suma + grupo.cantidad, 0);
+
+    return { total, porUbicacion };
   }
 }

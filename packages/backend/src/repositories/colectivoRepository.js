@@ -82,10 +82,7 @@ export class ColectivoRepository {
 
   async obtenerDenunciaPorId(denunciaId) {
     const colectivo = await this.model
-      .findOne(
-        { "denuncias._id": denunciaId },
-        { "denuncias.$": 1, nombre: 1, _id: 1 },
-      )
+      .findOne({ "denuncias._id": denunciaId }, { "denuncias.$": 1, nombre: 1, _id: 1 })
       .lean();
     if (!colectivo || !colectivo.denuncias || colectivo.denuncias.length === 0) {
       return null;
@@ -111,9 +108,7 @@ export class ColectivoRepository {
       return null;
     }
 
-    const denuncia = colectivo.denuncias?.find(
-      (d) => String(d._id) === String(denunciaId),
-    );
+    const denuncia = colectivo.denuncias?.find((d) => String(d._id) === String(denunciaId));
     if (!denuncia) return null;
 
     return {
@@ -121,5 +116,14 @@ export class ColectivoRepository {
       colectivoId: colectivo._id,
       colectivoNombre: colectivo.nombre,
     };
+  }
+
+  //Estadisticas
+  async contarPorUbicacion() {
+    return await this.model.aggregate([
+      { $group: { _id: "$ubicacion", cantidad: { $sum: 1 } } },
+      { $sort: { cantidad: -1 } },
+      { $project: { _id: 0, ubicacion: "$_id", cantidad: 1 } },
+    ]);
   }
 }

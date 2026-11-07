@@ -147,4 +147,9 @@ export class PostulacionService {
       estado,
     };
   }
+
+  async obtenerEstadisticas() {
+    const resultado = await this.repository.obtenerEstadisticas();
+    return resultado;
+  }
 }

@@ -235,4 +235,12 @@ export class ProyectoService {
     }
     return true;
   }
+
+  //Estadisticas
+  async obtenerEstadisticas() {
+    const resultado = await this.proyectoRepository.contarTotalYActicvos();
+    const { total, activos } = resultado[0] ?? { total: 0, activos: 0 };
+
+    return { total, activos, finalizados: total - activos };
+  }
 }

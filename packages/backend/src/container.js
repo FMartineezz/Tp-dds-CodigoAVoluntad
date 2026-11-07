@@ -16,6 +16,7 @@ import { PersonaColaboradoraService } from "./services/personaColaboradoraServic
 import { PerfilService } from "./services/perfilService.js";
 import { MensajeService } from "./services/mensajeService.js";
 import { BusquedaService } from "./services/busquedaService.js";
+import { EstadisticasService } from "./services/estadisticasService.js";
 import { LogroService } from "./services/logroService.js";
 import { ValoracionService } from "./services/valoracionService.js";
 import { PostulacionService } from "./services/postulacionService.js";
@@ -29,6 +30,7 @@ import { PersonaColaboradoraController } from "./controllers/personaColaboradora
 import { HealthCheckController } from "./controllers/healthCheckController.js";
 import { PerfilController } from "./controllers/perfilController.js";
 import { MensajeController } from "./controllers/mensajeController.js";
+import { EstadisticasController } from "./controllers/estadisticasController.js";
 import { LogroController } from "./controllers/logroController.js";
 import { ValoracionController } from "./controllers/valoracionController.js";
 import { PostulacionController } from "./controllers/postulacionController.js";
@@ -106,6 +108,13 @@ const valoracionService = new ValoracionService({
   colectivoRepository,
   personaColaboradoraRepository,
 });
+const estadisticasService = new EstadisticasService({
+  colaboracionService,
+  colectivoService,
+  proyectoService,
+  personaColaboradoraService,
+  postulacionService,
+});
 
 // Controllers: dependen de services.
 export const proyectoController = new ProyectoController({ proyectoService });
@@ -121,6 +130,7 @@ export const logroController = new LogroController({ logroService });
 export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });
+export const estadisticasController = new EstadisticasController({ estadisticasService });
 export const valoracionController = new ValoracionController({ valoracionService });
 export const postulacionController = new PostulacionController({ postulacionService });
 export const denunciaController = new DenunciaController({ denunciaService });

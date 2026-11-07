@@ -61,4 +61,36 @@ export class PersonaColaboradoraRepository {
 
     return { actualizado: false, razon: "YA_DADO_DE_BAJA" };
   }
+
+  //Estadisticas
+  async obtenerEstadisticas() {
+    return await this.model.aggregate([
+      {
+        $lookup: {
+          from: "postulaciones",
+          localField: "_id",
+          foreignField: "personaColaboradora",
+          as: "postulacionesInfo",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          bloqueanMensajes: { $sum: { $cond: ["$bloquearMensajeInterno", 1, 0] } },
+          promedioHabilidadesPorPersona: { $avg: { $size: "$habilidades" } },
+          promedioPostulacionesPorPersona: { $avg: { $size: "$postulacionesInfo" } },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1,
+          bloqueanMensajes: 1,
+          promedioHabilidadesPorPersona: { $round: ["$promedioHabilidadesPorPersona", 2] },
+          promedioPostulacionesPorPersona: { $round: ["$promedioPostulacionesPorPersona", 2] },
+        },
+      },
+    ]);
+  }
 }

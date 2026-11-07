@@ -65,4 +65,12 @@ export class ColaboracionService {
 
     await this.colaboracionRepository.desactivar(id);
   }
+
+  //Estadisticas
+  async obtenerEstadisticas() {
+    const resultado = await this.colaboracionRepository.contarTotalYAnonimas();
+    const { total, anonimas } = resultado[0] ?? { total: 0, anonimas: 0 };
+
+    return { total, anonimas, publicas: total - anonimas };
+  }
 }

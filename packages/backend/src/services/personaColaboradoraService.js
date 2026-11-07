@@ -66,7 +66,9 @@ export class PersonaColaboradoraService {
 
     if (cambios.habilidades !== undefined) {
       cambiosPreparados.habilidades = await Promise.all(
-        cambios.habilidades.map((codigo) => this.habilidadService.obtenerHabilidadPorCodigo(codigo)),
+        cambios.habilidades.map((codigo) =>
+          this.habilidadService.obtenerHabilidadPorCodigo(codigo),
+        ),
       );
     }
 
@@ -97,12 +99,41 @@ export class PersonaColaboradoraService {
   }
 
   async obtenerPersonaColaboradoraPorIdConContactos(id) {
-    const personaColaboradora = await this.personaColaboradoraRepository.obtenerPorIdConContactos(id);
+    const personaColaboradora =
+      await this.personaColaboradoraRepository.obtenerPorIdConContactos(id);
 
     if (!personaColaboradora) {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
     }
 
     return personaColaboradora;
+  }
+
+  //agregar en la query de la db?
+  ocultarContactos(personaColaboradora) {
+    const { contactos, ...resto } = personaColaboradora;
+    return resto;
+  }
+
+  //Estadisticas
+  async obtenerEstadisticas() {
+    const resultado = await this.personaColaboradoraRepository.obtenerEstadisticas();
+    const {
+      total,
+      bloqueanMensajes,
+      promedioHabilidadesPorPersona,
+      promedioPostulacionesPorPersona,
+    } = resultado[0] ?? {
+      total: 0,
+      bloqueanMensajes: 0,
+      promedioHabilidadesPorPersona: 0,
+      promedioPostulacionesPorPersona: 0,
+    };
+    return {
+      total,
+      bloqueanMensajes,
+      promedioHabilidadesPorPersona,
+      promedioPostulacionesPorPersona,
+    };
   }
 }
