@@ -1,0 +1,17 @@
+/* =====================================================================
+   TEMA DALTÓNICO  ·  redefine algunos colores de la paleta
+   =====================================================================
+   Se activa cuando <html data-theme="daltonico"> (interruptor en el menú de
+   usuario y en el pie). Evita el par rojo/verde: éxito en verde azulado,
+   peligro en bermellón, acento en un azul más profundo.
+   Para crear otro tema (ej. oscuro): copiá este archivo, cambiá el nombre del
+   atributo y los hex, e impórtalo en estilos/index.css. */
+
+:root[data-theme='daltonico'] {
+  --green-700: #0b6b57;
+  --red-700: #a54300;
+  --red-500: #d55e00;
+  --blue-600: #0b5a9a;
+  --blue-800: #083f6d;
+  --yellow-400: #e69f00;
+}

@@ -1,0 +1,16 @@
+/* Efecto de dos tintas desalineadas (serigrafía) para UNA palabra del titular. */
+.wrap { display: inline-block; }
+.visual {
+  position: relative;
+  display: inline-block;
+  color: var(--blue-600);
+  mix-blend-mode: multiply;
+}
+.visual::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0.035em;
+  top: 0.03em;
+  color: var(--red-500);
+  mix-blend-mode: multiply;
+}

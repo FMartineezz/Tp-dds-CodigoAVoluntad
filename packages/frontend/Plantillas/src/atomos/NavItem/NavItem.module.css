@@ -1,0 +1,18 @@
+/* Ítem de menú de la barra de navegación. */
+.item {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  font-size: var(--text-label);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text);
+  text-decoration: none;
+  cursor: pointer;
+}
+.item:hover { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+/* página actual: subrayado de tinta roja (decorativo); el texto sigue siendo tinta negra */
+.active,
+.item:global(.active) { box-shadow: inset 0 -4px 0 var(--red-500); font-weight: 600; }

@@ -1,0 +1,47 @@
+/* =====================================================================
+   PALETA  ·  el ÚNICO archivo del sitio que contiene colores hex
+   =====================================================================
+   Cambiás un hex acá y cambia en TODO el sitio (botones, tarjetas, avisos,
+   fondos, bordes, íconos, sombras…). Ningún otro archivo escribe un hex:
+   todos usan estas variables, directa o indirectamente.
+
+   Cómo está organizada la paleta
+     • Cada color tiene un número de intensidad: 100 muy claro … 900 muy oscuro.
+     • Los NOMBRES son de color (rojo, azul…), no de uso. El uso se decide en
+       colores-semanticos.css (ej. "el color de peligro es --red-700").
+
+   Al cambiar un hex, verificá el contraste (mínimo 4,5:1 para texto normal,
+   3:1 para texto enorme o bordes). Las notas de cada color dicen dónde importa.
+
+   Si agregás un color nuevo: sumalo acá con el mismo formato y después
+   dale un rol en colores-semanticos.css. */
+
+:root {
+  /* ---------- PAPEL: fondos ---------- */
+  --paper-100: #f8f2e4;  /* superficie: tarjetas, formularios, paneles (lo más claro) */
+  --paper-200: #efe6d2;  /* fondo general de la página */
+  --paper-300: #ddd0b3;  /* reservado: bordes suaves o fondos de apoyo */
+
+  /* ---------- TINTA: texto y bordes ---------- */
+  --ink-900: #14110f;    /* texto principal, bordes, botón principal (contraste 15:1 sobre papel) */
+  --ink-700: #5b5348;    /* texto de apoyo (ayudas, fechas) (6:1 sobre papel; NO usar sobre --sand-400) */
+
+  /* ---------- ROJO ---------- */
+  --red-500: #e0583f;    /* rojo "tinta": SOLO decoración y texto enorme (3:1 sobre papel; no para texto chico) */
+  --red-700: #a63b2b;    /* rojo accesible: errores, botón de peligro, texto (5,2:1 sobre papel) */
+
+  /* ---------- AZUL ---------- */
+  --blue-600: #3a54b4;   /* azul de acento: enlaces, botón principal con sesión, avance (5,4:1) */
+  --blue-800: #2a3a80;   /* azul oscuro: hover del botón principal */
+
+  /* ---------- AMARILLO: SOLO AVISOS ---------- */
+  --yellow-400: #eec654; /* advertencia / estado "pendiente". No usar de relleno decorativo */
+  --yellow-100: #f6ecc8; /* fondo suave de un aviso */
+
+  /* ---------- ARENA (marrón claro): rellenos y selección ---------- */
+  --sand-200: #e4d6b8;   /* hover y elemento seleccionado (un paso más oscuro que el fondo) */
+  --sand-400: #d2bd93;   /* etiquetas, avatares, celdas destacadas. Texto encima: usar --ink-900 */
+
+  /* ---------- VERDE ---------- */
+  --green-700: #17632f;  /* positivo: Abierto, Aceptada, éxito, hover de «Aceptar» */
+}

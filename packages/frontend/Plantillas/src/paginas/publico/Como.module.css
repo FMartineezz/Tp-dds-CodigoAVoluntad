@@ -1,0 +1,11 @@
+/* Estilos propios de las pantallas Como. Los comunes están en plantillas/disposicion.module.css. */
+.page { display: grid; gap: var(--space-7); padding-block: var(--space-7); align-content: start; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-7); align-items: start; }
+.col { display: grid; gap: var(--space-4); align-content: start; justify-items: start; padding: var(--space-6); background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius); }
+.faqs { display: grid; gap: var(--space-3); }
+.faq { background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius); }
+.faq h3 { margin: 0; font-size: inherit; }
+.faq button { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); width: 100%; min-height: 3.5rem; padding: 0 var(--space-5); background: transparent; border: 0; font-weight: 600; text-align: left; cursor: pointer; }
+.faq button:hover { background: var(--color-hover); border-radius: var(--radius); }
+.faq > p { padding: 0 var(--space-5) var(--space-5); }
+@media (max-width: 800px) { .split { grid-template-columns: 1fr; gap: var(--space-5); } .col { padding: var(--space-5); } }

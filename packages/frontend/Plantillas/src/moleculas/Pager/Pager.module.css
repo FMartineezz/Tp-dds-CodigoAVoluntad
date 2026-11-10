@@ -1,0 +1,10 @@
+/* Paginación numerada. */
+.pager { display: flex; gap: var(--space-2); justify-content: center; align-items: center; }
+
+.pager button { min-width: 2.75rem; min-height: 2.75rem; display: inline-grid; place-items: center; background: var(--color-surface); border: var(--border); border-radius: var(--radius); font-weight: 600; cursor: pointer; }
+
+.pager button[aria-current='page'] { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+
+.pager button:disabled { opacity: 0.35; cursor: default; }
+
+.pager button:not(:disabled):not([aria-current]):hover { background: var(--color-hover); }
