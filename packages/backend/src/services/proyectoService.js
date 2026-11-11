@@ -1,6 +1,7 @@
 import { Proyecto } from "../models/proyecto.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
+import { eventos, EVENTO_PROYECTO_CREADO } from "../events/events.js";
 
 export class ProyectoService {
   constructor({ proyectoRepository, perfilService, colectivoService, personaColaboradoraService }) {
@@ -85,6 +86,8 @@ export class ProyectoService {
 
     await this.colectivoService.agregarProyecto(colectivoEncontrado._id, proyectoGuardado._id);
 
+    eventos.emit(EVENTO_PROYECTO_CREADO, proyectoGuardado, colectivo);
+
     return proyectoGuardado;
   }
 
@@ -104,7 +107,6 @@ export class ProyectoService {
 
   async obtenerProyectosConAlgunaHabilidad(idsHabilidad) {
     const proyectos = await this.proyectoRepository.obtenerPorAlgunaHabilidad(idsHabilidad);
-    console.log(proyectos);
     return proyectos;
   }
 

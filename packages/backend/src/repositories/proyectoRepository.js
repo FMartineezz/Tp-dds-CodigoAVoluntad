@@ -107,6 +107,7 @@ export class ProyectoRepository {
         finalizado: { $ne: true },
         "perfiles.habilidadesRequeridas": { $in: idsHabilidad },
       })
+      .populate("colectivo")
       .lean();
   }
 
@@ -190,7 +191,6 @@ export class ProyectoRepository {
       },
       { $set: { finalizado: true } },
     );
-    console.log(resultado);
   }
 
   async obtenerPorColectivoId(colectivoId) {
