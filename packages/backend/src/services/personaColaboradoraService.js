@@ -2,6 +2,7 @@ import { PersonaColaboradora } from "../models/personaColaboradora.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { validarYNormalizarRedesSociales } from "./redSocialService.js";
+import { eventos, EVENTO_PERSONA_CREADA } from "../events/events.js";
 
 export class PersonaColaboradoraService {
   constructor({ personaColaboradoraRepository, habilidadService }) {
@@ -44,6 +45,8 @@ export class PersonaColaboradoraService {
     const personaColaboradoraGuardada =
       await this.personaColaboradoraRepository.guardar(personaColaboradora);
     personaColaboradora.id = personaColaboradoraGuardada.id;
+
+    eventos.emit(EVENTO_PERSONA_CREADA, personaColaboradoraGuardada);
 
     return personaColaboradora;
   }

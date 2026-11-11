@@ -7,6 +7,7 @@ import { PersonaColaboradoraRepository } from "./repositories/personaColaborador
 import { MensajeRepository } from "./repositories/mensajesRepository.js";
 import { ValoracionRepository } from "./repositories/valoracionRepository.js";
 import { PostulacionRepository } from "./repositories/postulacionRepository.js";
+import { NotificacionRepository } from "./repositories/notificacionRepository.js";
 
 import { ProyectoService } from "./services/proyectoService.js";
 import { ColectivoService } from "./services/colectivoService.js";
@@ -21,6 +22,7 @@ import { LogroService } from "./services/logroService.js";
 import { ValoracionService } from "./services/valoracionService.js";
 import { PostulacionService } from "./services/postulacionService.js";
 import { DenunciaService } from "./services/denunciaService.js";
+import { NotificacionAutomaticaService } from "./services/notificacionAutomaticaService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -35,6 +37,7 @@ import { LogroController } from "./controllers/logroController.js";
 import { ValoracionController } from "./controllers/valoracionController.js";
 import { PostulacionController } from "./controllers/postulacionController.js";
 import { DenunciaController } from "./controllers/denunciaController.js";
+import { NotificacionController } from "./controllers/notificacionController.js";
 
 import { cierreProyectosJob } from "./cronTasks/cierreProyectoJob.js";
 
@@ -47,6 +50,7 @@ const personaColaboradoraRepository = new PersonaColaboradoraRepository();
 const mensajeRepository = new MensajeRepository();
 const valoracionRepository = new ValoracionRepository();
 const postulacionRepository = new PostulacionRepository();
+const notificacionRepository = new NotificacionRepository();
 
 // Transporter de mails para las notificaciones por medios externos.
 const mailTransporter = nodemailer.createTransport({
@@ -115,6 +119,12 @@ const estadisticasService = new EstadisticasService({
   personaColaboradoraService,
   postulacionService,
 });
+export const notificacionAutomaticaService = new NotificacionAutomaticaService({
+  repository: notificacionRepository,
+  personaColaboradoraService,
+  colectivoService,
+  busquedaService,
+});
 
 // Controllers: dependen de services.
 export const proyectoController = new ProyectoController({ proyectoService });
@@ -134,6 +144,7 @@ export const estadisticasController = new EstadisticasController({ estadisticasS
 export const valoracionController = new ValoracionController({ valoracionService });
 export const postulacionController = new PostulacionController({ postulacionService });
 export const denunciaController = new DenunciaController({ denunciaService });
+export const notificacionController = new NotificacionController({ notificacionAutomaticaService });
 
 //Job task
 export const cierreProyectos = new cierreProyectosJob({ proyectoService });

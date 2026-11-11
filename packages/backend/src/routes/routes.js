@@ -11,6 +11,7 @@ import swaggerRoutes from "./swaggerRoutes.js";
 import estadisticasRoutes from "./estadisticasRoutes.js";
 import postulacionRoutes from "./postulacionRoutes.js";
 import denunciaRoutes from "./denunciaRoutes.js";
+import notificacionRoute from "./notificacionRoutes.js";
 
 const routes = [
   habilidadRoutes(),
@@ -26,6 +27,7 @@ const routes = [
   swaggerRoutes(),
   postulacionRoutes(),
   denunciaRoutes(),
+  notificacionRoute(),
 ];
 
 export default routes;

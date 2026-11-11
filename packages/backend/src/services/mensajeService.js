@@ -19,8 +19,6 @@ export class MensajeService {
         personaColaboradoraId,
       );
 
-    console.log(personaColaboradora);
-
     if (personaColaboradora.bloquearMensajeInterno) {
       throw new AppError(
         ErrorCatalog.MENSAJE_DESTINATARIA_NO_ACEPTA,
