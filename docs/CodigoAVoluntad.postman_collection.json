@@ -17,12 +17,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/healthCheck",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "healthCheck"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["healthCheck"]
             }
           },
           "response": []
@@ -102,12 +98,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/habilidades",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "habilidades"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["habilidades"]
             }
           },
           "response": []
@@ -143,12 +135,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colectivos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos"]
             }
           },
           "response": []
@@ -169,12 +157,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colectivos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos"]
             }
           },
           "response": [],
@@ -200,13 +184,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colectivos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -238,12 +217,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colectivos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos"]
             }
           },
           "response": [],
@@ -283,19 +258,47 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colectivos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", ":id"],
               "variable": [
                 {
                   "key": "id",
                   "value": "{{colectivoId}}"
                 }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/colectivos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colectivoId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Promovemos el cuidado del ambiente y las huertas comunitarias.\",\n  \"redesSociales\": [\n    {\n      \"tipo\": \"instagram\",\n      \"url\": \"https://instagram.com/colectivoambiental_oficial\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
@@ -394,12 +397,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboradoras",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras"]
             }
           },
           "response": [],
@@ -439,13 +438,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -477,13 +471,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -515,13 +504,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -553,19 +537,47 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", ":id"],
               "variable": [
                 {
                   "key": "id",
                   "value": "{{colaboradoraId}}"
                 }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modificar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colaboradoraId}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"presentacion\": \"Desarrolladora Fullstack interesada en proyectos de impacto social.\",\n  \"redesSociales\": [\n    {\n      \"tipo\": \"github\",\n      \"url\": \"https://github.com/devneko-updated\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
@@ -582,12 +594,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos"]
             }
           },
           "response": []
@@ -608,12 +616,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos"]
             }
           },
           "response": [],
@@ -640,13 +644,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -702,14 +701,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
             }
           },
           "response": []
@@ -721,15 +714,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles",
-                "{{perfilId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}"]
             }
           },
           "response": []
@@ -755,14 +741,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
             }
           },
           "event": [
@@ -801,15 +781,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilNuevoId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles",
-                "{{perfilNuevoId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilNuevoId}}"]
             }
           },
           "response": []
@@ -821,15 +794,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilNuevoId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles",
-                "{{perfilNuevoId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilNuevoId}}"]
             }
           },
           "response": []
@@ -846,43 +812,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboraciones",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboraciones"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Crear",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"personaColaboradoraId\": \"{{colaboradoraId}}\",\n  \"proyectoId\": \"{{proyectoId}}\",\n  \"anonima\": false\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/colaboraciones",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboraciones"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones"]
             }
           },
           "response": [],
@@ -892,9 +823,15 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 201) {",
-                  "    const body = pm.response.json();",
-                  "    pm.collectionVariables.set('colaboracionId', String(body.id ?? body._id));",
+                  "if (pm.response.code === 200) {",
+                  "    const proyectoId = pm.collectionVariables.get('proyectoId');",
+                  "    const lista = pm.response.json();",
+                  "    const colaboracion = lista.find(",
+                  "        (c) => c.proyecto && String(c.proyecto._id ?? c.proyecto) === proyectoId",
+                  "    ) ?? lista[lista.length - 1];",
+                  "    if (colaboracion) {",
+                  "        pm.collectionVariables.set('colaboracionId', String(colaboracion._id ?? colaboracion.id));",
+                  "    }",
                   "}"
                 ]
               }
@@ -908,19 +845,217 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboraciones/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboraciones",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones", ":id"],
               "variable": [
                 {
                   "key": "id",
                   "value": "{{colaboracionId}}"
                 }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dar de baja",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colaboraciones/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboraciones", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{colaboracionId}}"
+                }
+              ]
+            },
+            "description": "Baja lógica: queda activo=false y deja de listarse."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Postulaciones",
+      "item": [
+        {
+          "name": "Postular a un perfil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}/postulaciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}", "postulaciones"]
+            },
+            "description": "La colaboradora debe tener al menos una habilidad requerida por el perfil. Guarda postulacionId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personaColaboradoraId\": \"{{colaboradoraId}}\",\n  \"anonima\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('postulacionId', String(body.id ?? body._id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Postulaciones de una colaboradora",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras/{{colaboradoraId}}/postulaciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", "{{colaboradoraId}}", "postulaciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Postulaciones de un colectivo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colectivos/{{colectivoId}}/postulaciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", "{{colectivoId}}", "postulaciones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Postulaciones de un colectivo (solo pendientes)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colectivos/{{colectivoId}}/postulaciones?estado=pendiente",
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", "{{colectivoId}}", "postulaciones"],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "pendiente"
+                }
+              ]
+            },
+            "description": "Valores válidos de estado: pendiente, aceptada, rechazada."
+          },
+          "response": []
+        },
+        {
+          "name": "Aceptar postulación",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/postulaciones/:postulacionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["postulaciones", ":postulacionId"],
+              "variable": [
+                {
+                  "key": "postulacionId",
+                  "value": "{{postulacionId}}"
+                }
+              ]
+            },
+            "description": "Crea automáticamente la colaboración (respeta el cupo del perfil) y guarda colaboracionId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aceptada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && pm.response.json().estado === 'aceptada') {",
+                  "    pm.sendRequest(pm.variables.replaceIn('{{baseUrl}}/colaboraciones'), (err, res) => {",
+                  "        if (err || res.code !== 200) return;",
+                  "        const proyectoId = pm.collectionVariables.get('proyectoId');",
+                  "        const colaboracion = res.json().find(",
+                  "            (c) => c.proyecto && String(c.proyecto._id ?? c.proyecto) === proyectoId",
+                  "        );",
+                  "        if (colaboracion) {",
+                  "            pm.collectionVariables.set('colaboracionId', String(colaboracion._id ?? colaboracion.id));",
+                  "        }",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rechazar postulación",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/postulaciones/:postulacionId",
+              "host": ["{{baseUrl}}"],
+              "path": ["postulaciones", ":postulacionId"],
+              "variable": [
+                {
+                  "key": "postulacionId",
+                  "value": "{{postulacionId}}"
+                }
+              ]
+            },
+            "description": "Solo funciona sobre una postulación pendiente. Para probarlo, ejecutar antes 'Postular a un perfil' con otra colaboradora u otro perfil.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"rechazada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "response": []
@@ -937,9 +1072,7 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}/colaboradoras-acordes",
-              "host": [
-                "{{baseUrl}}"
-              ],
+              "host": ["{{baseUrl}}"],
               "path": [
                 "proyectos",
                 "{{proyectoId}}",
@@ -958,14 +1091,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/{{colaboradoraId}}/proyectos-acordes",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras",
-                "{{colaboradoraId}}",
-                "proyectos-acordes"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", "{{colaboradoraId}}", "proyectos-acordes"]
             }
           },
           "response": []
@@ -996,14 +1123,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/colectivos/{{colectivoId}}/mensajes",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colectivos",
-                "{{colectivoId}}",
-                "mensajes"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", "{{colectivoId}}", "mensajes"]
             }
           },
           "response": []
@@ -1015,15 +1136,42 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/colaboradoras/{{colaboradoraId}}/mensajes",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "colaboradoras",
-                "{{colaboradoraId}}",
-                "mensajes"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", "{{colaboradoraId}}", "mensajes"]
             }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notificaciones",
+      "item": [
+        {
+          "name": "Notificaciones de una colaboradora",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colaboradoras/{{colaboradoraId}}/notificaciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["colaboradoras", "{{colaboradoraId}}", "notificaciones"]
+            },
+            "description": "Se generan solas al crear un proyecto con perfiles acordes a las habilidades de la colaboradora."
+          },
+          "response": []
+        },
+        {
+          "name": "Notificaciones de un colectivo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/colectivos/{{colectivoId}}/notificaciones",
+              "host": ["{{baseUrl}}"],
+              "path": ["colectivos", "{{colectivoId}}", "notificaciones"]
+            },
+            "description": "Se generan solas al crear una colaboradora con habilidades acordes a un proyecto del colectivo."
           },
           "response": []
         }
@@ -1144,124 +1292,6 @@
       ]
     },
     {
-      "name": "Perfiles",
-      "item": [
-        {
-          "name": "Obtener todos",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "\r\nif (pm.response.code === 201) {\r\n  const body = pm.response.json();\r\n  const perfilId = body._id ?? body.id;\r\n\r\n  if (perfilId) {\r\n    pm.collectionVariables.set(\"perfilId\", String(perfilId));\r\n  }\r\n}\r\n"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Crear",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "\r\n{\r\n  \"descripcion\": \"Implementar la API\",\r\n  \"habilidadesRequeridas\": [\r\n    \"programacion_en_java_script\"\r\n  ],\r\n  \"habilidadesOpcionales\": [],\r\n  \"horas\": 10,\r\n  \"tipoDeCompromiso\": \"semanal\",\r\n  \"modalidadDeColaboracion\": \"gratuita\"\r\n}\r\n",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Obtener por ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Modificar",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "\r\n{\r\n  \"descripcion\": \"Implementar y documentar la API\",\r\n  \"horas\": 12\r\n}\r\n",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Eliminar",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["proyectos", "{{proyectoId}}", "perfiles", "{{perfilId}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Colaboradoras acordes",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/proyectos/{{proyectoId}}/perfiles/{{perfilId}}/colaboradoras-acordes",
-              "host": ["{{baseUrl}}"],
-              "path": [
-                "proyectos",
-                "{{proyectoId}}",
-                "perfiles",
-                "{{perfilId}}",
-                "colaboradoras-acordes"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
       "name": "Cierre de proyecto",
       "item": [
         {
@@ -1285,13 +1315,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/proyectos/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "proyectos",
-                ":id"
-              ],
+              "host": ["{{baseUrl}}"],
+              "path": ["proyectos", ":id"],
               "variable": [
                 {
                   "key": "id",
@@ -1338,7 +1363,21 @@
               ]
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('denunciaId', String(body.id ?? body._id));",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Listar denuncias (Admin)",
@@ -1572,12 +1611,50 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Estadísticas",
+      "item": [
+        {
+          "name": "Ver estadísticas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas",
+              "host": ["{{baseUrl}}"],
+              "path": ["estadisticas"]
+            },
+            "description": "Límite: 5 peticiones cada 20 minutos por IP (responde 429 al superarlo)."
+          },
+          "response": []
+        },
+        {
+          "name": "Ver estadísticas (con API key)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/estadisticas",
+              "host": ["{{baseUrl}}"],
+              "path": ["estadisticas"]
+            },
+            "description": "Con la API key (valor de MI_API_KEY del .env, cargarlo en la variable apiKey) no aplica el límite."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8000"
+      "value": "http://localhost:3000"
     },
     {
       "key": "habilidadId",
@@ -1613,6 +1690,14 @@
     },
     {
       "key": "denunciaId",
+      "value": ""
+    },
+    {
+      "key": "postulacionId",
+      "value": ""
+    },
+    {
+      "key": "apiKey",
       "value": ""
     }
   ]

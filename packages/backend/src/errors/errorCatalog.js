@@ -400,58 +400,6 @@ const ErrorCatalog = {
     message: "La URL del código fuente debe ser una URL válida",
   },
 
-  // =========================
-  // VALORACIONES
-  // =========================
-
-  VALORACION_COLABORACION_ID_INVALIDO: {
-    code: "ERR-VAL-1101",
-    message: "El id de la colaboración es requerido",
-  },
-  VALORACION_EVALUADOR_TIPO_FORMATO: {
-    code: "ERR-VAL-1102",
-    message: "El tipo de evaluador no es válido",
-  },
-  VALORACION_PUNTAJE_REQUERIDO: {
-    code: "ERR-VAL-1104",
-    message: "El puntaje es requerido",
-  },
-  VALORACION_COMENTARIO_REQUERIDO: {
-    code: "ERR-VAL-1105",
-    message: "El comentario es requerido",
-  },
-
-  VALORACION_PUNTAJE_FORMATO: {
-    code: "ERR-VAL-1106",
-    message: "El puntaje debe ser un número entero entre 1 y 5",
-  },
-
-  VALORACION_PUNTAJE_RANGO: {
-    code: "ERR-VAL-1107",
-    message: "El puntaje debe estar entre 1 y 5",
-  },
-
-  VALORACION_COMENTARIO_FORMATO: {
-    code: "ERR-VAL-1108",
-    message: "El comentario debe ser un texto de entre 1 y 500 caracteres",
-  },
-
-  VALORACION_COMENTARIO_LARGO: {
-    code: "ERR-VAL-1109",
-    message: "El comentario debe tener un máximo de 500 caracteres",
-  },
-
-  VALORACION_EXISTENTE: {
-    code: "ERR-EST-1110",
-    message: (colaboracionId, evaluador) =>
-      `Ya existe una valoración para la colaboración con id ${colaboracionId} y el evaluador ${evaluador}`,
-  },
-
-  VALORACION_COLABORACION_NO_FINALIZADA: {
-    code: "ERR-EST-1111",
-    message: "No se puede valorar una colaboración que no ha finalizado",
-  },
-
   // POSTULACION
   // =========================
 
@@ -574,10 +522,62 @@ const ErrorCatalog = {
     code: "ERR-VAL-1207",
     message: "El estado de la denuncia es requerido",
   },
+
+  // =========================
+  // VALORACIONES
+  // =========================
+
+  VALORACION_COLABORACION_ID_INVALIDO: {
+    code: "ERR-VAL-1301",
+    message: "El id de la colaboración es requerido",
+  },
+  VALORACION_EVALUADOR_TIPO_FORMATO: {
+    code: "ERR-VAL-1302",
+    message: "El tipo de evaluador no es válido",
+  },
+  VALORACION_PUNTAJE_REQUERIDO: {
+    code: "ERR-VAL-1304",
+    message: "El puntaje es requerido",
+  },
+  VALORACION_COMENTARIO_REQUERIDO: {
+    code: "ERR-VAL-1305",
+    message: "El comentario es requerido",
+  },
+
+  VALORACION_PUNTAJE_FORMATO: {
+    code: "ERR-VAL-1306",
+    message: "El puntaje debe ser un número entero entre 1 y 5",
+  },
+
+  VALORACION_PUNTAJE_RANGO: {
+    code: "ERR-VAL-1307",
+    message: "El puntaje debe estar entre 1 y 5",
+  },
+
+  VALORACION_COMENTARIO_FORMATO: {
+    code: "ERR-VAL-1308",
+    message: "El comentario debe ser un texto de entre 1 y 500 caracteres",
+  },
+
+  VALORACION_COMENTARIO_LARGO: {
+    code: "ERR-VAL-1309",
+    message: "El comentario debe tener un máximo de 500 caracteres",
+  },
+
+  VALORACION_EXISTENTE: {
+    code: "ERR-EST-1310",
+    message: (colaboracionId, evaluador) =>
+      `Ya existe una valoración para la colaboración con id ${colaboracionId} y el evaluador ${evaluador}`,
+  },
+
+  VALORACION_COLABORACION_NO_FINALIZADA: {
+    code: "ERR-EST-1311",
+    message: "No se puede valorar una colaboración que no ha finalizado",
+  },
 };
 
 Object.defineProperty(ErrorCatalog, "HABILIDADES_INEXISTENTES_GENERICO", {
-  value: ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO,
+  value: ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO,
   enumerable: false,
   writable: false,
   configurable: false,
