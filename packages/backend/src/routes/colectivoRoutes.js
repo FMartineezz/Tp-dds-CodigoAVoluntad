@@ -2,7 +2,6 @@ import { Router } from "express";
 import validarColectivo, {
   validarActualizacionColectivo,
 } from "../middlewares/validations/colectivoValidation.js";
-import validarMensaje from "../middlewares/validations/mensajeValidation.js";
 import { colectivoController } from "../container.js";
 import { mensajeController } from "../container.js";
 
@@ -23,13 +22,9 @@ export default function colectivoRoutes() {
     colectivoController.actualizarColectivo,
   );
 
-  router.post(
-    "/colectivos/:colectivoId/mensajes",
-    validarMensaje,
-    mensajeController.enviarMensajeDesdeColectivo,
-  );
-
   router.delete("/colectivos/:id", colectivoController.eliminarColectivo);
+
+  router.get("/colectivos/:colectivoId/mensajes", mensajeController.verMensajesColectivo);
 
   return router;
 }

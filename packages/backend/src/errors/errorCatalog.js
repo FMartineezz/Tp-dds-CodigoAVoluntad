@@ -366,19 +366,59 @@ const ErrorCatalog = {
     message: (nombre) => `La colaboradora ${nombre} no acepta mensajes internos`,
   },
 
-  MENSAJE_PERSONA_COLABORADORA_REQUERIDO: {
+  MENSAJE_COLECTIVO_REQUERIDO: {
     code: "ERR-VAL-802",
+    message: "El colectivo es requerido",
+  },
+
+  MENSAJE_PERSONA_COLABORADORA_REQUERIDO: {
+    code: "ERR-VAL-803",
     message: "La persona colaboradora destinataria es requerida",
   },
 
   MENSAJE_TEXTO_REQUERIDO: {
-    code: "ERR-VAL-803",
+    code: "ERR-VAL-804",
     message: "El texto del mensaje es requerido",
   },
 
+  MENSAJE_PROYECTO_REQUERIDO: {
+    code: "ERR-VAL-805",
+    message: "El proyecto es requerido",
+  },
+
+  MENSAJE_EMISOR_RQUERIDO: {
+    code: "ERR-VAL-806",
+    message: "El emisor es requerido",
+  },
+
+  MENSAJE_EMISOR_INVALIDO: {
+    code: "ERR-VAL-807",
+    message: "EL emisor debe ser un colectivo o una persona",
+  },
+
   MENSAJE_TEXTO_FORMATO: {
-    code: "ERR-VAL-804",
+    code: "ERR-VAL-806",
     message: "El texto del mensaje debe ser un texto",
+  },
+
+  MENSAJE_SIN_CONVERSACION_PREVIA: {
+    code: "ERR-VAL-807",
+    message: "Espere a ser contactado por el colectivo",
+  },
+
+  MENSAJE_COLECTIVO_NO_COINCIDE_CON_PROYECTO: {
+    code: "ERR-VAL-808",
+    message: "El proyecto debe pertenecer al colectivo",
+  },
+
+  MENSAJE_LECTOR_REQUERIDO: {
+    code: "ERR-VAL-809",
+    message: "El lector es requerido",
+  },
+
+  MENSAJE_LECTOR_INVALIDO: {
+    code: "ERR-VAL-810",
+    message: "El lector del mensaje debe ser un colectivo o una persona",
   },
 
   // =========================

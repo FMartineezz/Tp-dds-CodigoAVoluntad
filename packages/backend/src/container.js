@@ -65,34 +65,43 @@ const mailTransporter = nodemailer.createTransport({
 
 // Services: dependen de repositorios y de otros services ya creados.
 const habilidadService = new HabilidadService({ repository: habilidadRepository });
+
 const perfilService = new PerfilService({ habilidadService });
+
 const colectivoService = new ColectivoService({ repository: colectivoRepository });
+
 const personaColaboradoraService = new PersonaColaboradoraService({
   personaColaboradoraRepository,
   habilidadService,
 });
+
 const proyectoService = new ProyectoService({
   proyectoRepository,
   perfilService,
   colectivoService,
 });
+
 const busquedaService = new BusquedaService({ proyectoService, personaColaboradoraService });
+
 const colaboracionService = new ColaboracionService({
   colaboracionRepository,
   personaColaboradoraService,
   proyectoService,
 });
+
 const mensajeService = new MensajeService({
   repository: mensajeRepository,
   colectivoService,
   personaColaboradoraService,
   transporter: mailTransporter,
+  proyectoService,
 });
 
 const logroService = new LogroService({
   proyectoService,
   proyectoRepository,
 });
+
 const postulacionService = new PostulacionService({
   repository: postulacionRepository,
   personaColaboradoraService,
@@ -100,6 +109,7 @@ const postulacionService = new PostulacionService({
   colectivoService,
   colaboracionService,
 });
+
 const denunciaService = new DenunciaService({
   colectivoRepository,
   colaboracionRepository,
@@ -112,6 +122,7 @@ const valoracionService = new ValoracionService({
   colectivoRepository,
   personaColaboradoraRepository,
 });
+
 const estadisticasService = new EstadisticasService({
   colaboracionService,
   colectivoService,
@@ -119,6 +130,7 @@ const estadisticasService = new EstadisticasService({
   personaColaboradoraService,
   postulacionService,
 });
+
 export const notificacionAutomaticaService = new NotificacionAutomaticaService({
   repository: notificacionRepository,
   personaColaboradoraService,

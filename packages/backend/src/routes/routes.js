@@ -12,6 +12,7 @@ import estadisticasRoutes from "./estadisticasRoutes.js";
 import postulacionRoutes from "./postulacionRoutes.js";
 import denunciaRoutes from "./denunciaRoutes.js";
 import notificacionRoute from "./notificacionRoutes.js";
+import mensajeRoutes from "./mensajeRoutes.js";
 
 const routes = [
   habilidadRoutes(),
@@ -28,6 +29,7 @@ const routes = [
   postulacionRoutes(),
   denunciaRoutes(),
   notificacionRoute(),
+  mensajeRoutes(),
 ];
 
 export default routes;
