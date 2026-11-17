@@ -183,14 +183,25 @@ export class ProyectoRepository {
 
     return logro;
   }
+
   async cerrarProyectoSi(fechaActual) {
-    const resultado = await this.model.updateMany(
-      {
-        finalizado: { $ne: true },
-        fechaCierre: { $exists: true, $lte: fechaActual },
-      },
-      { $set: { finalizado: true } },
-    );
+    const proyectosACerrar = await this.model
+      .find(
+        {
+          finalizado: { $ne: true },
+          fechaCierre: { $exists: true, $ne: null, $lte: fechaActual },
+        },
+        { _id: 1 },
+      )
+      .lean();
+
+    const ids = proyectosACerrar.map((p) => p._id);
+
+    if (ids.length > 0) {
+      await this.model.updateMany({ _id: { $in: ids } }, { $set: { finalizado: true } });
+    }
+
+    return ids;
   }
 
   async obtenerPorColectivoId(colectivoId) {

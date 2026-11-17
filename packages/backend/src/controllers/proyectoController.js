@@ -31,7 +31,7 @@ export class ProyectoController {
     res.status(200).json(proyecto);
   };
 
-  // Alternativa recurso-céntrica a /finalizar (ver issue REST): PATCH /proyectos/:id { finalizado: true }
+  // Alternativa recurso-céntrica a /finalizar (ver issue REST): PATCH /proyectos/:id { finalizado: true, fechaCierre:22:21:21T url: wwww }
   actualizarProyecto = async (req, res) => {
     const id = req.params.id;
 
