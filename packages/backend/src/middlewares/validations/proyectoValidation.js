@@ -102,6 +102,7 @@ export const proyectoActualizacionSchema = zod
         errorMap: () => ({ message: "ARGUMENTO_INVALIDO" }),
       })
       .optional(),
+    fechaCierre: zod.coerce.date().nullable().optional(),
     urlDonaciones: urlDonacionesSchema,
   })
   .strict({ message: "ARGUMENTO_INVALIDO" })

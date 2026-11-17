@@ -1,7 +1,7 @@
 import { Proyecto } from "../models/proyecto.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
-import { eventos, EVENTO_PROYECTO_CREADO } from "../events/events.js";
+import { eventos, EVENTO_PROYECTO_CREADO, EVENTO_PROYECTOS_CERRADOS } from "../events/events.js";
 
 export class ProyectoService {
   constructor({ proyectoRepository, perfilService, colectivoService, personaColaboradoraService }) {
@@ -121,7 +121,10 @@ export class ProyectoService {
       throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, id);
     }
 
-    return await this.proyectoRepository.finalizarProyecto(id);
+    const finalizado = await this.proyectoRepository.finalizarProyecto(id);
+    eventos.emit(EVENTO_PROYECTOS_CERRADOS, [id]);
+
+    return finalizado;
   }
 
   async actualizarProyecto(id, cambios = {}) {
@@ -134,7 +137,7 @@ export class ProyectoService {
       throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
 
-    const camposPermitidos = ["finalizado", "urlDonaciones"];
+    const camposPermitidos = ["finalizado", "fechaCierre", "urlDonaciones"];
     const tieneCamposNoPermitidos = campos.some((campo) => !camposPermitidos.includes(campo));
     if (tieneCamposNoPermitidos) {
       throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
@@ -157,6 +160,10 @@ export class ProyectoService {
       actualizaciones.finalizado = true;
     }
 
+    if (cambios.fechaCierre !== undefined) {
+      actualizaciones.fechaCierre = cambios.fechaCierre ? new Date(cambios.fechaCierre) : null;
+    }
+
     if (cambios.urlDonaciones !== undefined) {
       if (cambios.urlDonaciones === null || cambios.urlDonaciones === "") {
         actualizaciones.urlDonaciones = null;
@@ -170,7 +177,16 @@ export class ProyectoService {
       }
     }
 
-    return await this.proyectoRepository.actualizarProyecto(id, actualizaciones);
+    const proyectoActualizado = await this.proyectoRepository.actualizarProyecto(
+      id,
+      actualizaciones,
+    );
+
+    if (actualizaciones.finalizado) {
+      eventos.emit(EVENTO_PROYECTOS_CERRADOS, [id]);
+    }
+
+    return proyectoActualizado;
   }
 
   async agregarPerfil(
@@ -227,7 +243,10 @@ export class ProyectoService {
   }
 
   async cerrarProyectosSi(fechaActual) {
-    await this.proyectoRepository.cerrarProyectoSi(fechaActual);
+    const idsCerrados = await this.proyectoRepository.cerrarProyectoSi(fechaActual);
+    if (idsCerrados && idsCerrados.length > 0) {
+      eventos.emit(EVENTO_PROYECTOS_CERRADOS, idsCerrados);
+    }
   }
 
   estaBusquedaAbierta(proyecto) {
