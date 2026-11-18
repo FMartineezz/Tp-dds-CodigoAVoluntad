@@ -83,8 +83,8 @@ export class PersonaColaboradoraService {
   }
 
   // Vista expuesta (sin contactos)
-  async obtenerPersonasColaboradoras() {
-    return await this.personaColaboradoraRepository.obtenerTodas();
+  async obtenerPersonasColaboradoras(paginacion) {
+    return await this.personaColaboradoraRepository.obtenerPagina(paginacion);
   }
 
   async obtenerPersonaColaboradoraPorId(id) {
@@ -99,6 +99,13 @@ export class PersonaColaboradoraService {
 
   async obtenerPersonasConAlgunaHabilidad(idsHabilidades) {
     return await this.personaColaboradoraRepository.obtenerPorHabilidadId(idsHabilidades);
+  }
+
+  async obtenerPaginaDePersonasConAlgunaHabilidad(idsHabilidades, paginacion) {
+    return await this.personaColaboradoraRepository.obtenerPaginaPorHabilidadId(
+      idsHabilidades,
+      paginacion,
+    );
   }
 
   async obtenerPersonaColaboradoraPorIdConContactos(id) {

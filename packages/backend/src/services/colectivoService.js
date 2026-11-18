@@ -64,8 +64,8 @@ export class ColectivoService {
     return await this.actualizarColectivo(id, cambios);
   }
 
-  async obtenerColectivos() {
-    return await this.repository.obtenerTodos();
+  async obtenerColectivos(paginacion) {
+    return await this.repository.obtenerPagina(paginacion);
   }
 
   async obtenerColectivoPorId(id) {

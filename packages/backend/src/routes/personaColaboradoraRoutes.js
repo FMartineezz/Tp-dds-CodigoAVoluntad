@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { validarPaginacion } from "../middlewares/validations/paginacionValidation.js";
 import { personaColaboradoraController } from "../container.js";
 import { mensajeController } from "../container.js";
 import validarPersonaColaboradora, {
@@ -8,7 +9,11 @@ import validarPersonaColaboradora, {
 export default function personaColaboradoraRoutes() {
   const router = Router();
 
-  router.get("/colaboradoras", personaColaboradoraController.obtenerPersonasColaboradoras);
+  router.get(
+    "/colaboradoras",
+    validarPaginacion,
+    personaColaboradoraController.obtenerPersonasColaboradoras,
+  );
 
   router.get("/colaboradoras/:id", personaColaboradoraController.obtenerPersonaColaboradoraPorId);
 
@@ -31,6 +36,7 @@ export default function personaColaboradoraRoutes() {
 
   router.get(
     "/colaboradoras/:id/proyectos-acordes",
+    validarPaginacion,
     personaColaboradoraController.obtenerProyectosAcordes,
   );
 

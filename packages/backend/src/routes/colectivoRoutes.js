@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { validarPaginacion } from "../middlewares/validations/paginacionValidation.js";
 import validarColectivo, {
   validarActualizacionColectivo,
 } from "../middlewares/validations/colectivoValidation.js";
@@ -10,7 +11,7 @@ const pathColectivos = "/colectivos";
 export default function colectivoRoutes() {
   const router = Router();
 
-  router.get("/colectivos", colectivoController.obtenerColectivos);
+  router.get("/colectivos", validarPaginacion, colectivoController.obtenerColectivos);
 
   router.get("/colectivos/:id", colectivoController.obtenerColectivoPorId);
 

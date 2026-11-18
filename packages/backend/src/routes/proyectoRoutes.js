@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { validarPaginacion } from "../middlewares/validations/paginacionValidation.js";
 import { proyectoController } from "../container.js";
 import proyectoValidation, {
   validarActualizacionProyecto,
@@ -9,7 +10,7 @@ const pathProyectos = "/proyectos";
 export default function proyectoRoutes() {
   const router = Router();
 
-  router.get("/proyectos", proyectoController.obtenerProyectos);
+  router.get("/proyectos", validarPaginacion, proyectoController.obtenerProyectos);
 
   router.get("/proyectos/:id", proyectoController.obtenerProyectoPorId);
 

@@ -26,11 +26,12 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
 
 ```
 ───backend
-   ├─── index.js
+   ├─── index.js             # Levanta la app (buildApp) y la conexión a MongoDB
    ├─── package.json
    ├─── config               # Conexión a MongoDB
    │
    ├───src
+   │   ├─── app.js           # buildApp(routes): Express con json, cors, rutas, 404 y manejo de errores
    │   ├─── container.js     # Arma el grafo de dependencias (repositorios → services → controllers)
    │   ├─── controllers      # Encargados de la response a las request
    │   ├─── errors           # Catálogo de errores y AppError
@@ -42,11 +43,13 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
    │   └─── services         # Encargados del comportamiento del dominio, contiene la logica y reglas de negocio
    │
    └───test
-       ├─── fakes            # Repositorios en memoria que reemplazan a Mongo en los tests
-       ├─── helpers          # Arma los services con los fakes, igual que container.js
-       ├─── errors
-       ├─── models           # Tests de la capa de dominio
-       └─── services         # Tests de la capa de servicios
+       ├─── unit             # Tests unitarios
+       │   ├─── errors
+       │   ├─── models       # Capa de dominio
+       │   └─── services     # Capa de servicios, con sus dependencias moqueadas (jest.fn)
+       ├─── int              # Tests de integración con Supertest (rutas → controllers → services)
+       │   └─── utils        # buildTestApp: arma la app como container.js, con repositorios moqueados
+       └─── utils            # esperarAppError
 ```
 
 ### Cómo levantar el backend
@@ -57,7 +60,10 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
    - `MONGODB_URI=mongodb://localhost:27017`
    - `MONGODB_DB_NAME=codigoavoluntad`
    - `SMTP_*` solo hace falta para probar el envío de mails (por ejemplo, con una cuenta de [ethereal.email](https://ethereal.email))
-4. Cargar los datos iniciales: `npm run seed:backend` (**borra** lo que haya en las colecciones de la base del `.env` y vuelve a cargar habilidades, colectivos, colaboradoras, proyectos con perfiles y logros, colaboraciones y mensajes)
+4. Cargar los datos iniciales (**borra** lo que haya en las colecciones de la base del `.env`):
+   - `npm run seed:backend`: demo curada. Pocas entidades con nombres reconocibles que pasan por todos los estados (búsqueda abierta, con fecha, vencida o cerrada; proyectos finalizados a mano y por cierre automático; perfiles sin cupo, con lugar y llenos; postulaciones pendientes, aceptadas, rechazadas y anónimas; bajas hechas por la persona y por el colectivo; denuncias en sus 4 estados; un colectivo dado de baja y una cuenta anonimizada). Datos en `packages/backend/seeds/datos.js`.
+   - `npm run seed:backend:volumen`: la demo más unos 40 colectivos, 150 colaboradoras y 60 proyectos generados, para ver paginación y búsquedas con muchos resultados. Se ajusta con `npm run seed:backend:volumen -- --proyectos=150 --semilla=7`; con la misma semilla genera siempre los mismos datos. Generador en `packages/backend/seeds/volumen.js`.
+   - El test `test/seeds/seed.test.js` verifica que ambos modos respeten las reglas del dominio y cubran todos los estados.
 5. `npm run dev:backend`
 6. La API queda en `http://localhost:8000` (el `SERVER_PORT` del `.env`) y la documentación Swagger en `/api-docs`.
 
@@ -65,10 +71,17 @@ Para probar la API a mano está la colección de Postman en `docs/CodigoAVolunta
 
 ### Tests
 
-Los tests unitarios usan [Jest](https://jestjs.io/) y cubren la capa de servicios y la de dominio. No necesitan MongoDB: los repositorios se reemplazan por fakes en memoria.
+Los tests usan [Jest](https://jestjs.io/) y ninguno necesita MongoDB:
+
+- **Unitarios** (`test/unit`): cubren la capa de dominio y la de servicios. Cada service se prueba aislado: el repositorio y los otros services que recibe por constructor se reemplazan por mocks (`jest.fn()` con `mockResolvedValue`), y se verifica con qué argumentos se los llama (`toHaveBeenCalledWith`).
+- **De integración** (`test/int`): con [Supertest](https://www.npmjs.com/package/supertest) se le hacen requests HTTP a la app real (rutas, validaciones de zod, controllers, services y `errorHandler`). Solo se moquean los repositorios y el transporter de mails.
+
+Cada test sigue la estructura preparación → ejecución → validación.
 
 ```bash
 npm run test:backend                              # desde la raíz
+npm run test:unit --workspace=backend             # solo unitarios
+npm run test:int --workspace=backend              # solo integración
 npm test --workspace=backend -- logroService      # solo los tests de un archivo
 npm run test:coverage --workspace=backend         # con reporte de cobertura
 ```

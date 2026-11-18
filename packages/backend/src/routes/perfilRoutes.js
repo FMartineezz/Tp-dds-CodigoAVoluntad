@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { validarPaginacion } from "../middlewares/validations/paginacionValidation.js";
 import { perfilController } from "../container.js";
 import validarPerfil, {
   validarActualizacionPerfil,
@@ -23,6 +24,7 @@ export default function proyectoRoutes() {
 
   router.get(
     "/proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes",
+    validarPaginacion,
     perfilController.obtenerColaboradorasAcordes,
   );
 
