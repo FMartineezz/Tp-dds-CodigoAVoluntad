@@ -1,4 +1,4 @@
-import { Denuncia, EstadoDenuncia } from "../../src/models/denuncia.js";
+import { Denuncia, EstadoDenuncia } from "../../../src/models/denuncia.js";
 
 describe("Denuncia Model", () => {
   test("se crea con estado inicial PENDIENTE y fecha automática", () => {

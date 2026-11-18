@@ -6,8 +6,12 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js test/unit",
+    "test:int": "node --experimental-vm-modules node_modules/jest/bin/jest.js test/int",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
-    "seed": "node seeds/seed.js"
+    "seed": "node seeds/seed.js",
+    "seed:volumen": "node seeds/seed.js --volumen",
+    "test:services": "node --experimental-vm-modules node_modules/jest/bin/jest.js test/services"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +31,9 @@
   },
   "type": "module",
   "devDependencies": {
-    "jest": "^30.5.2"
+    "jest": "^30.5.2",
+    "mongodb-memory-server": "^11.3.0",
+    "supertest": "^7.3.1"
   },
   "jest": {
     "testEnvironment": "node",
@@ -35,9 +41,19 @@
     "roots": [
       "<rootDir>/test"
     ],
+    "globalSetup": "<rootDir>/test/setup/globalSetup.js",
+    "globalTeardown": "<rootDir>/test/setup/globalTeardown.js",
+    "setupFiles": [
+      "<rootDir>/test/setup/env.js"
+    ],
+    "testTimeout": 30000,
     "collectCoverageFrom": [
       "src/services/**/*.js",
-      "src/models/**/*.js"
+      "src/models/**/*.js",
+      "src/repositories/**/*.js",
+      "src/controllers/**/*.js",
+      "src/routes/**/*.js",
+      "src/middlewares/**/*.js"
     ]
   }
 }

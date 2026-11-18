@@ -1,4 +1,4 @@
-import { Valoracion, TipoEvaluador } from "../../src/models/valoracion.js";
+import { Valoracion, TipoEvaluador } from "../../../src/models/valoracion.js";
 
 describe("Modelo Valoracion", () => {
   test("TipoEvaluador define PERSONA y COLECTIVO", () => {

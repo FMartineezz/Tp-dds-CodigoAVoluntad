@@ -1,4 +1,4 @@
-import { RedSocial, TipoRedSocial, esUrlValida } from "../../src/models/redSocial.js";
+import { RedSocial, TipoRedSocial, esUrlValida } from "../../../src/models/redSocial.js";
 
 describe("RedSocial", () => {
   test("creación de una red social válida", () => {

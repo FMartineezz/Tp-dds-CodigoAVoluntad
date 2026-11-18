@@ -134,9 +134,7 @@ describe("Validaciones de entrada - Redes Sociales", () => {
       });
 
       expect(nextLlamado).toBe(true);
-      expect(req.body.redesSociales).toEqual([
-        { tipo: "github", url: "https://github.com/dev" },
-      ]);
+      expect(req.body.redesSociales).toEqual([{ tipo: "github", url: "https://github.com/dev" }]);
     });
 
     test("validarActualizacionColectivo rechaza payload vacío con 400", () => {

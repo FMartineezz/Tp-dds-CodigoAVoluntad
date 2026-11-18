@@ -118,8 +118,6 @@ const ErrorCatalog = {
 
   HABILIDADES_INEXISTENTES_GENERICO: {
     code: "ERR-VAL-207",
-    message: (codigos) => `Las habilidades de codigo: ${codigos.join(", ")} no existen`,
-
     message: (codigo) =>
       Array.isArray(codigo)
         ? `Las habilidades de codigo: ${codigo.join(", ")} no existen`
@@ -259,7 +257,7 @@ const ErrorCatalog = {
   },
 
   COLABORACION_YA_DADA_DE_BAJA: {
-    code: "ERR-EST-508",
+    code: "ERR-EST-608",
     message: (id) => `La colaboración ${id} ya fue dada de baja`,
   },
 
@@ -397,12 +395,12 @@ const ErrorCatalog = {
   },
 
   MENSAJE_TEXTO_FORMATO: {
-    code: "ERR-VAL-806",
+    code: "ERR-VAL-811",
     message: "El texto del mensaje debe ser un texto",
   },
 
   MENSAJE_SIN_CONVERSACION_PREVIA: {
-    code: "ERR-VAL-807",
+    code: "ERR-VAL-812",
     message: "Espere a ser contactado por el colectivo",
   },
 

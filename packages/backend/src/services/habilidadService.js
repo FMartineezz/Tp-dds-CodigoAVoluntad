@@ -39,7 +39,7 @@ export class HabilidadService {
     const habilidad = await this.repository.obtenerPorCodigo(codigo);
 
     if (!habilidad) {
-      throw new AppError(ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO, 400, codigo);
+      throw new AppError(ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO, 400, codigo);
     }
     return habilidad;
   }
