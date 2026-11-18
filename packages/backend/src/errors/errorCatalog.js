@@ -1,4 +1,4 @@
-const ErrorCatalog = Object.freeze({
+const ErrorCatalog = {
   // =========================
   // GENERALES
   // =========================
@@ -6,6 +6,16 @@ const ErrorCatalog = Object.freeze({
   ARGUMENTO_INVALIDO: {
     code: "ERR-VAL-001",
     message: (stringDelArgumento) => `El argumento ${stringDelArgumento} es inválido`,
+  },
+
+  PAGINACION_PAGINA_INVALIDA: {
+    code: "ERR-VAL-002",
+    message: "El parámetro pagina debe ser un número entero mayor o igual a 1",
+  },
+
+  PAGINACION_LIMITE_INVALIDO: {
+    code: "ERR-VAL-003",
+    message: (maximo) => `El parámetro limite debe ser un número entero entre 1 y ${maximo}`,
   },
 
   RECURSO_NO_ENCONTRADO: {
@@ -77,6 +87,11 @@ const ErrorCatalog = Object.freeze({
     message: "La URL del sistema debe ser una URL válida",
   },
 
+  PROYECTO_URL_DONACIONES_INVALIDA: {
+    code: "ERR-VAL-116",
+    message: "La URL de donaciones debe ser una URL válida",
+  },
+
   // =========================
   // HABILIDADES
   // =========================
@@ -111,14 +126,12 @@ const ErrorCatalog = Object.freeze({
     message: (id) => `Ya existe una habilidad con ese título y descripción, y su id es: ${id}`,
   },
 
-  HABILIDAD_INEXISTENTE_GENERICO: {
-    code: "ERR-VAL-207",
-    message: (codigo) => `La habilidad de codigo ${codigo} no existe`,
-  },
-
   HABILIDADES_INEXISTENTES_GENERICO: {
     code: "ERR-VAL-207",
-    message: (codigos) => `Las habilidades de codigo: ${codigos.join(', ')} no existen`,
+    message: (codigo) =>
+      Array.isArray(codigo)
+        ? `Las habilidades de codigo: ${codigo.join(", ")} no existen`
+        : `La habilidad de codigo ${codigo} no existe`,
   },
   // =========================
   // COLECTIVOS
@@ -165,7 +178,7 @@ const ErrorCatalog = Object.freeze({
   },
 
   COLECTIVO_YA_DADO_DE_BAJA: {
-    code: "ERR-EST-508",
+    code: "ERR-EST-309",
     message: (id) => `El colectivo ${id} ya fue dado de baja`,
   },
 
@@ -209,7 +222,7 @@ const ErrorCatalog = Object.freeze({
   },
 
   COLABORADORA_YA_DADA_DE_BAJA: {
-    code: "ERR-EST-508",
+    code: "ERR-EST-408",
     message: (id) => `La persona colaboradora ${id} ya fue dada de baja`,
   },
 
@@ -254,7 +267,7 @@ const ErrorCatalog = Object.freeze({
   },
 
   COLABORACION_YA_DADA_DE_BAJA: {
-    code: "ERR-EST-508",
+    code: "ERR-EST-608",
     message: (id) => `La colaboración ${id} ya fue dada de baja`,
   },
 
@@ -361,19 +374,59 @@ const ErrorCatalog = Object.freeze({
     message: (nombre) => `La colaboradora ${nombre} no acepta mensajes internos`,
   },
 
-  MENSAJE_PERSONA_COLABORADORA_REQUERIDO: {
+  MENSAJE_COLECTIVO_REQUERIDO: {
     code: "ERR-VAL-802",
+    message: "El colectivo es requerido",
+  },
+
+  MENSAJE_PERSONA_COLABORADORA_REQUERIDO: {
+    code: "ERR-VAL-803",
     message: "La persona colaboradora destinataria es requerida",
   },
 
   MENSAJE_TEXTO_REQUERIDO: {
-    code: "ERR-VAL-803",
+    code: "ERR-VAL-804",
     message: "El texto del mensaje es requerido",
   },
 
+  MENSAJE_PROYECTO_REQUERIDO: {
+    code: "ERR-VAL-805",
+    message: "El proyecto es requerido",
+  },
+
+  MENSAJE_EMISOR_RQUERIDO: {
+    code: "ERR-VAL-806",
+    message: "El emisor es requerido",
+  },
+
+  MENSAJE_EMISOR_INVALIDO: {
+    code: "ERR-VAL-807",
+    message: "EL emisor debe ser un colectivo o una persona",
+  },
+
   MENSAJE_TEXTO_FORMATO: {
-    code: "ERR-VAL-804",
+    code: "ERR-VAL-811",
     message: "El texto del mensaje debe ser un texto",
+  },
+
+  MENSAJE_SIN_CONVERSACION_PREVIA: {
+    code: "ERR-VAL-812",
+    message: "Espere a ser contactado por el colectivo",
+  },
+
+  MENSAJE_COLECTIVO_NO_COINCIDE_CON_PROYECTO: {
+    code: "ERR-VAL-808",
+    message: "El proyecto debe pertenecer al colectivo",
+  },
+
+  MENSAJE_LECTOR_REQUERIDO: {
+    code: "ERR-VAL-809",
+    message: "El lector es requerido",
+  },
+
+  MENSAJE_LECTOR_INVALIDO: {
+    code: "ERR-VAL-810",
+    message: "El lector del mensaje debe ser un colectivo o una persona",
   },
 
   // =========================
@@ -395,7 +448,6 @@ const ErrorCatalog = Object.freeze({
     message: "La URL del código fuente debe ser una URL válida",
   },
 
-  // =========================
   // POSTULACION
   // =========================
 
@@ -446,6 +498,139 @@ const ErrorCatalog = Object.freeze({
     message:
       "La Postulacion ya fue resuelta, asegurese de resolver postuaciones con estado PENDIENTE",
   },
+
+  // =========================
+  // REDES SOCIALES
+  // =========================
+
+  RED_SOCIAL_FORMATO: {
+    code: "ERR-VAL-1101",
+    message: "Las redes sociales deben ser una lista",
+  },
+
+  RED_SOCIAL_TIPO_REQUERIDO: {
+    code: "ERR-VAL-1102",
+    message: "El tipo de red social es requerido",
+  },
+
+  RED_SOCIAL_TIPO_INVALIDO: {
+    code: "ERR-VAL-1103",
+    message: (tipo) =>
+      tipo ? `El tipo de red social ${tipo} no es válido` : "El tipo de red social no es válido",
+  },
+
+  RED_SOCIAL_URL_REQUERIDA: {
+    code: "ERR-VAL-1104",
+    message: "La URL de la red social es requerida",
+  },
+
+  RED_SOCIAL_URL_INVALIDA: {
+    code: "ERR-VAL-1105",
+    message: (url) =>
+      url
+        ? `La URL ${url} no es válida, debe utilizar protocolo HTTP o HTTPS`
+        : "La URL de la red social debe ser una URL válida con protocolo HTTP o HTTPS",
+  },
+
+  RED_SOCIAL_TIPO_DUPLICADO: {
+    code: "ERR-VAL-1106",
+    message: (tipo) =>
+      tipo
+        ? `No se permiten tipos de redes sociales duplicados: ${tipo}`
+        : "No se permiten dos enlaces correspondientes al mismo tipo de red social",
+  },
+  // DENUNCIAS
+  // =========================
+
+  DENUNCIA_DESCRIPCION_REQUERIDA: {
+    code: "ERR-VAL-1201",
+    message: "La descripción de la denuncia es requerida",
+  },
+  DENUNCIA_COLABORACION_NO_ACREDITA_PARTICIPACION: {
+    code: "ERR-EST-1202",
+    message: "La colaboración no acredita una participación válida en el proyecto",
+  },
+  DENUNCIA_DUPLICADA: {
+    code: "ERR-EST-1203",
+    message: "Ya existe una denuncia registrada para esta colaboración",
+  },
+  DENUNCIA_PROYECTO_SIN_COLECTIVO: {
+    code: "ERR-EST-1204",
+    message: "El proyecto asociado a la colaboración no tiene un colectivo responsable",
+  },
+  DENUNCIA_NO_ENCONTRADA: {
+    code: "ERR-NOT-1205",
+    message: (id) => `La denuncia ${id} no fue encontrada`,
+  },
+  DENUNCIA_ESTADO_INVALIDO: {
+    code: "ERR-VAL-1206",
+    message: "El estado de la denuncia debe ser: en_revision, resuelta o descartada",
+  },
+  DENUNCIA_ESTADO_REQUERIDO: {
+    code: "ERR-VAL-1207",
+    message: "El estado de la denuncia es requerido",
+  },
+
+  // =========================
+  // VALORACIONES
+  // =========================
+
+  VALORACION_COLABORACION_ID_INVALIDO: {
+    code: "ERR-VAL-1301",
+    message: "El id de la colaboración es requerido",
+  },
+  VALORACION_EVALUADOR_TIPO_FORMATO: {
+    code: "ERR-VAL-1302",
+    message: "El tipo de evaluador no es válido",
+  },
+  VALORACION_PUNTAJE_REQUERIDO: {
+    code: "ERR-VAL-1304",
+    message: "El puntaje es requerido",
+  },
+  VALORACION_COMENTARIO_REQUERIDO: {
+    code: "ERR-VAL-1305",
+    message: "El comentario es requerido",
+  },
+
+  VALORACION_PUNTAJE_FORMATO: {
+    code: "ERR-VAL-1306",
+    message: "El puntaje debe ser un número entero entre 1 y 5",
+  },
+
+  VALORACION_PUNTAJE_RANGO: {
+    code: "ERR-VAL-1307",
+    message: "El puntaje debe estar entre 1 y 5",
+  },
+
+  VALORACION_COMENTARIO_FORMATO: {
+    code: "ERR-VAL-1308",
+    message: "El comentario debe ser un texto de entre 1 y 500 caracteres",
+  },
+
+  VALORACION_COMENTARIO_LARGO: {
+    code: "ERR-VAL-1309",
+    message: "El comentario debe tener un máximo de 500 caracteres",
+  },
+
+  VALORACION_EXISTENTE: {
+    code: "ERR-EST-1310",
+    message: (colaboracionId, evaluador) =>
+      `Ya existe una valoración para la colaboración con id ${colaboracionId} y el evaluador ${evaluador}`,
+  },
+
+  VALORACION_COLABORACION_NO_FINALIZADA: {
+    code: "ERR-EST-1311",
+    message: "No se puede valorar una colaboración que no ha finalizado",
+  },
+};
+
+Object.defineProperty(ErrorCatalog, "HABILIDADES_INEXISTENTES_GENERICO", {
+  value: ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO,
+  enumerable: false,
+  writable: false,
+  configurable: false,
 });
+
+Object.freeze(ErrorCatalog);
 
 export default ErrorCatalog;

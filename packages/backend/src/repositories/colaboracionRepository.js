@@ -11,15 +11,64 @@ export class ColaboracionRepository {
   }
 
   async obtenerTodas() {
-    return await this.model.find().populate("personaColaboradora").populate("proyecto").lean();
+    return await this.model
+      .find(
+        { activo: true },
+        {
+          _id: 1,
+          personaColaboradora: {
+            $cond: { if: "$anonima", then: null, else: "$personaColaboradora" },
+          },
+          proyecto: 1,
+          perfil: 1,
+          anonima: 1,
+          activo: 1,
+        },
+      )
+      .populate("personaColaboradora")
+      .populate("proyecto")
+      .lean();
   }
 
   async obtenerPorId(id) {
+    return await this.model
+      .findById(id, {
+        _id: 1,
+        personaColaboradora: {
+          $cond: { if: "$anonima", then: null, else: "$personaColaboradora" },
+        },
+        proyecto: 1,
+        perfil: 1,
+        anonima: 1,
+        activo: 1,
+        fechaBaja: 1,
+        bajaPor: 1,
+      })
+      .populate("personaColaboradora")
+      .populate("proyecto")
+      .lean();
+  }
+
+  async obtenerPorIdParaAdmin(id) {
+    return await this.model
+      .findById(id)
+      .populate({ path: "personaColaboradora", select: "+contactos" });
+  }
+
+  async obtenerPorIdCompleto(id) {
     return await this.model
       .findById(id)
       .populate("personaColaboradora")
       .populate("proyecto")
       .lean();
+  }
+
+  async obtenerPorPersonaColaboradoraId(personaColaboradoraId) {
+    return await this.model.find({ personaColaboradora: personaColaboradoraId }).lean();
+  }
+
+  async obtenerPorProyectoIds(proyectoIds) {
+    return await this.model.find({ proyecto: { $in: proyectoIds } }).lean();
   }
 
   async contarActivasPorPerfil(proyectoId, perfilId) {
@@ -31,14 +80,27 @@ export class ColaboracionRepository {
   }
 
   async desactivar(id) {
-  return await this.model.findByIdAndUpdate(
-    id,
-    {
-      activo: false,
-      fechaBaja: new Date(),
-      //bajaPor: OrigenBaja.ADMIN, // resolver cuando se implemente la autenticación y autorización para obtener el usuario que realiza la baja
-    },
-    { new: true }
-  );
+    return await this.model.findByIdAndUpdate(
+      id,
+      {
+        activo: false,
+        fechaBaja: new Date(),
+      },
+      { new: true },
+    );
+  }
+
+  //Estadisticas
+  async contarTotalYAnonimas() {
+    return await this.model.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          anonimas: { $sum: { $cond: ["$anonima", 1, 0] } },
+        },
+      },
+      { $project: { _id: 0, total: 1, anonimas: 1 } },
+    ]);
   }
 }

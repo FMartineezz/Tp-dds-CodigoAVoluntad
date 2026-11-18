@@ -31,9 +31,6 @@ export class ColaboracionService {
       }
     }
 
-    console.log("Perfil obtenido:", perfil);
-    console.log("Tipo de perfil:", typeof perfil);
-    console.log("ID del perfil:", perfil?._id);
     const colaboracion = new Colaboracion(persona, proyecto, perfil, anonima);
     const colaboracionGuardada = await this.colaboracionRepository.guardar(colaboracion);
     colaboracion.id = colaboracionGuardada.id;
@@ -67,5 +64,13 @@ export class ColaboracionService {
     }
 
     await this.colaboracionRepository.desactivar(id);
+  }
+
+  //Estadisticas
+  async obtenerEstadisticas() {
+    const resultado = await this.colaboracionRepository.contarTotalYAnonimas();
+    const { total, anonimas } = resultado[0] ?? { total: 0, anonimas: 0 };
+
+    return { total, anonimas, publicas: total - anonimas };
   }
 }

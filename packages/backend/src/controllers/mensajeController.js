@@ -3,23 +3,40 @@ export class MensajeController {
     this.mensajeService = mensajeService;
   }
 
-  enviarMensajeDesdeColectivo = async (req, res) => {
-    const colectivoId = req.params.colectivoId;
-
-    const mensaje = await this.mensajeService.enviarMensajeDesdeColectivo(
-      colectivoId,
+  enviarMensaje = async (req, res) => {
+    const mensaje = await this.mensajeService.enviarMensaje(
+      req.body.colectivoId,
       req.body.personaColaboradoraId,
+      req.body.proyectoId,
+      req.body.emisor,
       req.body.texto,
     );
-
     res.status(201).json(mensaje);
   };
 
-  verBandejaDeEntradaColaboradora = async (req, res) => {
+  marcarComoLeidos = async (req, res) => {
+    const resultado = await this.mensajeService.marcarComoLeidos(
+      req.body.colectivoId,
+      req.body.personaColaboradoraId,
+      req.body.proyectoId,
+      req.body.lector,
+      req.body.leido,
+    );
+    res.status(200).json(resultado);
+  };
+
+  verMensajesColaboradora = async (req, res) => {
     const personaColaboradoraId = req.params.personaColaboradoraId;
 
-    const mensajes =
-      await this.mensajeService.obtenerBandejaDeEntradaColaboradora(personaColaboradoraId);
+    const mensajes = await this.mensajeService.verMensajesColaboradora(personaColaboradoraId);
+
+    res.status(200).json(mensajes);
+  };
+
+  verMensajesColectivo = async (req, res) => {
+    const colectivoId = req.params.colectivoId;
+
+    const mensajes = await this.mensajeService.verMensajesColectivo(colectivoId);
 
     res.status(200).json(mensajes);
   };

@@ -1,3 +1,4 @@
+import { respuestaPaginada } from "../utils/paginacion.js";
 export class PersonaColaboradoraController {
   constructor({ personaColaboradoraService, busquedaService }) {
     this.personaColaboradoraService = personaColaboradoraService;
@@ -15,15 +16,29 @@ export class PersonaColaboradoraController {
       req.body.presentacion,
       req.body.contactos,
       req.body.bloquearMensajeInterno,
+      req.body.redesSociales,
     );
 
     res.status(201).location(`/colaboradoras/${persona.id}`).json(persona);
   };
 
-  obtenerPersonasColaboradoras = async (req, res) => {
-    const personas = await this.personaColaboradoraService.obtenerPersonasColaboradoras();
+  actualizarPersonaColaboradora = async (req, res) => {
+    const id = req.params.id;
 
-    res.status(200).json(personas);
+    const persona = await this.personaColaboradoraService.actualizarPersonaColaboradora(
+      id,
+      req.body,
+    );
+
+    res.status(200).json(persona);
+  };
+
+  obtenerPersonasColaboradoras = async (req, res) => {
+    const pagina = await this.personaColaboradoraService.obtenerPersonasColaboradoras(
+      req.paginacion,
+    );
+
+    res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };
 
   obtenerPersonaColaboradoraPorId = async (req, res) => {
@@ -33,13 +48,13 @@ export class PersonaColaboradoraController {
 
     res.status(200).json(persona);
   };
-  
+
   obtenerProyectosAcordes = async (req, res) => {
     const id = req.params.id;
-    
-    const proyectos = await this.busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(id);
-       
-    res.status(200).json(proyectos);
+
+    const pagina = await this.busquedaService.buscarProyectosParaColaboradora(id, req.paginacion);
+
+    res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };
 
   eliminarPersonaColaboradora = async (req, res) => {

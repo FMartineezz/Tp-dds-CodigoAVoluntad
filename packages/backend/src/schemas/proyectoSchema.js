@@ -30,6 +30,11 @@ const proyectoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    urlDonaciones: {
+      type: String,
+      required: false,
+      default: null,
+    },
     logros: {
       type: [logroSchema],
       default: [],

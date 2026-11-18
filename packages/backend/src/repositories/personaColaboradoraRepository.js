@@ -1,4 +1,5 @@
 import { PersonaColaboradoraModel } from "../schemas/personaColaboradoraSchema.js";
+import { paginar } from "./paginar.js";
 
 export class PersonaColaboradoraRepository {
   constructor() {
@@ -14,31 +15,48 @@ export class PersonaColaboradoraRepository {
     return await this.model.find().lean();
   }
 
+  async obtenerPagina(paginacion) {
+    return await paginar(this.model, {}, paginacion);
+  }
+
   async obtenerPorId(id) {
     return await this.model.findById(id).lean();
   }
 
   async obtenerPorIdConContactos(id) {
-    return await this.model.findById(id).lean().select('+contactos');
+    return await this.model.findById(id).lean().select("+contactos");
   }
 
   async obtenerPorHabilidadId(habilidadesIds) {
     return await this.model.find({ habilidades: { $in: habilidadesIds } }).lean();
   }
 
+  async obtenerPaginaPorHabilidadId(habilidadesIds, paginacion) {
+    return await paginar(this.model, { habilidades: { $in: habilidadesIds } }, paginacion);
+  }
+
+  async actualizar(id, cambios) {
+    return await this.model
+      .findByIdAndUpdate(id, { $set: cambios }, { new: true, runValidators: true })
+      .lean();
+  }
+
   async eliminar(id) {
     const colaboradora = await this.model.findOneAndUpdate(
       { _id: id, activo: true },
-      { $set: { 
-        nombreFantasia: "UserEliminado",
-        git: `github:UserEliminado${id}`,
-        nombre: "Usuario",
-        apellido: "Eliminado",
-        pronombres: [],
-        presentacion: "Presentacion Usuario Eliminado",
-        contactos: [],
-        activo: false } },
-      { new: true }
+      {
+        $set: {
+          nombreFantasia: "UserEliminado",
+          git: `github:UserEliminado${id}`,
+          nombre: "Usuario",
+          apellido: "Eliminado",
+          pronombres: [],
+          presentacion: "Presentacion Usuario Eliminado",
+          contactos: [],
+          activo: false,
+        },
+      },
+      { new: true },
     );
 
     if (colaboradora) {
@@ -47,9 +65,41 @@ export class PersonaColaboradoraRepository {
 
     const existe = await this.model.findById(id);
     if (!existe) {
-      return { actualizado: false, razon: 'NO_ENCONTRADO' };
+      return { actualizado: false, razon: "NO_ENCONTRADO" };
     }
 
-    return { actualizado: false, razon: 'YA_DADO_DE_BAJA' };
+    return { actualizado: false, razon: "YA_DADO_DE_BAJA" };
+  }
+
+  //Estadisticas
+  async obtenerEstadisticas() {
+    return await this.model.aggregate([
+      {
+        $lookup: {
+          from: "postulaciones",
+          localField: "_id",
+          foreignField: "personaColaboradora",
+          as: "postulacionesInfo",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          bloqueanMensajes: { $sum: { $cond: ["$bloquearMensajeInterno", 1, 0] } },
+          promedioHabilidadesPorPersona: { $avg: { $size: "$habilidades" } },
+          promedioPostulacionesPorPersona: { $avg: { $size: "$postulacionesInfo" } },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          total: 1,
+          bloqueanMensajes: 1,
+          promedioHabilidadesPorPersona: { $round: ["$promedioHabilidadesPorPersona", 2] },
+          promedioPostulacionesPorPersona: { $round: ["$promedioPostulacionesPorPersona", 2] },
+        },
+      },
+    ]);
   }
 }

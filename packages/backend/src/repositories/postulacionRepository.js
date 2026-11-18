@@ -58,4 +58,54 @@ export class PostulacionRepository {
       )
       .lean();
   }
+
+  async rechazarPendientesPorProyectos(proyectoIds) {
+    if (!proyectoIds || proyectoIds.length === 0) return;
+
+    await this.model.updateMany(
+      {
+        proyecto: { $in: proyectoIds },
+        estado: EstadoPostulacion.PENDIENTE,
+      },
+      {
+        $set: {
+          estado: EstadoPostulacion.RECHAZADA,
+          fechaResolucion: new Date(),
+        },
+      },
+    );
+  }
+
+  async obtenerEstadisticas() {
+    return await this.model.aggregate([
+      {
+        $group: {
+          _id: "$proyecto",
+          cantidadPostulaciones: { $sum: 1 },
+          cantidadPostulacionesAceptadas: {
+            $sum: { $cond: [{ $eq: ["$estado", EstadoPostulacion.ACEPTADA] }, 1, 0] },
+          },
+          cantidadPostulacionesPendientes: {
+            $sum: { $cond: [{ $eq: ["$estado", EstadoPostulacion.PENDIENTE] }, 1, 0] },
+          },
+          cantidadPostulacionesRechazadas: {
+            $sum: { $cond: [{ $eq: ["$estado", EstadoPostulacion.RECHAZADA] }, 1, 0] },
+          },
+        },
+      },
+      { $sort: { cantidadPostulaciones: -1 } },
+      { $lookup: { from: "proyectos", localField: "_id", foreignField: "_id", as: "proyecto" } },
+      { $unwind: "$proyecto" },
+      {
+        $project: {
+          _id: 0,
+          proyecto: "$proyecto.titulo",
+          cantidadPostulaciones: 1,
+          cantidadPostulacionesAceptadas: 1,
+          cantidadPostulacionesPendientes: 1,
+          cantidadPostulacionesRechazadas: 1,
+        },
+      },
+    ]);
+  }
 }

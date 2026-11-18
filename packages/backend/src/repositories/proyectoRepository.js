@@ -1,4 +1,5 @@
 import { ProyectoModel } from "../schemas/proyectoSchema.js";
+import { paginar } from "./paginar.js";
 
 export class ProyectoRepository {
   constructor() {
@@ -12,6 +13,10 @@ export class ProyectoRepository {
 
   async obtenerTodos() {
     return await this.model.find().lean();
+  }
+
+  async obtenerPagina(paginacion) {
+    return await paginar(this.model, {}, paginacion);
   }
 
   async obtenerPorId(id) {
@@ -91,18 +96,14 @@ export class ProyectoRepository {
     return perfil;
   }
 
-  async finalizarProyecto(id) {
+  async actualizarProyecto(id, cambios) {
     return await this.model
-      .findByIdAndUpdate(
-        id,
-        {
-          $set: {
-            finalizado: true,
-          },
-        },
-        { new: true },
-      )
+      .findByIdAndUpdate(id, { $set: cambios }, { new: true, runValidators: true })
       .lean();
+  }
+
+  async finalizarProyecto(id) {
+    return await this.actualizarProyecto(id, { finalizado: true });
   }
 
   async obtenerPorAlgunaHabilidad(idsHabilidad) {
@@ -111,7 +112,17 @@ export class ProyectoRepository {
         finalizado: { $ne: true },
         "perfiles.habilidadesRequeridas": { $in: idsHabilidad },
       })
+      .populate("colectivo")
       .lean();
+  }
+
+  async obtenerPaginaPorAlgunaHabilidad(idsHabilidad, paginacion) {
+    return await paginar(
+      this.model,
+      { finalizado: { $ne: true }, "perfiles.habilidadesRequeridas": { $in: idsHabilidad } },
+      paginacion,
+      { populate: "colectivo" },
+    );
   }
 
   async guardarLogro(proyectoId, logro) {
@@ -186,15 +197,43 @@ export class ProyectoRepository {
 
     return logro;
   }
+
   async cerrarProyectoSi(fechaActual) {
-    const resultado = await this.model.updateMany(
+    const proyectosACerrar = await this.model
+      .find(
+        {
+          finalizado: { $ne: true },
+          fechaCierre: { $exists: true, $ne: null, $lte: fechaActual },
+        },
+        { _id: 1 },
+      )
+      .lean();
+
+    const ids = proyectosACerrar.map((p) => p._id);
+
+    if (ids.length > 0) {
+      await this.model.updateMany({ _id: { $in: ids } }, { $set: { finalizado: true } });
+    }
+
+    return ids;
+  }
+
+  async obtenerPorColectivoId(colectivoId) {
+    return await this.model.find({ colectivo: colectivoId }).lean();
+  }
+
+  //Estadisticas
+  async contarTotalYActicvos() {
+    return await this.model.aggregate([
       {
-        finalizado: { $ne: true },
-        fechaCierre: { $exists: true, $lte: fechaActual },
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          activos: { $sum: { $cond: ["$finalizado", 0, 1] } },
+        },
       },
-      { $set: { finalizado: true } },
-    );
-    console.log(resultado);
+      { $project: { _id: 0, total: 1, activos: 1 } },
+    ]);
   }
 }
 

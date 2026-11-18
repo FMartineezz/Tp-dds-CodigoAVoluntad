@@ -10,7 +10,21 @@ export class BusquedaService {
       habilidad.toString(),
     );
 
-    return this.personaColaboradoraService.obtenerPersonasConAlgunaHabilidad(idsHabilidadesRequeridas);
+    return this.personaColaboradoraService.obtenerPersonasConAlgunaHabilidad(
+      idsHabilidadesRequeridas,
+    );
+  }
+
+  async obtenerPersonasColaboradorasAcordesAProyecto(proyecto) {
+    const idsHabilidadesRequeridas = new Set();
+    for (const perfil of proyecto.perfiles) {
+      perfil.habilidadesRequeridas.forEach((habilidad) => {
+        idsHabilidadesRequeridas.add(habilidad.toString());
+      });
+    }
+    return this.personaColaboradoraService.obtenerPersonasConAlgunaHabilidad([
+      ...idsHabilidadesRequeridas,
+    ]);
   }
 
   async obtenerProyectosAcordesALaPersonaColaboradora(personaColaboradoraId) {
@@ -19,5 +33,30 @@ export class BusquedaService {
     const idsDeHabilidad = personaColaboradora.habilidades.map((habilidad) => habilidad.toString());
 
     return this.proyectoService.obtenerProyectosConAlgunaHabilidad(idsDeHabilidad);
+  }
+
+  // Versiones paginadas para los endpoints de búsqueda. Las de arriba devuelven todo porque
+  // las usan las notificaciones automáticas, que tienen que avisarle a cada coincidencia.
+  async buscarColaboradorasParaPerfil(proyectoId, perfilId, paginacion) {
+    const perfil = await this.proyectoService.obtenerPerfilPorId(proyectoId, perfilId);
+    const idsHabilidadesRequeridas = perfil.habilidadesRequeridas.map((habilidad) =>
+      habilidad.toString(),
+    );
+
+    return this.personaColaboradoraService.obtenerPaginaDePersonasConAlgunaHabilidad(
+      idsHabilidadesRequeridas,
+      paginacion,
+    );
+  }
+
+  async buscarProyectosParaColaboradora(personaColaboradoraId, paginacion) {
+    const personaColaboradora =
+      await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaColaboradoraId);
+    const idsDeHabilidad = personaColaboradora.habilidades.map((habilidad) => habilidad.toString());
+
+    return this.proyectoService.obtenerPaginaDeProyectosConAlgunaHabilidad(
+      idsDeHabilidad,
+      paginacion,
+    );
   }
 }
