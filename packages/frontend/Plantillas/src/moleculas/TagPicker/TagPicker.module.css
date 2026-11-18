@@ -1,0 +1,14 @@
+/* Selector de etiquetas: las elegidas se ven como chips y un desplegable agrega más. */
+.picker { display: grid; gap: var(--space-2); align-content: start; }
+
+.pl { font-size: var(--text-small); font-weight: 600; }
+
+.hint { font-size: var(--text-small); color: var(--color-text-muted); }
+
+.pbox { min-height: var(--tap-target); display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; padding: var(--space-2) var(--space-3); background: var(--color-surface); border: var(--border); border-radius: var(--radius); }
+
+.chipX { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2); background: var(--color-fill); border: var(--border); border-radius: var(--radius-sm); font-weight: 600; font-size: var(--text-label); line-height: 1.3; cursor: pointer; }
+
+.chipX:hover { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+
+.add { appearance: none; padding: var(--space-1) var(--space-3); background: transparent; border: 2px dashed var(--color-border); border-radius: var(--radius-sm); font-weight: 600; font-size: var(--text-label); cursor: pointer; }

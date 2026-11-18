@@ -1,0 +1,2 @@
+/* Diálogos con formulario: PostularDialog, DenunciaDialog y ValoracionDialog (todos sobre ConfirmDialog). */
+.form { display: grid; gap: var(--space-4); }

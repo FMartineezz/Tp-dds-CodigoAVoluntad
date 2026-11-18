@@ -1,0 +1,4 @@
+/* Barra de progreso (avance de un proyecto). */
+.bar { flex: 1; min-width: 5rem; max-width: 14rem; height: 0.9rem; border: var(--border); border-radius: 99px; background: var(--color-surface); overflow: hidden; align-self: center; display: block; }
+
+.bar span { display: block; height: 100%; background: var(--color-accent); }

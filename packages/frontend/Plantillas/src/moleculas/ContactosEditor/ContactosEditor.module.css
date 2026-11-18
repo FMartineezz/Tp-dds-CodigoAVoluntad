@@ -1,0 +1,18 @@
+/* Editor de medios de contacto internos (correo, WhatsApp, SMS). */
+.contactos { display: grid; gap: var(--space-3); }
+
+.clist { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+.clist li { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3); background: var(--color-fill); border: var(--border-thin); border-radius: var(--radius-sm); font-size: var(--text-small); }
+
+.clist button { display: grid; place-items: center; width: 1.6rem; height: 1.6rem; background: transparent; border: 0; cursor: pointer; border-radius: 50%; }
+
+.clist button:hover { background: var(--ink-900); color: var(--paper-100); }
+
+.cadd { display: grid; grid-template-columns: 9rem 1fr auto; gap: var(--space-3); align-items: end; }
+
+@media (max-width: 800px) { .cadd { grid-template-columns: 1fr; } }
+
+.pl { font-size: var(--text-small); font-weight: 600; }
+
+.hint { font-size: var(--text-small); color: var(--color-text-muted); }

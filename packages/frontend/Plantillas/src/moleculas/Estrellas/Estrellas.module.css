@@ -1,0 +1,10 @@
+/* Puntaje de 1 a 5 con estrellas (valoraciones). */
+.estrellas { display: inline-flex; gap: 2px; }
+
+.estrellas .on { color: var(--ink-900); }
+
+.estrellas .on svg { fill: currentColor; }
+
+.estrellas .off { color: var(--sand-400); }
+
+.estrellas .off svg { fill: currentColor; }

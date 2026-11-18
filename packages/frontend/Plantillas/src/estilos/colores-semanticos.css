@@ -1,0 +1,36 @@
+/* =====================================================================
+   COLORES SEMÁNTICOS  ·  qué color cumple cada ROL
+   =====================================================================
+   Los componentes usan SOLO estas variables (--color-*), nunca la paleta
+   directa. Así podés cambiar el "rol" sin tocar los componentes.
+
+   Dos formas de cambiar la apariencia:
+     1) Cambiar un hex  →  paleta.css  (cambia todo lo que use ese color).
+     2) Cambiar un rol  →  acá. Ej: --color-accent: var(--green-700) pinta de
+        verde todos los enlaces, avances y botones principales con sesión. */
+
+:root {
+  /* Superficies */
+  --color-bg: var(--paper-200);          /* fondo de la página */
+  --color-surface: var(--paper-100);     /* tarjetas, formularios, paneles */
+  --color-inverse-bg: var(--ink-900);    /* bloques oscuros: pie, encabezado de tabla, botón principal */
+  --color-inverse-text: var(--paper-200);/* texto sobre los bloques oscuros */
+
+  /* Texto y bordes */
+  --color-text: var(--ink-900);          /* texto principal */
+  --color-text-muted: var(--ink-700);    /* texto de apoyo */
+  --color-border: var(--ink-900);        /* todos los bordes */
+
+  /* Acciones y estados de interfaz */
+  --color-accent: var(--blue-600);       /* enlaces, avance, botón principal con sesión, selección */
+  --color-focus: var(--blue-600);        /* aro de foco al navegar con teclado */
+  --color-hover: var(--sand-200);        /* fondo al pasar el mouse */
+  --color-selected: var(--sand-200);     /* fondo del elemento elegido (chat, fila…) */
+  --color-fill: var(--sand-400);         /* relleno de etiquetas, avatares, resaltados */
+
+  /* Significado */
+  --color-success: var(--green-700);     /* positivo */
+  --color-danger: var(--red-700);        /* error / destructivo */
+  --color-warning: var(--yellow-400);    /* advertencia (único uso del amarillo) */
+  --color-print: var(--red-500);         /* decoración "tinta roja" (subrayados, números grandes) */
+}
