@@ -12,6 +12,7 @@ import {
 } from "../../src/container.js";
 import { EstadoPostulacion } from "../../src/models/postulacion.js";
 import { PostulacionModel } from "../../src/schemas/postulacionSchema.js";
+import { ColectivoModel } from "../../src/schemas/colectivoSchema.js";
 
 usarBaseDeDatos();
 
@@ -159,6 +160,22 @@ describe("GET /estadisticas", () => {
       },
     });
   });
+
+  test("los colectivos dados de baja no cuentan", async () => {
+    // Preparación
+    await colectivoService.crearColectivo("Huerta Comunitaria", "Huerta", "caba", "ong");
+    const comedor = await colectivoService.crearColectivo("Comedor", "Comedor", "caba", "asamblea");
+    await ColectivoModel.updateOne({ _id: comedor._id ?? comedor.id }, { activo: false });
+
+    // Ejecución
+    const respuesta = await getEstadisticas();
+
+    // Validación
+    expect(respuesta.body.estadisticasColectivos).toEqual({
+      total: 1,
+      porUbicacion: [{ ubicacion: "caba", cantidad: 1 }],
+    });
+  });
 });
 
 // Va al final: el contador del rate limit vive en memoria (por IP) durante todo el archivo.
@@ -197,9 +214,7 @@ describe("Rate limit de /estadisticas", () => {
     expect((await request(app).get("/estadisticas")).status).toBe(429);
   });
 
-  // BUG: el skip compara `apiKey == process.env.MI_API_KEY`. Si MI_API_KEY no está configurada,
-  // un pedido sin clave da `undefined == undefined` → true y el rate limit no se aplica a nadie.
-  test.failing("sin MI_API_KEY configurada igual limita los pedidos sin clave", async () => {
+  test("sin MI_API_KEY configurada igual limita los pedidos sin clave", async () => {
     // Preparación
     const original = process.env.MI_API_KEY;
     delete process.env.MI_API_KEY;

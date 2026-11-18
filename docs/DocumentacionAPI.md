@@ -16,11 +16,13 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
   }
   ```
 
-  Los códigos salen de `errorCatalog.js`. Si ocurre un error no controlado, se devuelve `500` con `code: "ERR-CSR-500"`. Esto también pasa hoy si un id de la ruta no tiene formato de ObjectId (por ejemplo `/proyectos/abc`).
+  Los códigos salen de `errorCatalog.js`. Si ocurre un error no controlado, se devuelve `500` con `code: "ERR-CSR-500"`.
+
+- **Ids inválidos:** si un id de la ruta no tiene formato de ObjectId (por ejemplo `/proyectos/abc`), se responde `404` con el código de "no encontrado" de ese recurso (por ejemplo `ERR-NOT-108` para proyectos), porque ese recurso no puede existir.
 
 - **Altas:** las respuestas `201` incluyen el header `Location` con la URL del recurso creado (salvo los mensajes).
 - **Lecturas:** los `GET` devuelven los documentos tal como están en la base: con `_id`, `createdAt`, `updatedAt` y `__v`, y las referencias a otras entidades como ids.
-- **Paginación:** `GET /proyectos`, `GET /colectivos`, `GET /colaboradoras` y las dos [búsquedas](#búsquedas) están paginados. Aceptan los parámetros de query `pagina` (desde 1, por defecto 1) y `limite` (entre 1 y 100, por defecto 20), y ordenan del más nuevo al más viejo. Responden:
+- **Paginación:** `GET /proyectos`, `GET /colectivos`, `GET /colaboradoras`, `GET /colectivos/:colectivoId/proyectos` y las dos [búsquedas](#búsquedas) están paginados. Aceptan los parámetros de query `pagina` (desde 1, por defecto 1) y `limite` (entre 1 y 100, por defecto 20), y ordenan del más nuevo al más viejo. Responden:
 
   ```json
   {
@@ -42,10 +44,10 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | [Habilidades](#habilidades)       | `GET /habilidades`, `GET /habilidades/:id`, `POST /habilidades`                                                                                                                             |
 | [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`, `PATCH /colectivos/:id`                                                                                                       |
 | [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `POST /colaboradoras`, `PATCH /colaboradoras/:id`                                                                                           |
-| [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `POST /proyectos`, `PATCH /proyectos/:id`                                                                                                           |
+| [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `GET /colectivos/:colectivoId/proyectos`, `POST /proyectos`, `PATCH /proyectos/:id`                                                                 |
 | [Perfiles](#perfiles)             | `GET`, `POST /proyectos/:idProyecto/perfiles`; `GET`, `PATCH`, `DELETE /proyectos/:idProyecto/perfiles/:idPerfil`                                                                           |
 | [Logros](#logros)                 | `GET`, `POST /proyectos/:proyectoId/logros`; `GET`, `PATCH`, `DELETE /proyectos/:proyectoId/logros/:logroId`                                                                                |
-| [Colaboraciones](#colaboraciones) | `GET /colaboraciones`, `GET /colaboraciones/:id`, `DELETE /colaboraciones/:id`                                                                                                              |
+| [Colaboraciones](#colaboraciones) | `GET /colaboraciones`, `GET /colaboraciones/:id`, `DELETE /colaboraciones/:id`, `GET /colaboradoras/:personaColaboradoraId/colaboraciones`, `GET /proyectos/:proyectoId/colaboraciones`     |
 | [Postulaciones](#postulaciones)   | `POST /proyectos/:proyectoId/perfiles/:perfilId/postulaciones`, `PATCH /postulaciones/:postulacionId`, `GET /colaboradoras/:id/postulaciones`, `GET /colectivos/:colectivoId/postulaciones` |
 | [Búsquedas](#búsquedas)           | `GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes`, `GET /colaboradoras/:id/proyectos-acordes`                                                                           |
 | [Mensajes](#mensajes)             | `POST /colectivos/:colectivoId/mensajes`, `GET /colaboradoras/:personaColaboradoraId/mensajes`                                                                                              |
@@ -349,12 +351,13 @@ Actualización parcial de una colaboradora. Si `redesSociales` se omite, se cons
 
 ## Proyectos
 
-| Método | Path             | Descripción                          |
-| ------ | ---------------- | ------------------------------------ |
-| GET    | `/proyectos`     | Lista todos los proyectos            |
-| GET    | `/proyectos/:id` | Obtiene un proyecto por id           |
-| POST   | `/proyectos`     | Crea un proyecto con sus perfiles    |
-| PATCH  | `/proyectos/:id` | Finaliza un proyecto (cierre manual) |
+| Método | Path                                 | Descripción                          |
+| ------ | ------------------------------------ | ------------------------------------ |
+| GET    | `/proyectos`                         | Lista todos los proyectos            |
+| GET    | `/proyectos/:id`                     | Obtiene un proyecto por id           |
+| GET    | `/colectivos/:colectivoId/proyectos` | Lista los proyectos de un colectivo  |
+| POST   | `/proyectos`                         | Crea un proyecto con sus perfiles    |
+| PATCH  | `/proyectos/:id`                     | Finaliza un proyecto (cierre manual) |
 
 ### GET `/proyectos`
 
@@ -405,7 +408,7 @@ Actualización parcial de una colaboradora. Si `redesSociales` se omite, se cons
 }
 ```
 
-`colectivo` es el id del colectivo; en los perfiles, las habilidades son ids.
+En este listado `colectivo` viene con su id y su nombre (`{ "_id": "...", "nombre": "Fundación Sur" }`), para mostrarlo sin otro pedido. En los perfiles, las habilidades son ids.
 
 ### GET `/proyectos/:id`
 
@@ -416,6 +419,20 @@ Actualización parcial de una colaboradora. Si `redesSociales` se omite, se cons
 | Status | code          | Cuándo                           |
 | ------ | ------------- | -------------------------------- |
 | 404    | `ERR-NOT-108` | No existe un proyecto con ese id |
+
+### GET `/colectivos/:colectivoId/proyectos`
+
+Proyectos publicados por un colectivo, en todos sus estados (abiertos, con búsqueda cerrada y finalizados). Lo usan la página pública del colectivo y su panel.
+
+**Respuesta 200:** paginada (ver [Paginación](#info-general)), con la misma forma que `GET /proyectos` (`colectivo` viene con su id y su nombre). Parámetros opcionales: `?pagina=1&limite=20`.
+
+**Errores:**
+
+| Status | code          | Cuándo                                       |
+| ------ | ------------- | -------------------------------------------- |
+| 404    | `ERR-NOT-305` | No existe un colectivo con ese id            |
+| 400    | `ERR-VAL-002` | `pagina` no es un entero mayor o igual a 1   |
+| 400    | `ERR-VAL-003` | `limite` no es un entero entre 1 y el máximo |
 
 ### POST `/proyectos`
 
@@ -742,11 +759,13 @@ Para el tope de 100% se cuenta el porcentaje **nuevo** del logro en lugar del an
 
 > **Cambio:** ya no existe `POST /colaboraciones`. Las colaboraciones se crean al **aceptar una postulación** (`PATCH /postulaciones/:postulacionId` con `estado: \"aceptada\"`, ver [Postulaciones](#postulaciones)).
 
-| Método | Path                  | Descripción                               |
-| ------ | --------------------- | ----------------------------------------- |
-| GET    | `/colaboraciones`     | Lista todas las colaboraciones            |
-| GET    | `/colaboraciones/:id` | Obtiene una colaboración por id           |
-| DELETE | `/colaboraciones/:id` | Da de baja una colaboración (baja lógica) |
+| Método | Path                                                   | Descripción                                     |
+| ------ | ------------------------------------------------------ | ----------------------------------------------- |
+| GET    | `/colaboraciones`                                      | Lista todas las colaboraciones                  |
+| GET    | `/colaboraciones/:id`                                  | Obtiene una colaboración por id                 |
+| DELETE | `/colaboraciones/:id`                                  | Da de baja una colaboración (baja lógica)       |
+| GET    | `/colaboradoras/:personaColaboradoraId/colaboraciones` | Historial de colaboraciones de una persona      |
+| GET    | `/proyectos/:proyectoId/colaboraciones`                | Equipo de un proyecto (activas y dadas de baja) |
 
 ### GET `/colaboraciones`
 
@@ -790,6 +809,8 @@ Para el tope de 100% se cuenta el porcentaje **nuevo** del logro en lugar del an
 
 Baja lógica: la colaboración queda con `activo: false` y `fechaBaja`, deja de aparecer en `GET /colaboraciones` y libera el cupo del perfil.
 
+Parámetro de query opcional `por=persona` o `por=colectivo`: registra quién dio la baja (queda en `bajaPor`). Ejemplo: `DELETE /colaboraciones/6acf...a7?por=colectivo`.
+
 **Respuesta 200:**
 
 ```json
@@ -801,7 +822,53 @@ Baja lógica: la colaboración queda con `activo: false` y `fechaBaja`, deja de 
 | Status | code          | Cuándo                                 |
 | ------ | ------------- | -------------------------------------- |
 | 404    | `ERR-NOT-506` | No existe una colaboración con ese id  |
+| 400    | `ERR-VAL-509` | `por` no es `persona` ni `colectivo`   |
 | 409    | `ERR-EST-508` | La colaboración ya estaba dada de baja |
+
+### GET `/colaboradoras/:personaColaboradoraId/colaboraciones`
+
+Historial completo de la persona: activas y dadas de baja, **incluidas sus colaboraciones anónimas** (es su propio historial). Ordenadas de la más nueva a la más vieja. El proyecto viene adentro, con `titulo`, `finalizado`, `busquedaCerrada`, `logros`, `perfiles` y `colectivo: { _id, nombre }`.
+
+**Respuesta 200:**
+
+```json
+[
+  {
+    "_id": "6acfd66a64d02459ba8dc6a7",
+    "personaColaboradora": "6acfd66164d02459ba8dc6a0",
+    "proyecto": {
+      "_id": "6acfd66264d02459ba8dc6a2",
+      "titulo": "Sitio web institucional",
+      "colectivo": { "_id": "6acfd66164d02459ba8dc69f", "nombre": "Fundación Sur" },
+      "finalizado": false,
+      "...": "..."
+    },
+    "perfil": "6acfd66264d02459ba8dc6a3",
+    "anonima": true,
+    "activo": false,
+    "fechaBaja": "2026-11-02T10:00:00.000Z",
+    "bajaPor": "persona"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                                |
+| ------ | ------------- | ------------------------------------- |
+| 404    | `ERR-NOT-405` | No existe una colaboradora con ese id |
+
+### GET `/proyectos/:proyectoId/colaboraciones`
+
+Equipo del proyecto: activas y dadas de baja (filtrar por `activo` para el equipo actual). En las anónimas `personaColaboradora` es `null`; en las demás trae `_id`, `nombreFantasia`, `habilidades` y `presentacion`, sin medios de contacto.
+
+**Respuesta 200:** array de colaboraciones (`_id`, `personaColaboradora`, `proyecto` (id), `perfil`, `anonima`, `activo`, `fechaBaja`, `bajaPor`).
+
+**Errores:**
+
+| Status | code          | Cuándo                           |
+| ------ | ------------- | -------------------------------- |
+| 404    | `ERR-NOT-108` | No existe un proyecto con ese id |
 
 ---
 
@@ -922,7 +989,9 @@ El colectivo resuelve una postulación `pendiente`.
   {
     "id": "6acfd66a64d02459ba8dc6b1",
     "proyecto": "Plataforma de Donaciones",
+    "proyectoId": "6acfd66264d02459ba8dc6a2",
     "perfil": "Desarrollo frontend",
+    "perfilId": "6acfd66264d02459ba8dc6a3",
     "estado": "pendiente",
     "anonima": false
   }
@@ -964,7 +1033,9 @@ El colectivo resuelve una postulación `pendiente`.
       "presentacion": "Desarrolladora Frontend apasionada por proyectos comunitarios."
     },
     "proyecto": "Plataforma de Donaciones",
+    "proyectoId": "6acfd66264d02459ba8dc6a2",
     "perfil": "Desarrollo frontend",
+    "perfilId": "6acfd66264d02459ba8dc6a3",
     "estado": "pendiente"
   }
 ]

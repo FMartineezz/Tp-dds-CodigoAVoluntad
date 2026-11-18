@@ -251,9 +251,7 @@ describe("ColectivoService", () => {
       );
     });
 
-    // BUG: eliminarColectivo nunca llama a repository.eliminarColectivo, así que el colectivo
-    // sigue activo después de "eliminarlo" y sigue apareciendo en el listado.
-    test.failing("da de baja (lógica) el colectivo", async () => {
+    test("da de baja (lógica) el colectivo", async () => {
       // Preparación
       const creado = await crearColectivo();
 
@@ -269,10 +267,7 @@ describe("ColectivoService", () => {
       });
     });
 
-    // BUG: la condición está invertida (lanza "ya dado de baja" si está activo) y además `activo`
-    // tiene select:false, así que obtenerPorId nunca lo trae y la condición nunca se cumple:
-    // eliminar un colectivo ya dado de baja no falla.
-    test.failing("falla con 409 si el colectivo ya estaba dado de baja", async () => {
+    test("falla con 409 si el colectivo ya estaba dado de baja", async () => {
       // Preparación
       const creado = await crearColectivo();
       await ColectivoModel.findByIdAndUpdate(creado.id, { activo: false });

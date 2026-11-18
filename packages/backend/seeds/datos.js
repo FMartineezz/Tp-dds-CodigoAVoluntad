@@ -591,6 +591,21 @@ export const mensajes = [
 ];
 
 export const notificaciones = [
+  // La colaboradora demo del front (FullstackFer) tiene notificaciones propias para la campana
+  {
+    colaboradora: "FullstackFer",
+    proyecto: "Plataforma de Donaciones Comunitarias",
+    destinatario: DestinatarioNotificacion.PERSONA,
+    texto:
+      'Hola FullstackFer!, se publico el proyecto "Plataforma de Donaciones Comunitarias" del colectivo Colectivo Ambiental CABA que busca perfiles acordes a tus habilidades',
+  },
+  {
+    colaboradora: "FullstackFer",
+    proyecto: "Mapa de Huertas Urbanas",
+    destinatario: DestinatarioNotificacion.PERSONA,
+    texto:
+      'Hola FullstackFer!, se publico el proyecto "Mapa de Huertas Urbanas" del colectivo Red de Huertas de Palermo que busca perfiles acordes a tus habilidades',
+  },
   {
     colaboradora: "DataSol",
     proyecto: "Mapa de Huertas Urbanas",

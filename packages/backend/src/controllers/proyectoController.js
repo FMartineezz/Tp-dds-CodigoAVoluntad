@@ -24,6 +24,15 @@ export class ProyectoController {
     res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };
 
+  obtenerProyectosDeColectivo = async (req, res) => {
+    const pagina = await this.proyectoService.obtenerProyectosDeColectivo(
+      req.params.colectivoId,
+      req.paginacion,
+    );
+
+    res.status(200).json(respuestaPaginada(pagina, req.paginacion));
+  };
+
   obtenerProyectoPorId = async (req, res) => {
     const id = req.params.id;
 

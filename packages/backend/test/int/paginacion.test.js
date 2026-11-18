@@ -96,6 +96,49 @@ describe.each(LISTADOS)("GET %s paginado", (ruta, contarEnLaBase) => {
   });
 });
 
+describe("GET /proyectos", () => {
+  test("cada proyecto trae el id y el nombre de su colectivo", async () => {
+    const respuesta = await request(app).get("/proyectos?limite=5");
+
+    respuesta.body.resultados.forEach((proyecto) => {
+      expect(proyecto.colectivo).toEqual({ _id: expect.any(String), nombre: expect.any(String) });
+    });
+  });
+});
+
+describe("GET /colectivos/:colectivoId/proyectos", () => {
+  test("pagina solo los proyectos de ese colectivo", async () => {
+    // Preparación: el Colectivo Ambiental CABA del seed
+    const colectivo = await ColectivoModel.findOne({ nombre: "Colectivo Ambiental CABA" });
+    const total = await ProyectoModel.countDocuments({ colectivo: colectivo._id });
+
+    // Ejecución
+    const respuesta = await request(app).get(`/colectivos/${colectivo._id}/proyectos?limite=2`);
+
+    // Validación
+    expect(total).toBeGreaterThan(0);
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body).toMatchObject({ pagina: 1, limite: 2, total });
+    respuesta.body.resultados.forEach((p) =>
+      expect(p.colectivo).toEqual({ _id: String(colectivo._id), nombre: colectivo.nombre }),
+    );
+  });
+
+  test("responde 404 si el colectivo no existe", async () => {
+    const respuesta = await request(app).get("/colectivos/000000000000000000000000/proyectos");
+
+    expect(respuesta.status).toBe(404);
+    expect(respuesta.body.code).toBe(ErrorCatalog.COLECTIVO_NO_ENCONTRADO.code);
+  });
+
+  test("responde 404 si el id no tiene formato de ObjectId", async () => {
+    const respuesta = await request(app).get("/colectivos/1/proyectos");
+
+    expect(respuesta.status).toBe(404);
+    expect(respuesta.body.code).toBe(ErrorCatalog.COLECTIVO_NO_ENCONTRADO.code);
+  });
+});
+
 describe("parámetros de paginación inválidos", () => {
   test.each([
     ["pagina=0", ErrorCatalog.PAGINACION_PAGINA_INVALIDA],
@@ -143,11 +186,13 @@ describe("búsquedas paginadas", () => {
     segunda.body.resultados.forEach((c) => expect(idsPrimera).not.toContain(idDe(c)));
   });
 
-  test("GET /colaboradoras/:id/proyectos-acordes pagina y excluye los finalizados", async () => {
+  test("GET /colaboradoras/:id/proyectos-acordes pagina los que todavía buscan gente", async () => {
     // Preparación: FullstackFer tiene JS, Node, React y Postman
     const fer = await PersonaColaboradoraModel.findOne({ nombreFantasia: "FullstackFer" });
     const total = await ProyectoModel.countDocuments({
       finalizado: { $ne: true },
+      busquedaCerrada: { $ne: true },
+      $or: [{ fechaLimiteBusqueda: null }, { fechaLimiteBusqueda: { $gt: new Date() } }],
       "perfiles.habilidadesRequeridas": { $in: fer.habilidades },
     });
 
@@ -161,7 +206,10 @@ describe("búsquedas paginadas", () => {
     expect(respuesta.status).toBe(200);
     expect(respuesta.body).toMatchObject({ pagina: 1, limite: 4, total });
     expect(respuesta.body.resultados).toHaveLength(4);
-    respuesta.body.resultados.forEach((p) => expect(p.finalizado).toBe(false));
+    respuesta.body.resultados.forEach((p) => {
+      expect(p.finalizado).toBe(false);
+      expect(p.busquedaCerrada).toBe(false);
+    });
   });
 
   test("las búsquedas también validan los parámetros", async () => {

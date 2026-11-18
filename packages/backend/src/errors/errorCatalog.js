@@ -196,6 +196,11 @@ const ErrorCatalog = {
     message: "El Git de la colaboradora es requerido",
   },
 
+  COLABORADORA_PRONOMBRES_FORMATO: {
+    code: "ERR-VAL-408",
+    message: "Los pronombres deben ser un texto o una lista de textos, sin valores vacíos",
+  },
+
   COLABORADORA_HABILIDADES_REQUERIDAS: {
     code: "ERR-VAL-403",
     message: "Las habilidades de la colaboradora son requeridas",
@@ -267,8 +272,13 @@ const ErrorCatalog = {
   },
 
   COLABORACION_YA_DADA_DE_BAJA: {
-    code: "ERR-EST-608",
+    code: "ERR-EST-508",
     message: (id) => `La colaboración ${id} ya fue dada de baja`,
+  },
+
+  COLABORACION_ORIGEN_BAJA_INVALIDO: {
+    code: "ERR-VAL-509",
+    message: "El parámetro por debe ser 'persona' o 'colectivo'",
   },
 
   // =========================
@@ -394,7 +404,7 @@ const ErrorCatalog = {
     message: "El proyecto es requerido",
   },
 
-  MENSAJE_EMISOR_RQUERIDO: {
+  MENSAJE_EMISOR_REQUERIDO: {
     code: "ERR-VAL-806",
     message: "El emisor es requerido",
   },

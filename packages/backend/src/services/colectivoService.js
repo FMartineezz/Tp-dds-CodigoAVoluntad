@@ -94,16 +94,19 @@ export class ColectivoService {
     await this.repository.agregarProyecto(colectivoId, proyectoId);
   }
 
+  // Baja lógica: el colectivo deja de listarse pero su historial se conserva
   async eliminarColectivo(id) {
-    const colectivo = await this.repository.obtenerPorId(id);
+    const colectivo = await this.repository.obtenerPorIdConEstado(id);
 
     if (!colectivo) {
       throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
     }
 
-    if (colectivo.activo) {
+    if (colectivo.activo === false) {
       throw new AppError(ErrorCatalog.COLECTIVO_YA_DADO_DE_BAJA, 409, id);
     }
+
+    await this.repository.eliminarColectivo(id);
   }
 
   //Estadisticas

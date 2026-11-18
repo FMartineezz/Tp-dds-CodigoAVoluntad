@@ -111,9 +111,7 @@ describe("Postulaciones (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.PERFIL_NO_ENCONTRADO.code);
     });
 
-    // BUG: un id con formato inválido produce un CastError de mongoose que no se traduce a un
-    // error del catálogo y el errorHandler responde 500 en lugar de 404 (o 400).
-    test.failing("responde 404 si el id del proyecto no es un ObjectId válido", async () => {
+    test("responde 404 si el id del proyecto no es un ObjectId válido", async () => {
       const e = await armarEscenario();
 
       const respuesta = await postularse({ ...e, proyectoId: "no-es-un-id" });
@@ -145,6 +143,10 @@ describe("Postulaciones (HTTP)", () => {
       expect(pendientes.body).toHaveLength(1);
       expect(pendientes.body[0].personaColaboradora.nombreFantasia).toBe(otra.nombreFantasia);
       expect(pendientes.body[0].estado).toBe("pendiente");
+      expect(pendientes.body[0]).toMatchObject({
+        proyectoId: String(e.proyectoId),
+        perfilId: String(e.perfilId),
+      });
     });
 
     test("GET /colectivos/:id/postulaciones responde 404 si el colectivo no existe", async () => {
@@ -164,7 +166,9 @@ describe("Postulaciones (HTTP)", () => {
       expect(respuesta.body).toHaveLength(1);
       expect(respuesta.body[0]).toMatchObject({
         proyecto: e.proyecto.titulo,
+        proyectoId: String(e.proyectoId),
         perfil: e.perfil.descripcion,
+        perfilId: String(e.perfilId),
         estado: "pendiente",
       });
     });

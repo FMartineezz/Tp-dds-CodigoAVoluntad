@@ -60,6 +60,12 @@ function buscar(mapa, clave, entidad) {
   return valor;
 }
 
+// Ids fijos para colectivos y colaboradoras: con la misma semilla, cada cuenta tiene siempre el
+// mismo id aunque se vuelva a sembrar. Así el front puede entrar con una cuenta de demo conocida
+// (VITE_DEMO_COLECTIVO_ID / VITE_DEMO_COLABORADORA_ID) y los enlaces no se rompen al resembrar.
+// Colectivo n.º 1 → "c00000000000000000000001"; colaboradora n.º 5 → "a00000000000000000000005".
+export const idFijo = (letra, numero) => letra + numero.toString(16).padStart(23, "0");
+
 const porClave = (documentos, clave) => new Map(documentos.map((doc) => [doc[clave], doc]));
 const mismoId = (a, b) => String(a) === String(b);
 
@@ -74,16 +80,19 @@ export async function sembrar(d = datos) {
 
   // Colectivos
   const colectivos = await ColectivoModel.create(
-    d.colectivos.map(
-      (c) => new Colectivo(c.nombre, c.descripcion, c.ubicacion, c.tipo, [], c.redesSociales ?? []),
+    d.colectivos.map((c, i) =>
+      Object.assign(
+        new Colectivo(c.nombre, c.descripcion, c.ubicacion, c.tipo, [], c.redesSociales ?? []),
+        { _id: idFijo("c", i + 1) },
+      ),
     ),
   );
   const colectivosPorNombre = porClave(colectivos, "nombre");
 
   // Personas colaboradoras
   const colaboradoras = await PersonaColaboradoraModel.create(
-    d.colaboradoras.map(
-      (c) =>
+    d.colaboradoras.map((c, i) =>
+      Object.assign(
         new PersonaColaboradora(
           c.nombreFantasia,
           c.git,
@@ -96,6 +105,8 @@ export async function sembrar(d = datos) {
           c.bloquearMensajeInterno ?? false,
           c.redesSociales ?? [],
         ),
+        { _id: idFijo("a", i + 1) },
+      ),
     ),
   );
   const colaboradorasPorNombre = porClave(colaboradoras, "nombreFantasia");

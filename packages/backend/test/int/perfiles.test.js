@@ -258,9 +258,7 @@ describe("PATCH /proyectos/:id/perfiles/:idPerfil", () => {
     expect(respuesta.body.code).toBe(ErrorCatalog.PERFIL_NO_ENCONTRADO.code);
   });
 
-  // BUG: el PATCH valida cantidadMaxima pero el repositorio no la incluye entre los campos que
-  // actualiza, así que responde 200 con el cupo viejo.
-  test.failing("actualiza la cantidadMaxima", async () => {
+  test("actualiza la cantidadMaxima", async () => {
     // Ejecución
     const respuesta = await request(app)
       .patch(`${rutaPerfiles}/${perfilId}`)

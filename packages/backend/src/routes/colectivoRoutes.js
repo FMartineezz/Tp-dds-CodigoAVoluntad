@@ -5,11 +5,17 @@ import validarColectivo, {
 } from "../middlewares/validations/colectivoValidation.js";
 import { colectivoController } from "../container.js";
 import { mensajeController } from "../container.js";
+import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
 
 const pathColectivos = "/colectivos";
 
 export default function colectivoRoutes() {
   const router = Router();
+  exigirIdsValidos(router, {
+    id: ErrorCatalog.COLECTIVO_NO_ENCONTRADO,
+    colectivoId: ErrorCatalog.COLECTIVO_NO_ENCONTRADO,
+  });
 
   router.get("/colectivos", validarPaginacion, colectivoController.obtenerColectivos);
 

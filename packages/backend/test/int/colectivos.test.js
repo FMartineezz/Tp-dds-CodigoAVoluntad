@@ -87,10 +87,7 @@ describe("Colectivos (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.COLECTIVO_YA_EXISTE.code);
     });
 
-    // BUG: la validación deja la ubicación como opcional y no chequea que sea una de
-    // UBICACION_VALIDA, pero el schema de mongoose la exige y la restringe con un enum: el
-    // ValidationError de mongoose no es un AppError y la API responde 500.
-    test.failing.each([
+    test.each([
       ["sin ubicación", { ubicacion: undefined }],
       ["con una ubicación inválida", { ubicacion: "narnia" }],
     ])("responde 400 %s", async (_caso, cambios) => {
@@ -144,8 +141,7 @@ describe("Colectivos (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.COLECTIVO_NO_ENCONTRADO.code);
     });
 
-    // BUG: un id que no es ObjectId produce un CastError de mongoose y la API responde 500.
-    test.failing("responde 404 si el id no es un ObjectId válido", async () => {
+    test("responde 404 si el id no es un ObjectId válido", async () => {
       // Ejecución
       const respuesta = await request(app).get("/colectivos/no-es-un-id");
 
@@ -265,9 +261,7 @@ describe("Colectivos (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.COLECTIVO_YA_EXISTE.code);
     });
 
-    // BUG: la ubicación no se valida contra UBICACION_VALIDA; el enum de mongoose la rechaza
-    // (runValidators) con un ValidationError que la API responde como 500.
-    test.failing("responde 400 si la ubicación es inválida", async () => {
+    test("responde 400 si la ubicación es inválida", async () => {
       // Preparación
       const creado = await crearColectivo();
 
@@ -292,9 +286,7 @@ describe("Colectivos (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.COLECTIVO_NO_ENCONTRADO.code);
     });
 
-    // BUG: ColectivoService.eliminarColectivo nunca llama al repositorio: responde 204 pero el
-    // colectivo sigue activo y sigue apareciendo en GET /colectivos.
-    test.failing("da de baja el colectivo y deja de listarse", async () => {
+    test("da de baja el colectivo y deja de listarse", async () => {
       // Preparación
       const creado = await crearColectivo();
 
@@ -307,9 +299,7 @@ describe("Colectivos (HTTP)", () => {
       expect(listado.body.resultados).toEqual([]);
     });
 
-    // BUG: la condición de "ya dado de baja" está invertida y `activo` no se lee (select:false),
-    // así que borrar dos veces el mismo colectivo nunca responde 409.
-    test.failing("responde 409 al eliminar un colectivo ya dado de baja", async () => {
+    test("responde 409 al eliminar un colectivo ya dado de baja", async () => {
       // Preparación
       const creado = await crearColectivo();
       await request(app).delete(`/colectivos/${creado.body.id}`);

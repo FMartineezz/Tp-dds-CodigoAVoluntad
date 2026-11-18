@@ -95,6 +95,12 @@ export class ProyectoService {
     return await this.proyectoRepository.obtenerPagina(paginacion);
   }
 
+  // Lanza 404 si el colectivo no existe (o fue dado de baja)
+  async obtenerProyectosDeColectivo(colectivoId, paginacion) {
+    await this.colectivoService.obtenerColectivoPorId(colectivoId);
+    return await this.proyectoRepository.obtenerPaginaDeColectivo(colectivoId, paginacion);
+  }
+
   async obtenerProyectoPorId(id) {
     const proyecto = await this.proyectoRepository.obtenerPorId(id);
 

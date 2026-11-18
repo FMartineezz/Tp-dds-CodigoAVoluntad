@@ -1,4 +1,4 @@
-import { Colaboracion } from "../models/colaboracion.js";
+import { Colaboracion, OrigenBaja } from "../models/colaboracion.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
@@ -52,7 +52,22 @@ export class ColaboracionService {
     return colaboracion;
   }
 
-  async desactivarColaboracion(id) {
+  async obtenerColaboracionesDePersona(personaId) {
+    await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
+    return await this.colaboracionRepository.obtenerDePersona(personaId);
+  }
+
+  async obtenerColaboracionesDeProyecto(proyectoId) {
+    await this.proyectoService.obtenerProyectoPorId(proyectoId);
+    return await this.colaboracionRepository.obtenerDeProyecto(proyectoId);
+  }
+
+  // bajaPor (opcional): quién da la baja, "persona" o "colectivo" (OrigenBaja)
+  async desactivarColaboracion(id, bajaPor) {
+    if (bajaPor !== undefined && !Object.values(OrigenBaja).includes(bajaPor)) {
+      throw new AppError(ErrorCatalog.COLABORACION_ORIGEN_BAJA_INVALIDO, 400);
+    }
+
     const colaboracion = await this.colaboracionRepository.obtenerPorId(id);
 
     if (!colaboracion) {
@@ -63,7 +78,7 @@ export class ColaboracionService {
       throw new AppError(ErrorCatalog.COLABORACION_YA_DADA_DE_BAJA, 409, id);
     }
 
-    await this.colaboracionRepository.desactivar(id);
+    await this.colaboracionRepository.desactivar(id, bajaPor);
   }
 
   //Estadisticas

@@ -255,9 +255,7 @@ describe("Perfiles de un proyecto (ProyectoService + PerfilService)", () => {
     expect(guardado.descripcion).toBe("Desarrollo backend");
   });
 
-  // BUG: ProyectoRepository.actualizarPerfil no incluye "cantidadMaxima" entre los campos
-  // permitidos, así que el cupo de un perfil no se puede editar (se ignora en silencio).
-  test.failing("editar la cantidadMaxima del perfil la actualiza", async () => {
+  test("editar la cantidadMaxima del perfil la actualiza", async () => {
     // Ejecución
     await proyectoService.actualizarPerfil(proyecto._id, perfil._id, { cantidadMaxima: 5 });
 

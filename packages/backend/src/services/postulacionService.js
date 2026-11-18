@@ -140,7 +140,9 @@ export class PostulacionService {
     return {
       id: _id,
       proyecto: proyecto.titulo,
+      proyectoId: proyecto._id,
       perfil: this.buscarPerfil(proyecto, perfil)?.descripcion,
+      perfilId: perfil,
       estado,
       anonima,
     };
@@ -156,7 +158,9 @@ export class PostulacionService {
         presentacion: personaColaboradora.presentacion,
       },
       proyecto: proyecto.titulo,
+      proyectoId: proyecto._id,
       perfil: this.buscarPerfil(proyecto, perfil)?.descripcion,
+      perfilId: perfil,
       estado,
     };
   }

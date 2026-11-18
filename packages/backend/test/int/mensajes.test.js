@@ -140,9 +140,7 @@ describe("Mensajes (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.MENSAJE_EMISOR_INVALIDO.code);
     });
 
-    // BUG: la validación usa la clave "MENSAJE_EMISOR_REQUERIDO" pero en el ErrorCatalog está
-    // escrita "MENSAJE_EMISOR_RQUERIDO"; AppError recibe undefined, explota y la API responde 500.
-    test.failing("responde 400 si falta el emisor", async () => {
+    test("responde 400 si falta el emisor", async () => {
       const e = await armarEscenario();
       const body = cuerpo(e);
       delete body.emisor;

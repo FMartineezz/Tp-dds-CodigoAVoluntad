@@ -27,6 +27,11 @@ export class ColectivoRepository {
     return await this.model.findById(id).lean();
   }
 
+  // Igual que obtenerPorId pero trae `activo` (que por defecto no se lee: select false)
+  async obtenerPorIdConEstado(id) {
+    return await this.model.findById(id).select("+activo").lean();
+  }
+
   async obtenerPorNombre(nombre) {
     return await this.model.findOne({ nombre }).lean();
   }
@@ -126,6 +131,8 @@ export class ColectivoRepository {
   //Estadisticas
   async contarPorUbicacion() {
     return await this.model.aggregate([
+      // Los colectivos dados de baja no cuentan (igual que en GET /colectivos)
+      { $match: { activo: true } },
       { $group: { _id: "$ubicacion", cantidad: { $sum: 1 } } },
       { $sort: { cantidad: -1 } },
       { $project: { _id: 0, ubicacion: "$_id", cantidad: 1 } },

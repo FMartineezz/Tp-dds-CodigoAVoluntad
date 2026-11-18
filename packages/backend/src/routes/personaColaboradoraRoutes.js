@@ -5,9 +5,15 @@ import { mensajeController } from "../container.js";
 import validarPersonaColaboradora, {
   validarActualizacionColaboradora,
 } from "../middlewares/validations/personaColaboradoraValidation.js";
+import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
 
 export default function personaColaboradoraRoutes() {
   const router = Router();
+  exigirIdsValidos(router, {
+    id: ErrorCatalog.COLABORADORA_NO_ENCONTRADA,
+    personaColaboradoraId: ErrorCatalog.COLABORADORA_NO_ENCONTRADA,
+  });
 
   router.get(
     "/colaboradoras",

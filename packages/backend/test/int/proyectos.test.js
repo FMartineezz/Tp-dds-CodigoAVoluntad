@@ -232,9 +232,7 @@ describe("GET /proyectos/:id", () => {
     expect(respuesta.body.code).toBe(ErrorCatalog.PROYECTO_NO_ENCONTRADO.code);
   });
 
-  // BUG: un id que no es un ObjectId válido hace fallar el findById con un CastError que nadie
-  // traduce, y la API responde 500 (ERR-CSR-500) en lugar de 404/400.
-  test.failing("responde 404 (no 500) si el id no tiene formato de ObjectId", async () => {
+  test("responde 404 (no 500) si el id no tiene formato de ObjectId", async () => {
     // Ejecución
     const respuesta = await request(app).get("/proyectos/no-es-un-id");
 

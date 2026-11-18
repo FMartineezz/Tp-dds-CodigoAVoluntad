@@ -63,6 +63,43 @@ export class ColaboracionRepository {
       .lean();
   }
 
+  // Todas las colaboraciones de una persona (activas y dadas de baja, también las anónimas:
+  // es su propio historial), con el proyecto y el nombre del colectivo
+  async obtenerDePersona(personaId) {
+    return await this.model
+      .find({ personaColaboradora: personaId })
+      .sort({ _id: -1 })
+      .populate({
+        path: "proyecto",
+        select: "titulo colectivo finalizado busquedaCerrada logros perfiles",
+        populate: { path: "colectivo", select: "nombre" },
+      })
+      .lean();
+  }
+
+  // El equipo de un proyecto (activas y dadas de baja). En las anónimas no se muestra la persona.
+  async obtenerDeProyecto(proyectoId) {
+    return await this.model
+      .find(
+        { proyecto: proyectoId },
+        {
+          _id: 1,
+          personaColaboradora: {
+            $cond: { if: "$anonima", then: null, else: "$personaColaboradora" },
+          },
+          proyecto: 1,
+          perfil: 1,
+          anonima: 1,
+          activo: 1,
+          fechaBaja: 1,
+          bajaPor: 1,
+        },
+      )
+      .sort({ _id: -1 })
+      .populate({ path: "personaColaboradora", select: "nombreFantasia habilidades presentacion" })
+      .lean();
+  }
+
   async obtenerPorPersonaColaboradoraId(personaColaboradoraId) {
     return await this.model.find({ personaColaboradora: personaColaboradoraId }).lean();
   }
@@ -79,12 +116,13 @@ export class ColaboracionRepository {
     });
   }
 
-  async desactivar(id) {
+  async desactivar(id, bajaPor) {
     return await this.model.findByIdAndUpdate(
       id,
       {
         activo: false,
         fechaBaja: new Date(),
+        ...(bajaPor && { bajaPor }),
       },
       { new: true },
     );

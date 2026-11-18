@@ -1,7 +1,7 @@
 import request from "supertest";
 import { app } from "../int/utils/app.js";
 import { usarBaseDeDatos } from "../utils/db.js";
-import { limpiar, sembrar } from "../../seeds/sembrar.js";
+import { limpiar, sembrar, idFijo } from "../../seeds/sembrar.js";
 import * as datos from "../../seeds/datos.js";
 import { generarVolumen, conVolumen, CANTIDADES_POR_DEFECTO } from "../../seeds/volumen.js";
 
@@ -45,6 +45,22 @@ describe("Seed", () => {
       colectivosDadosDeBaja: datos.colectivos.filter((c) => c.eliminado).length,
       colaboradorasEliminadas: datos.colaboradoras.filter((c) => c.eliminada).length,
     });
+  });
+
+  test("colectivos y colaboradoras tienen ids fijos, iguales al resembrar", async () => {
+    // Preparación: el front usa estos ids como cuentas de demo
+    await sembrar();
+    await limpiar();
+
+    // Ejecución
+    await sembrar();
+
+    // Validación
+    const colectivo = await request(app).get(`/colectivos/${idFijo("c", 1)}`);
+    const colaboradora = await request(app).get(`/colaboradoras/${idFijo("a", 5)}`);
+    expect(idFijo("c", 1)).toBe("c00000000000000000000001");
+    expect(colectivo.body.nombre).toBe(datos.colectivos[0].nombre);
+    expect(colaboradora.body.nombreFantasia).toBe(datos.colaboradoras[4].nombreFantasia);
   });
 
   test("se puede correr dos veces seguidas y deja el mismo resultado", async () => {

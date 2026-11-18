@@ -2306,6 +2306,92 @@
         }
       }
     },
+    "/colectivos/{colectivoId}/proyectos": {
+      "get": {
+        "tags": ["Proyectos"],
+        "summary": "Lista los proyectos de un colectivo (todos sus estados), paginado",
+        "responses": {
+          "200": {
+            "description": "Lista de proyectos (paginado, del más nuevo al más viejo)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaDeProyectos"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de paginación inválidos. Códigos posibles: `ERR-VAL-002`, `ERR-VAL-003`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-003",
+                  "message": "El parámetro limite debe ser un número entero entre 1 y 100"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe un colectivo con ese id (ERR-NOT-305)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "colectivoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Id del colectivo"
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "description": "Número de página, desde 1. Por defecto 1. Una página posterior a la última devuelve `resultados` vacío.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "description": "Resultados por página, entre 1 y 100. Por defecto 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ]
+      }
+    },
     "/colectivos/{colectivoId}/mensajes": {
       "post": {
         "tags": ["Mensajes"],
@@ -3890,6 +3976,16 @@
               "type": "string",
               "example": "6acfd66264d02459ba8dc6a2"
             }
+          },
+          {
+            "name": "por",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["persona", "colectivo"]
+            },
+            "description": "Quién da la baja (queda en bajaPor)"
           }
         ],
         "responses": {
@@ -3948,8 +4044,101 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "`por` no es persona ni colectivo (ERR-VAL-509)"
           }
         }
+      }
+    },
+    "/colaboradoras/{personaColaboradoraId}/colaboraciones": {
+      "get": {
+        "tags": ["Colaboraciones"],
+        "summary": "Historial de colaboraciones de una persona (activas, dadas de baja y anónimas propias)",
+        "description": "Las anónimas tienen `personaColaboradora: null`.",
+        "responses": {
+          "200": {
+            "description": "Lista de colaboraciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Colaboracion"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe una colaboradora con ese id (ERR-NOT-405)"
+          }
+        },
+        "parameters": [
+          {
+            "name": "personaColaboradoraId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/proyectos/{proyectoId}/colaboraciones": {
+      "get": {
+        "tags": ["Colaboraciones"],
+        "summary": "Equipo de un proyecto (activas y dadas de baja; anónimas sin persona)",
+        "description": "Las anónimas tienen `personaColaboradora: null`.",
+        "responses": {
+          "200": {
+            "description": "Lista de colaboraciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Colaboracion"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe un proyecto con ese id (ERR-NOT-108)"
+          }
+        },
+        "parameters": [
+          {
+            "name": "proyectoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/proyectos/{proyectoId}/perfiles/{perfilId}/postulaciones": {

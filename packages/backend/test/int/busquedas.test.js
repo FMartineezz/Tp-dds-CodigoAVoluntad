@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { app } from "./utils/app.js";
 import { usarBaseDeDatos } from "../utils/db.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
+import { ProyectoModel } from "../../src/schemas/proyectoSchema.js";
 
 usarBaseDeDatos();
 
@@ -123,6 +124,27 @@ describe("Búsquedas (HTTP)", () => {
       expect(respuesta.status).toBe(200);
       expect(respuesta.body.resultados.map((p) => p.titulo)).toEqual(["Backend"]);
       expect(respuesta.body.resultados[0].colectivo).toMatchObject({ nombre: "Asamblea Norte" });
+    });
+
+    test("no incluye proyectos con la búsqueda cerrada o la fecha límite vencida", async () => {
+      // Preparación
+      await crearProyecto("Abierto", [perfil(["node"])]);
+      const cerrado = await crearProyecto("Cerrado", [perfil(["node"])]);
+      const vencido = await crearProyecto("Vencido", [perfil(["node"])]);
+      await ProyectoModel.updateOne({ _id: cerrado._id }, { busquedaCerrada: true });
+      await ProyectoModel.updateOne(
+        { _id: vencido._id },
+        { fechaLimiteBusqueda: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      );
+      const colaboradora = await crearColaboradora("eva", ["node"]);
+
+      // Ejecución
+      const respuesta = await request(app).get(
+        `/colaboradoras/${colaboradora.id}/proyectos-acordes`,
+      );
+
+      // Validación
+      expect(respuesta.body.resultados.map((p) => p.titulo)).toEqual(["Abierto"]);
     });
 
     test("devuelve una lista vacía si no hay proyectos acordes", async () => {

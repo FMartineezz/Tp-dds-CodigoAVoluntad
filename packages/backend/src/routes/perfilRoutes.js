@@ -4,9 +4,15 @@ import { perfilController } from "../container.js";
 import validarPerfil, {
   validarActualizacionPerfil,
 } from "../middlewares/validations/perfilValidation.js";
+import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
 
 export default function proyectoRoutes() {
   const router = Router();
+  exigirIdsValidos(router, {
+    idProyecto: ErrorCatalog.PROYECTO_NO_ENCONTRADO,
+    idPerfil: ErrorCatalog.PERFIL_NO_ENCONTRADO,
+  });
 
   router.get("/proyectos/:idProyecto/perfiles", perfilController.obtenerPerfiles);
 

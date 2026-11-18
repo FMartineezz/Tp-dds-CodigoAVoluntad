@@ -131,9 +131,7 @@ describe("Colaboradoras (HTTP)", () => {
       expect(listado.body.resultados).toEqual([]);
     });
 
-    // BUG: la validación acepta habilidades: [] pero el schema de mongoose exige al menos una;
-    // el ValidationError no es AppError y la API responde 500.
-    test.failing("responde 400 si la lista de habilidades está vacía", async () => {
+    test("responde 400 si la lista de habilidades está vacía", async () => {
       // Ejecución
       const respuesta = await crearColaboradora(colaboradoraValida({ habilidades: [] }));
 
@@ -188,8 +186,7 @@ describe("Colaboradoras (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.COLABORADORA_NO_ENCONTRADA.code);
     });
 
-    // BUG: un id que no es ObjectId produce un CastError de mongoose y la API responde 500.
-    test.failing("responde 404 si el id no es un ObjectId válido", async () => {
+    test("responde 404 si el id no es un ObjectId válido", async () => {
       // Ejecución
       const respuesta = await request(app).get("/colaboradoras/no-es-un-id");
 
@@ -219,6 +216,35 @@ describe("Colaboradoras (HTTP)", () => {
         habilidades: [react._id],
       });
       expect(respuesta.body).not.toHaveProperty("contactos");
+    });
+
+    test.each([
+      [{ habilidades: [] }, "COLABORADORA_HABILIDADES_REQUERIDAS"],
+      [{ pronombres: "" }, "COLABORADORA_PRONOMBRES_FORMATO"],
+      [{ pronombres: ["ella", " "] }, "COLABORADORA_PRONOMBRES_FORMATO"],
+      [{ pronombres: 3 }, "COLABORADORA_PRONOMBRES_FORMATO"],
+    ])("responde 400 con %j", async (cambios, error) => {
+      const creada = await crearColaboradora();
+
+      const respuesta = await request(app).patch(`/colaboradoras/${creada.body.id}`).send(cambios);
+
+      expect(respuesta.status).toBe(400);
+      expect(respuesta.body.code).toBe(ErrorCatalog[error].code);
+    });
+
+    test("acepta pronombres como texto o como lista", async () => {
+      const creada = await crearColaboradora();
+
+      const texto = await request(app)
+        .patch(`/colaboradoras/${creada.body.id}`)
+        .send({ pronombres: "ella/la" });
+      const lista = await request(app)
+        .patch(`/colaboradoras/${creada.body.id}`)
+        .send({ pronombres: ["ella", "la"] });
+
+      expect(texto.status).toBe(200);
+      expect(lista.status).toBe(200);
+      expect(lista.body.pronombres).toEqual(["ella", "la"]);
     });
 
     test("reemplaza las redes sociales normalizadas", async () => {

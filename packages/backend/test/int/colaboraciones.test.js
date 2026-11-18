@@ -144,13 +144,100 @@ describe("Colaboraciones (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.COLABORACION_NO_ENCONTRADA.code);
     });
 
-    // BUG: con un id que no es un ObjectId válido mongoose lanza un CastError que el
-    // errorHandler no traduce, y la API responde 500 en lugar de 404.
-    test.failing("responde 404 si el id no tiene formato válido", async () => {
+    test("responde 404 si el id no tiene formato válido", async () => {
       const respuesta = await request(app).delete("/colaboraciones/no-es-un-id");
 
       expect(respuesta.status).toBe(404);
       expect(respuesta.body.code).toBe(ErrorCatalog.COLABORACION_NO_ENCONTRADA.code);
+    });
+  });
+
+  describe("DELETE /colaboraciones/:id?por=", () => {
+    test("registra quién dio la baja", async () => {
+      // Preparación
+      const e = await armarEscenario();
+      const { colaboracionId } = await crearColaboracion(e);
+
+      // Ejecución
+      const respuesta = await request(app).delete(
+        `/colaboraciones/${colaboracionId}?por=colectivo`,
+      );
+
+      // Validación
+      expect(respuesta.status).toBe(200);
+      const guardada = await ColaboracionModel.findById(colaboracionId).lean();
+      expect(guardada).toMatchObject({ activo: false, bajaPor: "colectivo" });
+    });
+
+    test("responde 400 si `por` no es persona ni colectivo", async () => {
+      const e = await armarEscenario();
+      const { colaboracionId } = await crearColaboracion(e);
+
+      const respuesta = await request(app).delete(`/colaboraciones/${colaboracionId}?por=nadie`);
+
+      expect(respuesta.status).toBe(400);
+      expect(respuesta.body.code).toBe(ErrorCatalog.COLABORACION_ORIGEN_BAJA_INVALIDO.code);
+    });
+  });
+
+  describe("GET /colaboradoras/:id/colaboraciones", () => {
+    test("devuelve su historial completo: activas, dadas de baja y anónimas", async () => {
+      // Preparación
+      const e = await armarEscenario();
+      const otra = await crearColaboradora({ habilidades: [e.habilidad.codigo] });
+      const { colaboracionId } = await crearColaboracion(e, { anonima: true });
+      await request(app).delete(`/colaboraciones/${colaboracionId}?por=persona`);
+      await crearColaboracion(e, { persona: otra });
+
+      // Ejecución
+      const respuesta = await request(app).get(`/colaboradoras/${e.personaId}/colaboraciones`);
+
+      // Validación
+      expect(respuesta.status).toBe(200);
+      expect(respuesta.body).toHaveLength(1);
+      expect(respuesta.body[0]).toMatchObject({
+        _id: colaboracionId,
+        anonima: true,
+        activo: false,
+        bajaPor: "persona",
+        proyecto: { _id: e.proyectoId, titulo: e.proyecto.titulo },
+      });
+      expect(respuesta.body[0].proyecto.colectivo).toMatchObject({ _id: e.colectivoId });
+    });
+
+    test("responde 404 si la colaboradora no existe", async () => {
+      const respuesta = await request(app).get(`/colaboradoras/${idInexistente()}/colaboraciones`);
+
+      expect(respuesta.status).toBe(404);
+      expect(respuesta.body.code).toBe(ErrorCatalog.COLABORADORA_NO_ENCONTRADA.code);
+    });
+  });
+
+  describe("GET /proyectos/:id/colaboraciones", () => {
+    test("devuelve el equipo y oculta a la persona en las anónimas", async () => {
+      // Preparación
+      const e = await armarEscenario();
+      const otra = await crearColaboradora({ habilidades: [e.habilidad.codigo] });
+      await crearColaboracion(e);
+      await crearColaboracion(e, { persona: otra, anonima: true });
+
+      // Ejecución
+      const respuesta = await request(app).get(`/proyectos/${e.proyectoId}/colaboraciones`);
+
+      // Validación
+      expect(respuesta.status).toBe(200);
+      expect(respuesta.body).toHaveLength(2);
+      const anonima = respuesta.body.find((c) => c.anonima);
+      const publica = respuesta.body.find((c) => !c.anonima);
+      expect(anonima.personaColaboradora).toBeNull();
+      expect(publica.personaColaboradora._id).toBe(e.personaId);
+    });
+
+    test("responde 404 si el proyecto no existe", async () => {
+      const respuesta = await request(app).get(`/proyectos/${idInexistente()}/colaboraciones`);
+
+      expect(respuesta.status).toBe(404);
+      expect(respuesta.body.code).toBe(ErrorCatalog.PROYECTO_NO_ENCONTRADO.code);
     });
   });
 });

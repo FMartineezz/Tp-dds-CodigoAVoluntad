@@ -23,7 +23,13 @@ export const colectivoSchema = zod.object({
         issue.code === "invalid_type" ? "COLECTIVO_TIPO_REQUERIDO" : "COLECTIVO_TIPO_INVALIDO",
     }),
   }),
-  ubicacion: zod.string().optional(),
+  // Obligatoria al crear (la base la exige) y siempre uno de los valores de UBICACION_VALIDA
+  ubicacion: zod
+    .string({
+      required_error: "COLECTIVO_UBICACION_INVALIDA",
+      invalid_type_error: "COLECTIVO_UBICACION_INVALIDA",
+    })
+    .refine((ubicacion) => UBICACION_VALIDA.has(ubicacion), "COLECTIVO_UBICACION_INVALIDA"),
   proyectos: zod.array(zod.string()).optional(),
   redesSociales: redesSocialesArraySchema.optional(),
 });

@@ -105,9 +105,7 @@ describe("Habilidades (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_ID.code);
     });
 
-    // BUG: un id que no es un ObjectId válido produce un CastError de mongoose que el errorHandler
-    // no reconoce y responde 500 en lugar de un 404 del catálogo.
-    test.failing("responde 404 si el id no es un ObjectId válido", async () => {
+    test("responde 404 si el id no es un ObjectId válido", async () => {
       // Ejecución
       const respuesta = await request(app).get("/habilidades/no-es-un-id");
 
