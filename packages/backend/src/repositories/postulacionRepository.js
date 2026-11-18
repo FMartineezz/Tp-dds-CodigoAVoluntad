@@ -60,6 +60,23 @@ export class PostulacionRepository {
       .lean();
   }
 
+  async rechazarPendientesPorProyectos(proyectoIds) {
+    if (!proyectoIds || proyectoIds.length === 0) return;
+
+    await this.model.updateMany(
+      {
+        proyecto: { $in: proyectoIds },
+        estado: EstadoPostulacion.PENDIENTE,
+      },
+      {
+        $set: {
+          estado: EstadoPostulacion.RECHAZADA,
+          fechaResolucion: new Date(),
+        },
+      },
+    );
+  }
+
   async obtenerEstadisticas() {
     return await this.model.aggregate([
       {

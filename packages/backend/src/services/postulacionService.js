@@ -1,5 +1,6 @@
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
+import { EVENTO_PROYECTOS_CERRADOS, eventos } from "../events/events.js";
 import { EstadoPostulacion, Postulacion } from "../models/postulacion.js";
 
 export class PostulacionService {
@@ -15,6 +16,14 @@ export class PostulacionService {
     this.proyectoService = proyectoService;
     this.colectivoService = colectivoService;
     this.colaboracionService = colaboracionService;
+
+    eventos.on(EVENTO_PROYECTOS_CERRADOS, async (proyectoIds) => {
+      try {
+        await this.rechazarPendientesDeProyectosCerrados(proyectoIds);
+      } catch {
+        console.error(`Error al rechazar postulaciones por cierre: ${error.message}`);
+      }
+    });
   }
 
   async crearPostulacion(proyectoId, perfilId, personaColaboradoraId, anonima = false) {
@@ -126,6 +135,10 @@ export class PostulacionService {
     if (nuevoEstado === EstadoPostulacion.RECHAZADA) {
       return await this.#procesarRechazo(postulacion);
     }
+  }
+
+  async rechazarPendientesDeProyectosCerrados(proyectoIds) {
+    await this.repository.rechazarPendientesPorProyectos(proyectoIds);
   }
 
   // ARMADO DE VISTAS
