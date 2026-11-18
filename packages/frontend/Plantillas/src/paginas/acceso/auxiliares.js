@@ -6,7 +6,7 @@
  * ANATOMÍA DE ESTE ARCHIVO:
  *   1. MAIL: la regla para decidir si un correo «parece» válido.
  *   2. useForm: manejo de validación de un formulario (errores al salir del campo,
- *      resumen al enviar y espera simulada).
+ *      resumen al enviar y envío al backend con el error que devuelva).
  *   3. Resumen: el aviso rojo con la lista de errores al enviar.
  *   4. useSocial: qué pasa al registrarse con un botón de red social.
  */
@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert } from '../../moleculas';
 import { useAuth } from '../../contexto';
+import { mensajeDeError } from '../../api/errores.js';
 
 // ───── 1. MAIL ─────
 // Expresión regular que acepta «algo@algo.algo» sin espacios. No comprueba que el correo
@@ -39,10 +40,14 @@ export const MAIL = /^\S+@\S+\.\S+$/;
 // Parámetro `validar`: función que recibe los valores del formulario y devuelve un
 // objeto con un mensaje por campo inválido, ej. { mail: 'Ingresá un correo válido.' }.
 // Un objeto vacío {} significa «todo bien».
+// Parámetro `alEnviar` (opcional): función `async` que recibe los valores y hace el pedido
+// al backend. Si el backend responde con error (por ejemplo 400 «La habilidad … no existe»
+// o 409 «Ya existe un colectivo con ese nombre»), su mensaje queda en `errorDelBackend`.
+// Sin `alEnviar` se simula la espera, como en el prototipo.
 //
-// Devuelve: { blur, enviar, errores, cargando, listo, intento, todos }.
+// Devuelve: { blur, enviar, errores, cargando, listo, intento, errorDelBackend, todos }.
 // Si se cambia: cambia el comportamiento de ambos formularios de registro.
-export function useForm(validar) {
+export function useForm(validar, alEnviar) {
   // ───── 1. DATOS Y ESTADO ─────
 
   // Campos que la persona ya «tocó» (entró y salió), ej. { mail: true }.
@@ -61,6 +66,9 @@ export function useForm(validar) {
   // true cuando el «envío» terminó bien (la pantalla muestra «Cuenta creada»).
   // Lo cambia `enviar`.
   const [listo, setListo] = useState(false);
+
+  // Mensaje de error que devolvió el backend al enviar ('' = ninguno). Lo cambia `enviar`.
+  const [errorDelBackend, setErrorDelBackend] = useState('');
 
   // ───── 2. CÁLCULOS ─────
 
@@ -104,14 +112,25 @@ export function useForm(validar) {
         return;
       }
 
-      // Se simula la espera con setTimeout (ejecuta la función de adentro a los 800 ms)
-      // para poder ver el estado «cargando». En producción acá iría la llamada a la API
-      // y esto correría cuando el servidor responda.
       setCargando(true);
-      setTimeout(() => {
-        setCargando(false);
-        setListo(true);
-      }, 800);
+      setErrorDelBackend('');
+
+      // Sin función de envío: se simula la espera con setTimeout (ejecuta la función de
+      // adentro a los 800 ms) para poder ver el estado «cargando».
+      if (!alEnviar) {
+        setTimeout(() => {
+          setCargando(false);
+          setListo(true);
+        }, 800);
+        return;
+      }
+
+      // Con función de envío: se espera la respuesta del backend. `.then` corre si salió bien,
+      // `.catch` si respondió con error y `.finally` siempre, al terminar.
+      alEnviar(valores)
+        .then(() => setListo(true))
+        .catch((error) => setErrorDelBackend(mensajeDeError(error)))
+        .finally(() => setCargando(false));
     };
   }
 
@@ -123,6 +142,7 @@ export function useForm(validar) {
     cargando,
     listo,
     intento,
+    errorDelBackend,
     todos: validar,
   };
 }

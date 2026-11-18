@@ -1,141 +1,146 @@
 /**
  * PANTALLA BuscarColaboradoras
  * Ruta: /org/colaboradoras   ·   Quién la ve: Organización
- * Qué muestra: Búsqueda de colaboradoras (habilidad, mensajes). Quien desactivó mensajes
- * no muestra «Enviar mensaje».
+ * Qué muestra: Colaboradoras de la plataforma, página por página, o solo las que encajan
+ * con un perfil de mis proyectos. Quien desactivó mensajes no muestra «Enviar mensaje».
+ * De dónde salen los datos: GET /colaboradoras?pagina=&limite= o, si se elige un perfil,
+ *   GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes (paginado).
+ *   Los perfiles del filtro salen de mis proyectos (GET /colectivos/:id/proyectos).
+ *   PENDIENTE (backend): buscar por nombre o habilidad y filtrar por «acepta mensajes»
+ *   (por ejemplo GET /colaboradoras?q=&habilidad=&aceptaMensajes=). Como la paginación es
+ *   del servidor, filtrar acá solo filtraría la página actual: por eso no están.
  * Para modificarla: COLUMNA NUEVA: <th> + <td data-l="…">.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: texto buscado, habilidad elegida, filtro de mensajes y página actual.
- *   2. CÁLCULOS: colaboradoras que cumplen los filtros y cuántas páginas hay.
- *   3. ACCIONES: cambiar un filtro (vuelve a la página 1) y limpiar los filtros.
- *   4. LO QUE SE DIBUJA: título, filtros, tabla (o mensaje vacío) y paginador.
+ *   1. DATOS Y ESTADO: perfil elegido, página actual y los pedidos al backend.
+ *   2. CÁLCULOS: las opciones del filtro y qué proyecto acompaña al mensaje.
+ *   3. ACCIONES: cambiar el perfil (vuelve a la página 1).
+ *   4. LO QUE SE DIBUJA: título, filtro, tabla (o mensaje vacío / error) y paginador.
  */
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, Button, Field, Heading, Icon, Tag } from '../../atomos';
-import { Pager, RowsSkeleton } from '../../moleculas';
-import { COLABORADORAS, HABILIDADES } from '../../datos';
-import { useLoading } from '../../hooks';
+import { Alert, Pager, RowsSkeleton } from '../../moleculas';
+import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { mensajeDeError } from '../../api/errores.js';
+import {
+  obtenerColaboradoras,
+  obtenerColaboradorasAcordes,
+  obtenerProyectosDelColectivo,
+} from '../../api/organizacion.js';
 import s from './Organizacion.module.css';
 import sh from '../../plantillas/disposicion.module.css';
 
-// Cuántas colaboradoras se muestran por página de la tabla.
-const POR_PAGINA = 5;
+// Cuántas colaboradoras se piden por página.
+const POR_PAGINA = 10;
+
+// Pide la página `pagina`: de todas las colaboradoras, o de las acordes al perfil elegido.
+// `perfilElegido` es 'todas' o un texto «idProyecto|idPerfil».
+function pedirPagina(perfilElegido, pagina) {
+  if (perfilElegido === 'todas') return obtenerColaboradoras({ pagina, limite: POR_PAGINA });
+  const [proyectoId, perfilId] = perfilElegido.split('|');
+  return obtenerColaboradorasAcordes(proyectoId, perfilId, { pagina, limite: POR_PAGINA });
+}
 
 export default function BuscarColaboradoras() {
   // ───── 1. DATOS Y ESTADO ─────
   // (ver docs/GLOSARIO.md → Estado (useState))
+  const { id } = useAuth();
 
-  // Texto del buscador (nombre o habilidad). Empieza vacío; lo cambia el campo «Buscar».
-  const [busqueda, setBusqueda] = useState('');
+  // Perfil elegido en el filtro: 'todas' o «idProyecto|idPerfil». Lo cambia el desplegable.
+  const [perfilElegido, setPerfilElegido] = useState('todas');
 
-  // Habilidad elegida: 'todas' o el nombre de una habilidad.
-  // La cambia el desplegable «Habilidad».
-  const [habilidadElegida, setHabilidadElegida] = useState('todas');
+  // Número de página (empieza en 1). La cambia el paginador y vuelve a 1 al cambiar el filtro.
+  const [pagina, setPagina] = useState(1);
 
-  // Filtro de mensajes: 'todos' | 'si' (habilitados) | 'no' (deshabilitados).
-  // Lo cambia el desplegable «Mensajes».
-  const [filtroMensajes, setFiltroMensajes] = useState('todos');
+  // Mis proyectos (para armar las opciones del filtro). Se piden una sola vez.
+  const { datos: misProyectos } = usePedido(() => obtenerProyectosDelColectivo(id), [id]);
 
-  // Número de página pedida (empieza en 1). La cambia el paginador y se reinicia a 1
-  // cada vez que cambia un filtro.
-  const [paginaPedida, setPaginaPedida] = useState(1);
-
-  // true un instante (simula la espera de datos) y después false.
-  const cargando = useLoading();
+  // La página de colaboradoras. Se vuelve a pedir cuando cambia el filtro o la página.
+  const { cargando, datos: resultado, error } = usePedido(
+    () => pedirPagina(perfilElegido, pagina),
+    [perfilElegido, pagina]
+  );
 
   // ───── 2. CÁLCULOS ─────
 
-  // Colaboradoras que cumplen los tres filtros a la vez (habilidad, mensajes y texto).
-  // useMemo guarda el resultado y solo lo recalcula si cambia alguno de los filtros de la
-  // lista final (ver docs/GLOSARIO.md → useMemo).
-  const colaboradorasFiltradas = useMemo(() => {
-    const textoBuscado = busqueda.trim().toLowerCase();
+  // Opciones del filtro: una por cada perfil de cada proyecto abierto.
+  // (.flatMap = .map que «aplana»: devuelve una sola lista con los perfiles de todos)
+  const opcionesDePerfil = (misProyectos ?? [])
+    .filter((proyecto) => proyecto.estado === 'abierto')
+    .flatMap((proyecto) =>
+      proyecto.perfiles.map((perfil) => ({
+        valor: `${proyecto.id}|${perfil.id}`,
+        texto: `${proyecto.titulo} · ${perfil.descripcion}`,
+      }))
+    );
 
-    // Responde si UNA colaboradora cumple todos los filtros.
-    function cumpleLosFiltros(colaboradora) {
-      // Habilidad: 'todas' deja pasar a todas; si no, tiene que tenerla.
-      const cumpleHabilidad =
-        habilidadElegida === 'todas' || colaboradora.habilidades.includes(habilidadElegida);
+  // Para escribirle a alguien hace falta un proyecto: si se filtró por perfil, es ese.
+  const proyectoDelFiltro = perfilElegido === 'todas' ? null : perfilElegido.split('|')[0];
 
-      // Mensajes: 'todos' deja pasar a todas; 'si' pide mensajes habilitados y 'no',
-      // deshabilitados. `(filtro === 'si')` da true/false y se compara con lo que ella tiene.
-      const cumpleMensajes =
-        filtroMensajes === 'todos' || (filtroMensajes === 'si') === colaboradora.mensajes;
-
-      // Texto: si no se escribió nada deja pasar a todas; si no, el texto tiene que estar
-      // en el nombre o en alguna de sus habilidades (sin importar mayúsculas).
-      // (.some → docs/GLOSARIO.md → Métodos de arrays: ¿alguna habilidad coincide?)
-      const cumpleTexto =
-        !textoBuscado ||
-        colaboradora.nombre.toLowerCase().includes(textoBuscado) ||
-        colaboradora.habilidades.some((habilidad) =>
-          habilidad.toLowerCase().includes(textoBuscado)
-        );
-
-      return cumpleHabilidad && cumpleMensajes && cumpleTexto;
-    }
-
-    return COLABORADORAS.filter(cumpleLosFiltros);
-  }, [busqueda, habilidadElegida, filtroMensajes]);
-
-  // Cantidad total de páginas (siempre al menos 1, aunque no haya resultados).
-  const totalPaginas = Math.max(1, Math.ceil(colaboradorasFiltradas.length / POR_PAGINA));
-
-  // Página que realmente se muestra: nunca pasa de la última (por si al filtrar hay menos).
-  const paginaActual = Math.min(paginaPedida, totalPaginas);
-
-  // Las colaboradoras de la página actual: se recorta la lista filtrada.
-  // Ej.: página 2 con 5 por página = posiciones 5 a 9.
-  const colaboradorasDeLaPagina = colaboradorasFiltradas.slice(
-    (paginaActual - 1) * POR_PAGINA,
-    paginaActual * POR_PAGINA
-  );
+  const colaboradoras = resultado?.resultados ?? [];
+  const totalPaginas = resultado?.totalPaginas ?? 1;
 
   // ───── 3. ACCIONES ─────
 
-  // Devuelve la función que se ejecuta cuando cambia un filtro: guarda el valor nuevo con
-  // `guardarValor` (el `set…` de ese filtro) y vuelve a la página 1, porque la lista
-  // filtrada cambió.
-  function alCambiarFiltro(guardarValor) {
-    return function (e) {
-      guardarValor(e.target.value);
-      setPaginaPedida(1);
-    };
+  // Se ejecuta al cambiar el perfil: guarda el valor y vuelve a la página 1.
+  function alCambiarPerfil(e) {
+    setPerfilElegido(e.target.value);
+    setPagina(1);
   }
 
-  // Se ejecuta al tocar «Limpiar filtros»: deja los tres filtros como al principio.
-  function limpiarFiltros() {
-    setBusqueda('');
-    setHabilidadElegida('todas');
-    setFiltroMensajes('todos');
+  // Botón de la derecha de cada fila. Si acepta mensajes y hay un proyecto elegido:
+  // «Enviar mensaje» (abre Mensajes con esa persona y ese proyecto). Si no: «Ver perfil»
+  // (desde el perfil se elige el proyecto para escribirle).
+  function accionDe(colaboradora) {
+    if (colaboradora.mensajes && proyectoDelFiltro) {
+      return (
+        <Button as={Link} to={`/org/mensajes?persona=${colaboradora.id}&proyecto=${proyectoDelFiltro}`}>
+          Enviar mensaje
+        </Button>
+      );
+    }
+    return (
+      <Button as={Link} to={`/org/colaboradoras/${colaboradora.id}`} variant="secondary">
+        Ver perfil
+      </Button>
+    );
   }
 
   // ───── 4. LO QUE SE DIBUJA ─────
 
-  // Elige qué se ve en el lugar de la lista. Hay tres casos posibles.
+  // Elige qué se ve en el lugar de la lista. Hay cuatro casos posibles.
   let contenidoDeLaLista;
   if (cargando) {
     // Caso 1: está cargando, filas grises de relleno.
     contenidoDeLaLista = <RowsSkeleton n={5} />;
-  } else if (colaboradorasFiltradas.length === 0) {
-    // Caso 2: ninguna coincide con los filtros.
+  } else if (error) {
+    // Caso 2: el pedido falló.
+    contenidoDeLaLista = (
+      <Alert kind="error" title="No pudimos cargar las colaboradoras">{mensajeDeError(error)}</Alert>
+    );
+  } else if (colaboradoras.length === 0) {
+    // Caso 3: no hay resultados.
     contenidoDeLaLista = (
       <div className={sh.empty}>
         <Heading level={2} size="h3">Ninguna colaboradora coincide</Heading>
-        <Button variant="secondary" onClick={limpiarFiltros}>Limpiar filtros</Button>
+        {perfilElegido !== 'todas' && (
+          <Button variant="secondary" onClick={() => alCambiarPerfil({ target: { value: 'todas' } })}>
+            Ver todas
+          </Button>
+        )}
       </div>
     );
   } else {
-    // Caso 3: hay resultados, se dibuja la tabla con las de la página actual.
+    // Caso 4: hay resultados, se dibuja la tabla de esta página.
     contenidoDeLaLista = (
       <table className={sh.table}>
         <thead>
           <tr><th>Persona</th><th>Habilidades</th><th>Mensajes</th><th>Acciones</th></tr>
         </thead>
         <tbody>
-          {colaboradorasDeLaPagina.map((colaboradora) => (
+          {colaboradoras.map((colaboradora) => (
             <tr key={colaboradora.id}>
               <td data-l="Persona">
                 <Link to={`/org/colaboradoras/${colaboradora.id}`} className={sh.person}>
@@ -151,8 +156,7 @@ export default function BuscarColaboradoras() {
                 </span>
               </td>
               <td data-l="Mensajes">
-                {/* Si acepta mensajes dice «Habilitados»; si no, «Deshabilitados»
-                    con candado. */}
+                {/* Si acepta mensajes dice «Habilitados»; si no, «Deshabilitados» con candado. */}
                 {colaboradora.mensajes ? (
                   'Habilitados'
                 ) : (
@@ -160,20 +164,7 @@ export default function BuscarColaboradoras() {
                 )}
               </td>
               <td className={sh.act}>
-                <div className={sh.row}>
-                  {/* Si acepta mensajes: «Enviar mensaje». Si no, solo «Ver perfil». */}
-                  {colaboradora.mensajes ? (
-                    <Button as={Link} to="/org/mensajes">Enviar mensaje</Button>
-                  ) : (
-                    <Button
-                      as={Link}
-                      to={`/org/colaboradoras/${colaboradora.id}`}
-                      variant="secondary"
-                    >
-                      Ver perfil
-                    </Button>
-                  )}
-                </div>
+                <div className={sh.row}>{accionDe(colaboradora)}</div>
               </td>
             </tr>
           ))}
@@ -186,44 +177,26 @@ export default function BuscarColaboradoras() {
     <div className={`container ${sh.page}`}>
       <Heading level={1}>Buscar colaboradoras</Heading>
 
-      {/* BLOQUE: Filtros — buscador, habilidad y mensajes */}
-      <div className={s.buscar3}>
-        <Field
-          label="Buscar"
-          type="search"
-          placeholder="Nombre o habilidad"
-          value={busqueda}
-          onChange={alCambiarFiltro(setBusqueda)}
-        />
+      {/* BLOQUE: Filtro — todas o las acordes a un perfil de mis proyectos abiertos */}
+      <div className={s.buscar}>
         <Field
           as="select"
-          label="Habilidad"
-          value={habilidadElegida}
-          onChange={alCambiarFiltro(setHabilidadElegida)}
+          label="Acordes al perfil"
+          value={perfilElegido}
+          onChange={alCambiarPerfil}
         >
-          <option value="todas">Todas</option>
-          {/* Una opción por cada habilidad conocida. */}
-          {HABILIDADES.map((habilidad) => (
-            <option key={habilidad}>{habilidad}</option>
+          <option value="todas">Todas las colaboradoras</option>
+          {opcionesDePerfil.map((opcion) => (
+            <option key={opcion.valor} value={opcion.valor}>{opcion.texto}</option>
           ))}
-        </Field>
-        <Field
-          as="select"
-          label="Mensajes"
-          value={filtroMensajes}
-          onChange={alCambiarFiltro(setFiltroMensajes)}
-        >
-          <option value="todos">Todos</option>
-          <option value="si">Habilitados</option>
-          <option value="no">Deshabilitados</option>
         </Field>
       </div>
 
-      {/* BLOQUE: Resultados — relleno gris si carga, mensaje si no hay, o la tabla */}
+      {/* BLOQUE: Resultados — relleno gris si carga, error, mensaje si no hay, o la tabla */}
       {contenidoDeLaLista}
 
-      {/* BLOQUE: Paginador — pasar de página (el número vuelve al estado paginaPedida) */}
-      <Pager page={paginaActual} pages={totalPaginas} onChange={setPaginaPedida} />
+      {/* BLOQUE: Paginador — cambia la página y se pide la nueva al backend */}
+      <Pager page={pagina} pages={totalPaginas} onChange={setPagina} />
     </div>
   );
 }

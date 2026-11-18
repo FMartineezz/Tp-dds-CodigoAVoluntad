@@ -5,9 +5,11 @@
  * Para modificarla: un tema nuevo = un bloque {tema === "x" && …} y su ruta en App.js.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
+ *   · EstadisticasEnVivo (componente chico) → pide GET /estadisticas y muestra la respuesta
+ *                        real; solo se usa en el tema 'api' (así las otras páginas no gastan
+ *                        pedidos: el backend permite 5 cada 20 minutos).
  *   1. DATOS Y ESTADO  → el prop `tema` (qué página mostrar) y lo que viene de la sesión
  *                        para el botón del modo daltónico.
- *   2. CÁLCULOS        → arma el texto JSON de ejemplo que se muestra en la página de la API.
  *   4. LO QUE SE DIBUJA → cuatro versiones posibles (términos, accesibilidad, API y contacto;
  *                        se ve solo la que pide `tema`) y, siempre, el botón «Volver al inicio».
  *   (No hay sección 3 · ACCIONES propia: el único botón que hace algo, el del modo daltónico,
@@ -15,8 +17,11 @@
  */
 import { Link } from 'react-router-dom';
 import { Button, Heading, Text } from '../../atomos';
-import { ESTADISTICAS } from '../../datos';
+import { Alert, RowsSkeleton } from '../../moleculas';
 import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { obtenerEstadisticas } from '../../api/estadisticas.js';
+import { mensajeDeError } from '../../api/errores.js';
 import sh from '../../plantillas/disposicion.module.css';
 
 // Estilo del recuadro oscuro donde se muestra el ejemplo de la API (un bloque de código).
@@ -29,6 +34,33 @@ const ESTILO_BLOQUE_DE_CODIGO = {
   overflow: 'auto',
 };
 
+// ═════ COMPONENTE AUXILIAR: EstadisticasEnVivo ═════
+// Pide las estadísticas al backend y las muestra tal cual llegan (JSON con sangría).
+// Está aparte porque un hook (usePedido) no se puede llamar «solo a veces» dentro de Info:
+// como este componente se dibuja solo con tema === 'api', el pedido se hace solo ahí.
+function EstadisticasEnVivo() {
+  const { cargando, datos: estadisticas, error } = usePedido(() => obtenerEstadisticas(), []);
+
+  // Mientras llega → filas grises. Si falló (por ejemplo, 429 por pasar el límite) → aviso.
+  if (cargando) return <RowsSkeleton n={4} />;
+  if (error) {
+    return (
+      <Alert kind="error" title="No pudimos traer las estadísticas">
+        {mensajeDeError(error)}
+      </Alert>
+    );
+  }
+  // `crudo` es la respuesta del backend sin adaptar. JSON.stringify(…, null, 2) la convierte
+  // en texto con sangría de 2 espacios para que se lea bien.
+  const json = JSON.stringify(estadisticas.crudo, null, 2);
+  // `{'\n'}` es un salto de línea escrito como texto.
+  return (
+    <pre style={ESTILO_BLOQUE_DE_CODIGO}>
+      <code>GET {import.meta.env.VITE_API_URL}/estadisticas{'\n'}{json}</code>
+    </pre>
+  );
+}
+
 // Recibe un único prop: `tema`, que puede ser 'terminos', 'accesibilidad', 'api' o 'contacto'.
 // Se lo define en App.js, una vez por cada ruta (ver docs/GLOSARIO.md → Props).
 export default function Info({ tema }) {
@@ -37,17 +69,6 @@ export default function Info({ tema }) {
   // ver docs/GLOSARIO.md → Desestructurar):
   // `dalt` es true si el modo daltónico está activado, y `toggleDalt` lo prende o apaga.
   const { dalt, toggleDalt } = useAuth();
-
-  // ───── 2. CÁLCULOS ─────
-  // Las tres cifras globales que expone la «API» de estadísticas.
-  const estadisticasPublicas = {
-    proyectos: ESTADISTICAS.proyectos,
-    colectivos: ESTADISTICAS.colectivos,
-    finalizados: ESTADISTICAS.finalizados,
-  };
-  // Esas cifras convertidas a texto JSON, con sangría de 2 espacios para que se lea bien.
-  // Se muestra tal cual en la página «API pública de estadísticas».
-  const json = JSON.stringify(estadisticasPublicas, null, 2);
 
   // ───── 4. LO QUE SE DIBUJA ─────
   // Un solo return con cuatro bloques posibles: cada uno se dibuja únicamente si `tema`
@@ -104,12 +125,12 @@ export default function Info({ tema }) {
       {tema === 'api' && (
         <>
           <Heading level={1}>API pública de estadísticas</Heading>
-          <Text variant="prose">Métricas globales de la plataforma, sin datos personales.</Text>
-          {/* Recuadro de código con el pedido de ejemplo y el JSON calculado arriba.
-              `{'\n'}` es un salto de línea escrito como texto. */}
-          <pre style={ESTILO_BLOQUE_DE_CODIGO}>
-            <code>GET /api/estadisticas{'\n'}{json}</code>
-          </pre>
+          <Text variant="prose">
+            Métricas globales de la plataforma, sin datos personales. Esta es la respuesta
+            real del backend en este momento. Sin API key se pueden hacer hasta 5 consultas
+            cada 20 minutos.
+          </Text>
+          <EstadisticasEnVivo />
         </>
       )}
 

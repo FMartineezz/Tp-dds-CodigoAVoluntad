@@ -1,30 +1,56 @@
 /**
- * AUXILIARES de las pantallas de organización: constantes y funciones que usan
- * varias pantallas de esta carpeta.
+ * AUXILIARES de las pantallas de organización: pedidos que juntan varios endpoints y que
+ * usan varias pantallas de esta carpeta.
  * Si cambiás algo acá, cambia en todas las pantallas que lo importan.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS: `MIS`, la lista de proyectos de la organización que tiene la sesión.
- *   2. FUNCIONES: `persona`, que busca una colaboradora a partir de su id.
+ *   1. PEDIDOS COMPUESTOS: `cargarPanel` (todo lo del panel) y `obtenerMiProyecto`
+ *      (un proyecto, solo si es del colectivo con sesión).
+ *   2. PANTALLA DE «NO EXISTE»: `esNoEncontrado`, para decidir cuándo mostrarla.
  */
-import { COLABORADORAS, PROYECTOS } from '../../datos';
+import { obtenerProyecto } from '../../api/proyectos.js';
+import {
+  obtenerMiColectivo,
+  obtenerPostulacionesDelColectivo,
+  obtenerProyectosDelColectivo,
+} from '../../api/organizacion.js';
+import { obtenerConversaciones } from '../../api/mensajes.js';
+import { esError } from '../../api/errores.js';
 
-// ───── 1. DATOS ─────
+// ───── 1. PEDIDOS COMPUESTOS ─────
 
-// MIS = «mis proyectos»: los proyectos del colectivo 1 (Asamblea Barrial Norte).
-// En el prototipo la organización logueada es siempre la del colectivo 1; con una API
-// real, esto vendría del servidor según quién inició sesión.
-// Se usa en: PanelOrg (cifras y tarjetas) y ProyectosOrg (la tabla).
-// Si se cambia el número 1, esas dos pantallas pasan a mostrar los proyectos de otro
-// colectivo. (.filter se explica en docs/GLOSARIO.md → Métodos de arrays)
-export const MIS = PROYECTOS.filter((proyecto) => proyecto.colectivoId === 1);
+// Todo lo que muestra PanelOrg, pedido a la vez con Promise.all (los cuatro pedidos salen
+// juntos y se espera a que lleguen todos). Si falla uno, falla todo y la pantalla avisa.
+// Devuelve { colectivo, proyectos, pendientes, sinLeer }.
+export async function cargarPanel(colectivoId) {
+  const [colectivo, proyectos, pendientes, chats] = await Promise.all([
+    obtenerMiColectivo(colectivoId),
+    obtenerProyectosDelColectivo(colectivoId),
+    obtenerPostulacionesDelColectivo(colectivoId, 'pendiente'),
+    obtenerConversaciones('org', colectivoId),
+  ]);
+  // Mensajes sin leer = suma de los «nuevos» de cada conversación (.reduce acumula).
+  const sinLeer = chats.reduce((total, chat) => total + chat.nuevos, 0);
+  return { colectivo, proyectos, pendientes, sinLeer };
+}
 
-// ───── 2. FUNCIONES ─────
+// Un proyecto (GET /proyectos/:id), pero SOLO si es del colectivo `colectivoId`.
+// Si es de otra organización se responde igual que si no existiera: se lanza un error con
+// la misma forma que un 404 de Axios, así la pantalla lo trata con el mismo `if`.
+export async function obtenerMiProyecto(proyectoId, colectivoId) {
+  const proyecto = await obtenerProyecto(proyectoId);
+  if (String(proyecto.colectivoId) !== String(colectivoId)) {
+    const error = new Error('El proyecto no es de esta organización');
+    error.response = {
+      status: 404,
+      data: { code: 'ERR-NOT-108', message: 'El proyecto solicitado no fue encontrado' },
+    };
+    throw error;
+  }
+  return proyecto;
+}
 
-// persona(id) devuelve la colaboradora que tiene ese id, o `undefined` si no existe.
-// Se usa en: FormProyecto, PostulacionesOrg, EquipoOrg y PerfilColaboradora.
-// Si se cambia, todas esas pantallas cambian cómo encuentran a las personas; las que
-// reciben `undefined` (por ejemplo PerfilColaboradora) muestran «no encontrada».
-// (.find se explica en docs/GLOSARIO.md → Métodos de arrays)
-export const persona = (id) =>
-  COLABORADORAS.find((colaboradora) => colaboradora.id === id);
+// ───── 2. PANTALLA DE «NO EXISTE» ─────
+
+// true si el backend respondió 404 (o el proyecto es de otra organización).
+export const esNoEncontrado = (error) => esError(error, 404);

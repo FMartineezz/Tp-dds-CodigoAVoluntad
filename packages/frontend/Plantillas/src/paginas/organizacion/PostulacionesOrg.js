@@ -1,84 +1,112 @@
 /**
  * PANTALLA PostulacionesOrg
  * Ruta: /org/proyectos/:id/postulaciones   ·   Quién la ve: Organización
- * Qué muestra: Postulaciones por estado; aceptar (se bloquea al llegar al cupo) o
- * rechazar con confirmación.
+ * Qué muestra: Postulaciones a un proyecto por estado; aceptar o rechazar (con confirmación).
+ * De dónde salen los datos: el proyecto de GET /proyectos/:id y las postulaciones de
+ *   GET /colectivos/:id/postulaciones (ver api/organizacion.js). Aceptar y rechazar hacen
+ *   PATCH /postulaciones/:id. El cupo de cada perfil lo controla el backend: si está lleno,
+ *   responde un error (ERR-EST-507) y se muestra en el aviso rojo.
+ *   PENDIENTE (backend): las postulaciones traen el TÍTULO del proyecto y no su id, por eso
+ *   se filtran por título (sirve porque un colectivo no repite títulos).
  * Para modificarla: COLUMNA NUEVA: <th> en <thead> + <td data-l="…"> por fila.
  *
  * ESTADOS DE UNA POSTULACIÓN: 'pendiente' (esperando respuesta), 'aceptada' (la persona
  * ya es parte del equipo) y 'rechazada'. Cada pestaña muestra uno de esos tres.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: la lista de postulaciones, la pestaña elegida, cuál se quiere
- *      rechazar y el aviso de éxito.
- *   2. CÁLCULOS: si el cupo está lleno, contadores por estado y la lista de la pestaña.
- *   3. ACCIONES: cambiar el estado, aceptar y confirmar el rechazo.
+ *   1. DATOS Y ESTADO: proyecto y postulaciones del backend, la pestaña elegida, cuál se
+ *      quiere rechazar, si se está enviando y los avisos.
+ *      ESPERA Y ERRORES: cargando, «no existe» (404) o aviso de error.
+ *   2. CÁLCULOS: contadores por estado y la lista de la pestaña.
+ *   3. ACCIONES: aceptar y confirmar el rechazo (las dos hablan con el backend).
  *   4. LO QUE SE DIBUJA: migas, avisos, pestañas con la tabla y el diálogo de rechazo.
  */
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Avatar, Button, Heading, Tag, Text } from '../../atomos';
-import { Alert, ConfirmDialog, Crumbs, Tabs } from '../../moleculas';
-import { POSTULACIONES_ORG, PROYECTOS } from '../../datos';
+import { Alert, ConfirmDialog, Crumbs, RowsSkeleton, Tabs } from '../../moleculas';
+import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { mensajeDeError } from '../../api/errores.js';
+import { obtenerPostulacionesDelColectivo, resolverPostulacion } from '../../api/organizacion.js';
 import { NoEncontrado } from '../../paginas/sistema/Errores.js';
-import { persona } from './auxiliares.js';
+import { esNoEncontrado, obtenerMiProyecto } from './auxiliares.js';
 import sh from '../../plantillas/disposicion.module.css';
 
-// Cupo máximo de personas aceptadas del proyecto (en el prototipo es fijo: 2).
-// Al llegar a este número ya no se puede aceptar a nadie más.
-const CUPO_MAXIMO = 2;
+// Pide el proyecto (solo si es mío) y todas las postulaciones del colectivo, y se queda
+// con las de este proyecto.
+async function cargarPostulaciones(proyectoId, colectivoId) {
+  const [proyecto, todas] = await Promise.all([
+    obtenerMiProyecto(proyectoId, colectivoId),
+    obtenerPostulacionesDelColectivo(colectivoId),
+  ]);
+  const postulaciones = todas.filter(
+    (postulacion) => String(postulacion.proyectoId) === String(proyectoId)
+  );
+  return { proyecto, postulaciones };
+}
 
 export default function PostulacionesOrg() {
   // ───── 1. DATOS Y ESTADO ─────
 
-  // Lee la parte variable de la dirección: /org/proyectos/48/postulaciones → id = '48'
+  // Lee la parte variable de la dirección: /org/proyectos/6afe…/postulaciones → id = '6afe…'
   // (ver docs/GLOSARIO.md → useParams)
   const { id } = useParams();
+  // `idColectivo` = el id de la cuenta con sesión (se renombra para no chocar con `id`).
+  const { id: idColectivo } = useAuth();
 
-  // El proyecto de la dirección (solo si es de esta organización). `undefined` si no existe.
-  // (.find → docs/GLOSARIO.md → Métodos de arrays)
-  const proyecto = PROYECTOS.find(
-    (candidato) => String(candidato.id) === id && candidato.colectivoId === 1
+  // Sumarle 1 vuelve a pedir los datos (está en las dependencias de usePedido).
+  const [version, setVersion] = useState(0);
+  const { cargando, datos, error } = usePedido(
+    () => cargarPostulaciones(id, idColectivo),
+    [id, idColectivo, version]
   );
-
-  // Todas las postulaciones, con su estado actual. Arranca con las de ejemplo y cambia
-  // cuando se acepta o rechaza una (cambiarEstado). (ver docs/GLOSARIO.md → Estado (useState))
-  const [postulaciones, setPostulaciones] = useState(POSTULACIONES_ORG);
 
   // Pestaña activa: 'pendientes' | 'aceptadas' | 'rechazadas'. La cambian las pestañas.
   const [pestana, setPestana] = useState('pendientes');
 
-  // Id de la postulación que se quiere rechazar, o null si no hay ninguna.
-  // Al tocar «Rechazar» se guarda el id (y se abre el diálogo); al cancelar vuelve a null.
-  const [idARechazar, setIdARechazar] = useState(null);
+  // Postulación que se quiere rechazar, o null si no hay ninguna.
+  // Al tocar «Rechazar» se guarda (y se abre el diálogo); al cancelar vuelve a null.
+  const [aRechazar, setARechazar] = useState(null);
 
-  // Mensaje verde de éxito. Texto vacío = no se muestra. Lo completan alAceptar y
-  // alConfirmarRechazo.
+  // Id de la postulación que se está enviando al backend (o null): su botón muestra espera.
+  const [enviandoId, setEnviandoId] = useState(null);
+
+  // Avisos verde (éxito) y rojo (error del backend). Texto vacío = no se muestra.
   const [aviso, setAviso] = useState('');
+  const [errorAccion, setErrorAccion] = useState('');
 
-  // Si el proyecto no existe se corta acá y se muestra la pantalla de error.
-  // Va después de los hooks a propósito (los hooks no pueden ir dentro de un `if`).
-  if (!proyecto) {
+  // ───── ESPERA Y ERRORES ─────
+  // (Los hooks de arriba tienen que ir antes de estos `return`, siempre en el mismo orden.)
+  if (cargando) {
     return (
-      <NoEncontrado
-        code="ERR-NOT-108"
-        titulo="Ese proyecto no existe"
-        msg="El proyecto solicitado no fue encontrado"
-      />
+      <div className={`container ${sh.page}`}>
+        <RowsSkeleton n={4} />
+      </div>
     );
   }
+  if (esNoEncontrado(error)) {
+    const { code, message } = error.response.data;
+    return <NoEncontrado code={code} titulo="Ese proyecto no existe" msg={message} />;
+  }
+  if (error) {
+    return (
+      <div className={`container ${sh.page}`}>
+        <Alert kind="error" title="No pudimos cargar las postulaciones">
+          {mensajeDeError(error)}
+        </Alert>
+      </div>
+    );
+  }
+
+  const { proyecto, postulaciones } = datos;
 
   // ───── 2. CÁLCULOS ─────
 
   // Cuenta cuántas postulaciones tienen un estado dado ('pendiente', 'aceptada'…).
-  // Sirve para los números de las pestañas y para controlar el cupo.
   function contarConEstado(estado) {
     return postulaciones.filter((postulacion) => postulacion.estado === estado).length;
   }
-
-  // true cuando ya se aceptó a tantas personas como permite el cupo.
-  // Entonces se deshabilita «Aceptar» y se muestra un aviso (regla de negocio).
-  const cupoLleno = contarConEstado('aceptada') >= CUPO_MAXIMO;
 
   // Traduce el nombre de cada pestaña al estado que muestra.
   const estadoDeCadaPestana = {
@@ -102,33 +130,34 @@ export default function PostulacionesOrg() {
 
   // ───── 3. ACCIONES ─────
 
-  // Cambia el estado de UNA postulación sin tocar las demás.
-  // `idPostulacion` dice cuál; `nuevoEstado` es 'aceptada' o 'rechazada'.
-  function cambiarEstado(idPostulacion, nuevoEstado) {
-    setPostulaciones((actuales) =>
-      actuales.map((postulacion) => {
-        // Solo esa postulación se copia con el estado nuevo (`...` → Copiar con cambios).
-        if (postulacion.id === idPostulacion) return { ...postulacion, estado: nuevoEstado };
-        return postulacion;
-      })
-    );
+  // Le pide al backend que cambie el estado de UNA postulación. Si sale bien muestra
+  // `textoExito` y vuelve a pedir la lista; si sale mal, muestra el error del backend.
+  // `async/await`: espera la respuesta antes de seguir (ver docs/GLOSARIO.md).
+  async function resolver(postulacion, nuevoEstado, textoExito) {
+    setEnviandoId(postulacion.id);
+    setAviso('');
+    setErrorAccion('');
+    try {
+      await resolverPostulacion(postulacion.id, nuevoEstado);
+      setAviso(textoExito);
+      setVersion((v) => v + 1);
+    } catch (e) {
+      setErrorAccion(mensajeDeError(e));
+    } finally {
+      setEnviandoId(null);
+    }
   }
 
-  // Se ejecuta al tocar «Aceptar»: marca la postulación como aceptada y avisa.
-  // (El botón ya viene deshabilitado si el cupo está lleno, así que no hace falta
-  // volver a controlarlo acá.)
+  // Se ejecuta al tocar «Aceptar»: el backend crea la colaboración (si hay cupo).
   function alAceptar(postulacion) {
-    const colaboradora = persona(postulacion.persona);
-    cambiarEstado(postulacion.id, 'aceptada');
-    setAviso(`Aceptaste a ${colaboradora.nombre}. Ya es parte del equipo.`);
+    resolver(postulacion, 'aceptada', `Aceptaste a ${postulacion.persona.nombre}. Ya es parte del equipo.`);
   }
 
-  // Se ejecuta al tocar «Sí, rechazar» en el diálogo: marca la postulación elegida como
-  // rechazada, cierra el diálogo y avisa.
-  function alConfirmarRechazo() {
-    cambiarEstado(idARechazar, 'rechazada');
-    setIdARechazar(null);
-    setAviso('Postulación rechazada.');
+  // Se ejecuta al tocar «Sí, rechazar» en el diálogo.
+  async function alConfirmarRechazo() {
+    const postulacion = aRechazar;
+    setARechazar(null);
+    await resolver(postulacion, 'rechazada', 'Postulación rechazada.');
   }
 
   // ───── 4. LO QUE SE DIBUJA ─────
@@ -151,8 +180,8 @@ export default function PostulacionesOrg() {
         </thead>
         <tbody>
           {postulacionesDeLaPestana.map((postulacion) => {
-            // La persona que se postuló (se busca por su id).
-            const colaboradora = persona(postulacion.persona);
+            // La persona que se postuló (viene adentro de la postulación).
+            const colaboradora = postulacion.persona;
             return (
               <tr key={postulacion.id}>
                 <td data-l="Persona">
@@ -172,18 +201,22 @@ export default function PostulacionesOrg() {
                 <td className={sh.act}>
                   <div className={sh.row}>
                     {/* Los botones aparecen solo si la postulación está pendiente; las
-                        aceptadas y rechazadas ya no se pueden cambiar. «Aceptar» se
-                        deshabilita si el cupo está lleno. */}
+                        aceptadas y rechazadas ya no se pueden cambiar. */}
                     {postulacion.estado === 'pendiente' && (
                       <>
                         <Button
                           variant="success"
-                          disabled={cupoLleno}
+                          loading={enviandoId === postulacion.id}
+                          disabled={enviandoId !== null}
                           onClick={() => alAceptar(postulacion)}
                         >
                           Aceptar
                         </Button>
-                        <Button variant="danger" onClick={() => setIdARechazar(postulacion.id)}>
+                        <Button
+                          variant="danger"
+                          disabled={enviandoId !== null}
+                          onClick={() => setARechazar(postulacion)}
+                        >
                           Rechazar
                         </Button>
                       </>
@@ -210,15 +243,9 @@ export default function PostulacionesOrg() {
       />
       <Heading level={1}>Postulaciones</Heading>
 
-      {/* BLOQUE: Avisos — éxito (si hay mensaje) y cupo completo (si se llegó al máximo) */}
-      {aviso && (
-        <Alert kind="success" onClose={() => setAviso('')}>{aviso}</Alert>
-      )}
-      {cupoLleno && (
-        <Alert kind="warning">
-          El cupo del proyecto está completo: no se puede aceptar a más personas.
-        </Alert>
-      )}
+      {/* BLOQUE: Avisos — éxito o error del backend (por ejemplo, cupo completo) */}
+      {aviso && <Alert kind="success" onClose={() => setAviso('')}>{aviso}</Alert>}
+      {errorAccion && <Alert kind="error" onClose={() => setErrorAccion('')}>{errorAccion}</Alert>}
 
       {/* BLOQUE: Pestañas — Pendientes / Aceptadas / Rechazadas, con la tabla adentro */}
       <Tabs tabs={pestanas} value={pestana} onChange={setPestana}>
@@ -226,13 +253,12 @@ export default function PostulacionesOrg() {
       </Tabs>
 
       {/* BLOQUE: Confirmación de rechazo — abierto solo si hay una postulación elegida */}
-      {/* `!!idARechazar` convierte el id en true/false: hay id = abierto, null = cerrado. */}
       <ConfirmDialog
-        open={!!idARechazar}
+        open={!!aRechazar}
         danger
         title="¿Rechazar la postulación?"
         confirmLabel="Sí, rechazar"
-        onCancel={() => setIdARechazar(null)}
+        onCancel={() => setARechazar(null)}
         onConfirm={alConfirmarRechazo}
       >
         <Text>La persona va a ver el estado «Rechazada».</Text>

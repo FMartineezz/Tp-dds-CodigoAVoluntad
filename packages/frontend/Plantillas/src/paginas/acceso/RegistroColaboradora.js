@@ -3,14 +3,21 @@
  * Ruta: /registro/colaboradora   ·   Quién la ve: Sin sesión
  * Qué muestra: Alta de colaboradora: nombre de fantasía, habilidades, contactos
  *   internos, captcha y términos.
+ * Adónde van los datos: POST /colaboradoras (ver api/colaboradoras.js). Las habilidades
+ *   salen del catálogo real (GET /habilidades) y viajan como CÓDIGOS. Si el backend rechaza
+ *   algo, su mensaje se ve arriba del formulario. Si sale bien, se abre la sesión con la
+ *   cuenta recién creada y se va al panel.
+ *   PENDIENTE (backend): correo y contraseña todavía no se guardan en ningún lado (no hay
+ *   login real / Keycloak); se piden y validan para que el formulario quede listo.
  * Para modificarla: un campo nuevo = un <Field> más dentro de la grilla .form
  *   (y su regla en useForm si es obligatorio).
  *
  * ANATOMÍA DE ESTE ARCHIVO:
  *   1. DATOS Y ESTADO: lo que la pantalla recuerda (campos de texto, habilidades,
- *      contactos) y el manejo de validación que viene de auxiliares.js.
+ *      contactos), el catálogo de habilidades (pedido al backend) y el manejo de
+ *      validación y envío que viene de auxiliares.js.
  *   2. CÁLCULOS: las reglas de validación y los errores que se ven en este momento.
- *   3. ACCIONES: cómo se guarda cada cambio de un campo.
+ *   3. ACCIONES: cómo se guarda cada cambio de un campo y cómo se arma y envía el alta.
  *   4. LO QUE SE DIBUJA: el formulario completo.
  *
  * Cómo se validan los campos: al salir de un campo (onBlur) se muestra su error; al
@@ -20,7 +27,7 @@
 
 // ───── Imports ─────
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button, Checkbox, Field, Heading } from '../../atomos';
 import {
   Alert,
@@ -30,11 +37,18 @@ import {
   SocialButtons,
   TagPicker,
 } from '../../moleculas';
-import { HABILIDADES } from '../../datos'; // lista de habilidades que se pueden elegir
+import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { obtenerHabilidades } from '../../api/habilidades.js';
+import { crearColaboradora } from '../../api/colaboradoras.js';
+import { mensajeDeError } from '../../api/errores.js';
 // piezas compartidas con el otro registro
 import { MAIL, useForm, Resumen, useSocial } from './auxiliares.js';
 import s from './Ingresar.module.css';
 import sh from '../../plantillas/disposicion.module.css'; // sh = layout común (.page, .form…)
+
+// Tipo de contacto como lo muestra ContactosEditor → como lo acepta el backend.
+const TIPOS_DE_CONTACTO = { Correo: 'email', WhatsApp: 'whatsapp', SMS: 'sms' };
 
 export default function RegistroColaboradora() {
   // ───── 1. DATOS Y ESTADO ─────
@@ -57,18 +71,27 @@ export default function RegistroColaboradora() {
     captcha: false,
   });
 
-  // Habilidades elegidas, como array de textos, ej. ['React', 'Node'].
+  // Catálogo de habilidades del backend: [{ id, titulo, codigo, descripcion }].
+  // `[]` = se pide una sola vez, al entrar.
+  const { datos: catalogo, error: errorDelCatalogo } = usePedido(() => obtenerHabilidades(), []);
+
+  // Habilidades elegidas, como array de TÍTULOS, ej. ['Desarrollo Web React'].
   // Empieza vacío; lo cambia el TagPicker.
   const [habilidadesElegidas, setHabilidadesElegidas] = useState([]);
 
-  // Contactos internos: array de pares [tipo, dato], ej. ['WhatsApp', '+54 11…'].
+  // Contactos internos: array de pares [tipo, dato], ej. ['WhatsApp', '1155550000'].
   // Empieza vacío; lo cambia el ContactosEditor.
   const [contactos, setContactos] = useState([]);
 
   // Manejo de validación (ver auxiliares.js → useForm). Devuelve funciones y banderas:
   // formulario.blur / .enviar / .errores y .cargando / .listo / .intento.
   // Se le pasa la función con las reglas (validarDatos, más abajo).
-  const formulario = useForm(validarDatos);
+  // El segundo parámetro es la función que manda el alta al backend (enviarAlBackend, abajo).
+  const formulario = useForm(validarDatos, enviarAlBackend);
+
+  // Para abrir la sesión con la cuenta creada y para ir al panel después.
+  const { entrar } = useAuth();
+  const navegar = useNavigate();
 
   // Función que, al elegir una red social, abre sesión como colaboradora ('col').
   const entrarConRedSocial = useSocial();
@@ -82,6 +105,13 @@ export default function RegistroColaboradora() {
     const erroresDelFormulario = {};
     if (!valores.fantasia.trim()) {
       erroresDelFormulario.fantasia = 'Ingresá un nombre de fantasía.';
+    }
+    // El backend exige la cuenta de git y la presentación.
+    if (!valores.github.trim()) {
+      erroresDelFormulario.github = 'Ingresá tu cuenta de GitHub o GitLab.';
+    }
+    if (!valores.bio.trim()) {
+      erroresDelFormulario.bio = 'Contá algo sobre vos.';
     }
     if (!MAIL.test(valores.mail)) {
       erroresDelFormulario.mail = 'Ingresá un correo válido.';
@@ -122,16 +152,60 @@ export default function RegistroColaboradora() {
     setDatos({ ...datos, captcha: resuelto });
   }
 
+  // Arma el cuerpo que pide POST /colaboradoras y lo envía. useForm la llama solo si no hay
+  // errores; si el backend responde con error, useForm muestra su mensaje.
+  async function enviarAlBackend(valores) {
+    // Título elegido → código (el backend recibe códigos, no títulos ni ids).
+    const codigos = habilidadesElegidas
+      .map((titulo) => catalogo.find((habilidad) => habilidad.titulo === titulo)?.codigo)
+      .filter(Boolean);
+    // ['WhatsApp', '11 5555-0000'] → { tipo: 'whatsapp', valor: '1155550000' }.
+    // Para teléfonos se sacan espacios, guiones y paréntesis: el backend pide 10 dígitos juntos.
+    const contactosParaElBackend = contactos.map(([tipo, dato]) => {
+      const tipoDelBackend = TIPOS_DE_CONTACTO[tipo] ?? tipo.toLowerCase();
+      const valor = tipoDelBackend === 'email' ? dato : dato.replace(/[\s\-()]/g, '');
+      return { tipo: tipoDelBackend, valor };
+    });
+    // Pronombres: «ella, elle» → ['ella', 'elle'] (el backend guarda una lista).
+    const pronombres = valores.pronombres
+      .split(',')
+      .map((pronombre) => pronombre.trim())
+      .filter(Boolean);
+
+    const creada = await crearColaboradora({
+      nombreFantasia: valores.fantasia.trim(),
+      git: valores.github.trim(),
+      presentacion: valores.bio.trim(),
+      habilidades: codigos,
+      contactos: contactosParaElBackend,
+      // La casilla dice «permitir mensajes»; el backend guarda lo contrario: «bloquear».
+      bloquearMensajeInterno: !valores.mensajes,
+      // Los opcionales se mandan solo si se completaron (`...(cond && {…})` agrega o no la clave).
+      ...(valores.nombre.trim() && { nombre: valores.nombre.trim() }),
+      ...(valores.apellido.trim() && { apellido: valores.apellido.trim() }),
+      ...(pronombres.length > 0 && { pronombres }),
+    });
+    // Salió bien: sesión abierta con la cuenta nueva y al panel.
+    entrar('col', creada.id);
+    navegar('/panel');
+  }
+
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     // onSubmit: al enviar, formulario.enviar(datos) valida y simula el envío
     <form className={`container ${sh.page}`} onSubmit={formulario.enviar(datos)} noValidate>
       <Heading level={1}>Crear cuenta · Colaboradora</Heading>
 
-      {/* Aparece solo cuando el envío simulado terminó (listo = true) */}
-      {formulario.listo && (
-        <Alert kind="success" title="Cuenta creada">
-          Ya podés <Link to="/ingresar">ingresar</Link>.
+      {/* Aparece si el backend rechazó el alta: su mensaje explica por qué */}
+      {formulario.errorDelBackend && (
+        <Alert kind="error" title="No pudimos crear la cuenta">
+          {formulario.errorDelBackend}
+        </Alert>
+      )}
+      {/* Aparece si no se pudo traer el catálogo de habilidades */}
+      {errorDelCatalogo && (
+        <Alert kind="error" title="No pudimos cargar las habilidades">
+          {mensajeDeError(errorDelCatalogo)}
         </Alert>
       )}
 
@@ -156,10 +230,11 @@ export default function RegistroColaboradora() {
           as="textarea"
           className={sh.r2}
           label="Sobre vos"
-          optional
           placeholder="Contá en pocas líneas quién sos y qué te gusta hacer…"
           value={datos.bio}
           onChange={alCambiarCampo('bio')}
+          onBlur={formulario.blur('bio')}
+          error={errores.bio}
         />
         <Field
           label="Nombre"
@@ -178,16 +253,18 @@ export default function RegistroColaboradora() {
         <Field
           label="Pronombres"
           optional
+          hint="Si son varios, separalos con comas."
           placeholder="Ej: ella, él, elle"
           value={datos.pronombres}
           onChange={alCambiarCampo('pronombres')}
         />
         <Field
           label="Cuenta de GitHub o GitLab"
-          optional
-          placeholder="usuario"
+          placeholder="https://github.com/usuario"
           value={datos.github}
           onChange={alCambiarCampo('github')}
+          onBlur={formulario.blur('github')}
+          error={errores.github}
         />
         <Field
           label="Correo electrónico"
@@ -201,7 +278,7 @@ export default function RegistroColaboradora() {
         <TagPicker
           label="Habilidades"
           value={habilidadesElegidas}
-          options={HABILIDADES}
+          options={(catalogo ?? []).map((habilidad) => habilidad.titulo)}
           onChange={setHabilidadesElegidas}
         />
         <PasswordField
@@ -232,7 +309,7 @@ export default function RegistroColaboradora() {
         </div>
       </div>
 
-      {/* BLOQUE: botón de envío — muestra «cargando» durante la espera simulada */}
+      {/* BLOQUE: botón de envío — muestra «cargando» mientras espera al backend */}
       <div className={sh.formActs}>
         <Button type="submit" loading={formulario.cargando}>Crear cuenta</Button>
       </div>
