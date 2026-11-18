@@ -1,3 +1,4 @@
+import { respuestaPaginada } from "../utils/paginacion.js";
 export class ProyectoController {
   constructor({ proyectoService }) {
     this.proyectoService = proyectoService;
@@ -18,9 +19,9 @@ export class ProyectoController {
   };
 
   obtenerProyectos = async (req, res) => {
-    const proyectos = await this.proyectoService.obtenerProyectos();
+    const pagina = await this.proyectoService.obtenerProyectos(req.paginacion);
 
-    res.status(200).json(proyectos);
+    res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };
 
   obtenerProyectoPorId = async (req, res) => {

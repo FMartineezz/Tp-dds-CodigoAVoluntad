@@ -128,7 +128,7 @@ describe("Colaboradoras (HTTP)", () => {
       expect(respuesta.status).toBe(400);
       expect(respuesta.body.code).toBe(ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO.code);
       const listado = await request(app).get("/colaboradoras");
-      expect(listado.body).toEqual([]);
+      expect(listado.body.resultados).toEqual([]);
     });
 
     // BUG: la validación acepta habilidades: [] pero el schema de mongoose exige al menos una;
@@ -154,8 +154,11 @@ describe("Colaboradoras (HTTP)", () => {
 
       // Validación
       expect(respuesta.status).toBe(200);
-      expect(respuesta.body.map((c) => c.nombreFantasia).sort()).toEqual(["ada", "grace"]);
-      respuesta.body.forEach((colaboradora) => {
+      expect(respuesta.body.resultados.map((c) => c.nombreFantasia).sort()).toEqual([
+        "ada",
+        "grace",
+      ]);
+      respuesta.body.resultados.forEach((colaboradora) => {
         expect(colaboradora).not.toHaveProperty("contactos");
         expect(colaboradora).not.toHaveProperty("activo");
       });

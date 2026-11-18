@@ -1,4 +1,5 @@
 import { ProyectoModel } from "../schemas/proyectoSchema.js";
+import { paginar } from "./paginar.js";
 
 export class ProyectoRepository {
   constructor() {
@@ -12,6 +13,10 @@ export class ProyectoRepository {
 
   async obtenerTodos() {
     return await this.model.find().lean();
+  }
+
+  async obtenerPagina(paginacion) {
+    return await paginar(this.model, {}, paginacion);
   }
 
   async obtenerPorId(id) {
@@ -109,6 +114,15 @@ export class ProyectoRepository {
       })
       .populate("colectivo")
       .lean();
+  }
+
+  async obtenerPaginaPorAlgunaHabilidad(idsHabilidad, paginacion) {
+    return await paginar(
+      this.model,
+      { finalizado: { $ne: true }, "perfiles.habilidadesRequeridas": { $in: idsHabilidad } },
+      paginacion,
+      { populate: "colectivo" },
+    );
   }
 
   async guardarLogro(proyectoId, logro) {

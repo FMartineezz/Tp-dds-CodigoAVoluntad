@@ -8,6 +8,16 @@ const ErrorCatalog = {
     message: (stringDelArgumento) => `El argumento ${stringDelArgumento} es inválido`,
   },
 
+  PAGINACION_PAGINA_INVALIDA: {
+    code: "ERR-VAL-002",
+    message: "El parámetro pagina debe ser un número entero mayor o igual a 1",
+  },
+
+  PAGINACION_LIMITE_INVALIDO: {
+    code: "ERR-VAL-003",
+    message: (maximo) => `El parámetro limite debe ser un número entero entre 1 y ${maximo}`,
+  },
+
   RECURSO_NO_ENCONTRADO: {
     code: "ERR-CSR-001",
     message: "El recurso solicitado no fue encontrado",

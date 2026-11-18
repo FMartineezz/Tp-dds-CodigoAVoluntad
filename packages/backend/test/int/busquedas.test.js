@@ -72,8 +72,8 @@ describe("Búsquedas (HTTP)", () => {
 
       // Validación
       expect(respuesta.status).toBe(200);
-      expect(respuesta.body.map((c) => c.nombreFantasia).sort()).toEqual(["ada", "dan"]);
-      respuesta.body.forEach((colaboradora) =>
+      expect(respuesta.body.resultados.map((c) => c.nombreFantasia).sort()).toEqual(["ada", "dan"]);
+      respuesta.body.resultados.forEach((colaboradora) =>
         expect(colaboradora).not.toHaveProperty("contactos"),
       );
     });
@@ -121,8 +121,8 @@ describe("Búsquedas (HTTP)", () => {
 
       // Validación
       expect(respuesta.status).toBe(200);
-      expect(respuesta.body.map((p) => p.titulo)).toEqual(["Backend"]);
-      expect(respuesta.body[0].colectivo).toMatchObject({ nombre: "Asamblea Norte" });
+      expect(respuesta.body.resultados.map((p) => p.titulo)).toEqual(["Backend"]);
+      expect(respuesta.body.resultados[0].colectivo).toMatchObject({ nombre: "Asamblea Norte" });
     });
 
     test("devuelve una lista vacía si no hay proyectos acordes", async () => {
@@ -137,7 +137,7 @@ describe("Búsquedas (HTTP)", () => {
 
       // Validación
       expect(respuesta.status).toBe(200);
-      expect(respuesta.body).toEqual([]);
+      expect(respuesta.body.resultados).toEqual([]);
     });
 
     test("responde 404 si la colaboradora no existe", async () => {

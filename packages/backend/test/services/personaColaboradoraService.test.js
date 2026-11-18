@@ -114,7 +114,8 @@ describe("PersonaColaboradoraService", () => {
       await crearPersona({ nombreFantasia: "grace" });
 
       // Ejecución
-      const personas = await personaColaboradoraService.obtenerPersonasColaboradoras();
+      const { resultados: personas } =
+        await personaColaboradoraService.obtenerPersonasColaboradoras({ pagina: 1, limite: 20 });
 
       // Validación
       expect(personas.map((p) => p.nombreFantasia).sort()).toEqual(["ada", "grace"]);

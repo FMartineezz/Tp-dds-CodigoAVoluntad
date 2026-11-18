@@ -1717,6 +1717,105 @@
             "example": "Demasiadas peticiones desde esta Ip. Intente de nuevo mas tarde"
           }
         }
+      },
+      "PaginaDeProyectos": {
+        "type": "object",
+        "description": "Página de resultados de un listado paginado",
+        "properties": {
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Proyecto"
+            }
+          },
+          "pagina": {
+            "type": "integer",
+            "example": 1,
+            "description": "Número de página devuelto (desde 1)"
+          },
+          "limite": {
+            "type": "integer",
+            "example": 20,
+            "description": "Cantidad máxima de resultados por página"
+          },
+          "total": {
+            "type": "integer",
+            "example": 66,
+            "description": "Cantidad total de resultados, sumando todas las páginas"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "example": 4,
+            "description": "Cantidad de páginas con el límite pedido (0 si no hay resultados)"
+          }
+        },
+        "required": ["resultados", "pagina", "limite", "total", "totalPaginas"]
+      },
+      "PaginaDeColectivos": {
+        "type": "object",
+        "description": "Página de resultados de un listado paginado",
+        "properties": {
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Colectivo"
+            }
+          },
+          "pagina": {
+            "type": "integer",
+            "example": 1,
+            "description": "Número de página devuelto (desde 1)"
+          },
+          "limite": {
+            "type": "integer",
+            "example": 20,
+            "description": "Cantidad máxima de resultados por página"
+          },
+          "total": {
+            "type": "integer",
+            "example": 66,
+            "description": "Cantidad total de resultados, sumando todas las páginas"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "example": 4,
+            "description": "Cantidad de páginas con el límite pedido (0 si no hay resultados)"
+          }
+        },
+        "required": ["resultados", "pagina", "limite", "total", "totalPaginas"]
+      },
+      "PaginaDeColaboradoras": {
+        "type": "object",
+        "description": "Página de resultados de un listado paginado",
+        "properties": {
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonaColaboradora"
+            }
+          },
+          "pagina": {
+            "type": "integer",
+            "example": 1,
+            "description": "Número de página devuelto (desde 1)"
+          },
+          "limite": {
+            "type": "integer",
+            "example": 20,
+            "description": "Cantidad máxima de resultados por página"
+          },
+          "total": {
+            "type": "integer",
+            "example": 66,
+            "description": "Cantidad total de resultados, sumando todas las páginas"
+          },
+          "totalPaginas": {
+            "type": "integer",
+            "example": 4,
+            "description": "Cantidad de páginas con el límite pedido (0 si no hay resultados)"
+          }
+        },
+        "required": ["resultados", "pagina", "limite", "total", "totalPaginas"]
       }
     },
     "securitySchemes": {
@@ -1922,14 +2021,25 @@
         "summary": "Listar colectivos",
         "responses": {
           "200": {
-            "description": "Lista de colectivos",
+            "description": "Lista de colectivos (paginado, del más nuevo al más viejo)",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Colectivo"
-                  }
+                  "$ref": "#/components/schemas/PaginaDeColectivos"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de paginación inválidos. Códigos posibles: `ERR-VAL-002`, `ERR-VAL-003`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-003",
+                  "message": "El parámetro limite debe ser un número entero entre 1 y 100"
                 }
               }
             }
@@ -1944,7 +2054,32 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "description": "Número de página, desde 1. Por defecto 1. Una página posterior a la última devuelve `resultados` vacío.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "description": "Resultados por página, entre 1 y 100. Por defecto 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ]
       },
       "post": {
         "tags": ["Colectivos"],
@@ -2271,14 +2406,25 @@
         "description": "No incluye los medios de contacto.",
         "responses": {
           "200": {
-            "description": "Lista de colaboradoras",
+            "description": "Lista de colaboradoras (paginado, del más nuevo al más viejo)",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PersonaColaboradora"
-                  }
+                  "$ref": "#/components/schemas/PaginaDeColaboradoras"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de paginación inválidos. Códigos posibles: `ERR-VAL-002`, `ERR-VAL-003`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-003",
+                  "message": "El parámetro limite debe ser un número entero entre 1 y 100"
                 }
               }
             }
@@ -2293,7 +2439,32 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "description": "Número de página, desde 1. Por defecto 1. Una página posterior a la última devuelve `resultados` vacío.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "description": "Resultados por página, entre 1 y 100. Por defecto 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ]
       },
       "post": {
         "tags": ["Colaboradoras"],
@@ -2696,18 +2867,52 @@
               "type": "string",
               "example": "6acfd66264d02459ba8dc6a2"
             }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "description": "Número de página, desde 1. Por defecto 1. Una página posterior a la última devuelve `resultados` vacío.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "description": "Resultados por página, entre 1 y 100. Por defecto 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Proyectos encontrados",
+            "description": "Proyectos encontrados (paginado, del más nuevo al más viejo)",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Proyecto"
-                  }
+                  "$ref": "#/components/schemas/PaginaDeProyectos"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de paginación inválidos. Códigos posibles: `ERR-VAL-002`, `ERR-VAL-003`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-003",
+                  "message": "El parámetro limite debe ser un número entero entre 1 y 100"
                 }
               }
             }
@@ -2745,14 +2950,25 @@
         "summary": "Listar proyectos",
         "responses": {
           "200": {
-            "description": "Lista de proyectos",
+            "description": "Lista de proyectos (paginado, del más nuevo al más viejo)",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Proyecto"
-                  }
+                  "$ref": "#/components/schemas/PaginaDeProyectos"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de paginación inválidos. Códigos posibles: `ERR-VAL-002`, `ERR-VAL-003`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-003",
+                  "message": "El parámetro limite debe ser un número entero entre 1 y 100"
                 }
               }
             }
@@ -2767,7 +2983,32 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "description": "Número de página, desde 1. Por defecto 1. Una página posterior a la última devuelve `resultados` vacío.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "description": "Resultados por página, entre 1 y 100. Por defecto 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ]
       },
       "post": {
         "tags": ["Proyectos"],
@@ -3340,18 +3581,52 @@
               "type": "string",
               "example": "6acfd66264d02459ba8dc6a2"
             }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "description": "Número de página, desde 1. Por defecto 1. Una página posterior a la última devuelve `resultados` vacío.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "description": "Resultados por página, entre 1 y 100. Por defecto 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Colaboradoras encontradas",
+            "description": "Colaboradoras encontradas (paginado, del más nuevo al más viejo)",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PersonaColaboradora"
-                  }
+                  "$ref": "#/components/schemas/PaginaDeColaboradoras"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros de paginación inválidos. Códigos posibles: `ERR-VAL-002`, `ERR-VAL-003`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-003",
+                  "message": "El parámetro limite debe ser un número entero entre 1 y 100"
                 }
               }
             }

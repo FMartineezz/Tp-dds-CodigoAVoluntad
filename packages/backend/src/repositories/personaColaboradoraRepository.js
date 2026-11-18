@@ -1,4 +1,5 @@
 import { PersonaColaboradoraModel } from "../schemas/personaColaboradoraSchema.js";
+import { paginar } from "./paginar.js";
 
 export class PersonaColaboradoraRepository {
   constructor() {
@@ -14,6 +15,10 @@ export class PersonaColaboradoraRepository {
     return await this.model.find().lean();
   }
 
+  async obtenerPagina(paginacion) {
+    return await paginar(this.model, {}, paginacion);
+  }
+
   async obtenerPorId(id) {
     return await this.model.findById(id).lean();
   }
@@ -24,6 +29,10 @@ export class PersonaColaboradoraRepository {
 
   async obtenerPorHabilidadId(habilidadesIds) {
     return await this.model.find({ habilidades: { $in: habilidadesIds } }).lean();
+  }
+
+  async obtenerPaginaPorHabilidadId(habilidadesIds, paginacion) {
+    return await paginar(this.model, { habilidades: { $in: habilidadesIds } }, paginacion);
   }
 
   async actualizar(id, cambios) {

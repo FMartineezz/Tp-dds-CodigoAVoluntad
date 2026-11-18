@@ -91,10 +91,14 @@ describe("ColectivoService", () => {
       await ColectivoModel.findByIdAndUpdate(inactivo.id, { activo: false });
 
       // Ejecución
-      const colectivos = await colectivoService.obtenerColectivos();
+      const { resultados: colectivos, total } = await colectivoService.obtenerColectivos({
+        pagina: 1,
+        limite: 20,
+      });
 
       // Validación
       expect(colectivos.map((c) => String(c._id))).toEqual([activo.id]);
+      expect(total).toBe(1);
     });
 
     test("obtenerColectivoPorId devuelve el colectivo", async () => {
@@ -259,7 +263,10 @@ describe("ColectivoService", () => {
       // Validación
       const guardado = await ColectivoModel.findById(creado.id).select("+activo").lean();
       expect(guardado.activo).toBe(false);
-      expect(await colectivoService.obtenerColectivos()).toEqual([]);
+      expect(await colectivoService.obtenerColectivos({ pagina: 1, limite: 20 })).toEqual({
+        resultados: [],
+        total: 0,
+      });
     });
 
     // BUG: la condición está invertida (lanza "ya dado de baja" si está activo) y además `activo`

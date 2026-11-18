@@ -20,6 +20,19 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 
 - **Altas:** las respuestas `201` incluyen el header `Location` con la URL del recurso creado (salvo los mensajes).
 - **Lecturas:** los `GET` devuelven los documentos tal como están en la base: con `_id`, `createdAt`, `updatedAt` y `__v`, y las referencias a otras entidades como ids.
+- **Paginación:** `GET /proyectos`, `GET /colectivos`, `GET /colaboradoras` y las dos [búsquedas](#búsquedas) están paginados. Aceptan los parámetros de query `pagina` (desde 1, por defecto 1) y `limite` (entre 1 y 100, por defecto 20), y ordenan del más nuevo al más viejo. Responden:
+
+  ```json
+  {
+    "resultados": [],
+    "pagina": 2,
+    "limite": 20,
+    "total": 66,
+    "totalPaginas": 4
+  }
+  ```
+
+  Una página posterior a la última devuelve `resultados` vacío (con `200`). Un `pagina` que no sea un entero mayor o igual a 1 responde `400` con `ERR-VAL-002`; un `limite` fuera de rango, `400` con `ERR-VAL-003`. Ejemplo: `GET /proyectos?pagina=2&limite=6`.
 
 ### Índice
 
@@ -135,22 +148,28 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 
 ### GET `/colectivos`
 
-**Respuesta 200:**
+**Respuesta 200:** paginada (ver [Paginación](#info-general)). Parámetros opcionales: `?pagina=1&limite=20`.
 
 ```json
-[
-  {
-    "_id": "6acfd66164d02459ba8dc69f",
-    "nombre": "Fundación Ejemplo",
-    "descripcion": "Texto breve que describe a Fundación Ejemplo",
-    "ubicacion": "caba",
-    "tipoDeColectivo": "fundacion",
-    "proyectos": ["6acfd66264d02459ba8dc6a2"],
-    "createdAt": "2026-10-14T19:22:09.939Z",
-    "updatedAt": "2026-10-14T19:22:10.081Z",
-    "__v": 0
-  }
-]
+{
+  "resultados": [
+    {
+      "_id": "6acfd66164d02459ba8dc69f",
+      "nombre": "Fundación Ejemplo",
+      "descripcion": "Texto breve que describe a Fundación Ejemplo",
+      "ubicacion": "caba",
+      "tipoDeColectivo": "fundacion",
+      "proyectos": ["6acfd66264d02459ba8dc6a2"],
+      "createdAt": "2026-10-14T19:22:09.939Z",
+      "updatedAt": "2026-10-14T19:22:10.081Z",
+      "__v": 0
+    }
+  ],
+  "pagina": 1,
+  "limite": 20,
+  "total": 1,
+  "totalPaginas": 1
+}
 ```
 
 `proyectos` contiene los ids de los proyectos del colectivo.
@@ -226,25 +245,31 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 
 ### GET `/colaboradoras`
 
-**Respuesta 200:**
+**Respuesta 200:** paginada (ver [Paginación](#info-general)). Parámetros opcionales: `?pagina=1&limite=20`.
 
 ```json
-[
-  {
-    "_id": "6acfd66264d02459ba8dc6a0",
-    "nombreFantasia": "devSolidario",
-    "git": "[https://github.com/devSolidario](https://github.com/devSolidario)",
-    "nombre": "Ana",
-    "apellido": "Pérez",
-    "habilidades": ["6acfd66164d02459ba8dc69c"],
-    "pronombres": "ella",
-    "presentacion": "Desarrolladora front interesada en proyectos comunitarios.",
-    "bloquearMensajeInterno": false,
-    "createdAt": "2026-10-14T19:22:10.011Z",
-    "updatedAt": "2026-10-14T19:22:10.011Z",
-    "__v": 0
-  }
-]
+{
+  "resultados": [
+    {
+      "_id": "6acfd66264d02459ba8dc6a0",
+      "nombreFantasia": "devSolidario",
+      "git": "[https://github.com/devSolidario](https://github.com/devSolidario)",
+      "nombre": "Ana",
+      "apellido": "Pérez",
+      "habilidades": ["6acfd66164d02459ba8dc69c"],
+      "pronombres": "ella",
+      "presentacion": "Desarrolladora front interesada en proyectos comunitarios.",
+      "bloquearMensajeInterno": false,
+      "createdAt": "2026-10-14T19:22:10.011Z",
+      "updatedAt": "2026-10-14T19:22:10.011Z",
+      "__v": 0
+    }
+  ],
+  "pagina": 1,
+  "limite": 20,
+  "total": 1,
+  "totalPaginas": 1
+}
 ```
 
 `habilidades` contiene los ids de sus habilidades.
@@ -255,9 +280,10 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 
 **Errores:**
 
-| Status | code          | Cuándo                                        |
-| ------ | ------------- | --------------------------------------------- |
-| 404    | `ERR-NOT-405` | No existe una persona colaboradora con ese id |
+| Status | code                          | Cuándo                                        |
+| ------ | ----------------------------- | --------------------------------------------- |
+| 400    | `ERR-VAL-002` / `ERR-VAL-003` | Parámetros de paginación inválidos            |
+| 404    | `ERR-NOT-405`                 | No existe una persona colaboradora con ese id |
 
 ### POST `/colaboradoras`
 
@@ -332,45 +358,51 @@ Actualización parcial de una colaboradora. Si `redesSociales` se omite, se cons
 
 ### GET `/proyectos`
 
-**Respuesta 200:**
+**Respuesta 200:** paginada (ver [Paginación](#info-general)). Parámetros opcionales: `?pagina=1&limite=20`.
 
 ```json
-[
-  {
-    "_id": "6acfd66264d02459ba8dc6a2",
-    "titulo": "Sitio web institucional",
-    "descripcion": "Sitio de la fundación",
-    "perfiles": [
-      {
-        "_id": "6acfd66264d02459ba8dc6a3",
-        "descripcion": "Desarrollo front",
-        "habilidadesRequeridas": ["6acfd66164d02459ba8dc69c"],
-        "habilidadesOpcionales": ["6acfd66164d02459ba8dc69d"],
-        "horas": 5,
-        "tipoDeCompromiso": "mensual",
-        "modalidadDeColaboracion": "gratuita",
-        "createdAt": "2026-10-14T19:22:10.073Z",
-        "updatedAt": "2026-10-14T19:22:10.073Z"
-      }
-    ],
-    "colectivo": "6acfd66164d02459ba8dc69f",
-    "urlSistema": "[https://fundacion.org](https://fundacion.org)",
-    "logros": [
-      {
-        "_id": "6acfd66a64d02459ba8dc6a9",
-        "descripcion": "MVP publicado",
-        "porcentaje": 60,
-        "urlCodigoFuente": "[https://github.com/fundacion/web](https://github.com/fundacion/web)",
-        "createdAt": "2026-10-14T19:22:18.292Z",
-        "updatedAt": "2026-10-14T19:22:18.292Z"
-      }
-    ],
-    "finalizado": false,
-    "createdAt": "2026-10-14T19:22:10.073Z",
-    "updatedAt": "2026-10-14T19:22:18.327Z",
-    "__v": 0
-  }
-]
+{
+  "resultados": [
+    {
+      "_id": "6acfd66264d02459ba8dc6a2",
+      "titulo": "Sitio web institucional",
+      "descripcion": "Sitio de la fundación",
+      "perfiles": [
+        {
+          "_id": "6acfd66264d02459ba8dc6a3",
+          "descripcion": "Desarrollo front",
+          "habilidadesRequeridas": ["6acfd66164d02459ba8dc69c"],
+          "habilidadesOpcionales": ["6acfd66164d02459ba8dc69d"],
+          "horas": 5,
+          "tipoDeCompromiso": "mensual",
+          "modalidadDeColaboracion": "gratuita",
+          "createdAt": "2026-10-14T19:22:10.073Z",
+          "updatedAt": "2026-10-14T19:22:10.073Z"
+        }
+      ],
+      "colectivo": "6acfd66164d02459ba8dc69f",
+      "urlSistema": "[https://fundacion.org](https://fundacion.org)",
+      "logros": [
+        {
+          "_id": "6acfd66a64d02459ba8dc6a9",
+          "descripcion": "MVP publicado",
+          "porcentaje": 60,
+          "urlCodigoFuente": "[https://github.com/fundacion/web](https://github.com/fundacion/web)",
+          "createdAt": "2026-10-14T19:22:18.292Z",
+          "updatedAt": "2026-10-14T19:22:18.292Z"
+        }
+      ],
+      "finalizado": false,
+      "createdAt": "2026-10-14T19:22:10.073Z",
+      "updatedAt": "2026-10-14T19:22:18.327Z",
+      "__v": 0
+    }
+  ],
+  "pagina": 1,
+  "limite": 20,
+  "total": 1,
+  "totalPaginas": 1
+}
 ```
 
 `colectivo` es el id del colectivo; en los perfiles, las habilidades son ids.
@@ -538,10 +570,11 @@ Los perfiles existen solo dentro de un proyecto, así que todas las rutas cuelga
 
 **Errores:**
 
-| Status | code          | Cuándo                                    |
-| ------ | ------------- | ----------------------------------------- |
-| 404    | `ERR-NOT-108` | No existe un proyecto con ese id          |
-| 404    | `ERR-NOT-611` | El proyecto no tiene un perfil con ese id |
+| Status | code                          | Cuándo                                    |
+| ------ | ----------------------------- | ----------------------------------------- |
+| 404    | `ERR-NOT-108`                 | No existe un proyecto con ese id          |
+| 400    | `ERR-VAL-002` / `ERR-VAL-003` | Parámetros de paginación inválidos        |
+| 404    | `ERR-NOT-611`                 | El proyecto no tiene un perfil con ese id |
 
 ### POST `/proyectos/:idProyecto/perfiles`
 
@@ -956,7 +989,7 @@ El colectivo resuelve una postulación `pendiente`.
 
 Devuelve las personas colaboradoras que tienen al menos una de las **habilidades requeridas** del perfil.
 
-**Respuesta 200:** array de personas colaboradoras (misma forma que `GET /colaboradoras`, sin contactos)
+**Respuesta 200:** página de personas colaboradoras (misma forma que `GET /colaboradoras`, sin contactos). Acepta `?pagina=&limite=` (ver [Paginación](#info-general)).
 
 **Errores:**
 
@@ -969,7 +1002,7 @@ Devuelve las personas colaboradoras que tienen al menos una de las **habilidades
 
 Devuelve los proyectos **no finalizados** que tienen al menos un perfil que requiere alguna de las habilidades de la colaboradora.
 
-**Respuesta 200:** array de proyectos (misma forma que `GET /proyectos`)
+**Respuesta 200:** página de proyectos (misma forma que `GET /proyectos`). Acepta `?pagina=&limite=` (ver [Paginación](#info-general)).
 
 **Errores:**
 

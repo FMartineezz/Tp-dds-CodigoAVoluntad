@@ -1,4 +1,5 @@
 import { ColectivoModel } from "../schemas/colectivoSchema.js";
+import { paginar } from "./paginar.js";
 
 export class ColectivoRepository {
   constructor() {
@@ -12,6 +13,10 @@ export class ColectivoRepository {
 
   async obtenerTodos() {
     return await this.model.find({ activo: true }).lean();
+  }
+
+  async obtenerPagina(paginacion) {
+    return await paginar(this.model, { activo: true }, paginacion);
   }
 
   async obtenerTodosConEliminados() {

@@ -199,13 +199,13 @@ describe("GET /proyectos", () => {
 
     // Validación
     expect(respuesta.status).toBe(200);
-    expect(respuesta.body.map((p) => p.titulo).sort()).toEqual(["Dos", "Uno"]);
+    expect(respuesta.body.resultados.map((p) => p.titulo).sort()).toEqual(["Dos", "Uno"]);
   });
 
   test("devuelve una lista vacía si no hay proyectos", async () => {
     const respuesta = await request(app).get("/proyectos");
     expect(respuesta.status).toBe(200);
-    expect(respuesta.body).toEqual([]);
+    expect(respuesta.body.resultados).toEqual([]);
   });
 });
 

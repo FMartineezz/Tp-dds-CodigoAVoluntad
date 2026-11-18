@@ -114,8 +114,8 @@ describe("Colectivos (HTTP)", () => {
 
       // Validación
       expect(respuesta.status).toBe(200);
-      expect(respuesta.body.map((c) => c.nombre).sort()).toEqual(["Dos", "Uno"]);
-      respuesta.body.forEach((colectivo) => {
+      expect(respuesta.body.resultados.map((c) => c.nombre).sort()).toEqual(["Dos", "Uno"]);
+      respuesta.body.resultados.forEach((colectivo) => {
         expect(colectivo).not.toHaveProperty("denuncias");
         expect(colectivo).not.toHaveProperty("activo");
       });
@@ -304,7 +304,7 @@ describe("Colectivos (HTTP)", () => {
       // Validación
       expect(respuesta.status).toBe(204);
       const listado = await request(app).get("/colectivos");
-      expect(listado.body).toEqual([]);
+      expect(listado.body.resultados).toEqual([]);
     });
 
     // BUG: la condición de "ya dado de baja" está invertida y `activo` no se lee (select:false),

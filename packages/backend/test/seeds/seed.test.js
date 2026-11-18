@@ -73,7 +73,7 @@ describe("Seed", () => {
       ]) {
         const respuesta = await request(app).get(ruta);
         expect(respuesta.status).toBe(200);
-        expect(respuesta.body).toHaveLength(cantidad);
+        expect(respuesta.body.total ?? respuesta.body.length).toBe(cantidad);
       }
     });
 
@@ -183,9 +183,9 @@ describe("Seed", () => {
 
       // Validación
       expect(proyectos.status).toBe(200);
-      expect(proyectos.body.map((p) => p.titulo)).toContain("Mapa de Huertas Urbanas");
+      expect(proyectos.body.resultados.map((p) => p.titulo)).toContain("Mapa de Huertas Urbanas");
       expect(colaboradoras.status).toBe(200);
-      expect(colaboradoras.body.map((c) => c.nombreFantasia)).toContain("QA Tincho");
+      expect(colaboradoras.body.resultados.map((c) => c.nombreFantasia)).toContain("QA Tincho");
     });
 
     test("hay mensajes en ambas direcciones y notificaciones para las dos partes", async () => {
@@ -336,7 +336,7 @@ describe("Seed", () => {
 
       // Validación
       expect(huellas.activo).toBe(false);
-      expect(listado.body.map((c) => c.nombre)).not.toContain("Fundación Huellas");
+      expect(listado.body.resultados.map((c) => c.nombre)).not.toContain("Fundación Huellas");
       expect(proyectoDelColectivo.status).toBe(200);
       expect(anonimizada.nombreFantasia).toBe("UserEliminado");
       expect(anonimizada.contactos).toHaveLength(0);
@@ -387,9 +387,9 @@ describe("Seed", () => {
       const colectivos = await request(app).get("/colectivos");
 
       // Validación: más de 3 páginas de 20 en cada listado
-      expect(proyectos.body.length).toBeGreaterThan(60);
-      expect(colaboradoras.body.length).toBeGreaterThan(60);
-      expect(colectivos.body.length).toBeGreaterThan(30);
+      expect(proyectos.body.total).toBeGreaterThan(60);
+      expect(colaboradoras.body.total).toBeGreaterThan(60);
+      expect(colectivos.body.total).toBeGreaterThan(30);
       await verificarQueCubreTodosLosEstados();
     });
   });

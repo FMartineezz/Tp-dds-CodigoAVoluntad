@@ -91,8 +91,8 @@ export class ProyectoService {
     return proyectoGuardado;
   }
 
-  async obtenerProyectos() {
-    return await this.proyectoRepository.obtenerTodos();
+  async obtenerProyectos(paginacion) {
+    return await this.proyectoRepository.obtenerPagina(paginacion);
   }
 
   async obtenerProyectoPorId(id) {
@@ -108,6 +108,10 @@ export class ProyectoService {
   async obtenerProyectosConAlgunaHabilidad(idsHabilidad) {
     const proyectos = await this.proyectoRepository.obtenerPorAlgunaHabilidad(idsHabilidad);
     return proyectos;
+  }
+
+  async obtenerPaginaDeProyectosConAlgunaHabilidad(idsHabilidad, paginacion) {
+    return await this.proyectoRepository.obtenerPaginaPorAlgunaHabilidad(idsHabilidad, paginacion);
   }
 
   async finalizarProyecto(id) {

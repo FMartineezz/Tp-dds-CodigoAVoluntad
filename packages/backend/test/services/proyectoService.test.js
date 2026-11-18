@@ -232,14 +232,21 @@ describe("ProyectoService consultas", () => {
     await crearProyecto({ titulo: "Dos" });
 
     // Ejecución
-    const proyectos = await proyectoService.obtenerProyectos();
+    const { resultados: proyectos, total } = await proyectoService.obtenerProyectos({
+      pagina: 1,
+      limite: 20,
+    });
 
     // Validación
     expect(proyectos.map((p) => p.titulo).sort()).toEqual(["Dos", "Uno"]);
+    expect(total).toBe(2);
   });
 
   test("obtenerProyectos devuelve una lista vacía si no hay proyectos", async () => {
-    expect(await proyectoService.obtenerProyectos()).toEqual([]);
+    expect(await proyectoService.obtenerProyectos({ pagina: 1, limite: 20 })).toEqual({
+      resultados: [],
+      total: 0,
+    });
   });
 
   test("obtenerProyectoPorId falla con un id inexistente", async () => {

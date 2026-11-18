@@ -1,3 +1,4 @@
+import { respuestaPaginada } from "../utils/paginacion.js";
 export class ColectivoController {
   constructor({ service }) {
     this.service = service;
@@ -24,8 +25,8 @@ export class ColectivoController {
   };
 
   obtenerColectivos = async (req, res) => {
-    const respuesta = await this.service.obtenerColectivos();
-    res.status(200).json(respuesta);
+    const pagina = await this.service.obtenerColectivos(req.paginacion);
+    res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };
 
   obtenerColectivoPorId = async (req, res) => {
