@@ -3,7 +3,7 @@ import {
   TipoMedioDeContacto,
 } from "../../../src/models/personaColaboradora.js";
 import { Colaboracion } from "../../../src/models/colaboracion.js";
-import { Mensaje } from "../../../src/models/mensaje.js";
+import { Mensaje, Emisor } from "../../../src/models/mensaje.js";
 
 describe("PersonaColaboradora", () => {
   test("solo exige nombre de fantasía y git; el resto tiene valores por defecto", () => {
@@ -54,10 +54,18 @@ describe("Mensaje", () => {
     const antes = new Date();
 
     // Ejecución
-    const mensaje = new Mensaje({ nombre: "Colectivo" }, { nombreFantasia: "Ana" }, "Hola");
+    const mensaje = new Mensaje(
+      { nombre: "Colectivo" },
+      { nombreFantasia: "Ana" },
+      { titulo: "Web" },
+      Emisor.COLECTIVO,
+      "Hola",
+    );
 
     // Validación
     expect(mensaje.texto).toBe("Hola");
+    expect(mensaje.emisor).toBe(Emisor.COLECTIVO);
+    expect(mensaje.leido).toBe(false);
     expect(mensaje.date.getTime()).toBeGreaterThanOrEqual(antes.getTime());
   });
 });

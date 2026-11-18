@@ -1,10 +1,10 @@
 import { Router } from "express";
 import validarHabilidad from "../middlewares/validations/habilidadValidation.js";
-import * as container from "../container.js";
+import { habilidadController } from "../container.js";
 
 const pathHabilidades = "/habilidades";
 
-export default function habilidadRoutes({ habilidadController } = container) {
+export default function habilidadRoutes() {
   const router = Router();
 
   router.get("/habilidades", habilidadController.obtenerHabilidades);

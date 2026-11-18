@@ -60,7 +60,10 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
    - `MONGODB_URI=mongodb://localhost:27017`
    - `MONGODB_DB_NAME=codigoavoluntad`
    - `SMTP_*` solo hace falta para probar el envío de mails (por ejemplo, con una cuenta de [ethereal.email](https://ethereal.email))
-4. Cargar los datos iniciales: `npm run seed:backend` (**borra** lo que haya en las colecciones de la base del `.env` y vuelve a cargar habilidades, colectivos, colaboradoras, proyectos con perfiles y logros, colaboraciones y mensajes)
+4. Cargar los datos iniciales (**borra** lo que haya en las colecciones de la base del `.env`):
+   - `npm run seed:backend`: demo curada. Pocas entidades con nombres reconocibles que pasan por todos los estados (búsqueda abierta, con fecha, vencida o cerrada; proyectos finalizados a mano y por cierre automático; perfiles sin cupo, con lugar y llenos; postulaciones pendientes, aceptadas, rechazadas y anónimas; bajas hechas por la persona y por el colectivo; denuncias en sus 4 estados; un colectivo dado de baja y una cuenta anonimizada). Datos en `packages/backend/seeds/datos.js`.
+   - `npm run seed:backend:volumen`: la demo más unos 40 colectivos, 150 colaboradoras y 60 proyectos generados, para ver paginación y búsquedas con muchos resultados. Se ajusta con `npm run seed:backend:volumen -- --proyectos=150 --semilla=7`; con la misma semilla genera siempre los mismos datos. Generador en `packages/backend/seeds/volumen.js`.
+   - El test `test/seeds/seed.test.js` verifica que ambos modos respeten las reglas del dominio y cubran todos los estados.
 5. `npm run dev:backend`
 6. La API queda en `http://localhost:8000` (el `SERVER_PORT` del `.env`) y la documentación Swagger en `/api-docs`.
 

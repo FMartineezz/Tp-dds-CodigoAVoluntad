@@ -10,7 +10,21 @@ export class BusquedaService {
       habilidad.toString(),
     );
 
-    return this.personaColaboradoraService.obtenerPersonasConAlgunaHabilidad(idsHabilidadesRequeridas);
+    return this.personaColaboradoraService.obtenerPersonasConAlgunaHabilidad(
+      idsHabilidadesRequeridas,
+    );
+  }
+
+  async obtenerPersonasColaboradorasAcordesAProyecto(proyecto) {
+    const idsHabilidadesRequeridas = new Set();
+    for (const perfil of proyecto.perfiles) {
+      perfil.habilidadesRequeridas.forEach((habilidad) => {
+        idsHabilidadesRequeridas.add(habilidad.toString());
+      });
+    }
+    return this.personaColaboradoraService.obtenerPersonasConAlgunaHabilidad([
+      ...idsHabilidadesRequeridas,
+    ]);
   }
 
   async obtenerProyectosAcordesALaPersonaColaboradora(personaColaboradoraId) {

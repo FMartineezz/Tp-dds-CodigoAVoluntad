@@ -15,9 +15,21 @@ export class PersonaColaboradoraController {
       req.body.presentacion,
       req.body.contactos,
       req.body.bloquearMensajeInterno,
+      req.body.redesSociales,
     );
 
     res.status(201).location(`/colaboradoras/${persona.id}`).json(persona);
+  };
+
+  actualizarPersonaColaboradora = async (req, res) => {
+    const id = req.params.id;
+
+    const persona = await this.personaColaboradoraService.actualizarPersonaColaboradora(
+      id,
+      req.body,
+    );
+
+    res.status(200).json(persona);
   };
 
   obtenerPersonasColaboradoras = async (req, res) => {

@@ -8,6 +8,7 @@ import ErrorCatalog from "./errors/errorCatalog.js";
 export function buildApp(routes) {
   const app = express();
   app.use(express.json());
+  app.set("trust proxy", 1);
 
   app.use(
     cors({

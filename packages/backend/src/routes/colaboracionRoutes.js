@@ -1,7 +1,7 @@
 import { Router } from "express";
-import * as container from "../container.js";
+import { colaboracionController } from "../container.js";
 
-export default function colaboracionRoutes({ colaboracionController } = container) {
+export default function colaboracionRoutes() {
   const router = Router();
 
   router.get("/colaboraciones", colaboracionController.obtenerColaboraciones);

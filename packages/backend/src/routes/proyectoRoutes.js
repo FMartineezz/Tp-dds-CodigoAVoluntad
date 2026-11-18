@@ -1,10 +1,12 @@
 import { Router } from "express";
-import * as container from "../container.js";
-import proyectoValidation from "../middlewares/validations/proyectoValidation.js";
+import { proyectoController } from "../container.js";
+import proyectoValidation, {
+  validarActualizacionProyecto,
+} from "../middlewares/validations/proyectoValidation.js";
 
 const pathProyectos = "/proyectos";
 
-export default function proyectoRoutes({ proyectoController } = container) {
+export default function proyectoRoutes() {
   const router = Router();
 
   router.get("/proyectos", proyectoController.obtenerProyectos);
@@ -13,8 +15,12 @@ export default function proyectoRoutes({ proyectoController } = container) {
 
   router.post("/proyectos", proyectoValidation, proyectoController.crearProyecto);
 
-  // Alternativa recurso-céntrica: PATCH /proyectos/:id con body { finalizado: true }
-  router.patch("/proyectos/:id", proyectoController.actualizarProyecto);
+  // Alternativa recurso-céntrica: PATCH /proyectos/:id con body { finalizado: true } o { urlDonaciones: ... }
+  router.patch(
+    "/proyectos/:id",
+    validarActualizacionProyecto,
+    proyectoController.actualizarProyecto,
+  );
 
   return router;
 }

@@ -23,18 +23,23 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 
 ### Índice
 
-| Recurso                           | Endpoints                                                                                                         |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| [Health Check](#health-check)     | `GET /healthCheck`                                                                                                |
-| [Habilidades](#habilidades)       | `GET /habilidades`, `GET /habilidades/:id`, `POST /habilidades`                                                   |
-| [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`                                                      |
-| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `POST /colaboradoras`                                             |
-| [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `POST /proyectos`, `PATCH /proyectos/:id`                                 |
-| [Perfiles](#perfiles)             | `GET`, `POST /proyectos/:idProyecto/perfiles`; `GET`, `PATCH`, `DELETE /proyectos/:idProyecto/perfiles/:idPerfil` |
-| [Logros](#logros)                 | `GET`, `POST /proyectos/:proyectoId/logros`; `GET`, `PATCH`, `DELETE /proyectos/:proyectoId/logros/:logroId`      |
-| [Colaboraciones](#colaboraciones) | `GET /colaboraciones`, `GET /colaboraciones/:id`, `POST /colaboraciones`                                          |
-| [Búsquedas](#búsquedas)           | `GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes`, `GET /colaboradoras/:id/proyectos-acordes` |
-| [Mensajes](#mensajes)             | `POST /colectivos/:colectivoId/mensajes`, `GET /colaboradoras/:personaColaboradoraId/mensajes`                    |
+| Recurso                           | Endpoints                                                                                                                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Health Check](#health-check)     | `GET /healthCheck`                                                                                                                                                                          |
+| [Habilidades](#habilidades)       | `GET /habilidades`, `GET /habilidades/:id`, `POST /habilidades`                                                                                                                             |
+| [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`, `PATCH /colectivos/:id`                                                                                                       |
+| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `POST /colaboradoras`, `PATCH /colaboradoras/:id`                                                                                           |
+| [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `POST /proyectos`, `PATCH /proyectos/:id`                                                                                                           |
+| [Perfiles](#perfiles)             | `GET`, `POST /proyectos/:idProyecto/perfiles`; `GET`, `PATCH`, `DELETE /proyectos/:idProyecto/perfiles/:idPerfil`                                                                           |
+| [Logros](#logros)                 | `GET`, `POST /proyectos/:proyectoId/logros`; `GET`, `PATCH`, `DELETE /proyectos/:proyectoId/logros/:logroId`                                                                                |
+| [Colaboraciones](#colaboraciones) | `GET /colaboraciones`, `GET /colaboraciones/:id`, `DELETE /colaboraciones/:id`                                                                                                              |
+| [Postulaciones](#postulaciones)   | `POST /proyectos/:proyectoId/perfiles/:perfilId/postulaciones`, `PATCH /postulaciones/:postulacionId`, `GET /colaboradoras/:id/postulaciones`, `GET /colectivos/:colectivoId/postulaciones` |
+| [Búsquedas](#búsquedas)           | `GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes`, `GET /colaboradoras/:id/proyectos-acordes`                                                                           |
+| [Mensajes](#mensajes)             | `POST /colectivos/:colectivoId/mensajes`, `GET /colaboradoras/:personaColaboradoraId/mensajes`                                                                                              |
+| [Notificaciones](#notificaciones) | `GET /colaboradoras/:colaboradoraId/notificaciones`, `GET /colectivos/:colectivoId/notificaciones`                                                                                          |
+| [Denuncias](#denuncias)           | `POST /colaboraciones/:id/denuncia`, `GET /admin/denuncias`, `GET /admin/denuncias/:id`, `PATCH /admin/denuncias/:id/estado`                                                                |
+| [Valoraciones](#valoraciones)     | `POST /valoraciones`, `GET /personaColaboradora/:personaColaboradoraId/valoraciones`, `GET /colectivo/:colectivoId/valoraciones`                                                            |
+| [Estadísticas](#estadísticas)     | `GET /estadisticas`                                                                                                                                                                         |
 
 ---
 
@@ -121,11 +126,12 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 
 ## Colectivos
 
-| Método | Path              | Descripción                 |
-| ------ | ----------------- | --------------------------- |
-| GET    | `/colectivos`     | Lista todos los colectivos  |
-| GET    | `/colectivos/:id` | Obtiene un colectivo por id |
-| POST   | `/colectivos`     | Crea un colectivo           |
+| Método | Path              | Descripción                         |
+| ------ | ----------------- | ----------------------------------- |
+| GET    | `/colectivos`     | Lista todos los colectivos          |
+| GET    | `/colectivos/:id` | Obtiene un colectivo por id         |
+| POST   | `/colectivos`     | Crea un colectivo                   |
+| PATCH  | `/colectivos/:id` | Actualiza parcialmente un colectivo |
 
 ### GET `/colectivos`
 
@@ -169,6 +175,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | `descripcion`     | string        | sí        |                                                                                                           |
 | `ubicacion`       | string (enum) | sí        | en minúsculas y sin tildes: `argentina`, `caba` o una provincia (ej. `buenos aires`, `cordoba`). Ver nota |
 | `tipoDeColectivo` | string (enum) | sí        | uno de: `fundacion`, `ong`, `asociacion barrial`, `asamblea`                                              |
+| `redesSociales`   | object[]      | no        | enlaces a redes sociales: `{ "tipo": "instagram", "url": "https://..." }` (enum TipoRedSocial)            |
 
 > **Nota sobre `ubicacion`:** el enunciado la define como opcional, pero hoy la base de datos la exige. Si falta o no es un valor válido, la respuesta es `500`.
 
@@ -185,6 +192,25 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | 400    | `ERR-VAL-001` | `nombre` o `descripcion` no son de tipo string     |
 | 409    | `ERR-CSR-308` | Ya existe un colectivo con ese `nombre`            |
 
+### PATCH `/colectivos/:id`
+
+Actualización parcial de un colectivo. Si `redesSociales` se omite, se conservan las existentes. Si se envía un array, se reemplaza la lista completa (un array vacío `[]` las elimina todas).
+
+**Body:** campos a modificar (al menos uno requerido).
+
+**Errores:**
+
+| Status | code           | Cuándo                                                  |
+| ------ | -------------- | ------------------------------------------------------- |
+| 400    | `ERR-VAL-001`  | Body vacío o tipos de datos inválidos                   |
+| 400    | `ERR-VAL-1101` | `redesSociales` no es un array                          |
+| 400    | `ERR-VAL-1102` | Falta `tipo` de red social                              |
+| 400    | `ERR-VAL-1103` | `tipo` no pertenece al enum `TipoRedSocial`             |
+| 400    | `ERR-VAL-1104` | `url` de red social vacía                               |
+| 400    | `ERR-VAL-1105` | `url` inválida o no utiliza protocolo HTTP/HTTPS        |
+| 400    | `ERR-VAL-1106` | Tipos de redes sociales duplicados dentro del colectivo |
+| 404    | `ERR-NOT-305`  | No existe un colectivo con ese id                       |
+
 ---
 
 ## Colaboradoras
@@ -194,6 +220,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | GET    | `/colaboradoras`     | Lista todas las personas colaboradoras  |
 | GET    | `/colaboradoras/:id` | Obtiene una persona colaboradora por id |
 | POST   | `/colaboradoras`     | Registra una persona colaboradora       |
+| PATCH  | `/colaboradoras/:id` | Actualiza parcialmente una colaboradora |
 
 Los medios de contacto (`contactos`) quedan registrados internamente y **nunca** aparecen en los `GET`.
 
@@ -206,7 +233,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
   {
     "_id": "6acfd66264d02459ba8dc6a0",
     "nombreFantasia": "devSolidario",
-    "git": "https://github.com/devSolidario",
+    "git": "[https://github.com/devSolidario](https://github.com/devSolidario)",
     "nombre": "Ana",
     "apellido": "Pérez",
     "habilidades": ["6acfd66164d02459ba8dc69c"],
@@ -236,17 +263,18 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 
 **Body:**
 
-| Campo                    | Tipo     | Requerido | Notas                                                                            |
-| ------------------------ | -------- | --------- | -------------------------------------------------------------------------------- |
-| `nombreFantasia`         | string   | sí        |                                                                                  |
-| `git`                    | string   | sí        | cuenta de GitHub o GitLab                                                        |
-| `nombre`                 | string   | no        |                                                                                  |
-| `apellido`               | string   | no        |                                                                                  |
-| `habilidades`            | string[] | sí        | array de **códigos** de habilidad ya existentes (no títulos ni ids)              |
-| `pronombres`             | string   | no        |                                                                                  |
-| `presentacion`           | string   | sí        |                                                                                  |
-| `contactos`              | object[] | no        | cero o más medios de contacto: `{ "tipo": "email", "valor": "ana@mail.com" }`    |
-| `bloquearMensajeInterno` | boolean  | no        | `true` si no quiere recibir mensajes internos de los colectivos. Default `false` |
+| Campo                    | Tipo     | Requerido | Notas                                                                                       |
+| ------------------------ | -------- | --------- | ------------------------------------------------------------------------------------------- |
+| `nombreFantasia`         | string   | sí        |                                                                                             |
+| `git`                    | string   | sí        | cuenta de GitHub o GitLab                                                                   |
+| `nombre`                 | string   | no        |                                                                                             |
+| `apellido`               | string   | no        |                                                                                             |
+| `habilidades`            | string[] | sí        | array de **códigos** de habilidad ya existentes (no títulos ni ids)                         |
+| `pronombres`             | string   | no        |                                                                                             |
+| `presentacion`           | string   | sí        |                                                                                             |
+| `contactos`              | object[] | no        | cero o más medios de contacto: `{ "tipo": "email", "valor": "ana@mail.com" }`               |
+| `bloquearMensajeInterno` | boolean  | no        | `true` si no quiere recibir mensajes internos de los colectivos. Default `false`            |
+| `redesSociales`          | object[] | no        | enlaces a redes sociales: `{ "tipo": "github", "url": "https://..." }` (enum TipoRedSocial) |
 
 **Medios de contacto:** `tipo` es uno de `email`, `whatsapp` o `sms` (en mayúsculas o minúsculas). Para `email`, `valor` debe ser un email válido; para `whatsapp` y `sms`, 10 dígitos juntos sin espacios ni símbolos (ej. `1127891234`).
 
@@ -271,6 +299,25 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-VAL-707` | El teléfono no tiene 10 dígitos                  |
 | 400    | `ERR-VAL-207` | Alguno de los códigos en `habilidades` no existe |
 | 400    | `ERR-VAL-001` | Algún campo de texto no es de tipo string        |
+
+### PATCH `/colaboradoras/:id`
+
+Actualización parcial de una colaboradora. Si `redesSociales` se omite, se conservan las existentes. Si se envía un array, se reemplaza la lista completa (un array vacío `[]` las elimina todas).
+
+**Body:** campos a modificar (al menos uno requerido).
+
+**Errores:**
+
+| Status | code           | Cuándo                                               |
+| ------ | -------------- | ---------------------------------------------------- |
+| 400    | `ERR-VAL-001`  | Body vacío o tipos de datos inválidos                |
+| 400    | `ERR-VAL-1101` | `redesSociales` no es un array                       |
+| 400    | `ERR-VAL-1102` | Falta `tipo` de red social                           |
+| 400    | `ERR-VAL-1103` | `tipo` no pertenece al enum `TipoRedSocial`          |
+| 400    | `ERR-VAL-1104` | `url` de red social vacía                            |
+| 400    | `ERR-VAL-1105` | `url` inválida o no utiliza protocolo HTTP/HTTPS     |
+| 400    | `ERR-VAL-1106` | Tipos de redes sociales duplicados dentro del perfil |
+| 404    | `ERR-NOT-405`  | No existe una persona colaboradora con ese id        |
 
 ---
 
@@ -307,13 +354,13 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
       }
     ],
     "colectivo": "6acfd66164d02459ba8dc69f",
-    "urlSistema": "https://fundacion.org",
+    "urlSistema": "[https://fundacion.org](https://fundacion.org)",
     "logros": [
       {
         "_id": "6acfd66a64d02459ba8dc6a9",
         "descripcion": "MVP publicado",
         "porcentaje": 60,
-        "urlCodigoFuente": "https://github.com/fundacion/web",
+        "urlCodigoFuente": "[https://github.com/fundacion/web](https://github.com/fundacion/web)",
         "createdAt": "2026-10-14T19:22:18.292Z",
         "updatedAt": "2026-10-14T19:22:18.292Z"
       }
@@ -342,13 +389,16 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 
 **Body:**
 
-| Campo         | Tipo     | Requerido | Notas                                                 |
-| ------------- | -------- | --------- | ----------------------------------------------------- |
-| `titulo`      | string   | sí        | no puede repetirse dentro del mismo colectivo         |
-| `descripcion` | string   | sí        |                                                       |
-| `perfiles`    | object[] | sí        | al menos un perfil (ver abajo)                        |
-| `colectivo`   | string   | sí        | **nombre** del colectivo existente (no id, no objeto) |
-| `urlSistema`  | string   | sí        | URL válida del sistema en funcionamiento              |
+| Campo                 | Tipo     | Requerido | Notas                                                                                         |
+| --------------------- | -------- | --------- | --------------------------------------------------------------------------------------------- |
+| `titulo`              | string   | sí        | no puede repetirse dentro del mismo colectivo                                                 |
+| `descripcion`         | string   | sí        |                                                                                               |
+| `perfiles`            | object[] | sí        | al menos un perfil (ver abajo)                                                                |
+| `colectivo`           | string   | sí        | **nombre** del colectivo existente (no id, no objeto)                                         |
+| `urlSistema`          | string   | sí        | URL válida del sistema en funcionamiento                                                      |
+| `urlDonaciones`       | string   | no        | URL externa para contribuciones económicas (HTTP/HTTPS)                                       |
+| `fechaCierre`         | date     | no        | fecha en que el proyecto se finaliza automáticamente (proceso programado, revisa cada minuto) |
+| `fechaLimiteBusqueda` | date     | no        | fecha límite para recibir postulaciones; vencida, se responde `ERR-EST-1006`                  |
 
 **Cada perfil:**
 
@@ -368,7 +418,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
   "titulo": "Sitio web institucional",
   "descripcion": "Sitio de la fundación",
   "colectivo": "Fundación Ejemplo",
-  "urlSistema": "https://fundacion.org",
+  "urlSistema": "[https://fundacion.org](https://fundacion.org)",
   "perfiles": [
     {
       "descripcion": "Desarrollo front",
@@ -394,6 +444,7 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-VAL-107` | Falta `colectivo`                                                 |
 | 400    | `ERR-VAL-112` | `colectivo` no es un string (nombre)                              |
 | 400    | `ERR-VAL-115` | Falta `urlSistema` o no es una URL válida                         |
+| 400    | `ERR-VAL-116` | `urlDonaciones` no es una URL válida con protocolo HTTP o HTTPS   |
 | 400    | `ERR-VAL-601` | Falta la `descripcion` de un perfil                               |
 | 400    | `ERR-VAL-602` | Faltan `habilidadesRequeridas` o está vacío                       |
 | 400    | `ERR-VAL-603` | Faltan `habilidadesOpcionales` o está vacío                       |
@@ -411,23 +462,51 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 
 ### PATCH `/proyectos/:id`
 
-Cierre manual del proyecto. Después de finalizarlo ya no se pueden anotar colaboradoras ni cargar logros.
+Permite finalizar el proyecto (cierre manual) y/o actualizar el enlace externo de donaciones (`urlDonaciones`). Después de finalizarlo ya no se pueden anotar colaboradoras ni cargar logros.
 
-**Body:** por ahora la única modificación soportada es:
+**Body:**
+
+| Campo           | Tipo           | Requerido | Notas                                                                                                                                                        |
+| --------------- | -------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `finalizado`    | boolean        | no        | Debe ser `true`. No se puede volver a abrir un proyecto finalizado.                                                                                          |
+| `urlDonaciones` | string \| null | no        | URL válida (HTTP o HTTPS) para recibir contribuciones económicas. Si se envía `null` o `""`, se elimina el enlace. Si se omite, se conserva el valor actual. |
+
+Al menos uno de los campos debe estar presente en el cuerpo de la petición.
+
+**Ejemplo - Modificar o agregar URL de donaciones:**
 
 ```json
-{ "finalizado": true }
+{
+  "urlDonaciones": "https://cafecito.app/fundacion"
+}
 ```
 
-**Respuesta 200:** el proyecto actualizado, con `finalizado: true` (misma forma que el `GET`).
+**Ejemplo - Eliminar URL de donaciones:**
+
+```json
+{
+  "urlDonaciones": null
+}
+```
+
+**Ejemplo - Finalizar proyecto:**
+
+```json
+{
+  "finalizado": true
+}
+```
+
+**Respuesta 200:** el proyecto actualizado (misma forma que el `GET`).
 
 **Errores:**
 
-| Status | code          | Cuándo                                          |
-| ------ | ------------- | ----------------------------------------------- |
-| 400    | `ERR-VAL-001` | El body es distinto de `{ "finalizado": true }` |
-| 400    | `ERR-EST-109` | El proyecto ya estaba finalizado                |
-| 404    | `ERR-NOT-108` | No existe un proyecto con ese id                |
+| Status | code          | Cuándo                                                                                 |
+| ------ | ------------- | -------------------------------------------------------------------------------------- |
+| 400    | `ERR-VAL-001` | El body está vacío, contiene campos no permitidos o `finalizado` es distinto de `true` |
+| 400    | `ERR-VAL-116` | `urlDonaciones` no es una URL válida con protocolo HTTP o HTTPS                        |
+| 400    | `ERR-EST-109` | El proyecto ya estaba finalizado                                                       |
+| 404    | `ERR-NOT-108` | No existe un proyecto con ese id                                                       |
 
 ---
 
@@ -560,7 +639,7 @@ Los logros dan trazabilidad al avance del proyecto. Cada uno aporta un porcentaj
   "_id": "6acfd66a64d02459ba8dc6a9",
   "descripcion": "MVP publicado",
   "porcentaje": 60,
-  "urlCodigoFuente": "https://github.com/fundacion/web",
+  "urlCodigoFuente": "[https://github.com/fundacion/web](https://github.com/fundacion/web)",
   "createdAt": "2026-10-14T19:22:18.292Z",
   "updatedAt": "2026-10-14T19:22:18.292Z"
 }
@@ -628,11 +707,13 @@ Para el tope de 100% se cuenta el porcentaje **nuevo** del logro en lugar del an
 
 ## Colaboraciones
 
-| Método | Path                  | Descripción                                  |
-| ------ | --------------------- | -------------------------------------------- |
-| GET    | `/colaboraciones`     | Lista todas las colaboraciones               |
-| GET    | `/colaboraciones/:id` | Obtiene una colaboración por id              |
-| POST   | `/colaboraciones`     | Anota una persona colaboradora a un proyecto |
+> **Cambio:** ya no existe `POST /colaboraciones`. Las colaboraciones se crean al **aceptar una postulación** (`PATCH /postulaciones/:postulacionId` con `estado: \"aceptada\"`, ver [Postulaciones](#postulaciones)).
+
+| Método | Path                  | Descripción                               |
+| ------ | --------------------- | ----------------------------------------- |
+| GET    | `/colaboraciones`     | Lista todas las colaboraciones            |
+| GET    | `/colaboraciones/:id` | Obtiene una colaboración por id           |
+| DELETE | `/colaboraciones/:id` | Da de baja una colaboración (baja lógica) |
 
 ### GET `/colaboraciones`
 
@@ -648,7 +729,9 @@ Para el tope de 100% se cuenta el porcentaje **nuevo** del logro en lugar del an
       "titulo": "Sitio web institucional",
       "...": "..."
     },
+    "perfil": "6acfd66264d02459ba8dc6a3",
     "anonima": true,
+    "activo": true,
     "createdAt": "2026-10-14T19:22:18.224Z",
     "updatedAt": "2026-10-14T19:22:18.224Z",
     "__v": 0
@@ -657,6 +740,8 @@ Para el tope de 100% se cuenta el porcentaje **nuevo** del logro en lugar del an
 ```
 
 **Contribuciones anónimas:** si `anonima` es `true`, la colaboración figura igual, pero `personaColaboradora` es `null`. Si no es anónima, la persona aparece sin sus medios de contacto.
+
+`GET /colaboraciones` lista solo las colaboraciones **activas** (`activo: true`). `GET /colaboraciones/:id` también devuelve las dadas de baja, con `activo: false`, `fechaBaja` y, si corresponde, `bajaPor` (`persona` o `colectivo`).
 
 ### GET `/colaboraciones/:id`
 
@@ -668,34 +753,195 @@ Para el tope de 100% se cuenta el porcentaje **nuevo** del logro en lugar del an
 | ------ | ------------- | ------------------------------------- |
 | 404    | `ERR-NOT-506` | No existe una colaboración con ese id |
 
-### POST `/colaboraciones`
+### DELETE `/colaboraciones/:id`
 
-**Body:**
+Baja lógica: la colaboración queda con `activo: false` y `fechaBaja`, deja de aparecer en `GET /colaboraciones` y libera el cupo del perfil.
 
-| Campo                   | Tipo    | Requerido | Notas                                                       |
-| ----------------------- | ------- | --------- | ----------------------------------------------------------- |
-| `personaColaboradoraId` | string  | sí        | id de la persona colaboradora                               |
-| `proyectoId`            | string  | sí        | id del proyecto                                             |
-| `anonima`               | boolean | no        | si es `true`, no se muestra quién colaboró. Default `false` |
+**Respuesta 200:**
 
-**Reglas de negocio:**
-
-- El proyecto no puede estar finalizado.
-- La persona debe tener al menos una de las **habilidades requeridas** de algún perfil del proyecto (las opcionales no cuentan).
-
-**Respuesta 201:** la colaboración creada, con `id`, la persona (sin contactos) y el proyecto completos.
+```json
+{ "message": "Colaboración desactivada correctamente" }
+```
 
 **Errores:**
 
-| Status | code          | Cuándo                                                          |
-| ------ | ------------- | --------------------------------------------------------------- |
-| 400    | `ERR-VAL-501` | Falta `personaColaboradoraId`                                   |
-| 400    | `ERR-VAL-502` | Falta `proyectoId`                                              |
-| 400    | `ERR-VAL-504` | `anonima` no es booleano                                        |
-| 400    | `ERR-VAL-503` | La persona no tiene ninguna habilidad requerida por el proyecto |
-| 404    | `ERR-NOT-405` | No existe la persona colaboradora                               |
-| 404    | `ERR-NOT-108` | No existe el proyecto                                           |
-| 409    | `ERR-EST-505` | El proyecto está finalizado                                     |
+| Status | code          | Cuándo                                 |
+| ------ | ------------- | -------------------------------------- |
+| 404    | `ERR-NOT-506` | No existe una colaboración con ese id  |
+| 409    | `ERR-EST-508` | La colaboración ya estaba dada de baja |
+
+---
+
+## Postulaciones
+
+Flujo para sumarse a un proyecto: la persona colaboradora **se postula** a un perfil; el colectivo la **acepta** (se crea la colaboración) o la **rechaza**.
+
+| Método | Path                                                      | Descripción                                   |
+| ------ | --------------------------------------------------------- | --------------------------------------------- |
+| POST   | `/proyectos/:proyectoId/perfiles/:perfilId/postulaciones` | Una colaboradora se postula a un perfil       |
+| PATCH  | `/postulaciones/:postulacionId`                           | El colectivo acepta o rechaza una postulación |
+| GET    | `/colaboradoras/:id/postulaciones`                        | Postulaciones hechas por una colaboradora     |
+| GET    | `/colectivos/:colectivoId/postulaciones`                  | Postulaciones recibidas por un colectivo      |
+
+Estados (`EstadoPostulacion`): `pendiente` → `aceptada` | `rechazada`. Toda postulación nace `pendiente` y se resuelve una sola vez.
+
+### POST `/proyectos/:proyectoId/perfiles/:perfilId/postulaciones`
+
+**Body:**
+
+| Campo                   | Tipo    | Requerido | Notas                                                                              |
+| ----------------------- | ------- | --------- | ---------------------------------------------------------------------------------- |
+| `personaColaboradoraId` | string  | sí        | id de la persona que se postula                                                    |
+| `anonima`               | boolean | no        | si es `true`, la colaboración que se cree al aceptar será anónima. Default `false` |
+
+**Reglas de negocio:**
+
+- La persona debe tener al menos una de las **habilidades requeridas** del perfil (las opcionales no cuentan).
+- El proyecto no puede estar finalizado ni tener la búsqueda cerrada (`busquedaCerrada: true` o `fechaLimiteBusqueda` vencida).
+- No puede existir otra postulación de la misma persona para el mismo perfil.
+
+**Respuesta 201:** la postulación con `estado: "pendiente"`; la persona, el proyecto y el perfil vienen completos.
+
+```json
+{
+  "id": "6acfd66a64d02459ba8dc6b1",
+  "personaColaboradora": {
+    "_id": "6acfd66264d02459ba8dc6a2",
+    "nombreFantasia": "DevNeko",
+    "...": "..."
+  },
+  "colectivo": "6acfd66264d02459ba8dc6a0",
+  "proyecto": {
+    "_id": "6acfd66264d02459ba8dc6a1",
+    "titulo": "Plataforma de Donaciones",
+    "...": "..."
+  },
+  "perfil": {
+    "_id": "6acfd66264d02459ba8dc6a3",
+    "descripcion": "Desarrollo frontend",
+    "...": "..."
+  },
+  "anonima": false,
+  "estado": "pendiente"
+}
+```
+
+**Errores:**
+
+| Status | code           | Cuándo                                                        |
+| ------ | -------------- | ------------------------------------------------------------- |
+| 400    | `ERR-VAL-1001` | Falta `personaColaboradoraId`                                 |
+| 400    | `ERR-VAL-1002` | `anonima` no es booleano                                      |
+| 400    | `ERR-VAL-1007` | La persona no tiene ninguna habilidad requerida por el perfil |
+| 404    | `ERR-NOT-405`  | No existe la persona colaboradora                             |
+| 404    | `ERR-NOT-108`  | No existe el proyecto                                         |
+| 404    | `ERR-NOT-611`  | El proyecto no tiene un perfil con ese id                     |
+| 409    | `ERR-EST-1008` | Ya existe una postulación de esa persona para ese perfil      |
+| 409    | `ERR-EST-1005` | El proyecto está finalizado                                   |
+| 409    | `ERR-EST-1006` | La búsqueda del proyecto está cerrada                         |
+
+### PATCH `/postulaciones/:postulacionId`
+
+El colectivo resuelve una postulación `pendiente`.
+
+**Body:**
+
+| Campo    | Tipo   | Requerido | Notas                                              |
+| -------- | ------ | --------- | -------------------------------------------------- |
+| `estado` | string | sí        | `aceptada` o `rechazada` (no distingue mayúsculas) |
+
+- **`aceptada`:** se crea automáticamente la colaboración (respetando `cantidadMaxima` del perfil) y después se marca la postulación. Si la creación falla (cupo completo, proyecto finalizado), la postulación **queda pendiente**.
+- **`rechazada`:** solo cambia el estado.
+
+**Respuesta 200:** la postulación actualizada (referencias como ids).
+
+```json
+{
+  "_id": "6acfd66a64d02459ba8dc6b1",
+  "personaColaboradora": "6acfd66264d02459ba8dc6a2",
+  "colectivo": "6acfd66264d02459ba8dc6a0",
+  "proyecto": "6acfd66264d02459ba8dc6a1",
+  "perfil": "6acfd66264d02459ba8dc6a3",
+  "anonima": false,
+  "estado": "aceptada"
+}
+```
+
+> `fechaResolucion` existe en el modelo, pero hoy no se completa al resolver.
+
+**Errores:**
+
+| Status | code           | Cuándo                                            |
+| ------ | -------------- | ------------------------------------------------- |
+| 400    | `ERR-VAL-1003` | Falta `estado`                                    |
+| 400    | `ERR-VAL-1004` | `estado` no es `aceptada` ni `rechazada`          |
+| 404    | `ERR-NOT-1009` | No existe la postulación                          |
+| 409    | `ERR-EST-1010` | La postulación ya fue resuelta                    |
+| 409    | `ERR-EST-507`  | Al aceptar: se completó el cupo máximo del perfil |
+| 409    | `ERR-EST-505`  | Al aceptar: el proyecto está finalizado           |
+
+### GET `/colaboradoras/:id/postulaciones`
+
+**Respuesta 200:** postulaciones de la persona, en cualquier estado (`[]` si no tiene).
+
+```json
+[
+  {
+    "id": "6acfd66a64d02459ba8dc6b1",
+    "proyecto": "Plataforma de Donaciones",
+    "perfil": "Desarrollo frontend",
+    "estado": "pendiente",
+    "anonima": false
+  }
+]
+```
+
+`proyecto` es el título y `perfil` la descripción del perfil.
+
+**Errores:**
+
+| Status | code          | Cuándo                                        |
+| ------ | ------------- | --------------------------------------------- |
+| 404    | `ERR-NOT-405` | No existe una persona colaboradora con ese id |
+
+### GET `/colectivos/:colectivoId/postulaciones`
+
+**Query params:**
+
+| Param    | Tipo   | Requerido | Notas                                                                         |
+| -------- | ------ | --------- | ----------------------------------------------------------------------------- |
+| `estado` | string | no        | `pendiente`, `aceptada` o `rechazada`. No se valida: otro valor devuelve `[]` |
+
+**Respuesta 200:**
+
+```json
+[
+  {
+    "id": "6acfd66a64d02459ba8dc6b1",
+    "personaColaboradora": {
+      "id": "6acfd66264d02459ba8dc6a2",
+      "nombreFantasia": "DevNeko",
+      "habilidades": [
+        {
+          "_id": "6acfd66264d02459ba8dc6a9",
+          "titulo": "Programación en JavaScript",
+          "codigo": "programacion_en_java_script"
+        }
+      ],
+      "presentacion": "Desarrolladora Frontend apasionada por proyectos comunitarios."
+    },
+    "proyecto": "Plataforma de Donaciones",
+    "perfil": "Desarrollo frontend",
+    "estado": "pendiente"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                            |
+| ------ | ------------- | --------------------------------- |
+| 404    | `ERR-NOT-305` | No existe un colectivo con ese id |
 
 ---
 
@@ -800,12 +1046,389 @@ Guarda el mensaje en la bandeja de la persona y lo **replica por email** a los c
 
 ---
 
+## Notificaciones
+
+Avisos **automáticos** que genera el sistema cuando un proyecto y una persona colaboradora coinciden en habilidades. No se crean por API: solo se consultan.
+
+| Evento                                           | A quién se notifica                                              |
+| ------------------------------------------------ | ---------------------------------------------------------------- |
+| Se crea un proyecto (`POST /proyectos`)          | Personas colaboradoras con habilidades acordes a algún perfil    |
+| Se crea una colaboradora (`POST /colaboradoras`) | Colectivos con proyectos acordes a las habilidades de la persona |
+
+No se repite la notificación para el mismo proyecto, persona y destinatario. Se listan de la más nueva a la más vieja.
+
+| Método | Path                                            | Descripción                        |
+| ------ | ----------------------------------------------- | ---------------------------------- |
+| GET    | `/colaboradoras/:colaboradoraId/notificaciones` | Notificaciones de una colaboradora |
+| GET    | `/colectivos/:colectivoId/notificaciones`       | Notificaciones de un colectivo     |
+
+### GET `/colaboradoras/:colaboradoraId/notificaciones`
+
+**Respuesta 200:** (`[]` si no tiene)
+
+```json
+[
+  {
+    "_id": "6acfd66a64d02459ba8dc6c1",
+    "personaColaboradora": "6acfd66264d02459ba8dc6a2",
+    "colectivo": "6acfd66264d02459ba8dc6a0",
+    "proyecto": { "_id": "6acfd66264d02459ba8dc6a1", "titulo": "Plataforma de Donaciones" },
+    "destinatario": "persona",
+    "texto": "Hola Lucía!, se publico el proyecto \" Plataforma de Donaciones \" del colectivo Colectivo Ambiental CABA que busca perfiles acordes a tus habilidades",
+    "createdAt": "2026-10-14T19:22:18.224Z"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                                        |
+| ------ | ------------- | --------------------------------------------- |
+| 404    | `ERR-NOT-405` | No existe una persona colaboradora con ese id |
+
+### GET `/colectivos/:colectivoId/notificaciones`
+
+**Respuesta 200:** (`[]` si no tiene) igual forma, pero `destinatario` es `colectivo` y `personaColaboradora` viene con `_id` y `nombreFantasia`.
+
+```json
+[
+  {
+    "_id": "6acfd66a64d02459ba8dc6c2",
+    "personaColaboradora": { "_id": "6acfd66264d02459ba8dc6a2", "nombreFantasia": "DevNeko" },
+    "colectivo": "6acfd66264d02459ba8dc6a0",
+    "proyecto": { "_id": "6acfd66264d02459ba8dc6a1", "titulo": "Plataforma de Donaciones" },
+    "destinatario": "colectivo",
+    "texto": "Hola Colectivo Ambiental CABA!, hay una nueva persona colaboradora \" DevNeko \" la cual tiene habilidades acordes al proyecto \" Plataforma de Donaciones \"",
+    "createdAt": "2026-10-14T19:22:18.224Z"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                            |
+| ------ | ------------- | --------------------------------- |
+| 404    | `ERR-NOT-305` | No existe un colectivo con ese id |
+
+---
+
+## Denuncias
+
+Permite que una persona que haya participado en un proyecto con una organización denuncie a la misma por mal comportamiento. Queda a criterio del equipo administrativo evaluar la denuncia.
+
+> **Aviso de seguridad y autenticación:** Actualmente el backend no cuenta con un sistema de autenticación ni control de acceso por roles (RBAC). Las rutas administrativas bajo `/admin/` están formalmente separadas de las rutas operativas, pero **no se encuentran protegidas técnicamente frente a terceros no autorizados** hasta tanto se implemente una capa transversal de autenticación.
+
+| Método | Path                           | Descripción                                                           |
+| ------ | ------------------------------ | --------------------------------------------------------------------- |
+| POST   | `/colaboraciones/:id/denuncia` | Registra una denuncia contra el colectivo asociado a una colaboración |
+| GET    | `/admin/denuncias`             | Lista global de denuncias para evaluación administrativa              |
+| GET    | `/admin/denuncias/:id`         | Detalle de una denuncia junto a la colaboración y contacto            |
+| PATCH  | `/admin/denuncias/:id/estado`  | Actualiza el estado administrativo de una denuncia                    |
+
+### POST `/colaboraciones/:id/denuncia`
+
+Registra una denuncia contra el colectivo responsable del proyecto en el cual se participó. El colectivo no se selecciona libremente sino que se deduce automáticamente a partir de la colaboración (`Colaboración -> Proyecto -> Colectivo`).
+
+**Body:**
+
+| Campo         | Tipo   | Requerido | Notas                                 |
+| ------------- | ------ | --------- | ------------------------------------- |
+| `descripcion` | string | sí        | Explicación de lo ocurrido (no vacío) |
+
+**Reglas de negocio:**
+
+- La colaboración debe existir.
+- La colaboración debe acreditar participación real en el proyecto (tanto colaboraciones activas como finalizadas / dadas de baja son válidas).
+- El proyecto debe tener un colectivo asociado.
+- Solo se permite una denuncia por colaboración (duplicados son rechazados).
+- La denuncia se crea con estado inicial `pendiente`.
+- **Privacidad:** La denuncia no almacena directamente datos personales (`denunciante` ni `personaId`). La respuesta operativa no expone datos personales.
+
+**Respuesta 201:**
+
+```json
+{
+  "id": "60c72b2f9b1d8b2bad000001",
+  "_id": "60c72b2f9b1d8b2bad000001",
+  "descripcion": "Incumplimiento reiterado de acuerdos",
+  "fecha": "2026-10-31T03:30:00.000Z",
+  "estado": "pendiente",
+  "colaboracionId": "6acfd66a64d02459ba8dc6a7"
+}
+```
+
+**Errores:**
+
+| Status | code           | Cuándo                                                   |
+| ------ | -------------- | -------------------------------------------------------- |
+| 400    | `ERR-VAL-1201` | Falta la descripción o está vacía                        |
+| 400    | `ERR-EST-1202` | La colaboración no acredita participación real           |
+| 400    | `ERR-EST-1204` | El proyecto no tiene un colectivo asociado               |
+| 404    | `ERR-NOT-506`  | No existe la colaboración                                |
+| 404    | `ERR-NOT-305`  | No existe el colectivo responsable                       |
+| 409    | `ERR-EST-1203` | Ya existe una denuncia registrada para esta colaboración |
+
+### GET `/admin/denuncias`
+
+Consulta global de denuncias embebidas en los distintos colectivos, optimizada mediante agregación sin transferir documentos completos de colectivos.
+
+**Query params opcionales:**
+
+- `estado`: filtra por estado (`pendiente`, `en_revision`, `resuelta`, `descartada`).
+
+**Respuesta 200:** array de denuncias con información de su colectivo.
+
+```json
+[
+  {
+    "_id": "60c72b2f9b1d8b2bad000001",
+    "descripcion": "Incumplimiento reiterado de acuerdos",
+    "fecha": "2026-10-31T03:30:00.000Z",
+    "estado": "pendiente",
+    "colaboracionId": "6acfd66a64d02459ba8dc6a7",
+    "colectivoId": "6acfd66064d02459ba8dc695",
+    "colectivoNombre": "Fundación Ejemplo"
+  }
+]
+```
+
+### GET `/admin/denuncias/:id`
+
+Obtiene el detalle administrativo de una denuncia, permitiendo al equipo de la plataforma recomponer la colaboración asociada y los datos de contacto de la persona si fuera necesario contactarla.
+
+**Respuesta 200:**
+
+```json
+{
+  "_id": "60c72b2f9b1d8b2bad000001",
+  "descripcion": "Incumplimiento reiterado de acuerdos",
+  "fecha": "2026-10-31T03:30:00.000Z",
+  "estado": "pendiente",
+  "colaboracionId": "6acfd66a64d02459ba8dc6a7",
+  "colectivoId": "6acfd66064d02459ba8dc695",
+  "colectivoNombre": "Fundación Ejemplo",
+  "colaboracion": {
+    "_id": "6acfd66a64d02459ba8dc6a7",
+    "personaColaboradora": {
+      "nombreFantasia": "Ana",
+      "contactos": [{ "tipo": "email", "valor": "ana@mail.com" }]
+    },
+    "proyecto": {
+      "titulo": "Sitio web institucional"
+    }
+  }
+}
+```
+
+**Errores:**
+
+| Status | code           | Cuándo                                       |
+| ------ | -------------- | -------------------------------------------- |
+| 404    | `ERR-NOT-1105` | No existe una denuncia con ese identificador |
+
+### PATCH `/admin/denuncias/:id/estado`
+
+Permite al equipo administrativo actualizar el estado de evaluación de la denuncia.
+
+**Body:**
+
+| Campo    | Tipo   | Requerido | Valores permitidos                      |
+| -------- | ------ | --------- | --------------------------------------- |
+| `estado` | string | sí        | `en_revision`, `resuelta`, `descartada` |
+
+**Errores:**
+
+| Status | code           | Cuándo                                         |
+| ------ | -------------- | ---------------------------------------------- |
+| 400    | `ERR-VAL-1207` | Falta el campo `estado`                        |
+| 400    | `ERR-VAL-1206` | El estado enviado no es válido para resolución |
+| 404    | `ERR-NOT-1105` | No existe la denuncia a actualizar             |
+
+---
+
+## Valoraciones
+
+Sistema de valoraciones mutuas entre colectivos y personas colaboradoras al finalizar una colaboración.
+
+- **Regla de finalización:** Una valoración solo puede realizarse cuando la colaboración ha finalizado (el proyecto al que pertenece fue marcado como finalizado o la colaboración fue dada de baja/desactivada).
+- **Mutuas y únicas:** Cada parte (colectivo y colaboradora) puede realizar como máximo **una** valoración por colaboración.
+- **Puntaje y comentario:** El puntaje debe ser un entero entre 1 y 5. El comentario es opcional (hasta 500 caracteres).
+- **Derivación de partes y alcance de autenticación:** El autor y destinatario se calculan estrictamente a nivel interno en base a la colaboración y al tipo de evaluador (`colectivo` -> autor Colectivo, destinatario Persona; `persona` -> autor Persona, destinatario Colectivo). Nunca deben recibirse desde el request. La verificación de la identidad del solicitante no forma parte del alcance de esta funcionalidad (se implementa en otra rama), por lo que no se requiere ni acepta `evaluadorId` en el payload.
+
+| Método | Path                                                       | Descripción                                                                |
+| ------ | ---------------------------------------------------------- | -------------------------------------------------------------------------- |
+| POST   | `/valoraciones`                                            | Registra una valoración sobre una colaboración finalizada                  |
+| GET    | `/personaColaboradora/:personaColaboradoraId/valoraciones` | Obtiene el historial público de valoraciones recibidas por la colaboradora |
+| GET    | `/colectivo/:colectivoId/valoraciones`                     | Obtiene el historial público de valoraciones recibidas por el colectivo    |
+
+### POST `/valoraciones`
+
+**Body:**
+
+```json
+{
+  "colaboracionId": "6acfd66a64d02459ba8dc6a8",
+  "evaluador": "colectivo",
+  "puntaje": 5,
+  "comentario": "Excelente desempeño técnico y gran compromiso con la causa."
+}
+```
+
+- `colaboracionId` (string ObjectId, requerido).
+- `evaluador` (`"colectivo"` | `"persona"`, requerido).
+- `puntaje` (entero entre 1 y 5, requerido).
+- `comentario` (string hasta 500 caracteres, opcional).
+
+**Respuesta 201:**
+
+```json
+{
+  "_id": "6acfd66a64d02459ba8dc6b0",
+  "colaboracion": "6acfd66a64d02459ba8dc6a8",
+  "evaluador": "colectivo",
+  "puntaje": 5,
+  "comentario": "Excelente desempeño técnico y gran compromiso con la causa.",
+  "autor": "6acfd66a64d02459ba8dc6a9",
+  "destinatario": "6acfd66a64d02459ba8dc6a7"
+}
+```
+
+**Errores:**
+
+| Status | code           | Cuándo                                                                   |
+| ------ | -------------- | ------------------------------------------------------------------------ |
+| 400    | `ERR-VAL-1301` | Falta el id de la colaboración                                           |
+| 400    | `ERR-VAL-1302` | Tipo de evaluador inválido (debe ser `colectivo` o `persona`)            |
+| 400    | `ERR-VAL-1306` | El puntaje no es un número entero                                        |
+| 400    | `ERR-VAL-1307` | El puntaje está fuera del rango 1 a 5                                    |
+| 400    | `ERR-VAL-1309` | El comentario supera los 500 caracteres                                  |
+| 400    | `ERR-EST-1310` | La parte evaluadora ya calificó esta colaboración                        |
+| 400    | `ERR-EST-1311` | La colaboración no ha finalizado (está activa y el proyecto no finalizó) |
+| 404    | `ERR-NOT-506`  | No existe una colaboración con ese id                                    |
+
+### GET `/personaColaboradora/:personaColaboradoraId/valoraciones`
+
+Obtiene el historial público de valoraciones recibidas por la persona colaboradora (calificaciones emitidas por colectivos hacia ella). No expone datos de contacto privados ni identificadores internos de autor/destinatario.
+
+**Query params opcionales:**
+
+- `direccion`: `"recibidas"` (default), `"emitidas"` (valoraciones hechas por la persona), `"todas"`.
+
+**Respuesta 200:**
+
+```json
+[
+  {
+    "_id": "6acfd66a64d02459ba8dc6b0",
+    "colaboracion": "6acfd66a64d02459ba8dc6a8",
+    "evaluador": "colectivo",
+    "puntaje": 5,
+    "comentario": "Excelente desempeño técnico y gran compromiso con la causa.",
+    "createdAt": "2026-10-31T20:15:00.000Z"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                                        |
+| ------ | ------------- | --------------------------------------------- |
+| 404    | `ERR-NOT-405` | No existe una persona colaboradora con ese id |
+
+### GET `/colectivo/:colectivoId/valoraciones`
+
+Obtiene el historial público de valoraciones recibidas por el colectivo (calificaciones emitidas por colaboradoras hacia la organización). No expone datos de contacto privados ni identificadores internos de autor/destinatario.
+
+**Query params opcionales:**
+
+- `direccion`: `"recibidas"` (default), `"emitidas"`, `"todas"`.
+
+**Respuesta 200:**
+
+```json
+[
+  {
+    "_id": "6acfd66a64d02459ba8dc6b1",
+    "colaboracion": "6acfd66a64d02459ba8dc6a8",
+    "evaluador": "persona",
+    "puntaje": 4,
+    "comentario": "Muy buena comunicación y apoyo durante el desarrollo.",
+    "createdAt": "2026-10-31T20:30:00.000Z"
+  }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                            |
+| ------ | ------------- | --------------------------------- |
+| 404    | `ERR-NOT-305` | No existe un colectivo con ese id |
+
+---
+
+## Estadísticas
+
+### GET `/estadisticas`
+
+Resumen de colaboraciones, colectivos, proyectos (con sus postulaciones) y personas colaboradoras.
+
+**Límite de uso:** 5 peticiones cada 20 minutos por IP. Se puede omitir enviando la API key en el header `x-api-key` (o en el query param `apiKey`) con el valor de `MI_API_KEY` del `.env`.
+
+**Respuesta 200:**
+
+```json
+{
+  "estadisticasColaboraciones": { "total": 12, "anonimas": 3, "publicas": 9 },
+  "estadisticasColectivos": {
+    "total": 8,
+    "porUbicacion": [
+      { "ubicacion": "caba", "cantidad": 5 },
+      { "ubicacion": "cordoba", "cantidad": 3 }
+    ]
+  },
+  "estadisticasProyectos": {
+    "proyectos": { "total": 20, "activos": 14, "finalizados": 6 },
+    "postulacionesPorProyecto": [
+      {
+        "proyecto": "Plataforma de Donaciones",
+        "cantidadPostulaciones": 7,
+        "cantidadPostulacionesAceptadas": 2,
+        "cantidadPostulacionesPendientes": 4,
+        "cantidadPostulacionesRechazadas": 1
+      }
+    ]
+  },
+  "estadisticasPersonasColaboradoras": {
+    "total": 30,
+    "bloqueanMensajes": 4,
+    "promedioHabilidadesPorPersona": 2.4,
+    "promedioPostulacionesPorPersona": 1.3
+  }
+}
+```
+
+- `postulacionesPorProyecto` solo incluye proyectos con al menos una postulación, de mayor a menor.
+- `porUbicacion` va de mayor a menor cantidad.
+
+**Respuesta 429:** se superó el límite. Ojo: este cuerpo **no** usa el formato de error estándar.
+
+```json
+{ "status": 429, "message": "Demasiadas peticiones desde esta Ip. Intente de nuevo mas tarde" }
+```
+
+---
+
 ## Enums de referencia
 
-| Enum                    | Valores                                                            |
-| ----------------------- | ------------------------------------------------------------------ |
-| `TipoColectivo`         | `fundacion`, `ong`, `asociacion barrial`, `asamblea`               |
-| `Ubicacion`             | `argentina`, `caba` y las 23 provincias en minúsculas y sin tildes |
-| `TipoCompromiso`        | `total`, `semanal`, `mensual`                                      |
-| `ModalidadColaboracion` | `gratuita`, `incentivo_economico`, `contratacion_eventual`         |
-| `TipoMedioDeContacto`   | `email`, `whatsapp`, `sms`                                         |
+| Enum                       | Valores                                                                 |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `TipoColectivo`            | `fundacion`, `ong`, `asociacion barrial`, `asamblea`                    |
+| `TipoRedSocial`            | `instagram`, `linkedin`, `github`, `facebook`, `x`, `youtube`, `tiktok` |
+| `Ubicacion`                | `argentina`, `caba` y las 23 provincias en minúsculas y sin tildes      |
+| `TipoCompromiso`           | `total`, `semanal`, `mensual`                                           |
+| `ModalidadColaboracion`    | `gratuita`, `incentivo_economico`, `contratacion_eventual`              |
+| `TipoMedioDeContacto`      | `email`, `whatsapp`, `sms`                                              |
+| `EstadoDenuncia`           | `pendiente`, `en_revision`, `resuelta`, `descartada`                    |
+| `TipoEvaluador`            | `colectivo`, `persona`                                                  |
+| `EstadoPostulacion`        | `pendiente`, `aceptada`, `rechazada`                                    |
+| `DestinatarioNotificacion` | `persona`, `colectivo`                                                  |

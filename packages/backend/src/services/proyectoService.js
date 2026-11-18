@@ -1,6 +1,7 @@
 import { Proyecto } from "../models/proyecto.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
+import { eventos, EVENTO_PROYECTO_CREADO, EVENTO_PROYECTOS_CERRADOS } from "../events/events.js";
 
 export class ProyectoService {
   constructor({ proyectoRepository, perfilService, colectivoService, personaColaboradoraService }) {
@@ -8,6 +9,16 @@ export class ProyectoService {
     this.perfilService = perfilService;
     this.colectivoService = colectivoService;
     this.personaColaboradoraService = personaColaboradoraService;
+  }
+
+  validarUrlHttp(url) {
+    if (!url || typeof url !== "string") return false;
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
   }
 
   async crearProyecto(
@@ -18,6 +29,7 @@ export class ProyectoService {
     urlSistema,
     fechaCierre,
     fechaLimiteBusqueda,
+    urlDonaciones,
   ) {
     //en vez de nombre, usar id
     const colectivoEncontrado = await this.colectivoService.obtenerColectivoPorNombre(colectivo);
@@ -36,6 +48,12 @@ export class ProyectoService {
       );
     }
 
+    if (urlDonaciones !== undefined && urlDonaciones !== null && urlDonaciones !== "") {
+      if (!this.validarUrlHttp(urlDonaciones)) {
+        throw new AppError(ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA, 400);
+      }
+    }
+
     //consultar si vale la pena
     const perfilesCreados = await Promise.all(
       perfiles.map((perfil) =>
@@ -51,6 +69,8 @@ export class ProyectoService {
       ),
     );
 
+    const urlDonacionesFinal = urlDonaciones && urlDonaciones !== "" ? urlDonaciones : null;
+
     const proyectoNuevo = new Proyecto(
       titulo,
       descripcion,
@@ -59,11 +79,14 @@ export class ProyectoService {
       urlSistema,
       fechaCierre,
       fechaLimiteBusqueda,
+      urlDonacionesFinal,
     );
     const proyectoGuardado = await this.proyectoRepository.guardar(proyectoNuevo);
     proyectoNuevo.id = proyectoGuardado.id;
 
     await this.colectivoService.agregarProyecto(colectivoEncontrado._id, proyectoGuardado._id);
+
+    eventos.emit(EVENTO_PROYECTO_CREADO, proyectoGuardado, colectivo);
 
     return proyectoGuardado;
   }
@@ -84,7 +107,6 @@ export class ProyectoService {
 
   async obtenerProyectosConAlgunaHabilidad(idsHabilidad) {
     const proyectos = await this.proyectoRepository.obtenerPorAlgunaHabilidad(idsHabilidad);
-    console.log(proyectos);
     return proyectos;
   }
 
@@ -99,17 +121,72 @@ export class ProyectoService {
       throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, id);
     }
 
-    return await this.proyectoRepository.finalizarProyecto(id);
+    const finalizado = await this.proyectoRepository.finalizarProyecto(id);
+    eventos.emit(EVENTO_PROYECTOS_CERRADOS, [id]);
+
+    return finalizado;
   }
 
   async actualizarProyecto(id, cambios = {}) {
-    const campos = Object.keys(cambios);
-
-    if (campos.length !== 1 || campos[0] !== "finalizado" || cambios.finalizado !== true) {
+    if (!cambios || typeof cambios !== "object" || Array.isArray(cambios)) {
       throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
 
-    return await this.finalizarProyecto(id);
+    const campos = Object.keys(cambios);
+    if (campos.length === 0) {
+      throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+    }
+
+    const camposPermitidos = ["finalizado", "fechaCierre", "urlDonaciones"];
+    const tieneCamposNoPermitidos = campos.some((campo) => !camposPermitidos.includes(campo));
+    if (tieneCamposNoPermitidos) {
+      throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+    }
+
+    const proyecto = await this.proyectoRepository.obtenerPorId(id);
+    if (!proyecto) {
+      throw new AppError(ErrorCatalog.PROYECTO_NO_ENCONTRADO, 404, id);
+    }
+
+    const actualizaciones = {};
+
+    if (cambios.finalizado !== undefined) {
+      if (cambios.finalizado !== true) {
+        throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+      }
+      if (proyecto.finalizado) {
+        throw new AppError(ErrorCatalog.PROYECTO_FINALIZADO, 400, id);
+      }
+      actualizaciones.finalizado = true;
+    }
+
+    if (cambios.fechaCierre !== undefined) {
+      actualizaciones.fechaCierre = cambios.fechaCierre ? new Date(cambios.fechaCierre) : null;
+    }
+
+    if (cambios.urlDonaciones !== undefined) {
+      if (cambios.urlDonaciones === null || cambios.urlDonaciones === "") {
+        actualizaciones.urlDonaciones = null;
+      } else if (typeof cambios.urlDonaciones === "string") {
+        if (!this.validarUrlHttp(cambios.urlDonaciones)) {
+          throw new AppError(ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA, 400);
+        }
+        actualizaciones.urlDonaciones = cambios.urlDonaciones;
+      } else {
+        throw new AppError(ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA, 400);
+      }
+    }
+
+    const proyectoActualizado = await this.proyectoRepository.actualizarProyecto(
+      id,
+      actualizaciones,
+    );
+
+    if (actualizaciones.finalizado) {
+      eventos.emit(EVENTO_PROYECTOS_CERRADOS, [id]);
+    }
+
+    return proyectoActualizado;
   }
 
   async agregarPerfil(
@@ -166,7 +243,10 @@ export class ProyectoService {
   }
 
   async cerrarProyectosSi(fechaActual) {
-    await this.proyectoRepository.cerrarProyectoSi(fechaActual);
+    const idsCerrados = await this.proyectoRepository.cerrarProyectoSi(fechaActual);
+    if (idsCerrados && idsCerrados.length > 0) {
+      eventos.emit(EVENTO_PROYECTOS_CERRADOS, idsCerrados);
+    }
   }
 
   estaBusquedaAbierta(proyecto) {
@@ -175,5 +255,13 @@ export class ProyectoService {
       return false;
     }
     return true;
+  }
+
+  //Estadisticas
+  async obtenerEstadisticas() {
+    const resultado = await this.proyectoRepository.contarTotalYActicvos();
+    const { total, activos } = resultado[0] ?? { total: 0, activos: 0 };
+
+    return { total, activos, finalizados: total - activos };
   }
 }
