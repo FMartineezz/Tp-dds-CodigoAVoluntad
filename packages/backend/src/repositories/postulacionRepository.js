@@ -52,6 +52,7 @@ export class PostulacionRepository {
         {
           $set: {
             estado: nuevoEstado,
+            fechaResolucion: new Date(),
           },
         },
         { new: true },

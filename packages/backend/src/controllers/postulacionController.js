@@ -22,6 +22,7 @@ export class PostulacionController {
     const postulacion = await this.postulacionService.actualizarEstado(
       postulacionId,
       req.body.estado,
+      req.body.colectivoId,
     );
 
     res.status(200).json(postulacion);

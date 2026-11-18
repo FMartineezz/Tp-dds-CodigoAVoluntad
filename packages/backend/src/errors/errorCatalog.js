@@ -478,8 +478,8 @@ const ErrorCatalog = {
   },
   POSTULACION_DUPLICADA: {
     code: "ERR-EST-1008",
-    message: (nombreFantasia, perfilDescripcion) =>
-      `Ya existe una postulación pendiente de ${nombreFantasia} para el perfil: ${perfilDescripcion}`,
+    message: (nombreFantasia, perfilDescripcion, estado) =>
+      `Ya existe una postulación ${estado} de ${nombreFantasia} para el perfil: ${perfilDescripcion}`,
   },
   POSTULACION_NO_ENCONTRADA: {
     code: "ERR-NOT-1009",
@@ -489,6 +489,10 @@ const ErrorCatalog = {
     code: "ERR-EST-1010",
     message:
       "La Postulacion ya fue resuelta, asegurese de resolver postuaciones con estado PENDIENTE",
+  },
+  POSTULACION_NO_PERTENECE_A_COLECTIVO: {
+    code: "ERR-EST-1011",
+    message: "La Postulacion no pertenece al colectivo que la esta queriendo modificar",
   },
 
   // =========================
