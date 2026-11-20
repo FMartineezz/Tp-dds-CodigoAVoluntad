@@ -28,30 +28,30 @@
  */
 
 // ───── Imports ─────
-import { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Button, Field, Heading, Icon, Tag, Text } from '../../atomos';
-import { Alert, RowsSkeleton } from '../../moleculas';
-import { useAuth } from '../../contexto';
-import { usePedido } from '../../hooks';
-import { mensajeDeError } from '../../api/errores.js';
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Button, Field, Heading, Icon, Tag, Text } from "../../atomos";
+import { Alert, RowsSkeleton } from "../../moleculas";
+import { useAuth } from "../../contexto";
+import { usePedido } from "../../hooks";
+import { mensajeDeError } from "../../api/errores.js";
 import {
   RELACIONES,
   claveDeConversacion,
   enviarMensaje,
   marcarComoLeida,
   obtenerConversaciones,
-} from '../../api/mensajes.js';
-import { obtenerColaboradora } from '../../api/organizacion.js';
-import { obtenerProyecto } from '../../api/proyectos.js';
-import s from './Mensajes.module.css';
-import sh from '../../plantillas/disposicion.module.css';
+} from "../../api/mensajes.js";
+import { obtenerColaboradora } from "../../api/organizacion.js";
+import { obtenerProyecto } from "../../api/proyectos.js";
+import s from "./Mensajes.module.css";
+import sh from "../../plantillas/disposicion.module.css";
 
 // Pide las conversaciones. Si la org llegó con ?persona=&proyecto= y todavía no hay
 // conversación con esa persona en ese proyecto, arma un chat vacío («borrador»).
 async function cargarMensajes(rol, idCuenta, personaId, proyectoId) {
   const chats = await obtenerConversaciones(rol, idCuenta);
-  if (rol !== 'org' || !personaId || !proyectoId) return chats;
+  if (rol !== "org" || !personaId || !proyectoId) return chats;
 
   const clave = claveDeConversacion(idCuenta, personaId, proyectoId);
   if (chats.some((chat) => chat.id === clave)) return chats;
@@ -68,7 +68,7 @@ async function cargarMensajes(rol, idCuenta, personaId, proyectoId) {
     con: persona.nombre,
     proyecto: proyecto.titulo,
     rel: RELACIONES.org[2],
-    hora: 'Nueva',
+    hora: "Nueva",
     nuevos: 0,
     msgs: [],
     bloqueada: !persona.mensajes,
@@ -87,8 +87,8 @@ export default function Mensajes({ rol }) {
 
   // Parámetros de la dirección (lo que va después del «?»): ?persona=…&proyecto=…
   const [parametros] = useSearchParams();
-  const personaPedida = parametros.get('persona');
-  const proyectoPedido = parametros.get('proyecto');
+  const personaPedida = parametros.get("persona");
+  const proyectoPedido = parametros.get("proyecto");
 
   // Sumarle 1 vuelve a pedir las conversaciones (después de enviar un mensaje).
   const [version, setVersion] = useState(0);
@@ -96,7 +96,7 @@ export default function Mensajes({ rol }) {
   // Las conversaciones del backend (ver api/mensajes.js para su forma).
   const { cargando, datos, error } = usePedido(
     () => cargarMensajes(rol, id, personaPedida, proyectoPedido),
-    [rol, id, personaPedida, proyectoPedido, version]
+    [rol, id, personaPedida, proyectoPedido, version],
   );
   const chats = datos ?? [];
 
@@ -112,19 +112,19 @@ export default function Mensajes({ rol }) {
   const [movilAbierto, setMovilAbierto] = useState(Boolean(personaPedida));
 
   // Texto del buscador de conversaciones por nombre.
-  const [busqueda, setBusqueda] = useState('');
+  const [busqueda, setBusqueda] = useState("");
 
   // Proyecto elegido en el filtro: 'todos' o el nombre de un proyecto.
-  const [proyectoFiltrado, setProyectoFiltrado] = useState('todos');
+  const [proyectoFiltrado, setProyectoFiltrado] = useState("todos");
 
   // Relación elegida en el filtro: 'Todos' o una de RELACIONES[rol].
-  const [relacionFiltrada, setRelacionFiltrada] = useState('Todos');
+  const [relacionFiltrada, setRelacionFiltrada] = useState("Todos");
 
   // Texto que se está escribiendo en el mensaje nuevo.
-  const [textoMensaje, setTextoMensaje] = useState('');
+  const [textoMensaje, setTextoMensaje] = useState("");
 
   // Mensaje de error del envío o de marcar como leído ('' = sin error).
-  const [errorMensaje, setErrorMensaje] = useState('');
+  const [errorMensaje, setErrorMensaje] = useState("");
 
   // true mientras se espera la respuesta del backend al enviar.
   const [enviando, setEnviando] = useState(false);
@@ -147,8 +147,8 @@ export default function Mensajes({ rol }) {
     const textoBuscado = busqueda.trim().toLowerCase();
     return chats.filter((chat) => {
       // 'Todos' en un filtro significa «no filtrar por esto»
-      const cumpleRelacion = relacionFiltrada === 'Todos' || chat.rel === relacionFiltrada;
-      const cumpleProyecto = proyectoFiltrado === 'todos' || chat.proyecto === proyectoFiltrado;
+      const cumpleRelacion = relacionFiltrada === "Todos" || chat.rel === relacionFiltrada;
+      const cumpleProyecto = proyectoFiltrado === "todos" || chat.proyecto === proyectoFiltrado;
       const cumpleBusqueda = !textoBuscado || chat.con.toLowerCase().includes(textoBuscado);
       return cumpleRelacion && cumpleProyecto && cumpleBusqueda;
     });
@@ -156,38 +156,53 @@ export default function Mensajes({ rol }) {
 
   // Chat abierto: el elegido; si no se eligió ninguno, el pedido por la dirección; si
   // tampoco, el primero de la lista. (.find puede devolver undefined.)
-  const idPedido = personaPedida && proyectoPedido
-    ? claveDeConversacion(id, personaPedida, proyectoPedido)
-    : null;
+  const idPedido =
+    personaPedida && proyectoPedido ? claveDeConversacion(id, personaPedida, proyectoPedido) : null;
   const chatActual =
     chats.find((chat) => chat.id === idElegido) ??
     chats.find((chat) => chat.id === idPedido) ??
     chats[0];
 
+  const marcandoRef = useRef(new Set());
+
+  useEffect(() => {
+    const esEscritorio = window.matchMedia("(min-width: 801px)").matches;
+    if (!chatActual || (!esEscritorio && !movilAbierto)) return;
+    if (
+      chatActual.nuevos === 0 ||
+      leidos.has(chatActual.id) ||
+      marcandoRef.current.has(chatActual.id)
+    ) {
+      return;
+    }
+    marcandoRef.current.add(chatActual.id);
+    marcarComoLeida(chatActual, rol)
+      .then(() => {
+        setLeidos((anteriores) => new Set(anteriores).add(chatActual.id));
+        window.dispatchEvent(new Event("cav-mensajes-actualizados"));
+      })
+      .catch((e) => {
+        marcandoRef.current.delete(chatActual.id);
+        setErrorMensaje(mensajeDeError(e));
+      });
+  }, [chatActual, leidos, movilAbierto, rol]);
+
   // Color de la etiqueta de relación: azul para la segunda opción, arena para el resto.
   function tonoDeLaRelacion(relacion) {
-    return relacion === relaciones[1] ? 'blue' : 'sand';
+    return relacion === relaciones[1] ? "blue" : "sand";
   }
 
-  const claseOcultarSiChatAbierto = movilAbierto ? s.ocultoMovil : '';
-  const claseOcultarSiListaAbierta = movilAbierto ? '' : s.ocultoMovil;
+  const claseOcultarSiChatAbierto = movilAbierto ? s.ocultoMovil : "";
+  const claseOcultarSiListaAbierta = movilAbierto ? "" : s.ocultoMovil;
 
   // ───── 3. ACCIONES ─────
 
   // Se ejecuta al tocar un chat de la lista: lo selecciona, en celular pasa a la
   // conversación y, si tenía mensajes sin leer, le avisa al backend que se leyeron.
-  async function abrirChat(chat) {
+  function abrirChat(chat) {
     setIdElegido(chat.id);
     setMovilAbierto(true);
-    setErrorMensaje('');
-    if (nuevosDe(chat) === 0) return;
-    try {
-      await marcarComoLeida(chat, rol);
-      // Copia del Set con el id agregado (React exige copiar, no modificar).
-      setLeidos((anteriores) => new Set(anteriores).add(chat.id));
-    } catch (e) {
-      setErrorMensaje(mensajeDeError(e));
-    }
+    setErrorMensaje("");
   }
 
   // Se ejecuta al apretar «Enviar». Si el mensaje está vacío muestra un error y corta;
@@ -196,15 +211,15 @@ export default function Mensajes({ rol }) {
     evento.preventDefault(); // evita que el navegador recargue la página
 
     if (!textoMensaje.trim()) {
-      setErrorMensaje('Escribí un mensaje antes de enviar.');
+      setErrorMensaje("Escribí un mensaje antes de enviar.");
       return;
     }
-    setErrorMensaje('');
+    setErrorMensaje("");
     setEnviando(true);
     try {
       await enviarMensaje(chatActual, rol, textoMensaje.trim());
       setIdElegido(chatActual.id); // que siga abierto después de recargar
-      setTextoMensaje('');
+      setTextoMensaje("");
       setVersion((v) => v + 1);
     } catch (e) {
       // Por ejemplo: la persona bloqueó los mensajes (ERR-EST-801).
@@ -250,7 +265,7 @@ export default function Mensajes({ rol }) {
             <Text variant="small">Todavía no hay mensajes. Escribí el primero.</Text>
           )}
           {chatActual.msgs.map(([quien, contenido], posicion) => (
-            <p key={posicion} className={`${s.msg} ${quien === 'yo' ? s.yo : ''}`}>
+            <p key={posicion} className={`${s.msg} ${quien === "yo" ? s.yo : ""}`}>
               {contenido}
             </p>
           ))}
@@ -271,7 +286,9 @@ export default function Mensajes({ rol }) {
               value={textoMensaje}
               onChange={(evento) => setTextoMensaje(evento.target.value)}
             />
-            <Button type="submit" loading={enviando}>Enviar</Button>
+            <Button type="submit" loading={enviando}>
+              Enviar
+            </Button>
           </form>
         )}
       </>
@@ -287,7 +304,9 @@ export default function Mensajes({ rol }) {
 
       {/* Si falló el pedido de conversaciones, un aviso arriba de todo. */}
       {error && (
-        <Alert kind="error" title="No pudimos cargar los mensajes">{mensajeDeError(error)}</Alert>
+        <Alert kind="error" title="No pudimos cargar los mensajes">
+          {mensajeDeError(error)}
+        </Alert>
       )}
 
       {/* BLOQUE: filtros — buscador por nombre, selector de proyecto y botones de relación */}
@@ -306,7 +325,9 @@ export default function Mensajes({ rol }) {
           onChange={(evento) => setProyectoFiltrado(evento.target.value)}
         >
           <option value="todos">Todos</option>
-          {nombresDeProyectos.map((nombre) => <option key={nombre}>{nombre}</option>)}
+          {nombresDeProyectos.map((nombre) => (
+            <option key={nombre}>{nombre}</option>
+          ))}
         </Field>
         <div className={s.rels} role="group" aria-label="Relación">
           {/* Un botón por relación; aria-pressed marca cuál está activo (el filtro actual) */}
@@ -328,47 +349,56 @@ export default function Mensajes({ rol }) {
         {/* BLOQUE: lista de chats — en celular se oculta cuando hay un chat abierto */}
         <ul className={`${s.lista} ${claseOcultarSiChatAbierto}`}>
           {/* Mientras carga: filas grises de relleno */}
-          {cargando && <li><RowsSkeleton n={3} /></li>}
+          {cargando && (
+            <li>
+              <RowsSkeleton n={3} />
+            </li>
+          )}
           {/* Terminó de cargar pero ningún chat pasa los filtros (o no hay ninguno) */}
           {!cargando && !error && chatsVisibles.length === 0 && (
             <li>
               <Text>
-                {chats.length === 0 ? 'Todavía no tenés conversaciones.' : 'Ninguna conversación coincide.'}
+                {chats.length === 0
+                  ? "Todavía no tenés conversaciones."
+                  : "Ninguna conversación coincide."}
               </Text>
             </li>
           )}
           {/* Terminó de cargar: un botón por cada chat visible */}
-          {!cargando && chatsVisibles.map((chat) => (
-            <li key={chat.id}>
-              <button
-                type="button"
-                className={`${s.conv} ${chat.id === chatActual?.id ? s.sel : ''}`}
-                aria-current={chat.id === chatActual?.id}
-                onClick={() => abrirChat(chat)}
-              >
-                <span className={s.l1}>
-                  <b>{chat.con}</b>
-                  <small>{chat.hora}</small>
-                </span>
-                {/* Vista previa: el texto del último mensaje (si hay) */}
-                <span className={s.snip}>
-                  {chat.msgs.length ? chat.msgs[chat.msgs.length - 1][1] : 'Conversación nueva'}
-                </span>
-                <span className={s.tags}>
-                  <Tag>{chat.proyecto}</Tag>
-                  <Tag tone={tonoDeLaRelacion(chat.rel)}>{chat.rel}</Tag>
-                  {/* Aparece solo si hay mensajes sin leer */}
-                  {nuevosDe(chat) > 0 && <span className={s.nuevos}>{nuevosDe(chat)} nuevos</span>}
-                </span>
-              </button>
-            </li>
-          ))}
+          {!cargando &&
+            chatsVisibles.map((chat) => (
+              <li key={chat.id}>
+                <button
+                  type="button"
+                  className={`${s.conv} ${chat.id === chatActual?.id ? s.sel : ""}`}
+                  aria-current={chat.id === chatActual?.id}
+                  onClick={() => abrirChat(chat)}
+                >
+                  <span className={s.l1}>
+                    <b>{chat.con}</b>
+                    <small>{chat.hora}</small>
+                  </span>
+                  {/* Vista previa: el texto del último mensaje (si hay) */}
+                  <span className={s.snip}>
+                    {chat.msgs.length ? chat.msgs[chat.msgs.length - 1][1] : "Conversación nueva"}
+                  </span>
+                  <span className={s.tags}>
+                    <Tag>{chat.proyecto}</Tag>
+                    <Tag tone={tonoDeLaRelacion(chat.rel)}>{chat.rel}</Tag>
+                    {/* Aparece solo si hay mensajes sin leer */}
+                    {nuevosDe(chat) > 0 && (
+                      <span className={s.nuevos}>{nuevosDe(chat)} nuevos</span>
+                    )}
+                  </span>
+                </button>
+              </li>
+            ))}
         </ul>
 
         {/* BLOQUE: conversación — en celular se oculta mientras se ve la lista */}
         <section
           className={`${s.chat} ${claseOcultarSiListaAbierta}`}
-          aria-label={chatActual ? `Conversación con ${chatActual.con}` : 'Conversación'}
+          aria-label={chatActual ? `Conversación con ${chatActual.con}` : "Conversación"}
         >
           {contenidoDelChat}
         </section>

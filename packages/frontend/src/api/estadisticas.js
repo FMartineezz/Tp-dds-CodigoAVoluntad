@@ -9,8 +9,8 @@
  * responde 429). Por eso la respuesta se pide UNA vez y se guarda mientras la pestaña siga
  * abierta: Inicio e Info la comparten.
  */
-import { api } from './cliente.js';
-import { textoDeUbicacion } from './colectivos.js';
+import { api } from "./cliente.js";
+import { textoDeUbicacion } from "./colectivos.js";
 
 // Promesa guardada: el primer pedido la crea y los siguientes reutilizan la misma.
 let guardadas = null;
@@ -18,7 +18,7 @@ let guardadas = null;
 export function obtenerEstadisticas() {
   if (!guardadas) {
     guardadas = api
-      .get('/estadisticas')
+      .get("/estadisticas", { headers: { "x-api-key": import.meta.env.VITE_API_APIKEY } })
       .then(({ data }) => aEstadisticasDeLaVista(data))
       .catch((error) => {
         // Si falló, se olvida para que el próximo intento vuelva a pedirlas.

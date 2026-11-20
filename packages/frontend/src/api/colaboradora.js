@@ -13,28 +13,28 @@
  * Cada función devuelve los datos YA TRADUCIDOS a la forma que usan las pantallas
  * (los «adaptadores» de abajo). Si el backend cambia un nombre, se arregla solo acá.
  */
-import { api } from './cliente.js';
-import { nombresDeHabilidades, obtenerHabilidades, titulos } from './habilidades.js';
-import { aProyectoDeLaVista } from './proyectos.js';
+import { api } from "./cliente.js";
+import { nombresDeHabilidades, obtenerHabilidades, titulos } from "./habilidades.js";
+import { aProyectoDeLaVista } from "./proyectos.js";
 
 // ───── Ayudas ─────
 
 // «Hace 2 h», «Ayer», «Hace 5 días»… a partir de una fecha del backend (texto ISO).
 export function haceCuanto(fecha) {
-  if (!fecha) return '';
+  if (!fecha) return "";
   const minutos = Math.floor((Date.now() - new Date(fecha).getTime()) / 60000);
-  if (minutos < 1) return 'Recién';
+  if (minutos < 1) return "Recién";
   if (minutos < 60) return `Hace ${minutos} min`;
   const horas = Math.floor(minutos / 60);
   if (horas < 24) return `Hace ${horas} h`;
   const dias = Math.floor(horas / 24);
-  if (dias === 1) return 'Ayer';
+  if (dias === 1) return "Ayer";
   if (dias < 30) return `Hace ${dias} días`;
-  return new Date(fecha).toLocaleDateString('es-AR');
+  return new Date(fecha).toLocaleDateString("es-AR");
 }
 
 // Nombres que ve la persona en el editor de contactos ↔ tipos que entiende el backend.
-const TIPOS_DE_CONTACTO = { Correo: 'email', WhatsApp: 'whatsapp', SMS: 'sms' };
+const TIPOS_DE_CONTACTO = { Correo: "email", WhatsApp: "whatsapp", SMS: "sms" };
 
 // ───── 1. Perfil ─────
 
@@ -44,16 +44,16 @@ const TIPOS_DE_CONTACTO = { Correo: 'email', WhatsApp: 'whatsapp', SMS: 'sms' };
 function aPerfilDeLaVista(c, nombres) {
   // Las redes llegan como lista [{ tipo, url }]; buscamos la de LinkedIn para su campo.
   const redes = c.redesSociales ?? [];
-  const linkedin = redes.find((red) => red.tipo === 'linkedin');
+  const linkedin = redes.find((red) => red.tipo === "linkedin");
   return {
-    fantasia: c.nombreFantasia ?? '',
-    nombre: c.nombre ?? '',
-    apellido: c.apellido ?? '',
+    fantasia: c.nombreFantasia ?? "",
+    nombre: c.nombre ?? "",
+    apellido: c.apellido ?? "",
     // El backend guarda los pronombres como lista (['ella', 'la']); el campo los muestra «ella/la».
-    pronombres: (c.pronombres ?? []).join('/'),
-    github: c.git ?? '',
-    linkedin: linkedin?.url ?? '',
-    bio: c.presentacion ?? '',
+    pronombres: (c.pronombres ?? []).join("/"),
+    github: c.git ?? "",
+    linkedin: linkedin?.url ?? "",
+    bio: c.presentacion ?? "",
     // El backend pregunta lo contrario: «¿bloquear mensajes?». `!` lo da vuelta.
     mensajes: !c.bloquearMensajeInterno,
     habilidades: titulos(c.habilidades, nombres),
@@ -81,8 +81,8 @@ export async function guardarPerfil(id, perfil, { contactos } = {}) {
 
   // La lista de redes se manda entera: las que no son LinkedIn quedan como estaban y LinkedIn
   // se agrega solo si el campo tiene algo.
-  const redes = perfil.redes.filter((red) => red.tipo !== 'linkedin');
-  if (perfil.linkedin.trim()) redes.push({ tipo: 'linkedin', url: perfil.linkedin.trim() });
+  const redes = perfil.redes.filter((red) => red.tipo !== "linkedin");
+  if (perfil.linkedin.trim()) redes.push({ tipo: "linkedin", url: perfil.linkedin.trim() });
 
   const cuerpo = {
     nombreFantasia: perfil.fantasia.trim(),
@@ -90,7 +90,10 @@ export async function guardarPerfil(id, perfil, { contactos } = {}) {
     nombre: perfil.nombre.trim(),
     apellido: perfil.apellido.trim(),
     // «ella/la» → ['ella', 'la'] (sin vacíos).
-    pronombres: perfil.pronombres.split('/').map((p) => p.trim()).filter(Boolean),
+    pronombres: perfil.pronombres
+      .split("/")
+      .map((p) => p.trim())
+      .filter(Boolean),
     presentacion: perfil.bio.trim(),
     bloquearMensajeInterno: !perfil.mensajes,
     habilidades: perfil.habilidades.map((titulo) => codigoDe.get(titulo)).filter(Boolean),
@@ -103,7 +106,7 @@ export async function guardarPerfil(id, perfil, { contactos } = {}) {
       const tipoBackend = TIPOS_DE_CONTACTO[tipo] ?? tipo;
       return {
         tipo: tipoBackend,
-        valor: tipoBackend === 'email' ? valor.trim() : valor.replace(/\D/g, ''),
+        valor: tipoBackend === "email" ? valor.trim() : valor.replace(/\D/g, ""),
       };
     });
   }
@@ -152,7 +155,7 @@ export async function obtenerMisColaboraciones(id) {
     return {
       id: c._id,
       proyecto,
-      rol: perfil?.descripcion ?? 'Sin perfil',
+      rol: perfil?.descripcion ?? "Sin perfil",
       anonima: Boolean(c.anonima),
       // false si se dio de baja (ella o el colectivo); bajaPor dice quién: 'persona' | 'colectivo'
       activa: Boolean(c.activo),
@@ -166,7 +169,7 @@ export async function obtenerMisColaboraciones(id) {
 // que la persona ya valoró (para no ofrecer «Valorar» dos veces).
 async function idsDeColaboracionesValoradas(id) {
   const { data } = await api.get(`/personaColaboradora/${id}/valoraciones`, {
-    params: { direccion: 'emitidas' },
+    params: { direccion: "emitidas" },
   });
   return new Set(data.map((v) => String(v.colaboracion)));
 }
@@ -174,16 +177,16 @@ async function idsDeColaboracionesValoradas(id) {
 // DELETE /colaboraciones/:id → baja lógica (permanente: habría que volver a postularse).
 export async function darseDeBaja(idColaboracion) {
   // ?por=persona deja registrado que la baja la dio ella (no el colectivo)
-  await api.delete(`/colaboraciones/${idColaboracion}`, { params: { por: 'persona' } });
+  await api.delete(`/colaboraciones/${idColaboracion}`, { params: { por: "persona" } });
 }
 
 // POST /valoraciones → la persona valora al colectivo de una colaboración terminada.
 // El backend calcula solo quién valora a quién a partir de la colaboración y `evaluador`.
 export async function valorarColectivo(idColaboracion, { puntaje, texto }) {
-  const cuerpo = { colaboracionId: idColaboracion, evaluador: 'persona', puntaje };
+  const cuerpo = { colaboracionId: idColaboracion, evaluador: "persona", puntaje };
   // El comentario es opcional: si quedó vacío no se manda.
   if (texto?.trim()) cuerpo.comentario = texto.trim();
-  await api.post('/valoraciones', cuerpo);
+  await api.post("/valoraciones", cuerpo);
 }
 
 // ───── 4. Notificaciones ─────
@@ -227,13 +230,13 @@ export async function obtenerPanel(id) {
     ]);
   return {
     nombre: perfil.nombreFantasia,
-    pendientes: postulaciones.filter((p) => p.estado === 'pendiente').length,
+    pendientes: postulaciones.filter((p) => p.estado === "pendiente").length,
     proyectosActivos: colaboraciones.filter((c) => c.activa && !c.proyecto.finalizado).length,
-    mensajes: mensajes.length,
+    mensajes: mensajes.filter((m) => m.emisor === "colectivo" && !m.leido).length,
     // Las tres novedades más recientes (ya vienen ordenadas).
     novedades: notificaciones.slice(0, 3),
     // Como mucho dos. El backend ya manda solo los que aceptan postulaciones; el filtro es
     // por las dudas (por ejemplo, si la fecha límite vence justo ahora).
-    sugeridos: acordes.resultados.filter((p) => p.estado === 'abierto').slice(0, 2),
+    sugeridos: acordes.resultados.filter((p) => p.estado === "abierto").slice(0, 2),
   };
 }

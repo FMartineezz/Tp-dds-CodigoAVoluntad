@@ -1,8 +1,3 @@
-/* export const EstadoColaboracion = Object.freeze({
-  ACTIVA: "activa",
-  BAJA: "baja",
-}); */
-
 export const OrigenBaja = Object.freeze({
   PERSONA: "persona",
   COLECTIVO: "colectivo",

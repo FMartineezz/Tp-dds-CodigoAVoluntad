@@ -20,7 +20,7 @@
  *   (No hay sección 3 · ACCIONES: esta pantalla no tiene botones que cambien datos;
  *   los botones y enlaces solo llevan a otras rutas.)
  */
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import {
   Button,
   Eyebrow,
@@ -32,34 +32,34 @@ import {
   StatusBadge,
   Tag,
   Text,
-} from '../../atomos';
-import { Alert, Barras, CardsSkeleton, Grid, Marquee, Ticket, TicketRow } from '../../moleculas';
-import { ProyectoCard } from '../../organismos';
-import { usePedido } from '../../hooks';
-import { obtenerEstadisticas } from '../../api/estadisticas.js';
-import { obtenerProyectos } from '../../api/proyectos.js';
-import { obtenerHabilidades } from '../../api/habilidades.js';
-import { mensajeDeError } from '../../api/errores.js';
-import s from './Inicio.module.css';
-import sh from '../../plantillas/disposicion.module.css';
+} from "../../atomos";
+import { Alert, Barras, CardsSkeleton, Grid, Marquee, Ticket, TicketRow } from "../../moleculas";
+import { ProyectoCard } from "../../organismos";
+import { usePedido } from "../../hooks";
+import { obtenerEstadisticas } from "../../api/estadisticas.js";
+import { obtenerProyectos } from "../../api/proyectos.js";
+import { obtenerHabilidades } from "../../api/habilidades.js";
+import { mensajeDeError } from "../../api/errores.js";
+import s from "./Inicio.module.css";
+import sh from "../../plantillas/disposicion.module.css";
 
 // Los tres pasos de «Cómo funciona». Son texto fijo: nunca cambian mientras se usa la página.
 // Cada paso es un objeto con su número, su título corto y su explicación.
 const PASOS = [
   {
-    numero: '1',
-    titulo: 'Publicá',
-    descripcion: 'Una organización cuenta qué necesita y qué perfiles busca.',
+    numero: "1",
+    titulo: "Publicá",
+    descripcion: "Una organización cuenta qué necesita y qué perfiles busca.",
   },
   {
-    numero: '2',
-    titulo: 'Postulate',
-    descripcion: 'Una persona con oficio levanta la mano para el perfil que le queda cómodo.',
+    numero: "2",
+    titulo: "Postulate",
+    descripcion: "Una persona con oficio levanta la mano para el perfil que le queda cómodo.",
   },
   {
-    numero: '3',
-    titulo: 'Construyan',
-    descripcion: 'Coordinan por mensajes y siguen el avance por hitos.',
+    numero: "3",
+    titulo: "Construyan",
+    descripcion: "Coordinan por mensajes y siguen el avance por hitos.",
   },
 ];
 
@@ -68,13 +68,17 @@ export default function Inicio() {
   // Tres pedidos independientes: si uno falla, los otros bloques se ven igual.
   // El `[]` del final significa «pedilo una sola vez, al entrar».
   // `datos: estadisticas` = «lo que viene en `datos` guardalo con el nombre `estadisticas`».
-  const { cargando: cargandoCifras, datos: estadisticas, error: errorCifras } = usePedido(
-    () => obtenerEstadisticas(),
-    []
-  );
+  const {
+    cargando: cargandoCifras,
+    datos: estadisticas,
+    error: errorCifras,
+  } = usePedido(() => obtenerEstadisticas(), []);
   // Proyectos para «Proyectos abiertos»: la primera página (los 20 más nuevos).
-  const { cargando: cargandoProyectos, datos: paginaDeProyectos, error: errorProyectos } =
-    usePedido(() => obtenerProyectos({ pagina: 1, limite: 20 }), []);
+  const {
+    cargando: cargandoProyectos,
+    datos: paginaDeProyectos,
+    error: errorProyectos,
+  } = usePedido(() => obtenerProyectos({ pagina: 1, limite: 20 }), []);
   // Catálogo de habilidades para la cinta que se desplaza.
   const { datos: habilidades } = usePedido(() => obtenerHabilidades(), []);
 
@@ -85,7 +89,7 @@ export default function Inicio() {
   // Es una selección de «destacados», no un filtro del listado: por eso alcanza con mirar
   // la primera página. PENDIENTE (backend): GET /proyectos?estado=abierto lo haría exacto.
   const proyectosAbiertos = (paginaDeProyectos?.resultados ?? [])
-    .filter((proyecto) => proyecto.estado === 'abierto')
+    .filter((proyecto) => proyecto.estado === "abierto")
     .slice(0, 3);
   // El primero de esos va en el «ticket» grande del hero (undefined si no hay ninguno).
   const proyectoDelHero = proyectosAbiertos[0];
@@ -106,10 +110,14 @@ export default function Inicio() {
           <div className={s.text}>
             <Eyebrow tag="Red solidaria IT">Código abierto · 100% voluntario</Eyebrow>
             <Heading level={1} size="display" id="h-hero">
-              Tu código<br />puede <Overprint>cambiar</Overprint><br />algo.
+              Tu código
+              <br />
+              puede <Overprint>cambiar</Overprint>
+              <br />
+              algo.
             </Heading>
             <Text variant="lead">
-              Asambleas, fundaciones y colectivos necesitan tecnología. Vos tenés el{' '}
+              Asambleas, fundaciones y colectivos necesitan tecnología. Vos tenés el{" "}
               <Highlight>oficio</Highlight>. Acá se encuentran.
             </Text>
             <div className={s.btns}>
@@ -135,9 +143,22 @@ export default function Inicio() {
                   meta="Proyecto destacado"
                   status={<StatusBadge status="abierto" />}
                   title={proyectoDelHero.titulo}
-                  stamp={<Stamp>Sin<br />fines<br />de lucro</Stamp>}
+                  stamp={
+                    <Stamp>
+                      Sin
+                      <br />
+                      fines
+                      <br />
+                      de lucro
+                    </Stamp>
+                  }
                   footer={
-                    <Button as={Link} to={`/proyectos/${proyectoDelHero.id}`} variant="secondary" fullWidth>
+                    <Button
+                      as={Link}
+                      to={`/proyectos/${proyectoDelHero.id}`}
+                      variant="secondary"
+                      fullWidth
+                    >
                       Ver proyecto →
                     </Button>
                   }
@@ -146,7 +167,9 @@ export default function Inicio() {
                   <TicketRow label="Buscamos">
                     {/* Hasta 3 habilidades, con un color distinto cada una */}
                     {proyectoDelHero.habilidades.slice(0, 3).map((habilidad, posicion) => (
-                      <Tag key={habilidad} tone={['sand', 'blue', undefined][posicion]}>{habilidad}</Tag>
+                      <Tag key={habilidad} tone={["sand", "blue", undefined][posicion]}>
+                        {habilidad}
+                      </Tag>
                     ))}
                   </TicketRow>
                   <TicketRow label="Tiempo">{proyectoDelHero.tiempo}</TicketRow>
@@ -170,16 +193,21 @@ export default function Inicio() {
           </Alert>
         ) : (
           <>
-            <Stat value={cargandoCifras ? '…' : estadisticas.proyectos} label="proyectos" />
-            <Stat value={cargandoCifras ? '…' : estadisticas.colectivos} label="colectivos" />
-            <Stat value={cargandoCifras ? '…' : estadisticas.finalizados} label="finalizados" />
+            <Stat value={cargandoCifras ? "…" : estadisticas.proyectos} label="proyectos" />
+            <Stat value={cargandoCifras ? "…" : estadisticas.colectivos} label="colectivos" />
+            <Stat
+              value={cargandoCifras ? "…" : estadisticas.finalizados}
+              label="proyectos finalizados"
+            />
           </>
         )}
       </section>
 
       {/* BLOQUE: Proyectos abiertos — hasta 3 tarjetas y un enlace al listado completo */}
       <section className={`container ${s.sec}`} aria-labelledby="h-abiertos">
-        <Heading level={2} id="h-abiertos">Proyectos abiertos</Heading>
+        <Heading level={2} id="h-abiertos">
+          Proyectos abiertos
+        </Heading>
         {/* Cuatro casos: cargando → 3 tarjetas grises; falló → aviso; hay abiertos → sus
             tarjetas; no hay ninguno → texto. */}
         {cargandoProyectos && <CardsSkeleton n={3} />}
@@ -198,7 +226,9 @@ export default function Inicio() {
         {!cargandoProyectos && !errorProyectos && proyectosAbiertos.length === 0 && (
           <Text>Ahora mismo no hay proyectos buscando gente entre los más nuevos.</Text>
         )}
-        <Button as={Link} to="/proyectos" variant="link" iconRight="→">Ver todos</Button>
+        <Button as={Link} to="/proyectos" variant="link" iconRight="→">
+          Ver todos
+        </Button>
       </section>
 
       {/* BLOQUE: La plataforma en números — dos gráficos de barras con datos de
@@ -208,7 +238,9 @@ export default function Inicio() {
           los que sí hay: colectivos por ubicación y postulaciones por proyecto. */}
       {estadisticas && (
         <section className={`container ${s.sec}`} aria-labelledby="h-num">
-          <Heading level={2} id="h-num">La plataforma en números</Heading>
+          <Heading level={2} id="h-num">
+            La plataforma en números
+          </Heading>
           <div className={s.charts}>
             {/* Cada gráfico solo si tiene al menos una barra */}
             {colectivosPorUbicacion.length > 0 && (
@@ -231,7 +263,9 @@ export default function Inicio() {
 
       {/* BLOQUE: Cómo funciona — lista numerada con los 3 pasos (salen de PASOS, arriba) */}
       <section className={`container ${s.sec}`} aria-labelledby="h-como">
-        <Heading level={2} id="h-como">Cómo funciona</Heading>
+        <Heading level={2} id="h-como">
+          Cómo funciona
+        </Heading>
         <ol className={s.pasos}>
           {/* .map dibuja un <li> por cada paso; `key` ayuda a React a distinguirlos
               (ver docs/GLOSARIO.md → Listas con map y key) */}

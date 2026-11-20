@@ -12,34 +12,34 @@
  *   { id, colectivoId, personaId, proyectoId, con, proyecto, rel, hora, fecha, nuevos,
  *     msgs: [['yo' | 'ellos', texto], …] }
  */
-import { api } from './cliente.js';
+import { api } from "./cliente.js";
 
 // Quién escribe cada mensaje, como lo nombra el backend (campo `emisor`).
-const EMISOR = { org: 'colectivo', col: 'persona' };
+const EMISOR = { org: "colectivo", col: "persona" };
 
 // Relaciones para el filtro de la pantalla: la primera es «sin filtro».
 // «Se postuló / Me postulé» = la persona tiene una postulación a ese proyecto;
 // si no, la conversación la empezó el colectivo por su cuenta.
 export const RELACIONES = {
-  org: ['Todos', 'Se postuló', 'La contacté'],
-  col: ['Todos', 'Me postulé', 'Me contactaron'],
+  org: ["Todos", "Se postuló", "La contacté"],
+  col: ["Todos", "Me postulé", "Me contactaron"],
 };
 
 // «Ahora», «Hace 5 min», «Hace 3 h», «Ayer» o la fecha corta (12/11).
 // La usan también las notificaciones (api/organizacion.js).
 export function textoDeCuando(fecha) {
-  if (!fecha) return '';
+  if (!fecha) return "";
   const minutos = Math.floor((Date.now() - new Date(fecha).getTime()) / 60000);
-  if (minutos < 1) return 'Ahora';
+  if (minutos < 1) return "Ahora";
   if (minutos < 60) return `Hace ${minutos} min`;
   if (minutos < 24 * 60) return `Hace ${Math.floor(minutos / 60)} h`;
-  if (minutos < 48 * 60) return 'Ayer';
-  return new Date(fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+  if (minutos < 48 * 60) return "Ayer";
+  return new Date(fecha).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
 }
 
 // Nombre para mostrar de una persona: nombre y apellido si los tiene; si no, su alias.
 function nombreDePersona(p) {
-  return [p?.nombre, p?.apellido].filter(Boolean).join(' ') || p?.nombreFantasia || 'Colaboradora';
+  return [p?.nombre, p?.apellido].filter(Boolean).join(" ") || p?.nombreFantasia || "Colaboradora";
 }
 
 // Clave de una conversación: colectivo + persona + proyecto.
@@ -69,17 +69,20 @@ function aConversaciones(mensajes, rol, postulo) {
         personaId,
         proyectoId,
         // Con quién se habla: la org ve a la persona; la persona ve al colectivo.
-        con: rol === 'org' ? nombreDePersona(m.personaColaboradora) : m.colectivo?.nombre ?? 'Colectivo',
-        proyecto: m.proyecto?.titulo ?? 'Proyecto',
+        con:
+          rol === "org"
+            ? nombreDePersona(m.personaColaboradora)
+            : (m.colectivo?.nombre ?? "Colectivo"),
+        proyecto: m.proyecto?.titulo ?? "Proyecto",
         // Si la persona bloqueó los mensajes, el colectivo ya no le puede escribir.
-        bloqueada: rol === 'org' && Boolean(m.personaColaboradora?.bloquearMensajeInterno),
+        bloqueada: rol === "org" && Boolean(m.personaColaboradora?.bloquearMensajeInterno),
         nuevos: 0,
         msgs: [],
       });
     }
     const chat = grupos.get(id);
     const esMio = m.emisor === yo;
-    chat.msgs.push([esMio ? 'yo' : 'ellos', m.texto]);
+    chat.msgs.push([esMio ? "yo" : "ellos", m.texto]);
     // Sin leer = lo escribió la otra parte y todavía no lo marcó como leído.
     if (!esMio && !m.leido) chat.nuevos += 1;
     chat.fecha = m.date;
@@ -97,7 +100,7 @@ function aConversaciones(mensajes, rol, postulo) {
 // GET /colectivos/:id/mensajes (org) o GET /colaboradoras/:id/mensajes (col), más las
 // postulaciones para saber la relación de cada chat. Devuelve la lista de conversaciones.
 export async function obtenerConversaciones(rol, idCuenta) {
-  if (rol === 'org') {
+  if (rol === "org") {
     const [{ data: mensajes }, { data: postulaciones }] = await Promise.all([
       api.get(`/colectivos/${idCuenta}/mensajes`),
       api.get(`/colectivos/${idCuenta}/postulaciones`),
@@ -105,7 +108,9 @@ export async function obtenerConversaciones(rol, idCuenta) {
     // El backend manda el TÍTULO del proyecto en la postulación (no su id).
     const postulo = (chat) =>
       postulaciones.some(
-        (p) => String(p.personaColaboradora?.id) === String(chat.personaId) && p.proyecto === chat.proyecto
+        (p) =>
+          String(p.personaColaboradora?.id) === String(chat.personaId) &&
+          p.proyecto === chat.proyecto,
       );
     return aConversaciones(mensajes, rol, postulo);
   }
@@ -120,7 +125,7 @@ export async function obtenerConversaciones(rol, idCuenta) {
 // POST /mensajes → envía `texto` en la conversación `chat` de parte de `rol`.
 // La persona solo puede responder conversaciones que ya empezó el colectivo (ERR 403).
 export async function enviarMensaje(chat, rol, texto) {
-  const { data } = await api.post('/mensajes', {
+  const { data } = await api.post("/mensajes", {
     colectivoId: chat.colectivoId,
     personaColaboradoraId: chat.personaId,
     proyectoId: chat.proyectoId,
@@ -133,7 +138,7 @@ export async function enviarMensaje(chat, rol, texto) {
 // PATCH /mensajes → marca como leídos los mensajes que la OTRA parte escribió en `chat`.
 // `lector` es quién los leyó ('colectivo' o 'persona').
 export async function marcarComoLeida(chat, rol) {
-  const { data } = await api.patch('/mensajes', {
+  const { data } = await api.patch("/mensajes", {
     colectivoId: chat.colectivoId,
     personaColaboradoraId: chat.personaId,
     proyectoId: chat.proyectoId,
@@ -141,4 +146,14 @@ export async function marcarComoLeida(chat, rol) {
     leido: true,
   });
   return data;
+}
+
+// Cuenta los mensajes no leídos que escribió la OTRA parte (para la insignia del menú).
+export async function obtenerCantidadNoLeidos(rol, idCuenta) {
+  if (!rol || !idCuenta) return 0;
+  const ruta =
+    rol === "org" ? `/colectivos/${idCuenta}/mensajes` : `/colaboradoras/${idCuenta}/mensajes`;
+  const otroEmisor = rol === "org" ? "persona" : "colectivo";
+  const { data } = await api.get(ruta);
+  return data.filter((m) => m.emisor === otroEmisor && !m.leido).length;
 }

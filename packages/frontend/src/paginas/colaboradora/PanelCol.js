@@ -15,16 +15,16 @@
  */
 
 // ───── Imports ─────
-import { Link } from 'react-router-dom';
-import { Button, Heading, Text } from '../../atomos';
-import { Alert, RowsSkeleton } from '../../moleculas';
-import { ProyectoCard } from '../../organismos'; // tarjeta que muestra un proyecto
-import { useAuth } from '../../contexto';
-import { usePedido } from '../../hooks';
-import { obtenerPanel } from '../../api/colaboradora.js';
-import s from './Colaboradora.module.css';
+import { Link } from "react-router-dom";
+import { Button, Heading, Text } from "../../atomos";
+import { Alert, RowsSkeleton } from "../../moleculas";
+import { ProyectoCard } from "../../organismos"; // tarjeta que muestra un proyecto
+import { useAuth } from "../../contexto";
+import { usePedido } from "../../hooks";
+import { obtenerPanel } from "../../api/colaboradora.js";
+import s from "./Colaboradora.module.css";
 // sh = layout común (.page, .stats, .split…)
-import sh from '../../plantillas/disposicion.module.css';
+import sh from "../../plantillas/disposicion.module.css";
 
 export default function PanelCol() {
   // ───── 1. DATOS Y ESTADO ─────
@@ -66,15 +66,17 @@ export default function PanelCol() {
          docs/GLOSARIO.md → Plantillas de texto) */}
       <div className={sh.stats}>
         <Link to="/panel/postulaciones" className={`${sh.stat} ${s.link}`}>
-          <b>{panel.pendientes}</b><span>postulaciones pendientes</span>
+          <b>{panel.pendientes}</b>
+          <span>postulaciones pendientes</span>
         </Link>
         <Link to="/panel/proyectos" className={`${sh.stat} ${s.link}`}>
           {/* `=== 1 ? … : …` elige singular o plural */}
           <b>{panel.proyectosActivos}</b>
-          <span>{panel.proyectosActivos === 1 ? 'proyecto activo' : 'proyectos activos'}</span>
+          <span>{panel.proyectosActivos === 1 ? "proyecto activo" : "proyectos activos"}</span>
         </Link>
         <Link to="/panel/mensajes" className={`${sh.stat} ${s.link}`}>
-          <b>{panel.mensajes}</b><span>mensajes</span>
+          <b>{panel.mensajes}</b>
+          <span>mensajes sin leer</span>
         </Link>
       </div>
 
@@ -82,10 +84,10 @@ export default function PanelCol() {
         {/* BLOQUE: novedades — las últimas notificaciones del sistema (aria-labelledby apunta
            al título con id="ult") */}
         <section className={sh.col} aria-labelledby="ult">
-          <Heading level={2} size="h3" id="ult">Última actividad</Heading>
-          {panel.novedades.length === 0 && (
-            <Text variant="small">Todavía no tenés novedades.</Text>
-          )}
+          <Heading level={2} size="h3" id="ult">
+            Última actividad
+          </Heading>
+          {panel.novedades.length === 0 && <Text variant="small">Todavía no tenés novedades.</Text>}
           {panel.novedades.map((novedad) => (
             <Alert key={novedad.id} kind="info">
               {novedad.texto} <small>({novedad.cuando})</small>
@@ -96,13 +98,18 @@ export default function PanelCol() {
         {/* BLOQUE: proyectos para vos — los que buscan alguna de sus habilidades (título con
            id="sug") */}
         <section className={sh.col} aria-labelledby="sug">
-          <Heading level={2} size="h3" id="sug">Proyectos para vos</Heading>
+          <Heading level={2} size="h3" id="sug">
+            Proyectos para vos
+          </Heading>
           {panel.sugeridos.length === 0 && (
             <>
               <Text variant="small">
-                No hay proyectos abiertos que busquen tus habilidades. Sumá habilidades en tu perfil.
+                No hay proyectos abiertos que busquen tus habilidades. Sumá habilidades en tu
+                perfil.
               </Text>
-              <Button as={Link} to="/panel/perfil" variant="secondary">Editar mi perfil</Button>
+              <Button as={Link} to="/panel/perfil" variant="secondary">
+                Editar mi perfil
+              </Button>
             </>
           )}
           {panel.sugeridos.map((proyecto) => (
