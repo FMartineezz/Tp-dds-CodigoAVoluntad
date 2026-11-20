@@ -1,20 +1,29 @@
 /**
  * PANTALLA FormProyecto
  * Ruta: /org/proyectos/nuevo · /org/proyectos/:id/editar   ·   Quién la ve: Organización
- * Qué muestra: Alta/edición de proyecto: perfiles completos, búsqueda abierta, cierre
- * automático e hitos con avance.
- * Para modificarla: un campo del proyecto = otro <Field> en la grilla; un campo por
- * perfil = otro <Field> dentro de PerfilesEditor.
+ * Qué muestra: Alta/edición de proyecto: datos, perfiles buscados, fechas y logros (avance).
+ * De dónde salen los datos (ver api/organizacion.js):
+ *   · Alta: POST /proyectos con sus perfiles (el colectivo va por NOMBRE y las habilidades
+ *     por CÓDIGO, como pide el backend).
+ *   · Edición: el proyecto de GET /proyectos/:id y, al guardar, solo lo que cambió:
+ *     PATCH /proyectos/:id (urlDonaciones, fechaCierre), POST/PATCH/DELETE de perfiles y
+ *     POST/PATCH/DELETE de logros.
+ *   PENDIENTE (backend): PATCH /proyectos/:id no acepta titulo, descripcion, urlSistema ni
+ *   fechaLimiteBusqueda (ni abrir/cerrar la búsqueda con busquedaCerrada): en la edición
+ *   esos campos se ven pero están deshabilitados.
+ * Para modificarla: un campo del proyecto = otro <Field> en la grilla (y su nombre del
+ * backend en armarProyectoNuevo); un campo por perfil = otro <Field> en PerfilesEditor.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   0. DATOS DE EJEMPLO: el perfil vacío y los perfiles que se cargan al editar.
- *   A. PerfilesEditor (componente chico, arriba): la lista de perfiles buscados.
- *      Recibe la lista y devuelve una lista nueva cada vez que algo cambia.
- *   B. FormProyecto (el componente principal, abajo), con estas secciones:
- *      1. DATOS Y ESTADO: datos del proyecto, perfiles, hitos, logros, errores y avisos.
- *      2. CÁLCULOS: suma de pesos de los hitos y avance del proyecto.
- *      3. ACCIONES: cambiar campos, editar hitos, validar y guardar.
- *      4. LO QUE SE DIBUJA: el formulario completo (los hitos solo al editar).
+ *   0. VALORES Y CONVERSIONES: perfil y logro vacíos, y cómo pasar del backend al formulario.
+ *   A. PerfilesEditor (componente chico): la lista de perfiles buscados.
+ *   B. FormProyecto (el que usa la ruta): pide los datos al backend y, cuando llegan,
+ *      dibuja el Formulario. Así el estado del formulario nace con los datos ya cargados.
+ *   C. Formulario, con estas secciones:
+ *      1. DATOS Y ESTADO: datos del proyecto, perfiles, logros, errores y avisos.
+ *      2. CÁLCULOS: avance (suma de los logros).
+ *      3. ACCIONES: cambiar campos, editar logros, validar y guardar.
+ *      4. LO QUE SE DIBUJA: el formulario completo (los logros solo al editar).
  *
  * Una idea clave del archivo: React exige NO modificar listas ni objetos que ya están
  * en el estado. Para cambiar algo se arma una copia con el cambio y se la entrega al
@@ -22,91 +31,116 @@
  */
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Button, Checkbox, Field, Heading, Icon, Progress, Text } from '../../atomos';
-import { Alert, Crumbs, TagPicker } from '../../moleculas';
-import { HABILIDADES, HITOS_EDIT, PROYECTOS } from '../../datos';
+import { Button, Field, Heading, Icon, Progress, Text } from '../../atomos';
+import { Alert, Crumbs, RowsSkeleton, TagPicker } from '../../moleculas';
+import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { mensajeDeError } from '../../api/errores.js';
+import { obtenerHabilidades } from '../../api/habilidades.js';
+import { MODALIDADES } from '../../api/proyectos.js';
+import {
+  actualizarLogro,
+  actualizarPerfil,
+  actualizarProyecto,
+  agregarLogro,
+  agregarPerfil,
+  crearProyecto,
+  eliminarLogro,
+  eliminarPerfil,
+  obtenerMiColectivo,
+} from '../../api/organizacion.js';
 import { NoEncontrado } from '../../paginas/sistema/Errores.js';
-import { persona } from './auxiliares.js';
+import { esNoEncontrado, obtenerMiProyecto } from './auxiliares.js';
 import s from './Organizacion.module.css';
 import sh from '../../plantillas/disposicion.module.css';
 
-// ───── 0. DATOS DE EJEMPLO ─────
+// ───── 0. VALORES Y CONVERSIONES ─────
 
 // Devuelve un perfil buscado en blanco. Es una función (y no un objeto fijo) para que
-// cada perfil nuevo sea un objeto distinto y no se compartan datos entre perfiles.
+// cada perfil nuevo sea un objeto distinto. Sin `id` = todavía no existe en el backend.
 const PERFIL_VACIO = () => ({
-  rol: '',
   descripcion: '',
   requeridas: [],
   opcionales: [],
-  tipo: 'semanales',
+  tipo: 'semanal',
   horas: '',
-  incentivo: false,
-  contratacion: false,
+  modalidad: 'gratuita',
   cupo: '',
 });
 
-// Perfiles de ejemplo que se cargan cuando se EDITA un proyecto existente.
-const PERFILES_EDIT = [
-  {
-    rol: 'Front-end',
-    descripcion: 'Arma la interfaz de turnos para voluntarias, pensada para celular.',
-    requeridas: ['React', 'Accesibilidad'],
-    opcionales: ['Testing'],
-    tipo: 'semanales',
-    horas: '4',
-    incentivo: true,
-    contratacion: false,
-    cupo: '2',
-  },
-  {
-    rol: 'Back-end',
-    descripcion: 'Diseña la API de turnos y la base de datos.',
-    requeridas: ['Node', 'MongoDB'],
-    opcionales: ['DevOps'],
-    tipo: 'semanales',
-    horas: '6',
-    incentivo: false,
-    contratacion: false,
-    cupo: '2',
-  },
-];
+// Un logro en blanco (sin `id` = nuevo).
+const LOGRO_VACIO = () => ({ descripcion: '', porcentaje: '', url: '' });
 
-// Descripción de ejemplo que se carga al editar un proyecto.
-const DESCRIPCION_EDIT =
-  'Necesitamos una herramienta simple para organizar quién retira la vianda y en qué horario.';
+// Fecha del backend ('2026-12-18T23:38:05.748Z') → valor de <input type="date"> ('2026-12-18').
+const aFechaDelInput = (fecha) => (fecha ? String(fecha).slice(0, 10) : '');
+
+// Perfil como lo adapta api/proyectos.js → perfil del formulario (horas y cupo como texto,
+// porque así los manejan los <input>).
+function perfilDelFormulario(p) {
+  return {
+    id: p.id,
+    descripcion: p.descripcion ?? '',
+    requeridas: p.requeridas,
+    opcionales: p.opcionales,
+    tipo: p.tipoDeCompromiso,
+    horas: String(p.horas ?? ''),
+    modalidad: p.modalidadDeColaboracion,
+    cupo: p.cantidadMaxima ? String(p.cantidadMaxima) : '',
+  };
+}
+
+// Logro del backend → logro del formulario.
+function logroDelFormulario(l) {
+  return { id: l._id, descripcion: l.descripcion, porcentaje: String(l.porcentaje), url: l.urlCodigoFuente };
+}
+
+// Perfil del formulario → cuerpo que espera el backend. `codigos` es el Map título → código.
+function perfilParaElBackend(perfil, codigos) {
+  const cuerpo = {
+    descripcion: perfil.descripcion.trim(),
+    habilidadesRequeridas: perfil.requeridas.map((titulo) => codigos.get(titulo)),
+    habilidadesOpcionales: perfil.opcionales.map((titulo) => codigos.get(titulo)),
+    horas: Number(perfil.horas),
+    tipoDeCompromiso: perfil.tipo,
+    modalidadDeColaboracion: perfil.modalidad,
+  };
+  if (perfil.cupo) cuerpo.cantidadMaxima = Number(perfil.cupo);
+  return cuerpo;
+}
+
+// Logro del formulario → cuerpo que espera el backend.
+function logroParaElBackend(logro) {
+  return {
+    descripcion: logro.descripcion.trim(),
+    porcentaje: Number(logro.porcentaje),
+    urlCodigoFuente: logro.url.trim(),
+  };
+}
+
+// ¿Cambió algo? Compara dos objetos convirtiéndolos a texto (alcanza para datos simples).
+const cambio = (a, b) => JSON.stringify(a) !== JSON.stringify(b);
 
 // ───── A. PerfilesEditor ─────
 // Dibuja y edita la lista de perfiles buscados.
-// Props: `value` = lista actual de perfiles, `onChange(nuevaLista)` = avisa a la pantalla
-// principal que la lista cambió, `errores` = texto de error a mostrar (o undefined).
-function PerfilesEditor({ value, onChange, errores }) {
-  // ───── 3. ACCIONES ─────
-
+// Props: `value` = lista actual de perfiles, `onChange(nuevaLista)` = avisa que cambió,
+// `errores` = texto de error (o undefined), `habilidades` = títulos que se pueden elegir.
+function PerfilesEditor({ value, onChange, errores, habilidades }) {
   // Cambia UNO O VARIOS campos de UN perfil sin tocar los demás.
-  // `indice` dice cuál perfil; `cambios` es un objeto con los campos nuevos, por ejemplo
-  // { horas: '5' }. Nunca se modifica la lista original: se arma una copia.
   function cambiarPerfil(indice, cambios) {
     // (.map y `...` → docs/GLOSARIO.md → Métodos de arrays / Copiar con cambios)
-    const listaNueva = value.map((perfil, posicion) => {
-      // Solo el perfil de la posición pedida se copia con los cambios; el resto queda igual.
-      if (posicion === indice) return { ...perfil, ...cambios };
-      return perfil;
-    });
-    onChange(listaNueva);
+    onChange(value.map((perfil, posicion) => (posicion === indice ? { ...perfil, ...cambios } : perfil)));
   }
 
-  // Agrega un perfil en blanco al final de la lista (copia la lista y suma uno).
-  function agregarPerfil() {
+  // Agrega un perfil en blanco al final de la lista.
+  function agregarPerfilVacio() {
     onChange([...value, PERFIL_VACIO()]);
   }
 
-  // Quita el perfil de la posición `indice` (copia la lista sin ese perfil).
+  // Quita el perfil de la posición `indice`.
   function quitarPerfil(indice) {
     onChange(value.filter((perfil, posicion) => posicion !== indice));
   }
 
-  // ───── 4. LO QUE SE DIBUJA ─────
   return (
     <section className={s.perfiles} aria-labelledby="h-perfiles">
       {/* BLOQUE: Encabezado — título y botón para agregar un perfil */}
@@ -116,38 +150,30 @@ function PerfilesEditor({ value, onChange, errores }) {
           type="button"
           variant="secondary"
           iconRight={<Icon name="mas" size={14} />}
-          onClick={agregarPerfil}
+          onClick={agregarPerfilVacio}
         >
           Agregar perfil
         </Button>
       </div>
 
-      {/* Se muestra solo si la lista está vacía (no hay ningún perfil cargado). */}
       {value.length === 0 && (
         <Text variant="small">
           Agregá al menos un perfil: cada uno define habilidades, compromiso y modalidad.
         </Text>
       )}
 
-      {/* Se muestra solo si hay un texto de error (lo calcula la pantalla al guardar). */}
       {errores && <Alert kind="error">{errores}</Alert>}
 
       {/* BLOQUE: Un recuadro por perfil — todos sus campos editables */}
       {value.map((perfil, indice) => (
-        <fieldset key={indice} className={s.perfil}>
+        <fieldset key={perfil.id ?? `nuevo-${indice}`} className={s.perfil}>
           <legend>Perfil {indice + 1}</legend>
           <div className={sh.form}>
-            <Field
-              label="Nombre del perfil"
-              placeholder="Ej: Tester"
-              value={perfil.rol}
-              onChange={(e) => cambiarPerfil(indice, { rol: e.target.value })}
-            />
             <Field
               as="textarea"
               className={sh.r2}
               label="Descripción del perfil"
-              placeholder="Qué tendría que hacer esta persona…"
+              placeholder="Ej: Desarrollo frontend. Qué tendría que hacer esta persona…"
               value={perfil.descripcion}
               onChange={(e) => cambiarPerfil(indice, { descripcion: e.target.value })}
             />
@@ -156,14 +182,14 @@ function PerfilesEditor({ value, onChange, errores }) {
             <TagPicker
               label="Habilidades requeridas"
               value={perfil.requeridas}
-              options={HABILIDADES.filter((h) => !perfil.opcionales.includes(h))}
-              onChange={(habilidades) => cambiarPerfil(indice, { requeridas: habilidades })}
+              options={habilidades.filter((h) => !perfil.opcionales.includes(h))}
+              onChange={(elegidas) => cambiarPerfil(indice, { requeridas: elegidas })}
             />
             <TagPicker
               label="Habilidades opcionales"
               value={perfil.opcionales}
-              options={HABILIDADES.filter((h) => !perfil.requeridas.includes(h))}
-              onChange={(habilidades) => cambiarPerfil(indice, { opcionales: habilidades })}
+              options={habilidades.filter((h) => !perfil.requeridas.includes(h))}
+              onChange={(elegidas) => cambiarPerfil(indice, { opcionales: elegidas })}
             />
             <div className={s.compromiso}>
               <Field
@@ -172,9 +198,9 @@ function PerfilesEditor({ value, onChange, errores }) {
                 value={perfil.tipo}
                 onChange={(e) => cambiarPerfil(indice, { tipo: e.target.value })}
               >
-                <option value="semanales">Horas semanales</option>
-                <option value="mensuales">Horas mensuales</option>
-                <option value="totales">Horas totales</option>
+                <option value="semanal">Horas semanales</option>
+                <option value="mensual">Horas mensuales</option>
+                <option value="total">Horas totales</option>
               </Field>
               <Field
                 label="Cantidad de horas"
@@ -195,26 +221,18 @@ function PerfilesEditor({ value, onChange, errores }) {
               value={perfil.cupo}
               onChange={(e) => cambiarPerfil(indice, { cupo: e.target.value })}
             />
-            <fieldset className={`${s.modalidad} ${sh.full}`}>
-              <legend>Modalidad de colaboración</legend>
-              <Text variant="small">
-                Si no marcás nada, la colaboración es únicamente gratuita.
-              </Text>
-              <div className={sh.row}>
-                <Checkbox
-                  checked={perfil.incentivo}
-                  onChange={(e) => cambiarPerfil(indice, { incentivo: e.target.checked })}
-                >
-                  Ofrece incentivo económico
-                </Checkbox>
-                <Checkbox
-                  checked={perfil.contratacion}
-                  onChange={(e) => cambiarPerfil(indice, { contratacion: e.target.checked })}
-                >
-                  Posible contratación eventual
-                </Checkbox>
-              </div>
-            </fieldset>
+            {/* El backend guarda UNA modalidad por perfil. */}
+            <Field
+              as="select"
+              label="Modalidad de colaboración"
+              value={perfil.modalidad}
+              onChange={(e) => cambiarPerfil(indice, { modalidad: e.target.value })}
+            >
+              {/* Object.entries convierte { clave: texto } en pares [clave, texto]. */}
+              {Object.entries(MODALIDADES).map(([valor, texto]) => (
+                <option key={valor} value={valor}>{texto}</option>
+              ))}
+            </Field>
           </div>
           <div>
             <Button type="button" variant="danger" onClick={() => quitarPerfil(indice)}>
@@ -227,188 +245,292 @@ function PerfilesEditor({ value, onChange, errores }) {
   );
 }
 
-// Dice si a un perfil le falta algo obligatorio: nombre, al menos una habilidad
-// requerida o las horas de compromiso. Se usa al validar el formulario.
+// Dice si a un perfil le falta algo obligatorio: descripción, al menos una habilidad
+// requerida u horas (número mayor que 0).
 function perfilIncompleto(perfil) {
-  const sinNombre = !perfil.rol.trim();
-  const sinHabilidades = !perfil.requeridas.length;
-  const sinHoras = !perfil.horas;
-  return sinNombre || sinHabilidades || sinHoras;
+  return !perfil.descripcion.trim() || !perfil.requeridas.length || !(Number(perfil.horas) > 0);
+}
+
+// Dice si a un logro le falta algo: descripción, porcentaje entre 0 (excluido) y 100,
+// y un enlace http(s) al código fuente.
+function logroIncompleto(logro) {
+  const porcentaje = Number(logro.porcentaje);
+  return (
+    !logro.descripcion.trim() ||
+    !(porcentaje > 0 && porcentaje <= 100) ||
+    !/^https?:\/\/\S+/.test(logro.url.trim())
+  );
 }
 
 // ───── B. FormProyecto ─────
-// Prop `edit`: true cuando la ruta es /editar (precarga datos y muestra los hitos);
-// false o ausente cuando es un proyecto nuevo.
-export default function FormProyecto({ edit }) {
-  // ───── 1. DATOS Y ESTADO ─────
+// Pide lo necesario al backend: el catálogo de habilidades y, según el caso, el colectivo
+// (alta: hace falta su NOMBRE para el POST) o el proyecto a editar (solo si es mío).
+async function cargarFormulario(edit, proyectoId, colectivoId) {
+  const [habilidades, extra] = await Promise.all([
+    obtenerHabilidades(),
+    edit ? obtenerMiProyecto(proyectoId, colectivoId) : obtenerMiColectivo(colectivoId),
+  ]);
+  return edit ? { habilidades, proyecto: extra } : { habilidades, colectivo: extra };
+}
 
-  // Lee la parte variable de la dirección: /org/proyectos/48/editar → id = '48'
-  // (ver docs/GLOSARIO.md → useParams)
+// Prop `edit`: true cuando la ruta es /editar; false o ausente cuando es un proyecto nuevo.
+export default function FormProyecto({ edit = false }) {
+  // Lee la parte variable de la dirección: /org/proyectos/6afe…/editar → id = '6afe…'
   const { id } = useParams();
+  const { id: idColectivo } = useAuth();
 
-  // `navegar('/ruta')` lleva a otra pantalla desde código (ver docs/GLOSARIO.md → useNavigate).
-  const navegar = useNavigate();
+  // Sumarle 1 vuelve a pedir el proyecto (después de guardar una edición).
+  const [version, setVersion] = useState(0);
+  const { cargando, datos, error } = usePedido(
+    () => cargarFormulario(edit, id, idColectivo),
+    [edit, id, idColectivo, version]
+  );
 
-  // El proyecto que se está editando (solo si es de esta organización), o null si es nuevo.
-  // Si no existe queda `undefined` y más abajo se muestra «no encontrado».
-  const proyectoEditado = edit
-    ? PROYECTOS.find((proyecto) => String(proyecto.id) === id && proyecto.colectivoId === 1)
-    : null;
-
-  // Datos simples del proyecto: guarda un objeto con nombre, desc, repo, prod, abierta (true/
-  // false), hasta y cierre (fechas como texto). Lo cambia alCambiarCampo al escribir.
-  // `?.` y `??`: «si hay proyecto usá su título, si no, texto vacío» (ver docs/GLOSARIO.md).
-  const [datos, setDatos] = useState({
-    nombre: proyectoEditado?.titulo ?? '',
-    desc: edit ? DESCRIPCION_EDIT : '',
-    repo: '',
-    prod: '',
-    abierta: true,
-    hasta: edit ? '2026-11-30' : '',
-    cierre: edit ? '2026-12-31' : '',
-  });
-
-  // Lista de perfiles buscados (cada uno es un objeto, ver PERFIL_VACIO). Al crear arranca
-  // con un perfil vacío; al editar, con los de ejemplo. Lo cambia PerfilesEditor.
-  const [perfiles, setPerfiles] = useState(edit ? PERFILES_EDIT : [PERFIL_VACIO()]);
-
-  // Lista de hitos { nombre, peso, hecho }. Vacía al crear; al editar, con los de ejemplo.
-  // Lo cambian cambiarHito, agregarHito y quitarHito.
-  const [hitos, setHitos] = useState(edit ? HITOS_EDIT : []);
-
-  // Lista de logros elegidos (textos). Lo cambia el selector de «Logros».
-  const [logros, setLogros] = useState(edit ? ['Primer deploy'] : []);
-
-  // Errores de validación por campo, p. ej. { nombre: '…', hitos: '…' }.
-  // Objeto vacío = sin errores. Lo completa alGuardar.
-  const [errores, setErrores] = useState({});
-
-  // true mientras dura el «guardado» simulado (el botón muestra que está cargando).
-  const [guardando, setGuardando] = useState(false);
-
-  // true cuando hay que mostrar «Cambios guardados». Se enciende al guardar una edición
-  // y se apaga apenas la persona vuelve a tocar cualquier campo.
+  // Aviso «Cambios guardados»: vive acá (y no en Formulario) porque Formulario se vuelve a
+  // crear cuando llegan los datos nuevos, y su estado se perdería.
   const [aviso, setAviso] = useState(false);
 
-  // Si se pidió editar un proyecto que no existe (o es de otra organización), se corta
-  // acá y se muestra la pantalla de error. Va después de los hooks a propósito.
-  if (edit && !proyectoEditado) {
+  if (cargando) {
     return (
-      <NoEncontrado
-        code="ERR-NOT-108"
-        titulo="Ese proyecto no existe"
-        msg="El proyecto solicitado no fue encontrado"
-      />
+      <div className={`container ${sh.page}`}>
+        <RowsSkeleton n={6} />
+      </div>
+    );
+  }
+  if (esNoEncontrado(error)) {
+    const { code, message } = error.response.data;
+    return <NoEncontrado code={code} titulo="Ese proyecto no existe" msg={message} />;
+  }
+  if (error) {
+    return (
+      <div className={`container ${sh.page}`}>
+        <Alert kind="error" title="No pudimos cargar el formulario">{mensajeDeError(error)}</Alert>
+      </div>
     );
   }
 
+  // `key`: si cambia, React descarta el Formulario viejo y crea uno nuevo con los datos
+  // recién llegados (así el estado inicial se vuelve a armar).
+  return (
+    <Formulario
+      key={version}
+      edit={edit}
+      {...datos}
+      aviso={aviso}
+      setAviso={setAviso}
+      alGuardarEdicion={() => {
+        setAviso(true);
+        setVersion((v) => v + 1);
+      }}
+    />
+  );
+}
+
+// ───── C. Formulario ─────
+// Props: `edit`, `habilidades` (catálogo), `proyecto` (al editar) o `colectivo` (al crear),
+// `aviso`/`setAviso` (el «Cambios guardados») y `alGuardarEdicion` (recarga los datos).
+function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, alGuardarEdicion }) {
+  // ───── 1. DATOS Y ESTADO ─────
+
+  const navegar = useNavigate();
+
+  // Títulos de las habilidades (lo que muestra el selector) y el Map título → código
+  // (lo que viaja al backend).
+  const titulosDeHabilidades = habilidades.map((h) => h.titulo);
+  const codigos = new Map(habilidades.map((h) => [h.titulo, h.codigo]));
+
+  // Valores con los que arranca el formulario (al editar, los del backend). Se guardan
+  // para comparar al guardar y mandar SOLO lo que cambió.
+  const [inicial] = useState(() => ({
+    datos: {
+      nombre: proyecto?.titulo ?? '',
+      desc: proyecto?.descripcion ?? '',
+      urlSistema: proyecto?.urlSistema ?? '',
+      urlDonaciones: proyecto?.urlDonaciones ?? '',
+      hasta: aFechaDelInput(proyecto?.fechaLimiteBusqueda),
+      cierre: aFechaDelInput(proyecto?.fechaCierre),
+    },
+    perfiles: proyecto ? proyecto.perfiles.map(perfilDelFormulario) : [PERFIL_VACIO()],
+    logros: proyecto ? proyecto.logros.map(logroDelFormulario) : [],
+  }));
+
+  // Datos simples del proyecto. Lo cambia alCambiarCampo al escribir.
+  const [datos, setDatos] = useState(inicial.datos);
+
+  // Lista de perfiles buscados. Lo cambia PerfilesEditor.
+  const [perfiles, setPerfiles] = useState(inicial.perfiles);
+
+  // Lista de logros { id?, descripcion, porcentaje, url }. Lo cambian cambiarLogro,
+  // agregarLogroVacio y quitarLogro.
+  const [logros, setLogros] = useState(inicial.logros);
+
+  // Errores de validación por campo. Objeto vacío = sin errores. Lo completa alGuardar.
+  const [errores, setErrores] = useState({});
+
+  // Error que devolvió el backend al guardar ('' = ninguno).
+  const [errorGuardado, setErrorGuardado] = useState('');
+
+  // true mientras se espera al backend (el botón muestra que está cargando).
+  const [guardando, setGuardando] = useState(false);
+
+  // Un proyecto finalizado ya no acepta cambios en sus logros (ERR-EST-109).
+  const finalizado = Boolean(proyecto?.finalizado);
+
   // ───── 2. CÁLCULOS ─────
 
-  // Suma de los pesos de TODOS los hitos. Cada hito vale un porcentaje del proyecto; si la
-  // suma pasa de 100 no se puede guardar (error ERR-EST-113), porque el avance superaría el
-  // 100 %. `Number(...) || 0` convierte el texto escrito en número y toma 0 si está vacío.
-  // (.reduce → docs/GLOSARIO.md → Métodos de arrays: va acumulando la suma hito por hito)
-  const sumaDePesos = hitos.reduce(
-    (suma, hito) => suma + (Number(hito.peso) || 0),
-    0
-  );
-
-  // Avance del proyecto: suma de los pesos de SOLO los hitos completados.
-  // Se calcula así (y no con un número a mano) para que el avance siempre refleje el
-  // trabajo realmente terminado: tildar un hito lo hace subir, destildarlo lo baja.
-  const hitosCompletados = hitos.filter((hito) => hito.hecho);
-  const avance = hitosCompletados.reduce(
-    (suma, hito) => suma + (Number(hito.peso) || 0),
-    0
-  );
+  // Avance del proyecto: suma de los porcentajes de los logros. No puede pasar de 100
+  // (ERR-EST-113). `Number(...) || 0` toma 0 si el campo está vacío.
+  // (.reduce → docs/GLOSARIO.md → Métodos de arrays)
+  const avance = logros.reduce((suma, logro) => suma + (Number(logro.porcentaje) || 0), 0);
 
   // ───── 3. ACCIONES ─────
 
   // Devuelve la función que se ejecuta cuando cambia UN campo simple del proyecto.
-  // `campo` es la propiedad de `datos` que se actualiza ('nombre', 'desc', 'abierta'…).
   function alCambiarCampo(campo) {
     return function (e) {
-      setAviso(false); // al editar se esconde el «Cambios guardados» anterior
-      // Los checkbox traen el valor en `checked`; los demás campos, en `value`.
-      let valorNuevo = e.target.value;
-      if (e.target.type === 'checkbox') valorNuevo = e.target.checked;
-      // Se copia `datos` y se pisa solo ese campo (corchetes = nombre de campo variable).
-      setDatos({ ...datos, [campo]: valorNuevo });
+      setAviso(false);
+      setDatos({ ...datos, [campo]: e.target.value });
     };
   }
 
-  // Se ejecuta cuando PerfilesEditor avisa que la lista de perfiles cambió.
   function alCambiarPerfiles(perfilesNuevos) {
     setAviso(false);
     setPerfiles(perfilesNuevos);
   }
 
-  // Cambia UN campo de UN hito sin tocar los demás.
-  // `indice` dice cuál hito; `campo` cuál propiedad ('nombre' | 'peso' | 'hecho');
-  // `valor` el nuevo valor.
-  function cambiarHito(indice, campo, valor) {
+  // Cambia UN campo de UN logro sin tocar los demás.
+  function cambiarLogro(indice, campo, valor) {
     setAviso(false);
-    setHitos((hitosActuales) =>
-      hitosActuales.map((hito, posicion) => {
-        // Solo el hito en la posición pedida se copia con el cambio; los otros quedan igual.
-        if (posicion === indice) return { ...hito, [campo]: valor };
-        return hito;
-      })
+    setLogros((actuales) =>
+      actuales.map((logro, posicion) => (posicion === indice ? { ...logro, [campo]: valor } : logro))
     );
   }
-
-  // Agrega un hito en blanco al final (copia la lista y suma uno con peso 0).
-  function agregarHito() {
-    setHitos((hitosActuales) => [...hitosActuales, { nombre: '', peso: 0, hecho: false }]);
+  function agregarLogroVacio() {
+    setLogros((actuales) => [...actuales, LOGRO_VACIO()]);
+  }
+  function quitarLogro(indice) {
+    setLogros((actuales) => actuales.filter((logro, posicion) => posicion !== indice));
   }
 
-  // Quita el hito de la posición `indice` (copia la lista sin ese hito).
-  function quitarHito(indice) {
-    setHitos((hitosActuales) => hitosActuales.filter((hito, posicion) => posicion !== indice));
+  // Revisa el formulario y devuelve los errores encontrados (objeto vacío = todo bien).
+  function validar() {
+    const erroresNuevos = {};
+    if (!datos.nombre.trim()) erroresNuevos.nombre = 'Ingresá el nombre del proyecto. (ERR-VAL-101)';
+    if (!datos.desc.trim()) erroresNuevos.desc = 'Ingresá una descripción. (ERR-VAL-102)';
+    if (!/^https?:\/\/\S+/.test(datos.urlSistema.trim())) {
+      erroresNuevos.urlSistema = 'Ingresá el enlace al sistema, empezando con https://. (ERR-VAL-115)';
+    }
+    if (datos.urlDonaciones.trim() && !/^https?:\/\/\S+/.test(datos.urlDonaciones.trim())) {
+      erroresNuevos.urlDonaciones = 'El enlace debe empezar con https://. (ERR-VAL-116)';
+    }
+    if (!perfiles.length || perfiles.some(perfilIncompleto)) {
+      erroresNuevos.perfiles =
+        'Cada perfil necesita descripción, al menos una habilidad requerida y las horas de compromiso.';
+    }
+    if (logros.some(logroIncompleto)) {
+      erroresNuevos.logros =
+        'Cada logro necesita descripción, un porcentaje entre 1 y 100 y el enlace al código fuente.';
+    } else if (avance > 100) {
+      erroresNuevos.logros = 'Los logros suman más de 100 %. (ERR-EST-113)';
+    }
+    return erroresNuevos;
+  }
+
+  // ALTA: arma el cuerpo de POST /proyectos con los nombres del backend.
+  function armarProyectoNuevo() {
+    const cuerpo = {
+      titulo: datos.nombre.trim(),
+      descripcion: datos.desc.trim(),
+      colectivo: colectivo.nombre, // el backend pide el NOMBRE del colectivo
+      urlSistema: datos.urlSistema.trim(),
+      perfiles: perfiles.map((perfil) => perfilParaElBackend(perfil, codigos)),
+    };
+    // Los opcionales solo se mandan si se completaron.
+    if (datos.urlDonaciones.trim()) cuerpo.urlDonaciones = datos.urlDonaciones.trim();
+    if (datos.hasta) cuerpo.fechaLimiteBusqueda = datos.hasta;
+    if (datos.cierre) cuerpo.fechaCierre = datos.cierre;
+    return cuerpo;
+  }
+
+  // EDICIÓN: manda al backend, uno por uno, solo los cambios. Si un pedido falla, los
+  // anteriores ya quedaron guardados y se corta ahí (el error lo muestra alGuardar).
+  async function guardarCambios() {
+    const proyectoId = proyecto.id;
+
+    // 1) Datos del proyecto que el backend deja cambiar.
+    const cambiosProyecto = {};
+    if (datos.urlDonaciones !== inicial.datos.urlDonaciones) {
+      cambiosProyecto.urlDonaciones = datos.urlDonaciones.trim() || null; // null = quitar
+    }
+    if (datos.cierre !== inicial.datos.cierre) {
+      cambiosProyecto.fechaCierre = datos.cierre || null;
+    }
+    if (Object.keys(cambiosProyecto).length) await actualizarProyecto(proyectoId, cambiosProyecto);
+
+    // 2) Perfiles: los que ya no están se borran; los nuevos (sin id) se crean; los que
+    //    cambiaron se actualizan.
+    const idsQueQuedan = perfiles.map((p) => p.id).filter(Boolean);
+    for (const viejo of inicial.perfiles) {
+      if (!idsQueQuedan.includes(viejo.id)) await eliminarPerfil(proyectoId, viejo.id);
+    }
+    for (const perfil of perfiles) {
+      if (!perfil.id) {
+        await agregarPerfil(proyectoId, perfilParaElBackend(perfil, codigos));
+      } else {
+        const viejo = inicial.perfiles.find((p) => p.id === perfil.id);
+        if (cambio(viejo, perfil)) {
+          await actualizarPerfil(proyectoId, perfil.id, perfilParaElBackend(perfil, codigos));
+        }
+      }
+    }
+
+    // 3) Logros: primero se borran (libera porcentaje), después se actualizan y al final
+    //    se crean los nuevos, para no pasar del 100 % a mitad de camino.
+    const logrosQueQuedan = logros.map((l) => l.id).filter(Boolean);
+    for (const viejo of inicial.logros) {
+      if (!logrosQueQuedan.includes(viejo.id)) await eliminarLogro(proyectoId, viejo.id);
+    }
+    for (const logro of logros.filter((l) => l.id)) {
+      const viejo = inicial.logros.find((l) => l.id === logro.id);
+      if (cambio(viejo, logro)) await actualizarLogro(proyectoId, logro.id, logroParaElBackend(logro));
+    }
+    for (const logro of logros.filter((l) => !l.id)) {
+      await agregarLogro(proyectoId, logroParaElBackend(logro));
+    }
   }
 
   // Se ejecuta al enviar el formulario (botón «Guardar»): valida y, si todo está bien,
-  // simula el guardado.
-  function alGuardar(e) {
+  // guarda en el backend.
+  async function alGuardar(e) {
     e.preventDefault(); // evita que el navegador recargue la página al enviar
 
-    // Se juntan los errores en un objeto: un campo con error = una entrada nueva.
-    const erroresNuevos = {};
-    if (!datos.nombre.trim()) {
-      erroresNuevos.nombre = 'Ingresá el nombre del proyecto. (ERR-VAL-101)';
-    }
-    if (!datos.desc.trim()) {
-      erroresNuevos.desc = 'Ingresá una descripción. (ERR-VAL-102)';
-    }
-    // El repositorio es opcional, pero si se escribió tiene que empezar con http(s)://
-    if (datos.repo && !/^https?:\/\//.test(datos.repo)) {
-      erroresNuevos.repo = 'El enlace debe empezar con https://. (ERR-VAL-103)';
-    }
-    // Tiene que haber al menos un perfil y ninguno puede estar incompleto.
-    if (!perfiles.length || perfiles.some(perfilIncompleto)) {
-      erroresNuevos.perfiles =
-        'Cada perfil necesita nombre, al menos una habilidad requerida y las horas de compromiso.';
-    }
-    // Regla de negocio: los pesos de los hitos no pueden sumar más de 100 %.
-    if (sumaDePesos > 100) {
-      erroresNuevos.hitos = 'Los pesos de los hitos suman más de 100 %. (ERR-EST-113)';
-    }
+    const erroresNuevos = validar();
     setErrores(erroresNuevos);
     setAviso(false);
-
-    // Si hay algún error no se guarda: se muestran los avisos y se corta acá.
+    setErrorGuardado('');
     if (Object.keys(erroresNuevos).length) return;
 
-    // Guardado simulado: 700 ms de espera (ver docs/GLOSARIO.md → setTimeout).
-    // Al terminar, si se estaba editando se muestra «Cambios guardados»; si era un
-    // proyecto nuevo, se vuelve a la lista de proyectos.
     setGuardando(true);
-    setTimeout(() => {
+    try {
+      if (edit) {
+        await guardarCambios();
+        alGuardarEdicion(); // aviso «Cambios guardados» y recarga del proyecto
+      } else {
+        await crearProyecto(armarProyectoNuevo());
+        navegar('/org/proyectos');
+      }
+    } catch (error) {
+      setErrorGuardado(
+        edit
+          ? `${mensajeDeError(error)} Los cambios anteriores a este error ya quedaron guardados.`
+          : mensajeDeError(error)
+      );
       setGuardando(false);
-      if (edit) setAviso(true);
-      else navegar('/org/proyectos');
-    }, 700);
+    }
   }
+
+  // Texto de ayuda para los campos que el backend todavía no deja editar.
+  const noEditable = edit ? 'Por ahora no se puede modificar después de publicar.' : undefined;
 
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
@@ -422,10 +544,13 @@ export default function FormProyecto({ edit }) {
       />
       <Heading level={1}>{edit ? 'Editar proyecto' : 'Nuevo proyecto'}</Heading>
 
-      {/* Aparece solo después de guardar una edición; se apaga al cerrarlo o al tocar
-          un campo. */}
-      {aviso && (
-        <Alert kind="success" onClose={() => setAviso(false)}>Cambios guardados.</Alert>
+      {/* Avisos: guardado con éxito, error del backend, o proyecto finalizado. */}
+      {aviso && <Alert kind="success" onClose={() => setAviso(false)}>Cambios guardados.</Alert>}
+      {errorGuardado && (
+        <Alert kind="error" onClose={() => setErrorGuardado('')}>{errorGuardado}</Alert>
+      )}
+      {finalizado && (
+        <Alert kind="warning">Este proyecto está finalizado: ya no se pueden cambiar sus logros.</Alert>
       )}
 
       {/* BLOQUE: Datos del proyecto — nombre, descripción y enlaces */}
@@ -436,6 +561,8 @@ export default function FormProyecto({ edit }) {
           value={datos.nombre}
           onChange={alCambiarCampo('nombre')}
           error={errores.nombre}
+          disabled={edit}
+          hint={noEditable}
         />
         <Field
           as="textarea"
@@ -445,21 +572,25 @@ export default function FormProyecto({ edit }) {
           value={datos.desc}
           onChange={alCambiarCampo('desc')}
           error={errores.desc}
+          disabled={edit}
+          hint={noEditable}
         />
         <Field
-          label="Enlace al repositorio"
-          optional
-          placeholder="https://github.com/…"
-          value={datos.repo}
-          onChange={alCambiarCampo('repo')}
-          error={errores.repo}
-        />
-        <Field
-          label="Enlace a producción"
-          optional
+          label="Enlace al sistema"
           placeholder="https://…"
-          value={datos.prod}
-          onChange={alCambiarCampo('prod')}
+          value={datos.urlSistema}
+          onChange={alCambiarCampo('urlSistema')}
+          error={errores.urlSistema}
+          disabled={edit}
+          hint={noEditable ?? 'Dónde se va a ver el sistema funcionando.'}
+        />
+        <Field
+          label="Enlace para donaciones"
+          optional
+          placeholder="https://cafecito.app/…"
+          value={datos.urlDonaciones}
+          onChange={alCambiarCampo('urlDonaciones')}
+          error={errores.urlDonaciones}
         />
       </div>
 
@@ -468,128 +599,126 @@ export default function FormProyecto({ edit }) {
         value={perfiles}
         onChange={alCambiarPerfiles}
         errores={errores.perfiles}
+        habilidades={titulosDeHabilidades}
       />
 
-      {/* BLOQUE: Búsqueda de colaboraciones — si está abierta y fechas de cierre */}
+      {/* BLOQUE: Fechas — límite para postularse y cierre automático */}
       <section className={s.perfiles} aria-labelledby="h-busq">
         <Heading level={2} size="h3" id="h-busq">Búsqueda de colaboraciones</Heading>
         <div className={sh.form}>
-          <div className={sh.mid}>
-            <Checkbox checked={datos.abierta} onChange={alCambiarCampo('abierta')}>
-              La búsqueda está abierta
-            </Checkbox>
-          </div>
-          {/* El campo de fecha se deshabilita cuando la búsqueda NO está abierta. */}
           <Field
-            label="Abierta hasta"
+            label="Recibe postulaciones hasta"
             optional
             type="date"
             value={datos.hasta}
             onChange={alCambiarCampo('hasta')}
-            disabled={!datos.abierta}
+            disabled={edit}
+            hint={noEditable}
           />
           <Field
             label="Cierre automático del proyecto"
             optional
             type="date"
-            hint="Ese día el proyecto se cierra y se rechazan las postulaciones pendientes."
+            hint="Ese día el proyecto se finaliza solo."
             value={datos.cierre}
             onChange={alCambiarCampo('cierre')}
           />
         </div>
       </section>
 
-      {/* BLOQUE: Avance por hitos — solo al EDITAR (un proyecto nuevo aún no tiene hitos) */}
+      {/* BLOQUE: Avance por logros — solo al EDITAR (un proyecto nuevo aún no tiene logros) */}
       {edit && (
-        <section className={s.hitos} aria-labelledby="h-hitos">
-          <Heading level={2} id="h-hitos">Avance por hitos</Heading>
-          <Text variant="small">El avance del proyecto se calcula con los hitos completados.</Text>
+        <section className={s.hitos} aria-labelledby="h-logros">
+          <Heading level={2} id="h-logros">Avance por logros</Heading>
+          <Text variant="small">
+            Cada logro cumplido suma un porcentaje al avance del proyecto (hasta 100 %).
+          </Text>
 
-          {/* Aparece solo si al guardar los pesos sumaban más de 100 %. */}
-          {errores.hitos && <Alert kind="error">{errores.hitos}</Alert>}
+          {errores.logros && <Alert kind="error">{errores.logros}</Alert>}
 
-          {/* BLOQUE: Tabla de hitos — nombre, peso, si está completado y botón para quitar */}
-          <table className={sh.table}>
-            <thead>
-              <tr>
-                <th>Hito</th>
-                <th>Peso (%)</th>
-                <th>Completado</th>
-                <th><span className="sr-only">Acción</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {hitos.map((hito, indice) => (
-                <tr key={indice}>
-                  <td data-l="Hito">
-                    <Field
-                      label={`Nombre del hito ${indice + 1}`}
-                      className={s.sinLabel}
-                      value={hito.nombre}
-                      onChange={(e) => cambiarHito(indice, 'nombre', e.target.value)}
-                    />
-                  </td>
-                  <td data-l="Peso (%)" className={s.peso}>
-                    <Field
-                      label={`Peso del hito ${indice + 1}`}
-                      className={s.sinLabel}
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={hito.peso}
-                      onChange={(e) => cambiarHito(indice, 'peso', e.target.value)}
-                    />
-                  </td>
-                  <td data-l="Completado">
-                    <Checkbox
-                      checked={hito.hecho}
-                      onChange={(e) => cambiarHito(indice, 'hecho', e.target.checked)}
-                    >
-                      {/* El texto del checkbox es «Sí» si el hito está hecho, «No» si no. */}
-                      {hito.hecho ? 'Sí' : 'No'}
-                    </Checkbox>
-                  </td>
-                  <td className={sh.act}>
-                    <Button type="button" variant="danger" onClick={() => quitarHito(indice)}>
-                      Quitar
-                    </Button>
-                  </td>
+          {/* BLOQUE: Tabla de logros — descripción, porcentaje, enlace y botón para quitar */}
+          {logros.length > 0 && (
+            <table className={sh.table}>
+              <thead>
+                <tr>
+                  <th>Logro</th>
+                  <th>Porcentaje</th>
+                  <th>Código fuente</th>
+                  <th><span className="sr-only">Acción</span></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <div>
-            <Button
-              type="button"
-              variant="secondary"
-              iconRight={<Icon name="mas" size={14} />}
-              onClick={agregarHito}
-            >
-              Agregar hito
-            </Button>
-          </div>
+              </thead>
+              <tbody>
+                {logros.map((logro, indice) => (
+                  <tr key={logro.id ?? `nuevo-${indice}`}>
+                    <td data-l="Logro">
+                      <Field
+                        label={`Descripción del logro ${indice + 1}`}
+                        className={s.sinLabel}
+                        value={logro.descripcion}
+                        disabled={finalizado}
+                        onChange={(e) => cambiarLogro(indice, 'descripcion', e.target.value)}
+                      />
+                    </td>
+                    <td data-l="Porcentaje" className={s.peso}>
+                      <Field
+                        label={`Porcentaje del logro ${indice + 1}`}
+                        className={s.sinLabel}
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={logro.porcentaje}
+                        disabled={finalizado}
+                        onChange={(e) => cambiarLogro(indice, 'porcentaje', e.target.value)}
+                      />
+                    </td>
+                    <td data-l="Código fuente">
+                      <Field
+                        label={`Enlace al código del logro ${indice + 1}`}
+                        className={s.sinLabel}
+                        placeholder="https://github.com/…"
+                        value={logro.url}
+                        disabled={finalizado}
+                        onChange={(e) => cambiarLogro(indice, 'url', e.target.value)}
+                      />
+                    </td>
+                    <td className={sh.act}>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        disabled={finalizado}
+                        onClick={() => quitarLogro(indice)}
+                      >
+                        Quitar
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {!finalizado && (
+            <div>
+              <Button
+                type="button"
+                variant="secondary"
+                iconRight={<Icon name="mas" size={14} />}
+                onClick={agregarLogroVacio}
+              >
+                Agregar logro
+              </Button>
+            </div>
+          )}
 
-          {/* BLOQUE: Resumen — suma de pesos, avance calculado y barra de progreso */}
+          {/* BLOQUE: Resumen — avance calculado y barra de progreso */}
           <div className={s.sum}>
             <div className={`${sh.row} ${sh.sb}`}>
-              {/* La suma se pinta en rojo (s.mal) solo si pasa de 100; si no, sin clase extra. */}
-              <span className={sumaDePesos > 100 ? s.mal : undefined}>
-                Suma de pesos: <b>{sumaDePesos} %</b>
+              {/* El número se pinta en rojo (s.mal) si pasa de 100. */}
+              <span className={avance > 100 ? s.mal : undefined}>
+                Avance: <b>{avance} %</b>
               </span>
-              <span>Avance calculado: <b>{avance} %</b></span>
             </div>
-            {/* La barra nunca pasa de 100, aunque los pesos se pasen. */}
             <Progress value={Math.min(100, avance)} />
           </div>
-
-          {/* BLOQUE: Logros — selector de logros del proyecto */}
-          <TagPicker
-            label="Logros"
-            value={logros}
-            options={['Primer deploy', 'MVP', 'Primer usuario real']}
-            onChange={setLogros}
-            addLabel="Agregar logro"
-          />
         </section>
       )}
 

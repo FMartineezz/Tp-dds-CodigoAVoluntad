@@ -1,3 +1,4 @@
+import { respuestaPaginada } from "../utils/paginacion.js";
 export class PerfilController {
   //Los perfiles tienen sentido unicamente en el contexto del proyecto,
   //Por ende siempre se tomara a proyecto como la entidad principal, y
@@ -62,10 +63,11 @@ export class PerfilController {
     const proyectoId = req.params.idProyecto;
     const perfilId = req.params.idPerfil;
 
-    const personas = await this.busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(
+    const pagina = await this.busquedaService.buscarColaboradorasParaPerfil(
       proyectoId,
       perfilId,
+      req.paginacion,
     );
-    res.status(200).json(personas);
+    res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };
 }

@@ -1,80 +1,146 @@
+import mongoose from "mongoose";
+import { habilidadService } from "../../src/container.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
-import { crearContexto, expectAppError } from "../helpers/crearContexto.js";
+import { HabilidadModel } from "../../src/schemas/habilidadSchema.js";
+import { usarBaseDeDatos } from "../utils/db.js";
+import { esperarAppError } from "../utils/esperarAppError.js";
+
+usarBaseDeDatos();
 
 describe("HabilidadService", () => {
-  let ctx;
-
-  beforeEach(() => {
-    ctx = crearContexto();
-  });
-
   describe("crearHabilidad", () => {
-    test("guarda la habilidad con su código normalizado y devuelve su id", async () => {
-      const habilidad = await ctx.habilidadService.crearHabilidad("Desarrollo Web React", "Front");
+    test("persiste la habilidad con su código en snake_case y devuelve el id", async () => {
+      // Ejecución
+      const habilidad = await habilidadService.crearHabilidad("Desarrollo Web React", "Front");
 
+      // Validación
       expect(habilidad).toMatchObject({
         titulo: "Desarrollo Web React",
         codigo: "desarrollo_web_react",
+        descripcion: "Front",
       });
-      expect(typeof habilidad.id).toBe("string");
-      expect(await ctx.habilidadService.obtenerHabilidadPorId(habilidad.id)).toMatchObject({
+      expect(habilidad.id).toBeDefined();
+      const guardada = await HabilidadModel.findById(habilidad.id).lean();
+      expect(guardada).toMatchObject({
+        titulo: "Desarrollo Web React",
         codigo: "desarrollo_web_react",
       });
     });
 
-    test("no permite dos habilidades con el mismo título", async () => {
-      await ctx.habilidadService.crearHabilidad("Python", "Backend");
+    test("rechaza con 409 una habilidad con el mismo título", async () => {
+      // Preparación
+      await habilidadService.crearHabilidad("Node", "Backend");
 
-      await expectAppError(
-        ctx.habilidadService.crearHabilidad("Python", "Otra descripción"),
+      // Ejecución y Validación
+      await esperarAppError(
+        habilidadService.crearHabilidad("Node", "Otra descripción"),
         ErrorCatalog.HABILIDAD_YA_EXISTE,
         409,
+      );
+      expect(await HabilidadModel.countDocuments()).toBe(1);
+    });
+
+    // BUG: crearHabilidad solo busca duplicados por título, pero el índice único es por código.
+    // Dos títulos distintos con el mismo código ("Node JS" y "node-js" -> "node_js") pasan el chequeo
+    // y el save explota con un E11000 de Mongo (un error que no es AppError, termina en 500).
+    test.failing(
+      "rechaza con 409 una habilidad cuyo título genera un código ya existente",
+      async () => {
+        // Preparación
+        await habilidadService.crearHabilidad("Node JS", "Backend");
+
+        // Ejecución y Validación
+        await esperarAppError(
+          habilidadService.crearHabilidad("node-js", "Backend"),
+          ErrorCatalog.HABILIDAD_YA_EXISTE,
+          409,
+        );
+      },
+    );
+  });
+
+  describe("obtenerHabilidades", () => {
+    test("devuelve una lista vacía si no hay habilidades", async () => {
+      // Ejecución y Validación
+      expect(await habilidadService.obtenerHabilidades()).toEqual([]);
+    });
+
+    test("devuelve todas las habilidades guardadas", async () => {
+      // Preparación
+      await habilidadService.crearHabilidad("Node", "Backend");
+      await habilidadService.crearHabilidad("React", "Frontend");
+
+      // Ejecución
+      const habilidades = await habilidadService.obtenerHabilidades();
+
+      // Validación
+      expect(habilidades.map((h) => h.codigo).sort()).toEqual(["node", "react"]);
+    });
+  });
+
+  describe("obtenerHabilidadPorId", () => {
+    test("devuelve la habilidad existente", async () => {
+      // Preparación
+      const creada = await habilidadService.crearHabilidad("Node", "Backend");
+
+      // Ejecución
+      const habilidad = await habilidadService.obtenerHabilidadPorId(creada.id);
+
+      // Validación
+      expect(habilidad).toMatchObject({ titulo: "Node", codigo: "node", descripcion: "Backend" });
+    });
+
+    test("falla con 404 si no existe", async () => {
+      // Preparación
+      const idInexistente = new mongoose.Types.ObjectId().toString();
+
+      // Ejecución y Validación
+      await esperarAppError(
+        habilidadService.obtenerHabilidadPorId(idInexistente),
+        ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_ID,
+        404,
       );
     });
   });
 
-  test("obtenerHabilidades lista todas", async () => {
-    await ctx.habilidadService.crearHabilidad("Python", "d");
-    await ctx.habilidadService.crearHabilidad("Go", "d");
-
-    expect(await ctx.habilidadService.obtenerHabilidades()).toHaveLength(2);
-  });
-
-  test("obtenerHabilidadPorId falla con 404 si no existe", async () => {
-    await expectAppError(
-      ctx.habilidadService.obtenerHabilidadPorId("inexistente"),
-      ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_ID,
-      404,
-    );
-  });
-
   describe("obtenerHabilidadPorCodigo", () => {
-    test("encuentra la habilidad por su código", async () => {
-      await ctx.habilidadService.crearHabilidad("Python", "d");
+    test("devuelve la habilidad del código", async () => {
+      // Preparación
+      await habilidadService.crearHabilidad("Base de Datos", "SQL y NoSQL");
 
-      expect(await ctx.habilidadService.obtenerHabilidadPorCodigo("python")).toMatchObject({
-        titulo: "Python",
-      });
+      // Ejecución
+      const habilidad = await habilidadService.obtenerHabilidadPorCodigo("base_de_datos");
+
+      // Validación
+      expect(habilidad.titulo).toBe("Base de Datos");
     });
 
     test("falla con 400 si el código no existe", async () => {
-      await expectAppError(
-        ctx.habilidadService.obtenerHabilidadPorCodigo("cobol"),
-        ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO,
+      // Ejecución y Validación
+      await esperarAppError(
+        habilidadService.obtenerHabilidadPorCodigo("no_existe"),
+        ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO,
         400,
       );
     });
   });
 
-  test("obtenerHabilidadesPorCodigos devuelve solo las que existen", async () => {
-    await ctx.habilidadService.crearHabilidad("Python", "d");
-    await ctx.habilidadService.crearHabilidad("Go", "d");
+  describe("obtenerHabilidadesPorCodigos", () => {
+    test("devuelve solo las habilidades existentes entre los códigos pedidos", async () => {
+      // Preparación
+      await habilidadService.crearHabilidad("Node", "Backend");
+      await habilidadService.crearHabilidad("React", "Frontend");
+      await habilidadService.crearHabilidad("Python", "Datos");
 
-    const habilidades = await ctx.habilidadService.obtenerHabilidadesPorCodigos([
-      "python",
-      "cobol",
-    ]);
+      // Ejecución
+      const habilidades = await habilidadService.obtenerHabilidadesPorCodigos([
+        "node",
+        "python",
+        "no_existe",
+      ]);
 
-    expect(habilidades.map((h) => h.codigo)).toEqual(["python"]);
+      // Validación
+      expect(habilidades.map((h) => h.codigo).sort()).toEqual(["node", "python"]);
+    });
   });
 });

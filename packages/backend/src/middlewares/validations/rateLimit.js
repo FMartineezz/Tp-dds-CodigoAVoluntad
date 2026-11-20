@@ -12,6 +12,7 @@ export const limiter = rateLimit({
   skip: (req, res) => {
     const apiKey = req.header("x-api-key") || req.query.apiKey;
 
-    return apiKey == process.env.MI_API_KEY;
+    // Sin MI_API_KEY configurada nadie se saltea el límite (antes undefined == undefined daba true)
+    return Boolean(process.env.MI_API_KEY) && apiKey === process.env.MI_API_KEY;
   },
 });

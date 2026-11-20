@@ -8,6 +8,16 @@ const ErrorCatalog = {
     message: (stringDelArgumento) => `El argumento ${stringDelArgumento} es inválido`,
   },
 
+  PAGINACION_PAGINA_INVALIDA: {
+    code: "ERR-VAL-002",
+    message: "El parámetro pagina debe ser un número entero mayor o igual a 1",
+  },
+
+  PAGINACION_LIMITE_INVALIDO: {
+    code: "ERR-VAL-003",
+    message: (maximo) => `El parámetro limite debe ser un número entero entre 1 y ${maximo}`,
+  },
+
   RECURSO_NO_ENCONTRADO: {
     code: "ERR-CSR-001",
     message: "El recurso solicitado no fue encontrado",
@@ -118,8 +128,6 @@ const ErrorCatalog = {
 
   HABILIDADES_INEXISTENTES_GENERICO: {
     code: "ERR-VAL-207",
-    message: (codigos) => `Las habilidades de codigo: ${codigos.join(", ")} no existen`,
-
     message: (codigo) =>
       Array.isArray(codigo)
         ? `Las habilidades de codigo: ${codigo.join(", ")} no existen`
@@ -186,6 +194,11 @@ const ErrorCatalog = {
   COLABORADORA_GIT_REQUERIDO: {
     code: "ERR-VAL-402",
     message: "El Git de la colaboradora es requerido",
+  },
+
+  COLABORADORA_PRONOMBRES_FORMATO: {
+    code: "ERR-VAL-408",
+    message: "Los pronombres deben ser un texto o una lista de textos, sin valores vacíos",
   },
 
   COLABORADORA_HABILIDADES_REQUERIDAS: {
@@ -261,6 +274,11 @@ const ErrorCatalog = {
   COLABORACION_YA_DADA_DE_BAJA: {
     code: "ERR-EST-508",
     message: (id) => `La colaboración ${id} ya fue dada de baja`,
+  },
+
+  COLABORACION_ORIGEN_BAJA_INVALIDO: {
+    code: "ERR-VAL-509",
+    message: "El parámetro por debe ser 'persona' o 'colectivo'",
   },
 
   // =========================
@@ -386,7 +404,7 @@ const ErrorCatalog = {
     message: "El proyecto es requerido",
   },
 
-  MENSAJE_EMISOR_RQUERIDO: {
+  MENSAJE_EMISOR_REQUERIDO: {
     code: "ERR-VAL-806",
     message: "El emisor es requerido",
   },
@@ -397,12 +415,12 @@ const ErrorCatalog = {
   },
 
   MENSAJE_TEXTO_FORMATO: {
-    code: "ERR-VAL-806",
+    code: "ERR-VAL-811",
     message: "El texto del mensaje debe ser un texto",
   },
 
   MENSAJE_SIN_CONVERSACION_PREVIA: {
-    code: "ERR-VAL-807",
+    code: "ERR-VAL-812",
     message: "Espere a ser contactado por el colectivo",
   },
 

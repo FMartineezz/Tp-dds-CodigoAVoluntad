@@ -45,6 +45,15 @@ export class PerfilService {
   async prepararCambios(cambios) {
     const cambiosPreparados = { ...cambios };
 
+    const cambiaRequeridas = cambios.habilidadesRequeridas !== undefined;
+    const cambiaOpcionales = cambios.habilidadesOpcionales !== undefined;
+
+    // Si no se tocan las habilidades, se devuelven los cambios tal cual: poner listas vacías
+    // acá borraría las habilidades que el perfil ya tiene.
+    if (!cambiaRequeridas && !cambiaOpcionales) {
+      return cambiosPreparados;
+    }
+
     const reqs = cambios.habilidadesRequeridas || [];
     const opts = cambios.habilidadesOpcionales || [];
 
@@ -58,8 +67,12 @@ export class PerfilService {
       throw new AppError(ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO, 400, codigosNoEncontrados);
     }
 
-    cambiosPreparados.habilidadesRequeridas = reqs.map((codigo) => mapaHabilidades.get(codigo));
-    cambiosPreparados.habilidadesOpcionales = opts.map((codigo) => mapaHabilidades.get(codigo));
+    if (cambiaRequeridas) {
+      cambiosPreparados.habilidadesRequeridas = reqs.map((codigo) => mapaHabilidades.get(codigo));
+    }
+    if (cambiaOpcionales) {
+      cambiosPreparados.habilidadesOpcionales = opts.map((codigo) => mapaHabilidades.get(codigo));
+    }
 
     return cambiosPreparados;
   }

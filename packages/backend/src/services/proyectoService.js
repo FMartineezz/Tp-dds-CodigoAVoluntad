@@ -91,8 +91,14 @@ export class ProyectoService {
     return proyectoGuardado;
   }
 
-  async obtenerProyectos() {
-    return await this.proyectoRepository.obtenerTodos();
+  async obtenerProyectos(paginacion) {
+    return await this.proyectoRepository.obtenerPagina(paginacion);
+  }
+
+  // Lanza 404 si el colectivo no existe (o fue dado de baja)
+  async obtenerProyectosDeColectivo(colectivoId, paginacion) {
+    await this.colectivoService.obtenerColectivoPorId(colectivoId);
+    return await this.proyectoRepository.obtenerPaginaDeColectivo(colectivoId, paginacion);
   }
 
   async obtenerProyectoPorId(id) {
@@ -108,6 +114,10 @@ export class ProyectoService {
   async obtenerProyectosConAlgunaHabilidad(idsHabilidad) {
     const proyectos = await this.proyectoRepository.obtenerPorAlgunaHabilidad(idsHabilidad);
     return proyectos;
+  }
+
+  async obtenerPaginaDeProyectosConAlgunaHabilidad(idsHabilidad, paginacion) {
+    return await this.proyectoRepository.obtenerPaginaPorAlgunaHabilidad(idsHabilidad, paginacion);
   }
 
   async finalizarProyecto(id) {

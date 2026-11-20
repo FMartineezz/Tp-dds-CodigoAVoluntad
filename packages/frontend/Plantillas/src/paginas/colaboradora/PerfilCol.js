@@ -1,75 +1,118 @@
 /**
  * PANTALLA PerfilCol
  * Ruta: /panel/perfil   ·   Quién la ve: Colaboradora
- * Qué muestra: Edición del perfil: datos, habilidades, contactos, redes, mensajes y LinkedIn.
- * Para modificarla: un campo nuevo = un <Field> en la grilla .form.
+ * Qué muestra: Edición del perfil: datos, habilidades, LinkedIn, mensajes y contactos.
+ * De dónde salen los datos: del backend (api/colaboradora.js):
+ *   · obtenerPerfil → GET /colaboradoras/:id; las habilidades posibles salen del catálogo
+ *     real (GET /habilidades, api/habilidades.js).
+ *   · guardarPerfil → PATCH /colaboradoras/:id.
+ * Para modificarla: un campo nuevo = un <Field> en la grilla .form (y su traducción en
+ *   aPerfilDeLaVista / guardarPerfil de api/colaboradora.js).
  *
- * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: los datos del perfil (con valores de ejemplo), habilidades,
- *      contactos y el estado del guardado (guardando, mensaje de éxito, errores).
- *   3. ACCIONES: cambiar un campo, importar desde LinkedIn y guardar con validación.
- *   4. LO QUE SE DIBUJA: el formulario completo.
+ * ANATOMÍA DE ESTE ARCHIVO: son DOS componentes.
+ *   PerfilCol (el de la ruta): pide el perfil y el catálogo, y dibuja cargando / error. Cuando
+ *     llegan los datos, dibuja el formulario pasándole esos datos como punto de partida.
+ *   FormularioDePerfil:
+ *     1. DATOS Y ESTADO: los campos (arrancan con lo que vino del backend), contactos y el
+ *        estado del guardado (guardando, mensaje de éxito, errores).
+ *     3. ACCIONES: cambiar un campo y guardar (validación + pedido al backend).
+ *     4. LO QUE SE DIBUJA: el formulario completo.
+ *   ¿Por qué dos? useState toma el valor inicial UNA sola vez, al aparecer el componente.
+ *   Si el formulario aparece recién cuando ya llegaron los datos, arranca con ellos.
  *
  * Aviso de éxito: cualquier cambio en un campo borra el mensaje de éxito anterior
  * (así no queda un «Cambios guardados» que ya no es cierto).
+ *
+ * PENDIENTE (backend): no hay foto de perfil (se dibuja un avatar con la inicial), ni
+ *   importación desde LinkedIn, ni campo «Sitio web», ni correo de la cuenta (vendrá con el
+ *   login). Esos campos de la maqueta se sacaron.
+ * PENDIENTE (backend): los contactos nunca vuelven en el GET (son privados), así que el editor
+ *   arranca vacío. Si la persona agrega alguno, al guardar REEMPLAZAN a los que tenía. Haría
+ *   falta un GET /colaboradoras/:id/contactos solo para la dueña del perfil.
  */
 
 // ───── Imports ─────
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Avatar, Button, Checkbox, Field, Heading } from '../../atomos';
-import { Alert, ContactosEditor, TagPicker } from '../../moleculas';
-import { HABILIDADES } from '../../datos'; // lista de habilidades que se pueden elegir
+import { Avatar, Button, Checkbox, Field, Heading, Text } from '../../atomos';
+import { Alert, ContactosEditor, RowsSkeleton, TagPicker } from '../../moleculas';
+import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { guardarPerfil, obtenerPerfil } from '../../api/colaboradora.js';
+import { obtenerHabilidades } from '../../api/habilidades.js';
+import { mensajeDeError } from '../../api/errores.js';
 import s from './Colaboradora.module.css';
 import sh from '../../plantillas/disposicion.module.css'; // sh = layout común (.page, .form…)
 
+// Pide a la vez el perfil y el catálogo de habilidades (para las opciones del TagPicker).
+async function pedirPerfilYCatalogo(id) {
+  const [perfil, catalogo] = await Promise.all([obtenerPerfil(id), obtenerHabilidades()]);
+  return { perfil, opciones: catalogo.map((habilidad) => habilidad.titulo) };
+}
+
 export default function PerfilCol() {
+  // `id` es el _id de la colaboradora con la sesión (ver contexto/Auth.js).
+  const { id } = useAuth();
+  const { cargando, datos, error } = usePedido(() => pedirPerfilYCatalogo(id), [id]);
+
+  // Caso 1: todavía no llegó la respuesta → filas grises de relleno.
+  if (cargando) {
+    return (
+      <div className={`container ${sh.page}`}>
+        <RowsSkeleton n={5} />
+      </div>
+    );
+  }
+
+  // Caso 2: algo falló → aviso con el mensaje del backend (o uno genérico).
+  if (error) {
+    return (
+      <div className={`container ${sh.page}`}>
+        <Alert kind="error" title="No pudimos cargar tu perfil">
+          {mensajeDeError(error)}
+        </Alert>
+      </div>
+    );
+  }
+
+  // Caso 3: llegó todo → el formulario, que arranca con esos datos.
+  return <FormularioDePerfil id={id} inicial={datos.perfil} opciones={datos.opciones} />;
+}
+
+function FormularioDePerfil({ id, inicial, opciones }) {
   // ───── 1. DATOS Y ESTADO ─────
 
-  // Todos los campos simples del perfil juntos en un objeto: texto para los campos,
-  // true/false para la casilla `mensajes`. Empiezan con datos de ejemplo de «Lucía».
-  // Los cambia alCambiarCampo y alImportarDeLinkedIn.
-  // (ver docs/GLOSARIO.md → useState)
-  const [datos, setDatos] = useState({
-    fantasia: 'Lucía',
-    nombre: 'Lucía',
-    apellido: 'Fernández',
-    pronombres: 'ella',
-    github: 'lucia-dev',
-    linkedin: '',
-    web: '',
-    bio: 'Desarrolladora front. Me gusta que las herramientas sean simples para quien las usa.',
-    mail: 'colaboradora@demo.org',
-    mensajes: true,
-  });
+  // Todos los campos del perfil juntos en un objeto: texto para los campos, true/false para
+  // la casilla `mensajes` y una lista de títulos en `habilidades`. Empiezan con lo que mandó
+  // el backend. (ver docs/GLOSARIO.md → useState)
+  const [datos, setDatos] = useState(inicial);
 
-  // Habilidades elegidas, como array de textos. Empieza con dos de ejemplo; las cambia
-  // el TagPicker y alImportarDeLinkedIn (que suma «Accesibilidad»).
-  const [habilidadesElegidas, setHabilidadesElegidas] = useState(['React', 'Node']);
+  // Contactos internos: array de pares [tipo, dato]. Empieza vacío porque el backend no los
+  // devuelve (ver PENDIENTE en la cabecera); lo cambia el ContactosEditor.
+  const [contactos, setContactos] = useState([]);
 
-  // Contactos internos: array de pares [tipo, dato]. Empieza con dos de ejemplo;
-  // lo cambia el ContactosEditor.
-  const [contactos, setContactos] = useState([
-    ['Correo', 'colaboradora@demo.org'],
-    ['WhatsApp', '+54 11 5555-0199'],
-  ]);
+  // true si la persona tocó los contactos: solo en ese caso se mandan al guardar
+  // (si no, se reemplazarían los que ya tenía por una lista vacía).
+  const [contactosTocados, setContactosTocados] = useState(false);
 
-  // true durante la espera simulada del guardado (el botón muestra «cargando»).
-  // Lo cambia alGuardar.
+  // true mientras se espera la respuesta del backend (el botón muestra «cargando»).
   const [guardando, setGuardando] = useState(false);
 
-  // Mensaje verde de éxito o de aviso ('' = no se muestra). Lo ponen alGuardar y
-  // alImportarDeLinkedIn; lo borran los cambios en los campos y la «x» del aviso.
+  // Mensaje verde de éxito ('' = no se muestra). Lo pone alGuardar; lo borran los cambios en
+  // los campos y la «x» del aviso.
   const [mensajeOk, setMensajeOk] = useState('');
 
-  // Errores por campo, ej. { fantasia: '…', mail: '…' }. Empieza vacío ({} = sin errores);
+  // Error que devolvió el backend al guardar (null = ninguno). Se muestra en un aviso rojo.
+  const [errorAlGuardar, setErrorAlGuardar] = useState(null);
+
+  // Errores por campo, ej. { fantasia: '…', github: '…' }. Empieza vacío ({} = sin errores);
   // lo cambia alGuardar.
   const [errores, setErrores] = useState({});
 
   // ───── 3. ACCIONES ─────
 
-  // Devuelve el manejador onChange de un campo: `alCambiarCampo('mail')` se ejecuta cuando
-  // la persona escribe en «mail» (o tilda una casilla). Borra el aviso de éxito anterior.
+  // Devuelve el manejador onChange de un campo: `alCambiarCampo('bio')` se ejecuta cuando
+  // la persona escribe en «bio» (o tilda una casilla). Borra el aviso de éxito anterior.
   // Casillas: se guarda `checked` (true/false); campos de texto: se guarda `value`.
   function alCambiarCampo(campo) {
     return function (evento) {
@@ -85,100 +128,101 @@ export default function PerfilCol() {
   // Se ejecuta al cambiar las habilidades en el TagPicker (recibe la lista nueva).
   function alCambiarHabilidades(habilidadesNuevas) {
     setMensajeOk('');
-    setHabilidadesElegidas(habilidadesNuevas);
+    setDatos({ ...datos, habilidades: habilidadesNuevas });
   }
 
   // Se ejecuta al cambiar los contactos en el ContactosEditor (recibe la lista nueva).
   function alCambiarContactos(contactosNuevos) {
     setMensajeOk('');
     setContactos(contactosNuevos);
-  }
-
-  // Se ejecuta al apretar «Importar desde LinkedIn». Es una simulación: completa LinkedIn
-  // y la presentación con datos de ejemplo y suma la habilidad «Accesibilidad».
-  // Nada se guarda hasta apretar «Guardar cambios».
-  function alImportarDeLinkedIn() {
-    // setDatos con una función recibe los datos actuales y devuelve los nuevos
-    setDatos((datosPrevios) => ({
-      ...datosPrevios,
-      linkedin: 'linkedin.com/in/lucia-fernandez',
-      bio: 'Desarrolladora front con 5 años de experiencia en React y accesibilidad.',
-    }));
-    // new Set(...) descarta repetidos: así «Accesibilidad» no se duplica si ya estaba
-    setHabilidadesElegidas((habilidadesPrevias) => {
-      return [...new Set([...habilidadesPrevias, 'Accesibilidad'])];
-    });
-    setMensajeOk(
-      'Importamos tu presentación y tus habilidades desde LinkedIn. Revisalas antes de guardar.',
-    );
+    setContactosTocados(true);
   }
 
   // Se ejecuta al apretar «Guardar cambios». Primero valida; si hay errores corta acá y
-  // no «llama a la API».
-  function alGuardar(evento) {
+  // no llama al backend. `async` permite esperar la respuesta con `await`.
+  async function alGuardar(evento) {
     // evita que el navegador recargue la página (comportamiento normal de un <form>)
     evento.preventDefault();
 
-    // Validación: un mensaje por cada campo obligatorio mal completado.
+    // Validación: un mensaje por cada campo que el backend exige.
     const erroresNuevos = {};
     if (!datos.fantasia.trim()) {
       erroresNuevos.fantasia = 'Ingresá un nombre de fantasía.';
     }
-    if (!/^\S+@\S+\.\S+$/.test(datos.mail)) {
-      // la expresión regular pide «algo@algo.algo», sin espacios
-      erroresNuevos.mail = 'Ingresá un correo válido.';
+    if (!datos.github.trim()) {
+      erroresNuevos.github = 'Ingresá tu cuenta de GitHub o GitLab.';
+    }
+    if (!datos.bio.trim()) {
+      erroresNuevos.bio = 'Contá algo sobre vos.';
+    }
+    if (datos.habilidades.length === 0) {
+      erroresNuevos.habilidades = 'Elegí al menos una habilidad.';
+    }
+    if (datos.linkedin.trim() && !/^https?:\/\//.test(datos.linkedin.trim())) {
+      // la expresión regular pide que empiece con http:// o https://
+      erroresNuevos.linkedin = 'Pegá la dirección completa, empezando con https://';
     }
     setErrores(erroresNuevos);
     setMensajeOk('');
+    setErrorAlGuardar(null);
 
     const hayErrores = Object.keys(erroresNuevos).length > 0;
     if (hayErrores) {
       return;
     }
 
-    // Se simula la espera con setTimeout (ejecuta la función de adentro a los 700 ms);
-    // en producción acá iría la llamada a la API y esto correría cuando responda.
     setGuardando(true);
-    setTimeout(() => {
-      setGuardando(false);
+    try {
+      // Los contactos se mandan solo si se tocaron (ver contactosTocados).
+      const guardado = await guardarPerfil(id, datos, {
+        contactos: contactosTocados ? contactos : undefined,
+      });
+      // Lo que devuelve el backend pasa a ser el nuevo punto de partida del formulario.
+      setDatos(guardado);
+      setContactosTocados(false);
       setMensajeOk('Cambios guardados.');
-    }, 700);
+    } catch (e) {
+      setErrorAlGuardar(e);
+    } finally {
+      // `finally` corre siempre, haya salido bien o mal.
+      setGuardando(false);
+    }
   }
 
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     <form className={`container ${sh.page}`} onSubmit={alGuardar} noValidate>
-      {/* BLOQUE: encabezado — título y botón para importar datos de LinkedIn */}
-      <div className={`${sh.row} ${sh.sb}`}>
-        <Heading level={1}>Mi perfil</Heading>
-        <Button type="button" variant="secondary" onClick={alImportarDeLinkedIn}>
-          Importar desde LinkedIn
-        </Button>
-      </div>
+      {/* BLOQUE: encabezado */}
+      <Heading level={1}>Mi perfil</Heading>
 
-      {/* Aparece solo si hay un mensaje de éxito/aviso (`mensajeOk` no vacío); la «x» lo borra */}
+      {/* Aparece solo si hay un mensaje de éxito (`mensajeOk` no vacío); la «x» lo borra */}
       {mensajeOk && <Alert kind="success" onClose={() => setMensajeOk('')}>{mensajeOk}</Alert>}
+      {/* Aparece solo si el backend rechazó el guardado: muestra su mensaje */}
+      {errorAlGuardar && (
+        <Alert kind="error" onClose={() => setErrorAlGuardar(null)}>
+          {mensajeDeError(errorAlGuardar)}
+        </Alert>
+      )}
 
       {/* BLOQUE: campos — grilla; sh.r2 / sh.mid / sh.full controlan cuánto ocupa cada uno */}
       {/* `optional` = campo no obligatorio; error={errores.x} muestra el mensaje solo si existe */}
       <div className={sh.form}>
-        {/* Foto: el avatar usa el nombre de fantasía (o «L» si está vacío; `||` = «o, si no,
-           usá») */}
+        {/* Avatar con la inicial del nombre de fantasía (o «?» si está vacío; `||` = «o, si no,
+           usá»). No hay foto: el backend todavía no guarda imágenes. */}
         <div className={sh.r2}>
           <span className={s.lab}>Foto</span>
           <div className={sh.foto}>
-            <Avatar nombre={datos.fantasia || 'L'} size={96} />
-            <Button type="button" variant="secondary">Cambiar foto</Button>
+            <Avatar nombre={datos.fantasia || '?'} size={96} />
           </div>
         </div>
         <Field
           as="textarea"
           className={sh.r2}
           label="Sobre vos"
-          optional
           placeholder="Contá en pocas líneas quién sos y qué te gusta hacer…"
           value={datos.bio}
           onChange={alCambiarCampo('bio')}
+          error={errores.bio}
         />
         <Field
           label="Nombre de fantasía"
@@ -186,12 +230,16 @@ export default function PerfilCol() {
           onChange={alCambiarCampo('fantasia')}
           error={errores.fantasia}
         />
-        <TagPicker
-          label="Habilidades"
-          value={habilidadesElegidas}
-          options={HABILIDADES}
-          onChange={alCambiarHabilidades}
-        />
+        <div>
+          <TagPicker
+            label="Habilidades"
+            value={datos.habilidades}
+            options={opciones}
+            onChange={alCambiarHabilidades}
+          />
+          {/* El TagPicker no muestra errores: el mensaje va debajo, solo si existe */}
+          {errores.habilidades && <Text variant="small" role="alert">{errores.habilidades}</Text>}
+        </div>
         <Field
           label="Nombre"
           optional
@@ -207,35 +255,24 @@ export default function PerfilCol() {
         <Field
           label="Pronombres"
           optional
+          placeholder="ella/la"
           value={datos.pronombres}
           onChange={alCambiarCampo('pronombres')}
         />
         <Field
           label="Cuenta de GitHub o GitLab"
-          optional
+          placeholder="https://github.com/usuario"
           value={datos.github}
           onChange={alCambiarCampo('github')}
-        />
-        <Field
-          label="Correo de la cuenta"
-          type="email"
-          value={datos.mail}
-          onChange={alCambiarCampo('mail')}
-          error={errores.mail}
+          error={errores.github}
         />
         <Field
           label="LinkedIn"
           optional
-          placeholder="linkedin.com/in/usuario"
+          placeholder="https://linkedin.com/in/usuario"
           value={datos.linkedin}
           onChange={alCambiarCampo('linkedin')}
-        />
-        <Field
-          label="Sitio web"
-          optional
-          placeholder="https://"
-          value={datos.web}
-          onChange={alCambiarCampo('web')}
+          error={errores.linkedin}
         />
         <div className={sh.mid}>
           <Checkbox checked={datos.mensajes} onChange={alCambiarCampo('mensajes')}>
@@ -244,6 +281,11 @@ export default function PerfilCol() {
         </div>
         <div className={sh.full}>
           <ContactosEditor value={contactos} onChange={alCambiarContactos} />
+          <Text variant="small">
+            Por privacidad no mostramos los contactos que ya guardaste. Si agregás alguno acá,
+            al guardar reemplaza a los anteriores. Teléfonos: 10 dígitos, sin 0 ni 15
+            (ej. 1127891234).
+          </Text>
         </div>
       </div>
 

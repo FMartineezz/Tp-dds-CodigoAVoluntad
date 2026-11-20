@@ -1,4 +1,5 @@
 import { ProyectoModel } from "../schemas/proyectoSchema.js";
+import { paginar } from "./paginar.js";
 
 export class ProyectoRepository {
   constructor() {
@@ -12,6 +13,20 @@ export class ProyectoRepository {
 
   async obtenerTodos() {
     return await this.model.find().lean();
+  }
+
+  // El listado trae el nombre del colectivo, para mostrarlo sin un pedido extra por proyecto
+  async obtenerPagina(paginacion) {
+    return await paginar(this.model, {}, paginacion, {
+      populate: { path: "colectivo", select: "nombre" },
+    });
+  }
+
+  // Proyectos publicados por un colectivo (todos sus estados), del más nuevo al más viejo
+  async obtenerPaginaDeColectivo(colectivoId, paginacion) {
+    return await paginar(this.model, { colectivo: colectivoId }, paginacion, {
+      populate: { path: "colectivo", select: "nombre" },
+    });
   }
 
   async obtenerPorId(id) {
@@ -55,6 +70,7 @@ export class ProyectoRepository {
       "horas",
       "tipoDeCompromiso",
       "modalidadDeColaboracion",
+      "cantidadMaxima",
     ];
 
     for (const campo of camposPermitidos) {
@@ -109,6 +125,22 @@ export class ProyectoRepository {
       })
       .populate("colectivo")
       .lean();
+  }
+
+  async obtenerPaginaPorAlgunaHabilidad(idsHabilidad, paginacion) {
+    return await paginar(
+      this.model,
+      {
+        // Solo proyectos que todavía buscan gente: no finalizados, con la búsqueda abierta
+        // y sin fecha límite vencida
+        finalizado: { $ne: true },
+        busquedaCerrada: { $ne: true },
+        $or: [{ fechaLimiteBusqueda: null }, { fechaLimiteBusqueda: { $gt: new Date() } }],
+        "perfiles.habilidadesRequeridas": { $in: idsHabilidad },
+      },
+      paginacion,
+      { populate: "colectivo" },
+    );
   }
 
   async guardarLogro(proyectoId, logro) {

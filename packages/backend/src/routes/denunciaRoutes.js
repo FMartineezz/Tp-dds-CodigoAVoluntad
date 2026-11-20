@@ -4,9 +4,14 @@ import {
   validarDenuncia,
   validarEstadoDenuncia,
 } from "../middlewares/validations/denunciaValidation.js";
+import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
 
 export default function denunciaRoutes() {
   const router = Router();
+  exigirIdsValidos(router, {
+    id: ErrorCatalog.RECURSO_NO_ENCONTRADO,
+  });
 
   // Ruta operativa para denunciar desde una colaboración existente
   router.post(

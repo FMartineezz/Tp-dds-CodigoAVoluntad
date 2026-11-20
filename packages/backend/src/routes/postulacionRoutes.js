@@ -4,9 +4,18 @@ import {
   validarPostulacion,
   validarResolucionPostulacion,
 } from "../middlewares/validations/postulacionValidation.js";
+import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
 
 export default function postulacionRoutes() {
   const router = Router();
+  exigirIdsValidos(router, {
+    id: ErrorCatalog.COLABORADORA_NO_ENCONTRADA,
+    colectivoId: ErrorCatalog.COLECTIVO_NO_ENCONTRADO,
+    proyectoId: ErrorCatalog.PROYECTO_NO_ENCONTRADO,
+    perfilId: ErrorCatalog.PERFIL_NO_ENCONTRADO,
+    postulacionId: ErrorCatalog.POSTULACION_NO_ENCONTRADA,
+  });
 
   router.get("/colaboradoras/:id/postulaciones", postulacionController.listarDePersona);
 

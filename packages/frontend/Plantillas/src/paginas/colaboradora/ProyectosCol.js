@@ -1,20 +1,30 @@
 /**
  * PANTALLA ProyectosCol
  * Ruta: /panel/proyectos   ·   Quién la ve: Colaboradora
- * Qué muestra: Proyectos en los que participo. Desvincularse (permanente) o valorar al colectivo.
+ * Qué muestra: Proyectos en los que participo, separados en «En curso» y «Finalizados».
+ *   Desvincularse (permanente) de uno en curso o valorar al colectivo de uno finalizado.
+ * De dónde salen los datos: del backend (api/colaboradora.js):
+ *   · obtenerMisColaboraciones → GET /colaboradoras/:id/colaboraciones + valoraciones
+ *     que ya hizo (GET /personaColaboradora/:id/valoraciones?direccion=emitidas).
+ *   · darseDeBaja → DELETE /colaboraciones/:id.
+ *   · valorarColectivo → POST /valoraciones.
  * Para modificarla: un botón más en la tarjeta = un <Button> más dentro de footer={<>…</>}.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: los proyectos en los que participa, y lo necesario para los
- *      dos diálogos (desvincularse / valorar) y el aviso de resultado.
- *   2. CÁLCULOS: el título que lleva el diálogo de baja y el botón final de cada tarjeta.
- *   3. ACCIONES: desvincularse, abrir/cerrar los diálogos y confirmar una valoración.
- *   4. LO QUE SE DIBUJA: título, aviso, tarjetas de proyectos y los dos diálogos.
+ *   1. DATOS Y ESTADO: el pedido de colaboraciones, y lo necesario para los dos diálogos
+ *      (desvincularse / valorar), el «enviando» y los avisos de resultado o de error.
+ *   2. CÁLCULOS: separa en curso / finalizados y arma el botón final de cada tarjeta.
+ *   3. ACCIONES: desvincularse y confirmar una valoración (pedidos al backend).
+ *   4. LO QUE SE DIBUJA: título, avisos, las dos listas de tarjetas y los dos diálogos.
  *
  * Cómo se decide el botón de cada tarjeta (siempre hay «Ver proyecto»; se suma uno más):
- *   - proyecto que todavía no está cerrado: «Desvincularme»;
- *   - proyecto cerrado y todavía sin valorar: «Valorar al colectivo»;
- *   - proyecto cerrado y ya valorado: la etiqueta «Valoración enviada».
+ *   - proyecto en curso (no finalizado): «Desvincularme»;
+ *   - proyecto finalizado y todavía sin valorar: «Valorar al colectivo»;
+ *   - proyecto finalizado y ya valorado: la etiqueta «Valoración enviada».
+ *
+ * PENDIENTE (backend): falta GET /colaboradoras/:id/colaboraciones. Hoy no aparecen acá las
+ *   colaboraciones anónimas de la persona ni las que ya se dieron de baja (que también se
+ *   podrían valorar).
  */
 
 // ───── Imports ─────
@@ -23,84 +33,93 @@ import { Link } from 'react-router-dom';
 import { Button, Heading, Tag, Text } from '../../atomos';
 import { Alert, CardsSkeleton, ConfirmDialog, Grid, TicketRow } from '../../moleculas';
 import { ProyectoCard, ValoracionDialog } from '../../organismos';
-import { useLoading } from '../../hooks'; // simula la espera de datos
-import { proyecto } from './auxiliares.js'; // busca un proyecto por id
+import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { darseDeBaja, obtenerMisColaboraciones, valorarColectivo } from '../../api/colaboradora.js';
+import { mensajeDeError } from '../../api/errores.js';
 import sh from '../../plantillas/disposicion.module.css';
 
 export default function ProyectosCol() {
   // ───── 1. DATOS Y ESTADO ─────
 
-  // Proyectos en los que participa: cada uno guarda el id del proyecto y el rol que
-  // cumple ahí. Empieza con tres de ejemplo; se le saca uno al desvincularse.
-  // (ver docs/GLOSARIO.md → useState)
-  const [participaciones, setParticipaciones] = useState([
-    { id: 48, rol: 'Front-end' },
-    { id: 45, rol: 'Datos' },
-    { id: 44, rol: 'Testing' },
-  ]);
+  // `id` es el _id de la colaboradora con la sesión (ver contexto/Auth.js).
+  const { id } = useAuth();
 
-  // Id del proyecto del que se quiere salir (null = ninguno, diálogo cerrado).
-  // Lo pone «Desvincularme» y lo borra «Cancelar» o confirmar.
-  const [idDeBaja, setIdDeBaja] = useState(null);
+  // Número que se suma después de cada acción: como está en las dependencias del pedido,
+  // cambiarlo vuelve a pedir la lista al backend (así se ve lo que quedó guardado).
+  const [vuelta, setVuelta] = useState(0);
 
-  // Id del proyecto cerrado que se quiere valorar (null = ninguno, diálogo cerrado).
-  // Lo pone «Valorar al colectivo» y lo borra «Cancelar» o confirmar.
-  const [idAValorar, setIdAValorar] = useState(null);
+  // Pide las colaboraciones de la persona. `datos: colaboraciones` = «lo que viene en
+  // `datos` guardalo con el nombre `colaboraciones`».
+  const { cargando, datos: colaboraciones, error } = usePedido(
+    () => obtenerMisColaboraciones(id),
+    [id, vuelta]
+  );
 
-  // Ids de los proyectos que ya se valoraron (para mostrar «Valoración enviada»).
-  // Empieza vacío; se agrega un id al confirmar una valoración.
-  const [idsValorados, setIdsValorados] = useState([]);
+  // Colaboración de la que se quiere salir (null = ninguna, diálogo cerrado).
+  // La pone «Desvincularme» y la borra «Cancelar» o confirmar.
+  const [deBaja, setDeBaja] = useState(null);
 
-  // Texto del aviso verde de resultado ('' = no se muestra). Lo cambian desvincular y
-  // confirmar valoración; lo borra la «x» del aviso.
+  // Colaboración (de un proyecto finalizado) que se quiere valorar (null = diálogo cerrado).
+  const [aValorar, setAValorar] = useState(null);
+
+  // true mientras se espera la respuesta del backend a una acción (botón «cargando»).
+  const [enviando, setEnviando] = useState(false);
+
+  // Texto del aviso verde de resultado ('' = no se muestra). Lo borra la «x» del aviso.
   const [aviso, setAviso] = useState('');
 
-  // true mientras se «cargan» los datos (simulación; en producción vendría de la API).
-  const cargando = useLoading();
+  // Error de la última acción (null = sin error). Se muestra en un aviso rojo.
+  const [errorDeAccion, setErrorDeAccion] = useState(null);
 
   // ───── 2. CÁLCULOS ─────
 
-  // Título del proyecto de baja para el diálogo. `idDeBaja ? … : ''` evita buscar cuando
-  // el diálogo está cerrado (idDeBaja es null).
-  const tituloDelProyectoDeBaja = idDeBaja ? proyecto(idDeBaja).titulo : '';
+  // Mientras carga (o si falló), `colaboraciones` es null: `?? []` usa una lista vacía.
+  const lista = colaboraciones ?? [];
+  // .filter se queda con las que cumplen (ver docs/GLOSARIO.md → Métodos de arrays).
+  // En curso: sigue activa y el proyecto no terminó. El resto (proyecto finalizado o
+  // colaboración dada de baja) va a «Finalizados», donde se puede valorar al colectivo.
+  const sigueEnCurso = (c) => c.activa && !c.proyecto.finalizado;
+  const enCurso = lista.filter(sigueEnCurso);
+  const finalizadas = lista.filter((c) => !sigueEnCurso(c));
 
   // Último botón de la tarjeta (ver reglas en la cabecera del archivo).
-  // Recibe la participación y si su proyecto está cerrado.
-  function botonFinalDeLaTarjeta(participacion, proyectoCerrado) {
-    if (!proyectoCerrado) {
+  function botonFinalDeLaTarjeta(colaboracion) {
+    if (sigueEnCurso(colaboracion)) {
       return (
-        <Button variant="danger" onClick={() => setIdDeBaja(participacion.id)}>
+        <Button variant="danger" onClick={() => setDeBaja(colaboracion)}>
           Desvincularme
         </Button>
       );
     }
-    // .includes pregunta si el id está en la lista de ya valorados
-    if (idsValorados.includes(participacion.id)) {
+    if (colaboracion.valorada) {
       return <Tag tone="sand">Valoración enviada</Tag>;
     }
     return (
-      <Button variant="secondary" onClick={() => setIdAValorar(participacion.id)}>
+      <Button variant="secondary" onClick={() => setAValorar(colaboracion)}>
         Valorar al colectivo
       </Button>
     );
   }
 
-  // Dibuja la tarjeta de un proyecto, con su rol y sus botones.
-  function tarjetaDeParticipacion(participacion) {
-    const datosProyecto = proyecto(participacion.id);
-    const proyectoCerrado = datosProyecto.estado === 'cerrado';
-
+  // Dibuja la tarjeta de una colaboración: el proyecto, su rol y sus botones.
+  function tarjetaDeColaboracion(colaboracion) {
     return (
       <ProyectoCard
-        key={participacion.id}
-        p={datosProyecto}
-        extra={<TicketRow label="Tu rol">{participacion.rol}</TicketRow>}
+        key={colaboracion.id}
+        p={colaboracion.proyecto}
+        extra={(
+          <TicketRow label="Tu rol">
+            {colaboracion.rol}
+            {colaboracion.anonima && <> <Tag tone="outline">Anónima</Tag></>}
+          </TicketRow>
+        )}
         footer={(
           <>
-            <Button as={Link} to={`/proyectos/${participacion.id}`} variant="secondary">
+            <Button as={Link} to={`/proyectos/${colaboracion.proyecto.id}`} variant="secondary">
               Ver proyecto
             </Button>
-            {botonFinalDeLaTarjeta(participacion, proyectoCerrado)}
+            {botonFinalDeLaTarjeta(colaboracion)}
           </>
         )}
       />
@@ -109,27 +128,41 @@ export default function ProyectosCol() {
 
   // ───── 3. ACCIONES ─────
 
-  // Se ejecuta al confirmar «Sí, desvincularme»: saca el proyecto de la lista, cierra el
-  // diálogo y avisa. Es permanente. (En producción: llamada a la API.)
-  function desvincular() {
-    const datosProyecto = proyecto(idDeBaja);
-    // .filter devuelve una copia sin ese proyecto (React exige copiar, no modificar)
-    setParticipaciones((listaPrevia) => {
-      return listaPrevia.filter((participacion) => participacion.id !== idDeBaja);
-    });
-    setIdDeBaja(null);
-    // `«${…}»` es una plantilla de texto: mete el título dentro de la frase
-    setAviso(`Te desvinculaste de «${datosProyecto.titulo}».`);
+  // Se ejecuta al confirmar «Sí, desvincularme»: pide la baja al backend. Si sale bien,
+  // avisa y vuelve a pedir la lista; si sale mal, muestra el mensaje del backend.
+  // `async` permite usar `await` adentro: la función espera la respuesta del backend antes de
+  // seguir. Si el backend responde con error, salta al bloque `catch`.
+  async function desvincular() {
+    setEnviando(true);
+    setErrorDeAccion(null);
+    try {
+      await darseDeBaja(deBaja.id);
+      // `«${…}»` es una plantilla de texto: mete el título dentro de la frase
+      setAviso(`Te desvinculaste de «${deBaja.proyecto.titulo}».`);
+      setVuelta((v) => v + 1);
+    } catch (e) {
+      setErrorDeAccion(e);
+    } finally {
+      // `finally` corre siempre, haya salido bien o mal.
+      setEnviando(false);
+      setDeBaja(null);
+    }
   }
 
-  // Se ejecuta al confirmar la valoración en el diálogo: anota el proyecto como valorado,
-  // cierra el diálogo y agradece. (En producción: se enviaría la valoración a la API.)
-  function confirmarValoracion() {
-    // [...lista, nuevo] copia la lista y agrega un id al final (ver docs/GLOSARIO.md →
-    // Copiar con cambios)
-    setIdsValorados((listaPrevia) => [...listaPrevia, idAValorar]);
-    setIdAValorar(null);
-    setAviso('Valoración publicada. Gracias por contar tu experiencia.');
+  // Se ejecuta al publicar la valoración (el diálogo manda { puntaje, texto }).
+  async function confirmarValoracion(valoracion) {
+    setEnviando(true);
+    setErrorDeAccion(null);
+    try {
+      await valorarColectivo(aValorar.id, valoracion);
+      setAviso('Valoración publicada. Gracias por contar tu experiencia.');
+      setVuelta((v) => v + 1);
+    } catch (e) {
+      setErrorDeAccion(e);
+    } finally {
+      setEnviando(false);
+      setAValorar(null);
+    }
   }
 
   // ───── 4. LO QUE SE DIBUJA ─────
@@ -137,45 +170,63 @@ export default function ProyectosCol() {
     <div className={`container ${sh.page}`}>
       <Heading level={1}>Mis proyectos</Heading>
 
-      {/* Aparece solo si hay un texto de aviso (después de desvincularse o valorar) */}
+      {/* Avisos: verde si la última acción salió bien, rojo si el backend la rechazó */}
       {aviso && <Alert kind="success" onClose={() => setAviso('')}>{aviso}</Alert>}
+      {errorDeAccion && (
+        <Alert kind="error" onClose={() => setErrorDeAccion(null)}>
+          {mensajeDeError(errorDeAccion)}
+        </Alert>
+      )}
 
-      {/* BLOQUE: tarjetas — según el caso: cargando / sin proyectos / lista de tarjetas */}
+      {/* BLOQUE: tarjetas — según el caso: cargando / error / sin proyectos / listas */}
       {cargando && <CardsSkeleton n={3} />}
-      {/* Terminó de cargar y no queda ningún proyecto activo */}
-      {!cargando && participaciones.length === 0 && (
+      {error && (
+        <Alert kind="error" title="No pudimos cargar tus proyectos">
+          {mensajeDeError(error)}
+        </Alert>
+      )}
+      {/* Terminó de cargar y no participa en ningún proyecto */}
+      {!cargando && !error && lista.length === 0 && (
         <div className={sh.empty}>
           <Heading level={2} size="h3">No tenés proyectos activos</Heading>
           <Button as={Link} to="/proyectos">Buscar proyectos</Button>
         </div>
       )}
-      {/* Terminó de cargar y hay proyectos: una tarjeta por cada uno */}
-      {!cargando && participaciones.length > 0 && (
-        <Grid>
-          {participaciones.map(tarjetaDeParticipacion)}
-        </Grid>
+      {/* En curso: una tarjeta por cada uno (solo si hay alguno) */}
+      {!cargando && enCurso.length > 0 && (
+        <section aria-labelledby="curso">
+          <Heading level={2} size="h3" id="curso">En curso</Heading>
+          <Grid>{enCurso.map(tarjetaDeColaboracion)}</Grid>
+        </section>
+      )}
+      {/* Finalizados: acá se puede valorar al colectivo */}
+      {!cargando && finalizadas.length > 0 && (
+        <section aria-labelledby="fin">
+          <Heading level={2} size="h3" id="fin">Finalizados</Heading>
+          <Grid>{finalizadas.map(tarjetaDeColaboracion)}</Grid>
+        </section>
       )}
 
-      {/* BLOQUE: diálogo de baja — abierto solo si hay un proyecto elegido para dejar */}
-      {/* `!!idDeBaja` convierte el id (o null) en true/false */}
+      {/* BLOQUE: diálogo de baja — abierto solo si hay una colaboración elegida para dejar */}
+      {/* `!!deBaja` convierte el objeto (o null) en true/false; `deBaja?.` evita leer de null */}
       <ConfirmDialog
-        open={!!idDeBaja}
-        title={`¿Desvincularte de «${tituloDelProyectoDeBaja}»?`}
+        open={!!deBaja}
+        title={`¿Desvincularte de «${deBaja?.proyecto.titulo ?? ''}»?`}
         danger
+        loading={enviando}
         confirmLabel="Sí, desvincularme"
-        onCancel={() => setIdDeBaja(null)}
+        onCancel={() => setDeBaja(null)}
         onConfirm={desvincular}
       >
         <Text>Es permanente: tendrías que postularte de nuevo.</Text>
       </ConfirmDialog>
 
-      {/* BLOQUE: diálogo de valoración — abierto solo si hay un proyecto cerrado elegido para
-         valorar */}
-      {/* `a`: a quién se valora (el colectivo del proyecto); '' si no hay proyecto elegido */}
+      {/* BLOQUE: diálogo de valoración — `a` es a quién se valora (el colectivo del proyecto) */}
       <ValoracionDialog
-        open={!!idAValorar}
-        a={idAValorar ? proyecto(idAValorar).colectivo : ''}
-        onCancel={() => setIdAValorar(null)}
+        open={!!aValorar}
+        a={aValorar?.proyecto.colectivo || 'el colectivo'}
+        loading={enviando}
+        onCancel={() => setAValorar(null)}
         onConfirm={confirmarValoracion}
       />
     </div>

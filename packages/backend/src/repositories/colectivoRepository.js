@@ -1,4 +1,5 @@
 import { ColectivoModel } from "../schemas/colectivoSchema.js";
+import { paginar } from "./paginar.js";
 
 export class ColectivoRepository {
   constructor() {
@@ -14,12 +15,21 @@ export class ColectivoRepository {
     return await this.model.find({ activo: true }).lean();
   }
 
+  async obtenerPagina(paginacion) {
+    return await paginar(this.model, { activo: true }, paginacion);
+  }
+
   async obtenerTodosConEliminados() {
     return await this.model.find().lean();
   }
 
   async obtenerPorId(id) {
     return await this.model.findById(id).lean();
+  }
+
+  // Igual que obtenerPorId pero trae `activo` (que por defecto no se lee: select false)
+  async obtenerPorIdConEstado(id) {
+    return await this.model.findById(id).select("+activo").lean();
   }
 
   async obtenerPorNombre(nombre) {
@@ -121,6 +131,8 @@ export class ColectivoRepository {
   //Estadisticas
   async contarPorUbicacion() {
     return await this.model.aggregate([
+      // Los colectivos dados de baja no cuentan (igual que en GET /colectivos)
+      { $match: { activo: true } },
       { $group: { _id: "$ubicacion", cantidad: { $sum: 1 } } },
       { $sort: { cantidad: -1 } },
       { $project: { _id: 0, ubicacion: "$_id", cantidad: 1 } },
