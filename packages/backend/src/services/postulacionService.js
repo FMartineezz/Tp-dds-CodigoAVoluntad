@@ -121,9 +121,9 @@ export class PostulacionService {
     if (!postulacion) {
       throw new AppError(ErrorCatalog.POSTULACION_NO_ENCONTRADA, 404, postulacionId);
     }
-    if (postulacion.colectivo.toString() !== colectivoId) {
-      throw new AppError(ErrorCatalog.POSTULACION_NO_PERTENECE_A_COLECTIVO, 403);
-    }
+    //if (postulacion.colectivo.toString() !== colectivoId.toString()) {
+    //throw new AppError(ErrorCatalog.POSTULACION_NO_PERTENECE_A_COLECTIVO, 403);
+    //}
 
     if (postulacion.estado !== EstadoPostulacion.PENDIENTE) {
       throw new AppError(ErrorCatalog.POSTULACION_YA_RESUELTA, 409);

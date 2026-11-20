@@ -12,42 +12,59 @@
  * backend; si falla, Axios lanza el error y la pantalla lo muestra con mensajeDeError(error).
  * SI EL BACKEND CAMBIA UN NOMBRE: se arregla solo acá, en el adaptador correspondiente.
  */
-import { api } from './cliente.js';
-import { aProyectoDeLaVista } from './proyectos.js';
-import { nombresDeHabilidades, obtenerHabilidades, titulos } from './habilidades.js';
-import { textoDeCuando } from './mensajes.js';
+import { api } from "./cliente.js";
+import { aProyectoDeLaVista } from "./proyectos.js";
+import { nombresDeHabilidades, obtenerHabilidades, titulos } from "./habilidades.js";
+import { textoDeCuando } from "./mensajes.js";
 
 // ───── VALORES QUE ACEPTA EL BACKEND ─────
 // El backend guarda tipos y ubicaciones en minúsculas y sin tildes; la pantalla los muestra
 // lindos. Cada opción es { valor: lo que viaja al backend, texto: lo que se ve }.
 
 export const TIPOS_DE_COLECTIVO = [
-  { valor: 'fundacion', texto: 'Fundación' },
-  { valor: 'ong', texto: 'ONG' },
-  { valor: 'asociacion barrial', texto: 'Asociación barrial' },
-  { valor: 'asamblea', texto: 'Asamblea' },
+  { valor: "fundacion", texto: "Fundación" },
+  { valor: "ong", texto: "ONG" },
+  { valor: "asociacion barrial", texto: "Asociación barrial" },
+  { valor: "asamblea", texto: "Asamblea" },
 ];
 
 export const UBICACIONES = [
-  ['argentina', 'Argentina'], ['caba', 'CABA'], ['buenos aires', 'Buenos Aires'],
-  ['catamarca', 'Catamarca'], ['chaco', 'Chaco'], ['chubut', 'Chubut'], ['cordoba', 'Córdoba'],
-  ['corrientes', 'Corrientes'], ['entre rios', 'Entre Ríos'], ['formosa', 'Formosa'],
-  ['jujuy', 'Jujuy'], ['la pampa', 'La Pampa'], ['la rioja', 'La Rioja'], ['mendoza', 'Mendoza'],
-  ['misiones', 'Misiones'], ['neuquen', 'Neuquén'], ['rio negro', 'Río Negro'], ['salta', 'Salta'],
-  ['san juan', 'San Juan'], ['san luis', 'San Luis'], ['santa cruz', 'Santa Cruz'],
-  ['santa fe', 'Santa Fe'], ['santiago del estero', 'Santiago del Estero'],
-  ['tierra del fuego', 'Tierra del Fuego'], ['tucuman', 'Tucumán'],
+  ["argentina", "Argentina"],
+  ["caba", "CABA"],
+  ["buenos aires", "Buenos Aires"],
+  ["catamarca", "Catamarca"],
+  ["chaco", "Chaco"],
+  ["chubut", "Chubut"],
+  ["cordoba", "Córdoba"],
+  ["corrientes", "Corrientes"],
+  ["entre rios", "Entre Ríos"],
+  ["formosa", "Formosa"],
+  ["jujuy", "Jujuy"],
+  ["la pampa", "La Pampa"],
+  ["la rioja", "La Rioja"],
+  ["mendoza", "Mendoza"],
+  ["misiones", "Misiones"],
+  ["neuquen", "Neuquén"],
+  ["rio negro", "Río Negro"],
+  ["salta", "Salta"],
+  ["san juan", "San Juan"],
+  ["san luis", "San Luis"],
+  ["santa cruz", "Santa Cruz"],
+  ["santa fe", "Santa Fe"],
+  ["santiago del estero", "Santiago del Estero"],
+  ["tierra del fuego", "Tierra del Fuego"],
+  ["tucuman", "Tucumán"],
 ].map(([valor, texto]) => ({ valor, texto }));
 
 // Redes sociales que acepta el backend (enum TipoRedSocial).
 export const REDES_SOCIALES = [
-  { valor: 'instagram', texto: 'Instagram' },
-  { valor: 'facebook', texto: 'Facebook' },
-  { valor: 'linkedin', texto: 'LinkedIn' },
-  { valor: 'github', texto: 'GitHub' },
-  { valor: 'x', texto: 'X' },
-  { valor: 'youtube', texto: 'YouTube' },
-  { valor: 'tiktok', texto: 'TikTok' },
+  { valor: "instagram", texto: "Instagram" },
+  { valor: "facebook", texto: "Facebook" },
+  { valor: "linkedin", texto: "LinkedIn" },
+  { valor: "github", texto: "GitHub" },
+  { valor: "x", texto: "X" },
+  { valor: "youtube", texto: "YouTube" },
+  { valor: "tiktok", texto: "TikTok" },
 ];
 
 // ───── COLECTIVO ─────
@@ -58,9 +75,9 @@ function aMiColectivo(c) {
   return {
     id: c._id,
     nombre: c.nombre,
-    descripcion: c.descripcion ?? '',
-    tipo: c.tipoDeColectivo ?? '',
-    ubicacion: c.ubicacion ?? '',
+    descripcion: c.descripcion ?? "",
+    tipo: c.tipoDeColectivo ?? "",
+    ubicacion: c.ubicacion ?? "",
     redes: c.redesSociales ?? [],
     proyectos: c.proyectos ?? [],
   };
@@ -104,7 +121,7 @@ export async function obtenerProyectosDelColectivo(colectivoId) {
 // POST /proyectos → crea un proyecto. `proyecto` ya viene con los nombres del backend
 // (titulo, descripcion, colectivo = NOMBRE del colectivo, urlSistema, perfiles…).
 export async function crearProyecto(proyecto) {
-  const { data } = await api.post('/proyectos', proyecto);
+  const { data } = await api.post("/proyectos", proyecto);
   return data;
 }
 
@@ -167,9 +184,9 @@ function aPostulacionDeLaVista(p) {
     perfilId: p.perfilId,
     persona: {
       id: persona.id ?? persona._id,
-      nombre: persona.nombreFantasia ?? 'Colaboradora',
+      nombre: persona.nombreFantasia ?? "Colaboradora",
       habilidades: (persona.habilidades ?? []).map((h) => h.titulo),
-      presentacion: persona.presentacion ?? '',
+      presentacion: persona.presentacion ?? "",
     },
   };
 }
@@ -210,7 +227,7 @@ export async function obtenerEquipoDelProyecto(proyectoId) {
 export async function darDeBajaColaboracion(colaboracionId) {
   // ?por=colectivo deja registrado que la baja la dio la organización
   const { data } = await api.delete(`/colaboraciones/${colaboracionId}`, {
-    params: { por: 'colectivo' },
+    params: { por: "colectivo" },
   });
   return data;
 }
@@ -219,9 +236,9 @@ export async function darDeBajaColaboracion(colaboracionId) {
 
 // POST /valoraciones: el colectivo valora a la persona de una colaboración ya terminada.
 export async function valorarColaboracion(colaboracionId, { puntaje, texto }) {
-  const cuerpo = { colaboracionId, evaluador: 'colectivo', puntaje };
+  const cuerpo = { colaboracionId, evaluador: "colectivo", puntaje };
   if (texto?.trim()) cuerpo.comentario = texto.trim();
-  const { data } = await api.post('/valoraciones', cuerpo);
+  const { data } = await api.post("/valoraciones", cuerpo);
   return data;
 }
 
@@ -229,7 +246,7 @@ export async function valorarColaboracion(colaboracionId, { puntaje, texto }) {
 // que el colectivo YA valoró (para no ofrecer «Valorar» dos veces).
 export async function colaboracionesYaValoradas(colectivoId) {
   const { data } = await api.get(`/colectivo/${colectivoId}/valoraciones`, {
-    params: { direccion: 'emitidas' },
+    params: { direccion: "emitidas" },
   });
   return new Set(data.map((v) => String(v.colaboracion)));
 }
@@ -241,7 +258,7 @@ export async function obtenerValoracionesDeColaboradora(personaId) {
   return data.map((v) => ({
     id: v._id,
     puntaje: v.puntaje,
-    texto: v.comentario ?? '',
+    texto: v.comentario ?? "",
     fecha: v.createdAt,
   }));
 }
@@ -252,18 +269,18 @@ export async function obtenerValoracionesDeColaboradora(personaId) {
 // `nombres` (opcional) es el Map id → título de habilidades para traducirlas.
 // Si el backend ya trae las habilidades como objetos { titulo }, se usan esos títulos.
 export function aColaboradoraDeLaVista(p, nombres) {
-  const completo = [p.nombre, p.apellido].filter(Boolean).join(' ');
+  const completo = [p.nombre, p.apellido].filter(Boolean).join(" ");
   const habilidades = (p.habilidades ?? []).map((h) =>
-    typeof h === 'object' && h?.titulo ? h.titulo : nombres ? titulos([h], nombres)[0] : null
+    typeof h === "object" && h?.titulo ? h.titulo : nombres ? titulos([h], nombres)[0] : null,
   );
   return {
     id: p._id ?? p.id,
-    alias: p.nombreFantasia ?? '',
+    alias: p.nombreFantasia ?? "",
     // Lo que se muestra como nombre: nombre y apellido si los cargó; si no, su alias.
-    nombre: completo || p.nombreFantasia || 'Colaboradora',
-    pronombres: Array.isArray(p.pronombres) ? p.pronombres.join('/') : p.pronombres ?? '',
-    bio: p.presentacion ?? '',
-    git: p.git ?? '',
+    nombre: completo || p.nombreFantasia || "Colaboradora",
+    pronombres: Array.isArray(p.pronombres) ? p.pronombres.join("/") : (p.pronombres ?? ""),
+    bio: p.presentacion ?? "",
+    git: p.git ?? "",
     redes: p.redesSociales ?? [],
     habilidades: habilidades.filter(Boolean),
     // true = acepta mensajes internos de los colectivos.
@@ -282,14 +299,18 @@ async function paginaDeColaboradoras(ruta, { pagina, limite }) {
 
 // GET /colaboradoras?pagina=&limite=
 export function obtenerColaboradoras({ pagina = 1, limite = 10 } = {}) {
-  return paginaDeColaboradoras('/colaboradoras', { pagina, limite });
+  return paginaDeColaboradoras("/colaboradoras", { pagina, limite });
 }
 
 // GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes?pagina=&limite=
-export function obtenerColaboradorasAcordes(proyectoId, perfilId, { pagina = 1, limite = 10 } = {}) {
+export function obtenerColaboradorasAcordes(
+  proyectoId,
+  perfilId,
+  { pagina = 1, limite = 10 } = {},
+) {
   return paginaDeColaboradoras(
     `/proyectos/${proyectoId}/perfiles/${perfilId}/colaboradoras-acordes`,
-    { pagina, limite }
+    { pagina, limite },
   );
 }
 
