@@ -68,9 +68,9 @@ export function SinPermiso() {
 
   // Elige a dónde lleva el botón principal según quién tenga la sesión.
   let rutaDelBotonPrincipal;
-  if (rol === 'org') {
+  if (rol === 'colectivo') {
     rutaDelBotonPrincipal = '/org';
-  } else if (rol === 'col') {
+  } else if (rol === 'colaboradora') {
     rutaDelBotonPrincipal = '/panel';
   } else {
     rutaDelBotonPrincipal = '/ingresar';

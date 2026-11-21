@@ -33,7 +33,7 @@ export function LayoutPrincipal() {
           ) : (
             <>
               <Button as={Link} to="/ingresar" variant="secondary">Ingresar</Button>
-              <Button as={Link} to="/registro">Crear cuenta</Button>
+              {/* <Button as={Link} to="/registro">Crear cuenta</Button> */}
             </>
           )
         }

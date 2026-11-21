@@ -7,7 +7,7 @@ export class ColectivoService {
     this.repository = repository;
   }
 
-  async crearColectivo(nombre, descripcion, ubicacion, tipoDeColectivo, proyectos) {
+  async crearColectivo(nombre, descripcion, ubicacion, tipoDeColectivo, /* proyectos, */ keycloackId) {
     const colectivo = await this.repository.obtenerPorNombre(nombre);
 
     if (colectivo) {
@@ -19,7 +19,8 @@ export class ColectivoService {
       descripcion,
       ubicacion,
       tipoDeColectivo,
-      proyectos,
+      //proyectos,
+      keycloackId
     );
     const colectivoGuardado = await this.repository.guardar(nuevoColectivo);
     nuevoColectivo.id = colectivoGuardado.id;

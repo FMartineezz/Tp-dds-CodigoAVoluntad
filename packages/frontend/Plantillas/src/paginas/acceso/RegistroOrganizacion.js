@@ -40,8 +40,8 @@ export default function RegistroOrganizacion() {
     tipo: '',
     ubicacion: '',
     lugar: '',
-    mail: '',
-    pass: '',
+/*     mail: '',
+    pass: '', */
     terminos: false,
     captcha: false,
   });
@@ -70,12 +70,12 @@ export default function RegistroOrganizacion() {
     if (!valores.tipo) {
       erroresDelFormulario.tipo = 'Elegí el tipo de colectivo.';
     }
-    if (!MAIL.test(valores.mail)) {
+/*     if (!MAIL.test(valores.mail)) {
       erroresDelFormulario.mail = 'Ingresá un correo válido.';
     }
     if (valores.pass.length < 8) {
       erroresDelFormulario.pass = 'La contraseña debe tener al menos 8 caracteres.';
-    }
+    } */
     if (!valores.terminos) {
       erroresDelFormulario.terminos = 'Tenés que aceptar los términos.';
     }
@@ -112,7 +112,7 @@ export default function RegistroOrganizacion() {
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     // onSubmit: al enviar, formulario.enviar(datos) valida y simula el envío
-    <form className={`container ${sh.page}`} onSubmit={formulario.enviar(datos)} noValidate>
+    <form className={`container ${sh.page}`} onSubmit={formulario.enviarColectivo(datos)} noValidate>
       <Heading level={1}>Crear cuenta · Organización</Heading>
 
       {/* Aparece solo cuando el envío simulado terminó (listo = true) */}
@@ -175,7 +175,7 @@ export default function RegistroOrganizacion() {
           value={datos.lugar}
           onChange={alCambiarCampo('lugar')}
         />
-        <Field
+{/*         <Field
           label="Correo de contacto"
           type="email"
           placeholder="contacto@colectivo.org"
@@ -183,15 +183,15 @@ export default function RegistroOrganizacion() {
           onChange={alCambiarCampo('mail')}
           onBlur={formulario.blur('mail')}
           error={errores.mail}
-        />
-        <PasswordField
+        /> */}
+{/*         <PasswordField
           label="Contraseña"
           placeholder="Mínimo 8 caracteres"
           value={datos.pass}
           onChange={alCambiarCampo('pass')}
           onBlur={formulario.blur('pass')}
           error={errores.pass}
-        />
+        /> */}
         <TagPicker
           label="Causas"
           value={causasElegidas}
@@ -216,9 +216,9 @@ export default function RegistroOrganizacion() {
       </div>
 
       {/* BLOQUE: registro social — alternativa sin formulario */}
-      <div className={s.narrow}>
+{/*       <div className={s.narrow}>
         <SocialButtons verbo="Registrarme" onEntrar={entrarConRedSocial('org')} />
-      </div>
+      </div> */}
     </form>
   );
 }

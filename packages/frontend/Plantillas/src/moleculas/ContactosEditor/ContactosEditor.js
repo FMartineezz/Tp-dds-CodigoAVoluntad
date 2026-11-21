@@ -12,9 +12,9 @@ import { Button, Field, Icon } from '../../atomos';
 import s from './ContactosEditor.module.css';
 
 export function ContactosEditor({ value, onChange }) {
-  const [tipo, setTipo] = useState('Correo');
+  const [tipo, setTipo] = useState('Email');
   const [val, setVal] = useState('');
-  const agregar = () => { if (!val.trim()) return; onChange([...value, [tipo, val.trim()]]); setVal(''); };
+  const agregar = () => { if (!val.trim()) return; onChange([...value, [tipo.toLowerCase(), val.trim()]]); setVal(''); };
   return (
     <div className={s.contactos}>
       <span className={s.pl}>Medios de contacto <span className={s.hint}>(opcional, no se muestran públicamente)</span></span>
@@ -26,8 +26,8 @@ export function ContactosEditor({ value, onChange }) {
         </ul>
       )}
       <div className={s.cadd}>
-        <Field as="select" label="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value)}><option>Correo</option><option>WhatsApp</option><option>SMS</option></Field>
-        <Field label="Dato de contacto" placeholder={tipo === 'Correo' ? 'nombre@correo.org' : '+54 11 5555-0000'} value={val} onChange={(e) => setVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregar(); } }} />
+        <Field as="select" label="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value)}><option>Email</option><option>WhatsApp</option><option>SMS</option></Field>
+        <Field label="Dato de contacto" placeholder={tipo === 'Email' ? 'nombre@correo.org' : '+54 11 5555-0000'} value={val} onChange={(e) => setVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregar(); } }} />
         <Button type="button" variant="secondary" onClick={agregar}>Agregar</Button>
       </div>
     </div>

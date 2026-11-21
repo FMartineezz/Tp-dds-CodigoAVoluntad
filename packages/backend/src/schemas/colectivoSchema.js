@@ -58,6 +58,9 @@ const colectivoSchema = new mongoose.Schema(
       default: true,
       select: false
     },
+    keycloackId: {
+      type: String,
+    },
     createdAt: { type: Date, select: false },
     updatedAt: { type: Date, select: false },
     __v: { type: Number, select: false }

@@ -19,6 +19,7 @@ export class PersonaColaboradoraService {
     presentacion,
     contactos,
     bloquearMensajeInterno,
+    keycloackId
   ) {
     const habilidadesEncontradas = await Promise.all(
       habilidades.map((codigo) => {
@@ -36,6 +37,7 @@ export class PersonaColaboradoraService {
       presentacion,
       contactos,
       bloquearMensajeInterno,
+      keycloackId
     );
     const personaColaboradoraGuardada =
       await this.personaColaboradoraRepository.guardar(personaColaboradora);

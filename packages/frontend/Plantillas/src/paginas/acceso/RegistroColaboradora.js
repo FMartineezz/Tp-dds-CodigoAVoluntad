@@ -49,12 +49,14 @@ export default function RegistroColaboradora() {
     apellido: '',
     pronombres: '',
     github: '',
-    mail: '',
-    pass: '',
+/*     mail: '',
+    pass: '', */
     bio: '',
     mensajes: true,
     terminos: false,
     captcha: false,
+    habilidades: [],
+    contactos: [],
   });
 
   // Habilidades elegidas, como array de textos, ej. ['React', 'Node'].
@@ -83,12 +85,12 @@ export default function RegistroColaboradora() {
     if (!valores.fantasia.trim()) {
       erroresDelFormulario.fantasia = 'Ingresá un nombre de fantasía.';
     }
-    if (!MAIL.test(valores.mail)) {
+/*     if (!MAIL.test(valores.mail)) {
       erroresDelFormulario.mail = 'Ingresá un correo válido.';
     }
     if (valores.pass.length < 8) {
       erroresDelFormulario.pass = 'La contraseña debe tener al menos 8 caracteres.';
-    }
+    } */
     if (!valores.terminos) {
       erroresDelFormulario.terminos = 'Tenés que aceptar los términos.';
     }
@@ -107,7 +109,7 @@ export default function RegistroColaboradora() {
   // Devuelve el manejador onChange de un campo: `alCambiarCampo('mail')` se ejecuta
   // cuando la persona escribe en «mail» (o tilda/destilda una casilla).
   // Casillas: se guarda `checked` (true/false); campos de texto: se guarda `value`.
-  function alCambiarCampo(campo) {
+/*   function alCambiarCampo(campo) {
     return function (evento) {
       const esCasilla = evento.target.type === 'checkbox';
       const nuevoValor = esCasilla ? evento.target.checked : evento.target.value;
@@ -115,7 +117,23 @@ export default function RegistroColaboradora() {
       // (ver docs/GLOSARIO.md → Copiar con cambios).
       setDatos({ ...datos, [campo]: nuevoValor });
     };
-  }
+  } */
+
+  function alCambiarCampo(campo) {
+  return function (eventoOValor) {
+    const nuevoValor =
+      eventoOValor && eventoOValor.target !== undefined
+        ? eventoOValor.target.type === 'checkbox'
+          ? eventoOValor.target.checked
+          : eventoOValor.target.value
+        : eventoOValor;
+
+    setDatos((prev) => ({
+      ...prev,
+      [campo]: nuevoValor,
+    }));
+  };
+}
 
   // Se ejecuta cuando la persona tilda el captcha de prueba (recibe true o false).
   function alCambiarCaptcha(resuelto) {
@@ -125,7 +143,7 @@ export default function RegistroColaboradora() {
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     // onSubmit: al enviar, formulario.enviar(datos) valida y simula el envío
-    <form className={`container ${sh.page}`} onSubmit={formulario.enviar(datos)} noValidate>
+    <form className={`container ${sh.page}`} onSubmit={formulario.enviarColaboradora(datos)} noValidate>
       <Heading level={1}>Crear cuenta · Colaboradora</Heading>
 
       {/* Aparece solo cuando el envío simulado terminó (listo = true) */}
@@ -189,28 +207,11 @@ export default function RegistroColaboradora() {
           value={datos.github}
           onChange={alCambiarCampo('github')}
         />
-        <Field
-          label="Correo electrónico"
-          type="email"
-          placeholder="nombre@correo.org"
-          value={datos.mail}
-          onChange={alCambiarCampo('mail')}
-          onBlur={formulario.blur('mail')}
-          error={errores.mail}
-        />
         <TagPicker
           label="Habilidades"
-          value={habilidadesElegidas}
+          value={datos.habilidades}
           options={HABILIDADES}
-          onChange={setHabilidadesElegidas}
-        />
-        <PasswordField
-          label="Contraseña"
-          placeholder="Mínimo 8 caracteres"
-          value={datos.pass}
-          onChange={alCambiarCampo('pass')}
-          onBlur={formulario.blur('pass')}
-          error={errores.pass}
+          onChange={alCambiarCampo('habilidades')}
         />
         <div className={sh.mid}>
           <Checkbox checked={datos.mensajes} onChange={alCambiarCampo('mensajes')}>
@@ -218,7 +219,7 @@ export default function RegistroColaboradora() {
           </Checkbox>
         </div>
         <div className={sh.full}>
-          <ContactosEditor value={contactos} onChange={setContactos} />
+          <ContactosEditor value={datos.contactos} onChange={alCambiarCampo('contactos')} />
         </div>
         <div className={sh.full}>
           <CaptchaMock ok={datos.captcha} onChange={alCambiarCaptcha} error={errores.captcha} />
@@ -238,9 +239,9 @@ export default function RegistroColaboradora() {
       </div>
 
       {/* BLOQUE: registro social — alternativa sin formulario */}
-      <div className={s.narrow}>
+{/*       <div className={s.narrow}>
         <SocialButtons verbo="Registrarme" onEntrar={entrarConRedSocial('col')} />
-      </div>
+      </div> */}
     </form>
   );
 }

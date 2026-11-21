@@ -68,6 +68,9 @@ export const personaColaboradoraSchema = new mongoose.Schema(
         type: Boolean,
         default: false
     },
+    keycloackId: {
+      type: String,
+    },
     activo:{
       type: Boolean,
       required: false,

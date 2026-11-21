@@ -12,6 +12,7 @@
   "dependencies": {
     "@fontsource-variable/archivo": "^5.1.0",
     "@fontsource/ibm-plex-mono": "^5.1.0",
+    "keycloak-js": "^26.2.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.0.0"

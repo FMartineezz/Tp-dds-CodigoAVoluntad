@@ -96,14 +96,14 @@ export default function DetalleProyecto() {
   );
 
   // Puede denunciar solo una colaboradora que ya participó en este proyecto.
-  const puedeDenunciar = rol === 'col' && PARTICIPO.includes(proyecto.id);
+  const puedeDenunciar = rol === 'colaboradora' && PARTICIPO.includes(proyecto.id);
 
   // ¿Qué botón principal va en la cabecera? Dos casos distintos (ver el bloque «Cabecera»):
   // - botón que abre la ventana: colaboradora, o cualquiera si la búsqueda está cerrada
   //   (en ese caso queda deshabilitado);
   // - botón que lleva a ingresar: visitante sin sesión con la búsqueda abierta.
-  const mostrarBotonDeCabecera = rol !== 'org' && !yaMePostule;
-  const botonDeCabeceraAbreVentana = rol === 'col' || !busquedaAbierta;
+  const mostrarBotonDeCabecera = rol !== 'colectivo' && !yaMePostule;
+  const botonDeCabeceraAbreVentana = rol === 'colaboradora' || !busquedaAbierta;
 
   // ───── 3. ACCIONES ─────
   // Devuelve el nombre a mostrar de quien ocupa un lugar en un perfil:
@@ -132,7 +132,7 @@ export default function DetalleProyecto() {
       return null;
     }
     // Colaboradora con sesión: el botón abre la ventana con este perfil preseleccionado.
-    if (rol === 'col') {
+    if (rol === 'colaboradora') {
       return (
         <Button variant="secondary" onClick={() => setPerfilParaPostular(perfil.rol)}>
           Postularme

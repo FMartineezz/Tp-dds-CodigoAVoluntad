@@ -34,14 +34,15 @@ const TipoColectivo = Object.freeze({
 });
 
 class Colectivo {
-  constructor(nombre, descripcion, ubicacion = null, tipoDeColectivo) {
+  constructor(nombre, descripcion, ubicacion = null, tipoDeColectivo, keycloackId) {
     this.id = null;
     this.nombre = nombre;
     this.descripcion = descripcion;
     this.ubicacion = ubicacion;
     this.tipoDeColectivo = tipoDeColectivo;
     this.proyectos = [];
-    this.activo = true
+    this.activo = true,
+    this.keycloackId = keycloackId
   }
 
   cargarProyecto(proyecto) {

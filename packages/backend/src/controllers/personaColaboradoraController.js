@@ -15,6 +15,7 @@ export class PersonaColaboradoraController {
       req.body.presentacion,
       req.body.contactos,
       req.body.bloquearMensajeInterno,
+      req.user.id,
     );
 
     res.status(201).location(`/colaboradoras/${persona.id}`).json(persona);

@@ -72,7 +72,7 @@ export default function DetalleColectivo() {
   // vacía: `||` significa «lo de la izquierda, y si no existe, lo de la derecha».
   const valoraciones = VALORACIONES.colectivo[colectivo.id] || [];
   // Puede denunciar solo una colaboradora que ya participó con este colectivo.
-  const puedeDenunciar = rol === 'col' && PARTICIPO.includes(colectivo.id);
+  const puedeDenunciar = rol === 'colaboradora' && PARTICIPO.includes(colectivo.id);
 
   // ───── 3. ACCIONES ─────
   // Se ejecuta al tocar «Denunciar»: abre la ventana de denuncia.

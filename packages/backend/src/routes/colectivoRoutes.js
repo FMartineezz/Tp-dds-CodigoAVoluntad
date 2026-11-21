@@ -3,6 +3,7 @@ import validarColectivo from "../middlewares/validations/colectivoValidation.js"
 import validarMensaje from "../middlewares/validations/mensajeValidation.js";
 import { colectivoController } from "../container.js";
 import { mensajeController } from "../container.js";
+import { verifyToken } from "../middlewares/auth.js";
 
 const pathColectivos = "/colectivos";
 
@@ -13,7 +14,7 @@ export default function colectivoRoutes() {
 
   router.get("/colectivos/:id", colectivoController.obtenerColectivoPorId);
 
-  router.post("/colectivos", validarColectivo, colectivoController.crearColectivo);
+  router.post("/colectivos", verifyToken, validarColectivo, colectivoController.crearColectivo);
   
   router.post(
     "/colectivos/:colectivoId/mensajes",

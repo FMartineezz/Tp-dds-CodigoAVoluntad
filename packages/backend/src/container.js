@@ -30,6 +30,8 @@ import { LogroController } from "./controllers/logroController.js";
 import { PostulacionController } from "./controllers/postulacionController.js";
 
 import { cierreProyectosJob } from "./cronTasks/CierreProyectoJob.js";
+import { AuthService } from "./services/authService.js";
+import { AuthController } from "./controllers/authController.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
@@ -88,6 +90,9 @@ const postulacionService = new PostulacionService({
   colectivoService,
   colaboracionService,
 });
+const authService = new AuthService({
+  personaColaboradoraRepository, colectivoRepository
+});
 
 // Controllers: dependen de services.
 export const proyectoController = new ProyectoController({ proyectoService });
@@ -104,6 +109,7 @@ export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });
 export const postulacionController = new PostulacionController({ postulacionService });
+export const authController = new AuthController({ authService });
 
 //Job task
 export const cierreProyectos = new cierreProyectosJob({ proyectoService });

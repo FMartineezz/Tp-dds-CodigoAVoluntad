@@ -22,6 +22,10 @@ export class ColectivoRepository {
     return await this.model.findById(id).lean();
   }
 
+  async obtenerPorKeycloack(id) {
+    return await this.model.findOne({ keycloackId: id }).lean();
+  }
+
   async obtenerPorNombre(nombre) {
     return await this.model.findOne({ nombre }).lean();
   }

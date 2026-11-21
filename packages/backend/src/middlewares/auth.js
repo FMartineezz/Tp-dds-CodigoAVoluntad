@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 
 const client = jwksClient({
-  jwksUri: 'http://localhost:8080/realms/codigo-a-voluntad/protocol/openid-connect/certs'
+  jwksUri: 'http://localhost:8080/realms/CodigoAVoluntad/protocol/openid-connect/certs'
 });
 
 function getKey(header, callback) {
@@ -23,6 +23,7 @@ export const verifyToken = (req, res, next) => {
 
   jwt.verify(token, getKey, { algorithms: ['RS256'] }, (err, decoded) => {
     if (err) {
+      console.error('Error real de jwt.verify:', err);
       return res.status(403).json({ message: 'Token inválido o expirado' });
     }
     

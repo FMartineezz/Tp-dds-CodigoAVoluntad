@@ -18,6 +18,10 @@ export class PersonaColaboradoraRepository {
     return await this.model.findById(id).lean();
   }
 
+  async obtenerPorKeycloack(id) {
+    return await this.model.findOne({ keycloackId: id }).lean();
+  }
+
   async obtenerPorIdConContactos(id) {
     return await this.model.findById(id).lean().select('+contactos');
   }

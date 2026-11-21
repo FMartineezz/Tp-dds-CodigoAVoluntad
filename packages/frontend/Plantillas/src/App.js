@@ -19,6 +19,7 @@ import ComoFunciona from './paginas/publico/ComoFunciona.js';
 import Info from './paginas/publico/Info.js';
 // Acceso
 import Ingresar from './paginas/acceso/Ingresar.js';
+import IngresarK from './paginas/acceso/IngresarK.js';
 import ElegirTipoCuenta from './paginas/acceso/ElegirTipoCuenta.js';
 import RegistroColaboradora from './paginas/acceso/RegistroColaboradora.js';
 import RegistroOrganizacion from './paginas/acceso/RegistroOrganizacion.js';
@@ -41,8 +42,39 @@ import EquipoOrg from './paginas/organizacion/EquipoOrg.js';
 import BuscarColaboradoras from './paginas/organizacion/BuscarColaboradoras.js';
 import PerfilColaboradora from './paginas/organizacion/PerfilColaboradora.js';
 import PerfilOrg from './paginas/organizacion/PerfilOrg.js';
+import keycloak from './api/keycloack.js';
+import { useEffect, useRef, useState } from 'react';
+import ComprobarPerfil from './paginas/acceso/ComprobarPerfil.js';
 
 export default function App() {
+/* const [isKeycloakReady, setIsKeycloakReady] = useState(false);
+  const isRun = useRef(false);
+
+  useEffect(() => {
+    // Evita la doble ejecución de init() por el StrictMode de React 18 en desarrollo
+    if (isRun.current) return;
+    isRun.current = true;
+
+    keycloak
+      .init({
+        onLoad: 'check-sso', // Revisa si ya hay sesión activa
+        pkceMethod: 'S256',   // Standard recomendado
+      })
+      .then((authenticated) => {
+        console.log('Keycloak inicializado correctamente. Autenticado:', authenticated);
+        setIsKeycloakReady(true);
+      })
+      .catch((err) => {
+        console.error('Error al inicializar Keycloak:', err);
+        // Marcamos como listo aunque falle para no dejar la pantalla en blanco
+        setIsKeycloakReady(true);
+      });
+  }, []);
+
+  if (!isKeycloakReady) {
+    return <div>Cargando autenticación...</div>;
+  } */
+
   return (
     <AuthProvider>
       <Routes>
@@ -60,7 +92,9 @@ export default function App() {
           <Route path="contacto" element={<Info tema="contacto" />} />
 
           {/* Acceso */}
-          <Route path="ingresar" element={<Ingresar />} />
+          {/* <Route path="ingresar" element={<Ingresar />} /> */}
+          <Route path="ingresar" element={<IngresarK />} />
+          <Route path="comprobar-perfil" element={<ComprobarPerfil />} />
           <Route path="registro" element={<ElegirTipoCuenta />} />
           <Route path="registro/colaboradora" element={<RegistroColaboradora />} />
           <Route path="registro/organizacion" element={<RegistroOrganizacion />} />
@@ -70,23 +104,23 @@ export default function App() {
           <Route path="pronto" element={<Pronto />} />
 
           {/* Colaboradora (privadas) */}
-          <Route path="panel" element={<Privada rol="col"><PanelCol /></Privada>} />
-          <Route path="panel/postulaciones" element={<Privada rol="col"><PostulacionesCol /></Privada>} />
-          <Route path="panel/proyectos" element={<Privada rol="col"><ProyectosCol /></Privada>} />
-          <Route path="panel/mensajes" element={<Privada rol="col"><Mensajes rol="col" /></Privada>} />
-          <Route path="panel/perfil" element={<Privada rol="col"><PerfilCol /></Privada>} />
+          <Route path="panel" element={<Privada rol="colaboradora"><PanelCol /></Privada>} />
+          <Route path="panel/postulaciones" element={<Privada rol="colaboradora"><PostulacionesCol /></Privada>} />
+          <Route path="panel/proyectos" element={<Privada rol="colaboradora"><ProyectosCol /></Privada>} />
+          <Route path="panel/mensajes" element={<Privada rol="colaboradora"><Mensajes rol="colaboradora" /></Privada>} />
+          <Route path="panel/perfil" element={<Privada rol="colaboradora"><PerfilCol /></Privada>} />
 
           {/* Organización (privadas) */}
-          <Route path="org" element={<Privada rol="org"><PanelOrg /></Privada>} />
-          <Route path="org/proyectos" element={<Privada rol="org"><ProyectosOrg /></Privada>} />
-          <Route path="org/proyectos/nuevo" element={<Privada rol="org"><FormProyecto /></Privada>} />
-          <Route path="org/proyectos/:id/editar" element={<Privada rol="org"><FormProyecto edit /></Privada>} />
-          <Route path="org/proyectos/:id/postulaciones" element={<Privada rol="org"><PostulacionesOrg /></Privada>} />
-          <Route path="org/proyectos/:id/equipo" element={<Privada rol="org"><EquipoOrg /></Privada>} />
-          <Route path="org/colaboradoras" element={<Privada rol="org"><BuscarColaboradoras /></Privada>} />
-          <Route path="org/colaboradoras/:id" element={<Privada rol="org"><PerfilColaboradora /></Privada>} />
-          <Route path="org/mensajes" element={<Privada rol="org"><Mensajes rol="org" /></Privada>} />
-          <Route path="org/perfil" element={<Privada rol="org"><PerfilOrg /></Privada>} />
+          <Route path="org" element={<Privada rol="colectivo"><PanelOrg /></Privada>} />
+          <Route path="org/proyectos" element={<Privada rol="colectivo"><ProyectosOrg /></Privada>} />
+          <Route path="org/proyectos/nuevo" element={<Privada rol="colectivo"><FormProyecto /></Privada>} />
+          <Route path="org/proyectos/:id/editar" element={<Privada rol="colectivo"><FormProyecto edit /></Privada>} />
+          <Route path="org/proyectos/:id/postulaciones" element={<Privada rol="colectivo"><PostulacionesOrg /></Privada>} />
+          <Route path="org/proyectos/:id/equipo" element={<Privada rol="colectivo"><EquipoOrg /></Privada>} />
+          <Route path="org/colaboradoras" element={<Privada rol="colectivo"><BuscarColaboradoras /></Privada>} />
+          <Route path="org/colaboradoras/:id" element={<Privada rol="colectivo"><PerfilColaboradora /></Privada>} />
+          <Route path="org/mensajes" element={<Privada rol="colectivo"><Mensajes rol="colectivo" /></Privada>} />
+          <Route path="org/perfil" element={<Privada rol="colectivo"><PerfilOrg /></Privada>} />
 
           {/* Cualquier otra dirección */}
           <Route path="*" element={<NoEncontrado />} />

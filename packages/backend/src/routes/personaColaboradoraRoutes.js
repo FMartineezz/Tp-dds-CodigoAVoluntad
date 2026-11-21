@@ -2,6 +2,7 @@ import { Router } from "express";
 import { personaColaboradoraController } from "../container.js";
 import { mensajeController } from "../container.js";
 import validarPersonaColaboradora from "../middlewares/validations/personaColaboradoraValidation.js";
+import { verifyToken } from "../middlewares/auth.js";
 
 export default function personaColaboradoraRoutes() {
   const router = Router();
@@ -16,7 +17,8 @@ export default function personaColaboradoraRoutes() {
   );
   
   router.post(
-    "/colaboradoras",
+    "/colaboradoras", 
+    verifyToken,
     validarPersonaColaboradora,
     personaColaboradoraController.crearPersonaColaboradora,
   );

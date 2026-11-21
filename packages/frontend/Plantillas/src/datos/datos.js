@@ -7,7 +7,7 @@
  * CÓMO AGREGAR UN HERMANO / EXTENDERLO:
  *   Dato nuevo: exportá otra constante y usala con import { NUEVO } from '../../datos'.
  */
-export const HABILIDADES = ['React', 'Node', 'UX / UI', 'MongoDB', 'Testing', 'DevOps', 'Accesibilidad', 'Datos'];
+export const HABILIDADES = ['desarrollo_web_react', 'Node', 'UX / UI', 'MongoDB', 'Testing', 'DevOps', 'Accesibilidad', 'Datos'];
 
 export const PROYECTOS = [
   { id: 50, titulo: 'Boletín digital del barrio', colectivo: 'Asamblea Barrial Norte', colectivoId: 1, estado: 'abierto', habilidades: ['React', 'UX / UI'], tiempo: '3 h por semana', modalidad: ['Incentivo económico', 'Posible contratación'], avance: 0 },
@@ -129,12 +129,12 @@ export const VALORACIONES = {
 };
 
 export const NOTIFICACIONES = {
-  col: [
+  colaboradora: [
     { id: 1, texto: 'Tu postulación a «App de turnos para el comedor» fue aceptada.', cuando: 'Hace 2 h' },
     { id: 2, texto: 'Hay un proyecto nuevo que encaja con tus habilidades: «Boletín digital del barrio».', cuando: 'Ayer' },
     { id: 3, texto: 'Asamblea Barrial Norte te escribió un mensaje.', cuando: 'Lun' },
   ],
-  org: [
+  colectivo: [
     { id: 1, texto: '3 postulaciones nuevas en «App de turnos para el comedor».', cuando: 'Hace 1 h' },
     { id: 2, texto: 'Hay una colaboradora que encaja con el perfil Front-end.', cuando: 'Ayer' },
   ],

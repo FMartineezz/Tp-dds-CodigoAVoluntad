@@ -12,10 +12,10 @@
  */
 
 // ───── Imports ─────
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Alert } from '../../moleculas';
-import { useAuth } from '../../contexto';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Alert } from "../../moleculas";
+import { useAuth } from "../../contexto";
 
 // ───── 1. MAIL ─────
 // Expresión regular que acepta «algo@algo.algo» sin espacios. No comprueba que el correo
@@ -25,6 +25,14 @@ import { useAuth } from '../../contexto';
 // su propia copia de esta regla).
 export const MAIL = /^\S+@\S+\.\S+$/;
 
+const normalizarTexto = (texto) => {
+  if (!texto) return '';
+  return texto
+    .normalize('NFD') // Separa los caracteres de sus tildes (ej. 'á' -> 'a' + '´')
+    .replace(/[\u0300-\u036f]/g, '') // Elimina los diacríticos (tildes)
+    .toLowerCase() // Convierte todo a minúsculas
+    .trim(); // Opcional: quita espacios extra al inicio y final
+};
 // ───── 2. useForm ─────
 // Hook que maneja la validación de un formulario de registro. Quién lo usa:
 // RegistroColaboradora y RegistroOrganizacion.
@@ -62,6 +70,7 @@ export function useForm(validar) {
   // Lo cambia `enviar`.
   const [listo, setListo] = useState(false);
 
+  const { keycloak, token, recargarPerfil } = useAuth();
   // ───── 2. CÁLCULOS ─────
 
   // Devuelve solo los errores que corresponde MOSTRAR ahora: todos si ya se intentó
@@ -90,11 +99,28 @@ export function useForm(validar) {
       setTocados((previos) => ({ ...previos, [campo]: true }));
     };
   }
-
+  
   // Se usa como onSubmit del formulario: `enviar(valores)` devuelve el manejador
   // que corre al apretar «Crear cuenta». Si hay errores corta y no «llama a la API».
-  function alEnviarFormulario(valores) {
-    return function (evento) {
+  function alEnviarFormularioColaboradora(valores) {
+    //const navigate = useNavigate();
+    console.log(valores);
+    const payload = {
+      nombreFantasia: valores.fantasia,
+      git: valores.github,
+      nombre: valores.nombre,
+      apellido: valores.apellido,
+      habilidades: (valores.habilidades || []).map(habilidad => (habilidad.toLowerCase())),
+      pronombres: valores.pronombres,
+      presentacion: valores.bio,
+      contactos: (valores.contactos || []).map(([tipo, valor]) => ({
+        tipo,
+        valor,
+      })),
+      bloquearMensajeInterno: valores.mensajes,
+    };
+    
+    return async function (evento) {
       evento.preventDefault(); // evita que el navegador recargue la página
       setIntento(true); // desde ahora se muestran todos los errores
       setListo(false); // oculta un «Cuenta creada» anterior
@@ -107,18 +133,122 @@ export function useForm(validar) {
       // Se simula la espera con setTimeout (ejecuta la función de adentro a los 800 ms)
       // para poder ver el estado «cargando». En producción acá iría la llamada a la API
       // y esto correría cuando el servidor responda.
-      setCargando(true);
-      setTimeout(() => {
-        setCargando(false);
+      try {
+        // 1. Nos aseguramos de que el token no esté vencido antes de enviarlo
+        await keycloak.updateToken(30);
+
+        // 2. Enviamos los datos del formulario al backend
+        const response = await fetch("http://localhost:3000/colaboradoras", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${keycloak.token || token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Ocurrió un error al crear la cuenta");
+        }
+
+        // 3. Refrescamos el token para que traiga el nuevo rol 'colaboradora' asignado por el backend
+        await keycloak.updateToken(-1);
+
+        // 4. Actualizamos el AuthContext (perfilCompletado = true, rol = 'colaboradora')
+        await recargarPerfil();
+
         setListo(true);
-      }, 800);
+
+        window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+        });
+        // 5. Redirigimos al panel de la colaboradora (ajustá la ruta si tiene otro nombre)
+        //navigate('/panel', { replace: true });
+
+      } catch (error) {
+        console.error("Error al registrar colaboradora:", error);
+        setErrorServidor(error.message);
+      } finally {
+        setCargando(false);
+      }
+    };
+  }
+
+  function alEnviarFormularioColectivo(valores) {
+    //const navigate = useNavigate();
+    console.log(valores);
+    const payload = {
+    nombre: valores.nombre,
+    descripcion: valores.desc,
+    ubicacion: normalizarTexto(valores.ubicacion),
+    tipoDeColectivo: normalizarTexto(valores.tipo),
+    };
+    
+    return async function (evento) {
+      evento.preventDefault(); // evita que el navegador recargue la página
+      setIntento(true); // desde ahora se muestran todos los errores
+      setListo(false); // oculta un «Cuenta creada» anterior
+
+      const hayErrores = Object.keys(validar(valores)).length > 0;
+      if (hayErrores) {
+        return;
+      }
+
+      // Se simula la espera con setTimeout (ejecuta la función de adentro a los 800 ms)
+      // para poder ver el estado «cargando». En producción acá iría la llamada a la API
+      // y esto correría cuando el servidor responda.
+      try {
+        // 1. Nos aseguramos de que el token no esté vencido antes de enviarlo
+        await keycloak.updateToken(30);
+
+        // 2. Enviamos los datos del formulario al backend
+        const response = await fetch("http://localhost:3000/colectivos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${keycloak.token || token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Ocurrió un error al crear la cuenta");
+        }
+
+        // 3. Refrescamos el token para que traiga el nuevo rol 'colaboradora' asignado por el backend
+        await keycloak.updateToken(-1);
+
+        // 4. Actualizamos el AuthContext (perfilCompletado = true, rol = 'colaboradora')
+        await recargarPerfil();
+
+        setListo(true);
+
+        window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+        });
+        // 5. Redirigimos al panel de la colaboradora (ajustá la ruta si tiene otro nombre)
+        //navigate('/panel', { replace: true });
+
+      } catch (error) {
+        console.error("Error al registrar colectivo:", error);
+        setErrorServidor(error.message);
+      } finally {
+        setCargando(false);
+      }
     };
   }
 
   // Lo que el hook le entrega a la pantalla. `todos` es la función de validación completa.
   return {
     blur: alSalirDelCampo,
-    enviar: alEnviarFormulario,
+    enviarColaboradora: alEnviarFormularioColaboradora,
+    enviarColectivo: alEnviarFormularioColectivo,
     errores: erroresVisibles,
     cargando,
     listo,
@@ -141,7 +271,11 @@ export function Resumen({ errores, mostrar }) {
     return null;
   }
   // .join(' ') une los mensajes en un solo texto, separados por un espacio
-  return <Alert kind="error" title="Revisá estos campos">{mensajes.join(' ')}</Alert>;
+  return (
+    <Alert kind="error" title="Revisá estos campos">
+      {mensajes.join(" ")}
+    </Alert>
+  );
 }
 
 // ───── 4. useSocial ─────
@@ -157,7 +291,7 @@ export function useSocial() {
   return function conRol(rol) {
     return function alElegirProveedor(proveedor) {
       entrar(rol);
-      navegar(rol === 'org' ? '/org' : '/panel');
+      navegar(rol === "org" ? "/org" : "/panel");
       // `proveedor` (Google, etc.) se recibe pero no se usa en el prototipo;
       // `void` evita el aviso del linter de «variable sin usar».
       void proveedor;

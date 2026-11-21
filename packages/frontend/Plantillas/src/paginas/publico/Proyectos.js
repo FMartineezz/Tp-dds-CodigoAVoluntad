@@ -247,7 +247,7 @@ export default function Proyectos() {
         {/* El checkbox de «encaje» aparece solo si quien mira es una colaboradora (rol 'col').
             `&&` significa: si lo de la izquierda es verdadero, se dibuja lo de la derecha
             (ver docs/GLOSARIO.md → Renderizado condicional). */}
-        {rol === 'col' && (
+        {rol === 'colaboradora' && (
           <div className={s.encaje}>
             <Checkbox checked={soloQueEncajan} onChange={alCambiarEncaje}>
               Mostrar solo proyectos que encajan con mis habilidades (

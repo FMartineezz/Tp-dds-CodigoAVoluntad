@@ -4,12 +4,15 @@ export class ColectivoController {
   }
 
   crearColectivo = async (req, res) => {
+    console.log(req.user.id);
+    console.log(req.body);
     const respuesta = await this.service.crearColectivo(
       req.body.nombre,
       req.body.descripcion,
       req.body.ubicacion,
       req.body.tipoDeColectivo,
-      req.body.proyectos,
+      //req.body.proyectos,
+      req.user.id
     );
     res.status(201).location(`/colectivos/${respuesta.id}`).json(respuesta);
   };

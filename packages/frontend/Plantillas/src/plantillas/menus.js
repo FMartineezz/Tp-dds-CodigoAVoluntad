@@ -10,21 +10,21 @@
 // Cada fila: [ruta, etiqueta, exacta?]   ('exacta' evita que «/panel» quede activo en «/panel/perfil»)
 export const MENUS = {
   null: [['/proyectos', 'Proyectos'], ['/colectivos', 'Colectivos'], ['/como-funciona', 'Cómo funciona']],           // sin sesión
-  col: [['/panel', 'Mi panel', true], ['/proyectos', 'Proyectos'], ['/panel/postulaciones', 'Postulaciones'], ['/panel/mensajes', 'Mensajes']], // colaboradora
-  org: [['/org', 'Panel', true], ['/org/proyectos', 'Mis proyectos'], ['/org/colaboradoras', 'Colaboradoras'], ['/org/mensajes', 'Mensajes']],  // organización
+  colaboradora: [['/panel', 'Mi panel', true], ['/proyectos', 'Proyectos'], ['/panel/postulaciones', 'Postulaciones'], ['/panel/mensajes', 'Mensajes']], // colaboradora
+  colectivo: [['/org', 'Panel', true], ['/org/proyectos', 'Mis proyectos'], ['/org/colaboradoras', 'Colaboradoras'], ['/org/mensajes', 'Mensajes']],  // organización
 };
 
 // Un ícono por ítem de MENUS[rol], EN EL MISMO ORDEN (los usa la barra inferior del móvil).
 export const ICONOS = {
-  col: ['panel', 'proyectos', 'postulaciones', 'mensajes'],
-  org: ['panel', 'proyectos', 'colaboradoras', 'mensajes'],
+  colaboradora: ['panel', 'proyectos', 'postulaciones', 'mensajes'],
+  colectivo: ['panel', 'proyectos', 'colaboradoras', 'mensajes'],
 };
 
 // Etiquetas más cortas para la barra inferior del móvil (opcional).
 export const ETIQUETA_MOVIL = { 'Mis proyectos': 'Proyectos', Colaboradoras: 'Personas' };
 
 // Mensajes sin leer por rol (insignia roja). Con backend real viene de la API.
-export const NO_LEIDOS = { col: 2, org: 1 };
+export const NO_LEIDOS = { colaboradora: 2, colectivo: 1 };
 
 // Enlaces del pie de página.
 export const ENLACES_PIE = [
