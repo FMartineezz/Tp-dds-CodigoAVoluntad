@@ -90,15 +90,20 @@ export default function Mensajes({ rol }) {
   const personaPedida = parametros.get("persona");
   const proyectoPedido = parametros.get("proyecto");
 
-  // Sumarle 1 vuelve a pedir las conversaciones (después de enviar un mensaje).
-  const [version, setVersion] = useState(0);
-
   // Las conversaciones del backend (ver api/mensajes.js para su forma).
   const { cargando, datos, error } = usePedido(
     () => cargarMensajes(rol, id, personaPedida, proyectoPedido),
-    [rol, id, personaPedida, proyectoPedido, version],
+    [rol, id, personaPedida, proyectoPedido],
   );
-  const chats = datos ?? [];
+
+  // Copia local para agregar mensajes enviados sin volver a mostrar skeletons.
+  const [chatsEditados, setChatsEditados] = useState(null);
+
+  useEffect(() => {
+    setChatsEditados(null);
+  }, [rol, id, personaPedida, proyectoPedido]);
+
+  const chats = chatsEditados ?? datos ?? [];
 
   // Id del chat elegido. null = todavía no se eligió (se abre el pedido por la dirección
   // o el primero de la lista). Lo cambia abrirChat.
@@ -208,19 +213,30 @@ export default function Mensajes({ rol }) {
   // Se ejecuta al apretar «Enviar». Si el mensaje está vacío muestra un error y corta;
   // si no, lo manda al backend y vuelve a pedir las conversaciones.
   async function alEnviarMensaje(evento) {
-    evento.preventDefault(); // evita que el navegador recargue la página
+    evento.preventDefault();
 
-    if (!textoMensaje.trim()) {
+    const texto = textoMensaje.trim();
+    if (!texto) {
       setErrorMensaje("Escribí un mensaje antes de enviar.");
       return;
     }
     setErrorMensaje("");
     setEnviando(true);
     try {
-      await enviarMensaje(chatActual, rol, textoMensaje.trim());
-      setIdElegido(chatActual.id); // que siga abierto después de recargar
+      await enviarMensaje(chatActual, rol, texto);
+      setIdElegido(chatActual.id);
       setTextoMensaje("");
-      setVersion((v) => v + 1);
+      setChatsEditados((previos) => {
+        const base = previos ?? datos ?? [];
+        const actual = base.find((c) => c.id === chatActual.id) ?? chatActual;
+        const actualizado = {
+          ...actual,
+          msgs: [...actual.msgs, ["yo", texto]],
+          hora: "Ahora",
+          fecha: new Date().toISOString(),
+        };
+        return [actualizado, ...base.filter((c) => c.id !== actual.id)];
+      });
     } catch (e) {
       // Por ejemplo: la persona bloqueó los mensajes (ERR-EST-801).
       setErrorMensaje(mensajeDeError(e));
