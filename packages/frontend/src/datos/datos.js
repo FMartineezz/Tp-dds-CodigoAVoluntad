@@ -1,5 +1,7 @@
 /**
- * Datos de prueba (mock). Reemplazalos por llamadas a la API cuando exista.
+ * Datos fijos del front. Las pantallas ya piden todo al backend: de acá solo se usan
+ * FAQ (Cómo funciona) y MOTIVOS_DENUNCIA (DenunciaDialog), que son textos de la interfaz.
+ * El resto son los datos de prueba del prototipo y se pueden borrar.
  *
  * USO: Cada export es un array u objeto.
  * SI LO CAMBIÁS O SACÁS: Las pantallas importan desde acá: si renombrás algo, buscá sus usos.

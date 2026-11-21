@@ -191,8 +191,8 @@ function FormularioOrg({ colectivo }) {
   }
 
   // Se ejecuta al tocar «Sí, eliminar». Solo avanza si el nombre escrito coincide.
-  // PENDIENTE (backend): DELETE /colectivos/:id existe pero hoy no borra ni da de baja nada;
-  // por ahora solo se cierra la sesión.
+  // PENDIENTE (front): DELETE /colectivos/:id ya da de baja al colectivo (activo: false),
+  // pero esta pantalla todavía no lo llama: por ahora solo se cierra la sesión.
   function alConfirmarEliminacion() {
     if (nombreNoCoincide) return;
     setDialogoEliminarAbierto(false);
@@ -282,7 +282,7 @@ function FormularioOrg({ colectivo }) {
       </form>
 
       {/* BLOQUE: Zona de riesgo — eliminar la cuenta del colectivo (acción permanente).
-          PENDIENTE (backend): la baja todavía no se aplica (ver alConfirmarEliminacion). */}
+          PENDIENTE (front): la baja todavía no se pide al backend (ver alConfirmarEliminacion). */}
       <section className={s.riesgo} aria-labelledby="riesgo">
         <Heading level={2} size="h3" id="riesgo">Zona de riesgo</Heading>
         <Text>

@@ -6,8 +6,8 @@
  *   GET /colectivos/:id/postulaciones (ver api/organizacion.js). Aceptar y rechazar hacen
  *   PATCH /postulaciones/:id. El cupo de cada perfil lo controla el backend: si está lleno,
  *   responde un error (ERR-EST-507) y se muestra en el aviso rojo.
- *   PENDIENTE (backend): las postulaciones traen el TÍTULO del proyecto y no su id, por eso
- *   se filtran por título (sirve porque un colectivo no repite títulos).
+ *   Las postulaciones del colectivo se filtran por `proyectoId` para quedarse con las de
+ *   este proyecto.
  * Para modificarla: COLUMNA NUEVA: <th> en <thead> + <td data-l="…"> por fila.
  *
  * ESTADOS DE UNA POSTULACIÓN: 'pendiente' (esperando respuesta), 'aceptada' (la persona

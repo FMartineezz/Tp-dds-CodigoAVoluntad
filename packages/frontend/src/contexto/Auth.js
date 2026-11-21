@@ -22,7 +22,7 @@ export const CUENTAS_DEMO = {
   col: import.meta.env.VITE_DEMO_COLABORADORA_ID,
 };
 
-/** Sesión simulada: rol = null | 'col' | 'org'. Solo para el prototipo. */
+/** Sesión simulada: rol = null | 'col' | 'org'. Se reemplaza cuando se integre Keycloak. */
 export function AuthProvider({ children }) {
   const [rol, setRol] = useState(() => {
     try { return sessionStorage.getItem('cav-rol') || null; } catch { return null; }

@@ -13,7 +13,6 @@
  */
 import { useState, useId } from 'react';
 import { Icon } from '../../atomos';
-import { NOTIFICACIONES } from '../../datos';
 import { useAuth } from '../../contexto';
 import { useDisclosure, usePedido } from '../../hooks';
 import { obtenerNotificaciones } from '../../api/colaboradora.js';
@@ -37,7 +36,7 @@ export function Campana() {
     [rol, idCuenta]
   );
   const porRol = { col: deLaColaboradora, org: deLaOrganizacion };
-  const items = (rol in porRol ? porRol[rol] : NOTIFICACIONES[rol]) ?? [];
+  const items = (rol in porRol ? porRol[rol] : null) ?? [];
   const [leidas, setLeidas] = useState(false);
   const n = leidas ? 0 : items.length;
   return (

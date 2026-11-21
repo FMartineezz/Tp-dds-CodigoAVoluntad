@@ -22,9 +22,8 @@
  *   - proyecto finalizado y todavía sin valorar: «Valorar al colectivo»;
  *   - proyecto finalizado y ya valorado: la etiqueta «Valoración enviada».
  *
- * PENDIENTE (backend): falta GET /colaboradoras/:id/colaboraciones. Hoy no aparecen acá las
- *   colaboraciones anónimas de la persona ni las que ya se dieron de baja (que también se
- *   podrían valorar).
+ * GET /colaboradoras/:id/colaboraciones trae el historial completo: también las anónimas
+ *   (con la etiqueta «Anónima») y las dadas de baja, que van a «Finalizados».
  */
 
 // ───── Imports ─────

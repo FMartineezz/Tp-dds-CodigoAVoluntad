@@ -20,8 +20,8 @@
  *
  * PENDIENTE (backend): no existe DELETE /postulaciones/:id, así que la colaboradora todavía
  *   no puede retirar una postulación pendiente (antes había un botón «Retirar» simulado).
- * PENDIENTE (backend): GET /colaboradoras/:id/postulaciones manda el TÍTULO del proyecto pero
- *   no su id, así que no se puede enlazar al detalle del proyecto desde acá.
+ * PENDIENTE (front): el backend ya manda `proyectoId` (y el adaptador lo expone), así que el
+ *   título del proyecto se podría enlazar a /proyectos/:id; hoy se muestra como texto.
  */
 
 // ───── Imports ─────
