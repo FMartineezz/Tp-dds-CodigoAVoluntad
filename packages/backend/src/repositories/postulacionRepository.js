@@ -15,12 +15,19 @@ export class PostulacionRepository {
     return await this.model.findById(id).lean();
   }
 
+  // Postulación vigente (pendiente o aceptada) de la persona a ese perfil, o null.
+  // Usa findOne y no exists(): exists() devuelve solo el _id, y el service necesita el estado
+  // para decidir si es un duplicado. Las rechazadas no cuentan: se puede volver a postular.
   async obtenerPorPersonaProyectoPerfil(personaId, proyectoId, perfilId) {
-    return await this.model.exists({
-      personaColaboradora: personaId,
-      proyecto: proyectoId,
-      perfil: perfilId,
-    });
+    return await this.model
+      .findOne({
+        personaColaboradora: personaId,
+        proyecto: proyectoId,
+        perfil: perfilId,
+        estado: { $in: [EstadoPostulacion.PENDIENTE, EstadoPostulacion.ACEPTADA] },
+      })
+      .select("estado")
+      .lean();
   }
 
   async obtenerPorPersona(personaId) {

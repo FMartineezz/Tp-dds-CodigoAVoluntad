@@ -115,9 +115,6 @@ export class PostulacionService {
 
   async actualizarEstado(postulacionId, nuevoEstado, colectivoId) {
     const postulacion = await this.repository.obtenerPostulacionPorId(postulacionId);
-    console.log(postulacion.colectivo);
-    console.log(colectivoId);
-
     if (!postulacion) {
       throw new AppError(ErrorCatalog.POSTULACION_NO_ENCONTRADA, 404, postulacionId);
     }
