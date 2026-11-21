@@ -57,9 +57,25 @@ server {
         proxy_busy_buffers_size    256k;
     }
 
-    # ----- Frontend (todavía no desplegado) -----
+    # ----- Frontend: el dist de Vite, copiado en la imagen (deploy/nginx/Dockerfile) -----
+    root /usr/share/nginx/html;
+
+    # Los archivos de /assets llevan un hash en el nombre: se pueden cachear "para siempre".
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    # SPA con BrowserRouter: cualquier ruta que no sea un archivo (/proyectos/123, /org/…)
+    # devuelve index.html y React Router decide qué pantalla mostrar. index.html no se
+    # cachea para que un deploy nuevo se vea al recargar.
     location / {
-        default_type text/plain;
-        return 200 "Frontend todavia no desplegado. API en /api/ - Keycloak en /auth/\n";
+        add_header Cache-Control "no-cache" always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri $uri/ /index.html;
     }
 }

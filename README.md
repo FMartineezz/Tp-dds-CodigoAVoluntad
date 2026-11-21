@@ -90,9 +90,34 @@ Como el backend usa ES Modules, Jest se ejecuta con `node --experimental-vm-modu
 
 ### Frontend
 
-El frontend es la capa de interacción con el usuario. Se encarga de presentar la información, facilitar la navegación y permitir la ejecución de las acciones del sistema a través de una interfaz web intuitiva
+El frontend es la capa de interacción con el usuario. Se encarga de presentar la información, facilitar la navegación y permitir la ejecución de las acciones del sistema a través de una interfaz web intuitiva. Está hecho con React + Vite y Axios; la estructura de carpetas (átomos → moléculas → organismos → plantillas → páginas) está explicada en `packages/frontend/README.md`.
 
+```bash
+cp packages/frontend/.env.example packages/frontend/.env.local   # VITE_API_URL=http://localhost:8000
+npm run start:frontend    # http://localhost:5173 (necesita el backend levantado)
+npm run test:frontend     # tests del front (Vitest + Testing Library)
+npm run build:frontend    # genera packages/frontend/dist
 ```
 
+## Despliegue
 
+Todo corre en un único servidor con `docker compose` (`docker-compose.yml`):
+
+| Servicio | Qué hace |
+|---|---|
+| `nginx` | Único expuesto a internet (80/443). Sirve el front compilado, hace de proxy a la API en `/api/` y a Keycloak en `/auth/`, y termina HTTPS. Su imagen (`deploy/nginx/Dockerfile`) compila el front en un primer paso y copia el `dist`. |
+| `certbot` | Renueva el certificado de Let's Encrypt. |
+| `backend` | La API (Express), en la red interna. |
+| `mongodb` | La base, con un usuario propio para la app (`deploy/mongo-init`). |
+| `keycloak` + `keycloak-db` | Login (todavía no integrado con el front). |
+
+Primer despliegue en el servidor:
+
+```bash
+./deploy/gen-env.sh            # crea .env con claves aleatorias; completar SMTP y DOMAIN
+./deploy/init-letsencrypt.sh   # pide el certificado y levanta todo
 ```
+
+Para actualizar después de un merge: `git pull && docker compose up -d --build`.
+
+El front le habla a la API por `/api` (mismo dominio), así que no hace falta CORS. Las variables `VITE_*` se fijan al compilar: se cambian con `build.args` en el servicio `nginx`.

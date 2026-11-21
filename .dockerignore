@@ -1,0 +1,9 @@
+# Contexto de build de deploy/nginx/Dockerfile (la raíz del repo): solo hace falta el front.
+**/node_modules
+**/dist
+**/coverage
+.git
+.env
+**/.env
+**/.env.local
+certbot
