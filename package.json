@@ -10,9 +10,11 @@
     "dev:backend": "npm run dev --workspace=backend",
     "seed:backend": "npm run seed --workspace=backend",
     "seed:backend:volumen": "npm run seed:volumen --workspace=backend",
-    "start:frontend": "npm start --workspace=frontend",
+    "start:frontend": "npm run dev --workspace=packages/frontend",
+    "build:frontend": "npm run build --workspace=packages/frontend",
     "start:dev": "concurrently \"npm run dev:backend\" \"npm run start:frontend\"",
     "test:backend": "npm test --workspace=backend",
+    "test:frontend": "npm test --workspace=packages/frontend",
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier --check ."
