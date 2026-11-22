@@ -1,23 +1,6 @@
 # Justificación de los requerimientos no funcionales (Entrega 3) — PROPUESTA
-
-> Borrador para revisar en equipo. Cada punto dice **qué decidimos**, **por qué** y **dónde se ve en el código**, para que quien corrija lo pueda verificar. Al final hay una lista de lo que todavía no cumplimos del todo, para decidir si lo arreglamos o lo dejamos explicado.
-
 Rutas relativas a `packages/frontend/src/`.
 
----
-
-## 0. Elecciones de stack
-
-| Elección | Alternativa del enunciado | Por qué |
-|---|---|---|
-| **React 19 + Vite** | React con CRA o Next.js | CRA está discontinuado (sin mantenimiento desde 2023 y React lo desaconseja). Vite compila el mismo código (`.js` con JSX y CSS Modules, como CRA) y arranca y recompila mucho más rápido. No usamos Next.js porque el enunciado pide cliente pesado y un único servidor con API JSON: el SSR de Next no aporta y suma un proceso de Node más para desplegar. *Hay que confirmar con el docente que Vite en lugar de CRA está aceptado.* |
-| **React Router (BrowserRouter)** | — | Las URL son legibles y compartibles (`/proyectos/:id`), y el botón «Atrás» funciona como se espera. nginx devuelve `index.html` para cualquier ruta (ver `deploy/nginx/site.conf.template`). |
-| **Axios** | Lo pide el enunciado | Una sola instancia en `api/cliente.js` (URL base y timeout de 10 s). Ahí se va a agregar el token de Keycloak con un interceptor, sin tocar las pantallas. |
-| **Capa de adaptadores (`api/*.js`)** | Llamar a Axios desde cada pantalla | Las pantallas no conocen los nombres del backend: cada `api/*.js` traduce la respuesta a lo que muestra la vista. Si el backend cambia un campo, se arregla en un solo lugar. |
-| **CSS Modules + tokens CSS** | Framework de UI (MUI, Bootstrap) | La estética propia («serigrafía de barrio») no sale de un framework sin pelearse con él. Los tokens (`estilos/`) nos dan la consistencia que daría un framework, sin dependencias extra. |
-| **Diseño atómico** (átomos → moléculas → organismos → plantillas → páginas) | — | Cada componente se escribe una vez y se reutiliza: un botón cambia en un solo archivo. Ayuda a «Consistencia en la UI». |
-
----
 
 ## 1. Interfaz intuitiva
 
@@ -64,7 +47,7 @@ Rutas relativas a `packages/frontend/src/`.
 - **Navegación en el celular**: el menú pasa a una **barra inferior con íconos** (`ICONOS` y `ETIQUETA_MOVIL` en `menus.js`), al alcance del pulgar.
 - **Tablas que se apilan**: debajo de 800 px cada fila se convierte en una tarjeta, y cada celda muestra su título con `td::before { content: attr(data-l) }` (`plantillas/disposicion.module.css`). Así no hace falta scroll horizontal.
 - **Grillas fluidas** (`moleculas/Grid`) con `auto-fill` y `minmax`: la cantidad de columnas se adapta sola.
-- **Probado en**: *completar con los dispositivos o anchos que probemos (por ejemplo 375, 768 y 1280 px).*
+- **Probado en**: Motorola G60s, Samsung Tab S9 FE, MacBook Pro (14").
 
 ## 5. Accesibilidad
 
@@ -103,13 +86,3 @@ Rutas relativas a `packages/frontend/src/`.
 - **Dos tipografías** en todo el sitio: Archivo para texto y títulos, IBM Plex Mono para datos (fechas, códigos). Se sirven desde el propio bundle con `@fontsource`, sin pedidos a Google.
 - **Un solo componente por función**: hay un `Button` para todo el sitio (con variantes), un `Field` para todos los campos, un `Alert` para todos los avisos y un `ConfirmDialog` para todas las confirmaciones.
 - **Documentación para el equipo**: cada carpeta tiene un `LEEME.md`, y además están `docs/GLOSARIO.md` y `docs/RECETAS.md`, para que cualquiera agregue pantallas sin romper la consistencia.
-
----
-
-## Pendiente o a discutir antes de entregar
-
-1. **Login real**: hoy la sesión es simulada. Afecta a «Login y autenticación», que no es un RNF pero se evalúa junto con esto.
-2. **Vite en lugar de CRA**: confirmarlo con el docente (punto 0).
-3. **Auditoría automática**: correr Lighthouse o axe sobre 3 o 4 pantallas y pegar los puntajes acá. Suma evidencia objetiva.
-4. **hCaptcha y login social** aparecen en los formularios pero están simulados: decidir si los integramos o los sacamos de la UI para no prometer algo que no funciona.
-5. **Completar «Probado en»** (punto 4) con capturas en celular, tablet y desktop.

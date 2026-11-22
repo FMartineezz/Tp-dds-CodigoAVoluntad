@@ -1,6 +1,6 @@
 import cron from "node-cron";
 
-/** Job que cada minuto cierra los proyectos cuya fecha de cierre ya pasó. */
+/* Job que cada minuto cierra los proyectos cuya fecha de cierre ya pasó. */
 export class cierreProyectosJob {
   /**
    * @param {object} deps
@@ -13,7 +13,7 @@ export class cierreProyectosJob {
   /** Programa el cron ("* * * * *": cada minuto). */
   iniciar() {
     cron.schedule("* * * * *", async () => {
-      console.log("Running every 1 minutes");
+      console.log("Running every 1 minute");
       console.log(new Date());
 
       const fechaActual = new Date();
