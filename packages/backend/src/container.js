@@ -1,3 +1,7 @@
+/**
+ * Contenedor de dependencias: crea una sola instancia de cada repositorio, service y controller,
+ * inyectando a cada uno lo que necesita por constructor. Las rutas importan de acá los controllers.
+ */
 import nodemailer from "nodemailer";
 import { ProyectoRepository } from "./repositories/proyectoRepository.js";
 import { ColectivoRepository } from "./repositories/colectivoRepository.js";

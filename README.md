@@ -27,6 +27,7 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
 ```
 ───backend
    ├─── index.js             # Levanta la app (buildApp) y la conexión a MongoDB
+   ├─── jsconfig.json        # Chequeo de tipos de las anotaciones JSDoc (npm run types)
    ├─── package.json
    ├─── config               # Conexión a MongoDB
    │
@@ -40,16 +41,18 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
    │   ├─── repositories     # Encargados de la persistencia y acceso a datos
    │   ├─── routes           # Definicion de los endpoints
    │   ├─── schemas          # Schemas de Mongoose
-   │   └─── services         # Encargados del comportamiento del dominio, contiene la logica y reglas de negocio
+   │   ├─── services         # Encargados del comportamiento del dominio, contiene la logica y reglas de negocio
+   │   └─── types.js         # Tipos compartidos en JSDoc (Id, Paginacion, ProyectoGuardado…)
    │
    └───test
-       ├─── unit             # Tests unitarios
-       │   ├─── errors
-       │   ├─── models       # Capa de dominio
-       │   └─── services     # Capa de servicios, con sus dependencias moqueadas (jest.fn)
-       ├─── int              # Tests de integración con Supertest (rutas → controllers → services)
-       │   └─── utils        # buildTestApp: arma la app como container.js, con repositorios moqueados
-       └─── utils            # esperarAppError
+       ├─── setup            # Levanta un MongoDB en memoria para toda la suite (mongodb-memory-server)
+       ├─── unit             # Capa de dominio (models) y errores, sin base de datos
+       ├─── services         # Capa de servicios, con sus repositorios reales contra la base en memoria
+       ├─── validations      # Schemas de zod
+       ├─── int              # Integración con Supertest: rutas → controllers → services → repositorios
+       │   └─── utils        # app: la misma app que levanta index.js
+       ├─── seeds            # Verifica que los seeds respeten las reglas del dominio
+       └─── utils            # Base por archivo de test, escenarios, esperarAppError y consultasA
 ```
 
 ### Cómo levantar el backend
@@ -71,22 +74,33 @@ Para probar la API a mano está la colección de Postman en `docs/CodigoAVolunta
 
 ### Tests
 
-Los tests usan [Jest](https://jestjs.io/) y ninguno necesita MongoDB:
+Los tests usan [Jest](https://jestjs.io/) y **un MongoDB en memoria** ([mongodb-memory-server](https://www.npmjs.com/package/mongodb-memory-server)): no hace falta tener Mongo instalado ni levantado. `test/setup/globalSetup.js` arranca un `mongod` real una sola vez, y cada archivo de test usa su propia base dentro de él (`test/utils/db.js`), que se vacía después de cada test. Así pueden correr en paralelo sin pisarse. La primera vez se descarga el binario de MongoDB.
 
-- **Unitarios** (`test/unit`): cubren la capa de dominio y la de servicios. Cada service se prueba aislado: el repositorio y los otros services que recibe por constructor se reemplazan por mocks (`jest.fn()` con `mockResolvedValue`), y se verifica con qué argumentos se los llama (`toHaveBeenCalledWith`).
-- **De integración** (`test/int`): con [Supertest](https://www.npmjs.com/package/supertest) se le hacen requests HTTP a la app real (rutas, validaciones de zod, controllers, services y `errorHandler`). Solo se moquean los repositorios y el transporter de mails.
+No hay mocks de repositorios: lo que se prueba es lo mismo que corre en producción.
+
+- **Unitarios** (`test/unit`): modelos de dominio y errores, sin base.
+- **De servicios** (`test/services`): cada service con sus repositorios reales contra la base en memoria. Algunos además cuentan las consultas que llegan a la base (`consultasA` en `test/utils/db.js`) para asegurar que no haya consultas N+1.
+- **De integración** (`test/int`): con [Supertest](https://www.npmjs.com/package/supertest) se le hacen requests HTTP a la app real (rutas, validaciones de zod, controllers, services, repositorios y `errorHandler`). El transporter de mails usa el modo JSON de nodemailer, que arma el mail sin enviarlo.
 
 Cada test sigue la estructura preparación → ejecución → validación.
 
 ```bash
 npm run test:backend                              # desde la raíz
-npm run test:unit --workspace=backend             # solo unitarios
+npm run test:unit --workspace=backend             # unitarios, de services y de validaciones
 npm run test:int --workspace=backend              # solo integración
 npm test --workspace=backend -- logroService      # solo los tests de un archivo
 npm run test:coverage --workspace=backend         # con reporte de cobertura
 ```
 
 Como el backend usa ES Modules, Jest se ejecuta con `node --experimental-vm-modules`. Por eso aparece un `ExperimentalWarning` al correrlos; es esperable.
+
+### Tipos con JSDoc
+
+JavaScript no tiene tipos: los agregamos con anotaciones [JSDoc](https://jsdoc.app/) en models, services, repositorios y controllers. Los tipos compartidos están en `src/types.js`: `Id`, `Paginacion`, `Pagina<T>` y la versión guardada de cada modelo, como `ProyectoGuardado`. VS Code los usa para autocompletar y marcar errores mientras se escribe, y el chequeo se puede correr a mano:
+
+```bash
+npm run types --workspace=backend   # tsc --noEmit sobre src/ (no compila nada, solo verifica)
+```
 
 ### Frontend
 

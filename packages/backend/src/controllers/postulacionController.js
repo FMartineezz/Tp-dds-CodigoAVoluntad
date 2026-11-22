@@ -1,8 +1,19 @@
+/** Endpoints de postulaciones a perfiles de proyectos (routes/postulacionRoutes.js). */
 export class PostulacionController {
+  /**
+   * @param {object} deps
+   * @param {import("../services/postulacionService.js").PostulacionService} deps.postulacionService
+   */
   constructor({ postulacionService }) {
     this.postulacionService = postulacionService;
   }
 
+  /**
+   * POST /proyectos/:proyectoId/perfiles/:perfilId/postulaciones (body validado por
+   * validarPostulacion) → 201 con la postulación.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   crearPostulacion = async (req, res) => {
     const { proyectoId, perfilId } = req.params;
 
@@ -18,6 +29,12 @@ export class PostulacionController {
     res.status(201).json(postulacion);
   };
 
+  /**
+   * PATCH /postulaciones/:postulacionId (body `{ estado, colectivoId }`; estado validado por
+   * validarResolucionPostulacion) → 200 con la postulación aceptada o rechazada.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   actualizarPostulacion = async (req, res) => {
     const postulacionId = req.params.postulacionId;
 
@@ -30,16 +47,30 @@ export class PostulacionController {
     res.status(200).json(postulacion);
   };
 
+  /**
+   * GET /colaboradoras/:id/postulaciones → 200 con las postulaciones de la persona.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   listarDePersona = async (req, res) => {
     const postulaciones = await this.postulacionService.obtenerDePersona(req.params.id);
 
     res.status(200).json(postulaciones);
   };
 
+  /**
+   * GET /colectivos/:colectivoId/postulaciones[?estado] → 200 con las postulaciones a proyectos
+   * del colectivo.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   listarDeColectivo = async (req, res) => {
     const postulaciones = await this.postulacionService.obtenerDeColectivo(
       req.params.colectivoId,
-      req.query.estado,
+      // El cast es solo para tsc: ?estado llega como texto y se usa tal cual como filtro.
+      /** @type {import("../services/postulacionService.js").EstadoPostulacionValor} */ (
+        req.query.estado
+      ),
     );
 
     res.status(200).json(postulaciones);

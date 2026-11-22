@@ -5,6 +5,10 @@ import {
   validarLecturaDeMensajes,
 } from "../middlewares/validations/mensajeValidation.js";
 
+/**
+ * Rutas de mensajes: envío y marcado como leídos.
+ * @returns {import("express").Router}
+ */
 export default function mensajeRoutes() {
   const router = Router();
 

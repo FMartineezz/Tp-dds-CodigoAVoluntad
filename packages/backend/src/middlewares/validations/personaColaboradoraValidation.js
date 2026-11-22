@@ -81,6 +81,14 @@ export const colaboradoraSchema = zod.object({
   redesSociales: redesSocialesArraySchema.optional(),
 });
 
+/**
+ * Valida el body de POST /colaboradoras y deja en req.body los contactos y redes sociales
+ * ya normalizados.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 const validarColaboradora = (req, res, next) => {
   const resultado = colaboradoraSchema.safeParse(req.body);
 
@@ -100,6 +108,14 @@ const validarColaboradora = (req, res, next) => {
   next();
 };
 
+/**
+ * Valida el body de PATCH /colaboradoras/:id (campos opcionales, pero al menos uno) y
+ * reemplaza req.body por los datos parseados.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarActualizacionColaboradora = (req, res, next) => {
   const schemaActualizacion = colaboradoraSchema.partial();
   const resultado = schemaActualizacion.safeParse(req.body);

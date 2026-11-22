@@ -10,6 +10,12 @@ const OBJECT_ID = /^[0-9a-f]{24}$/i;
 //
 // USO (en cada archivo de rutas): exigirIdsValidos(router, { id: ErrorCatalog.COLECTIVO_NO_ENCONTRADO })
 // Las claves son los nombres de los parámetros (:id, :colectivoId…) de ESE router.
+/**
+ * @param {import("express").Router} router
+ * @param {Record<string, import("../../errors/errorCatalog.js").EntradaErrorCatalog>} erroresPorParametro
+ *   Nombre del parámetro de ruta → error del catálogo a devolver (con 404) si el id no es un ObjectId.
+ * @returns {void}
+ */
 export function exigirIdsValidos(router, erroresPorParametro) {
   for (const [parametro, error] of Object.entries(erroresPorParametro)) {
     router.param(parametro, (req, res, next, valor) => {

@@ -11,6 +11,14 @@ const postulacionSchema = zod.object({
   anonima: zod.boolean({ invalid_type_error: "POSTULACION_ANONIMA_FORMATO" }).optional(),
 });
 
+/**
+ * Valida el body de POST /proyectos/:proyectoId/perfiles/:perfilId/postulaciones:
+ * personaColaboradoraId obligatorio y `anonima` booleano opcional.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarPostulacion = (req, res, next) => {
   const resultado = postulacionSchema.safeParse(req.body);
 
@@ -36,6 +44,14 @@ const resolucionPostulacionSchema = zod.object({
   ),
 });
 
+/**
+ * Valida el `estado` de PATCH /postulaciones/:postulacionId (aceptada o rechazada, sin importar
+ * mayúsculas) y lo deja normalizado en req.body.estado.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarResolucionPostulacion = (req, res, next) => {
   const resultado = resolucionPostulacionSchema.safeParse(req.body);
 

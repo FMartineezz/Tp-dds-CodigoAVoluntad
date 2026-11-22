@@ -2,11 +2,28 @@ import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { Habilidad } from "../models/habilidad.js";
 
+/** @typedef {import("../types.js").Id} Id */
+/** @typedef {import("../types.js").HabilidadGuardada} HabilidadGuardada */
+
+/**
+ * Alta y consulta del catálogo de habilidades.
+ */
 export class HabilidadService {
+  /**
+   * @param {object} deps
+   * @param {import("../repositories/habilidadRepository.js").HabilidadRespository} deps.repository
+   */
   constructor({ repository }) {
     this.repository = repository;
   }
 
+  /**
+   * Crea una habilidad nueva si no hay otra con el mismo título.
+   * @param {string} titulo
+   * @param {string} descripcion
+   * @returns {Promise<Habilidad>} La habilidad con el `id` asignado.
+   * @throws {AppError} 409 si ya existe una habilidad con ese título.
+   */
   async crearHabilidad(titulo, descripcion) {
     //Valido que no exista la habilidad
     const habilidadExistente = await this.repository.obtenerPorTitulo(titulo);
@@ -21,10 +38,19 @@ export class HabilidadService {
     return habilidad;
   }
 
+  /**
+   * Todas las habilidades.
+   * @returns {Promise<HabilidadGuardada[]>}
+   */
   async obtenerHabilidades() {
     return await this.repository.obtenerTodas();
   }
 
+  /**
+   * @param {Id} id
+   * @returns {Promise<HabilidadGuardada>}
+   * @throws {AppError} 404 si no existe.
+   */
   async obtenerHabilidadPorId(id) {
     const habilidad = await this.repository.obtenerPorId(id);
 
@@ -35,6 +61,11 @@ export class HabilidadService {
     return habilidad;
   }
 
+  /**
+   * @param {string} codigo
+   * @returns {Promise<HabilidadGuardada>}
+   * @throws {AppError} 400 si no existe una habilidad con ese código.
+   */
   async obtenerHabilidadPorCodigo(codigo) {
     const habilidad = await this.repository.obtenerPorCodigo(codigo);
 
@@ -44,6 +75,11 @@ export class HabilidadService {
     return habilidad;
   }
 
+  /**
+   * Las habilidades cuyos códigos están en la lista (los inexistentes se ignoran).
+   * @param {string[]} codigos
+   * @returns {Promise<HabilidadGuardada[]>}
+   */
   async obtenerHabilidadesPorCodigos(codigos) {
     return await this.repository.obtenerPorCodigos(codigos);
   }

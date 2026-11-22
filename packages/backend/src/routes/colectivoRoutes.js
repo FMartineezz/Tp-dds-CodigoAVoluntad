@@ -10,6 +10,10 @@ import ErrorCatalog from "../errors/errorCatalog.js";
 
 const pathColectivos = "/colectivos";
 
+/**
+ * Rutas de colectivos (ABM y listado paginado) y de sus mensajes.
+ * @returns {import("express").Router}
+ */
 export default function colectivoRoutes() {
   const router = Router();
   exigirIdsValidos(router, {

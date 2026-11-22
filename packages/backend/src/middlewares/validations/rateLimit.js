@@ -1,5 +1,9 @@
 import rateLimit from "express-rate-limit";
 
+/**
+ * Rate limit: 5 pedidos cada 20 minutos por IP (responde 429). Se saltea si el pedido trae
+ * la API key de MI_API_KEY (header x-api-key o ?apiKey).
+ */
 export const limiter = rateLimit({
   windowMs: 20 * 60 * 1000,
   max: 5,

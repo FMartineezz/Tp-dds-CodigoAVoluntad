@@ -323,9 +323,7 @@ describe("Colaboradoras (HTTP)", () => {
   });
 
   describe("DELETE /colaboradoras/:id", () => {
-    // BUG: el controller llama a personaColaboradoraService.eliminarPersonaColaboradora, que no
-    // existe: cualquier DELETE responde 500 ("is not a function") y la colaboradora no se anonimiza.
-    test.failing("anonimiza a la colaboradora y responde 204", async () => {
+    test("anonimiza a la colaboradora y responde 204", async () => {
       // Preparación
       const creada = await crearColaboradora();
 
@@ -343,8 +341,7 @@ describe("Colaboradoras (HTTP)", () => {
       });
     });
 
-    // BUG: ver arriba, falta el método del service.
-    test.failing("responde 409 si la colaboradora ya fue dada de baja", async () => {
+    test("responde 409 si la colaboradora ya fue dada de baja", async () => {
       // Preparación
       const creada = await crearColaboradora();
       await request(app).delete(`/colaboradoras/${creada.body.id}`);
@@ -357,8 +354,7 @@ describe("Colaboradoras (HTTP)", () => {
       expect(respuesta.body.code).toBe(ErrorCatalog.COLABORADORA_YA_DADA_DE_BAJA.code);
     });
 
-    // BUG: ver arriba, falta el método del service.
-    test.failing("responde 404 si la colaboradora no existe", async () => {
+    test("responde 404 si la colaboradora no existe", async () => {
       // Ejecución
       const respuesta = await request(app).delete(`/colaboradoras/${idInexistente()}`);
 

@@ -1,3 +1,7 @@
+/**
+ * Punto de entrada del backend: arma la app, conecta a MongoDB, arranca los jobs
+ * (cierre de proyectos y notificaciones automáticas) y escucha en SERVER_PORT (3000 por defecto).
+ */
 import "dotenv/config";
 import routes from "./src/routes/routes.js";
 import { buildApp } from "./src/app.js";

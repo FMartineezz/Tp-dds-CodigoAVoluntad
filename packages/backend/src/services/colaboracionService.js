@@ -2,13 +2,36 @@ import { Colaboracion, OrigenBaja } from "../models/colaboracion.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
+/** @typedef {import("../types.js").Id} Id */
+/** @typedef {import("../types.js").ColaboracionGuardada} ColaboracionGuardada */
+/** @typedef {typeof OrigenBaja[keyof typeof OrigenBaja]} OrigenBajaValor */
+
+/**
+ * Colaboraciones: alta con control de cupo del perfil, consultas y baja lógica.
+ */
 export class ColaboracionService {
+  /**
+   * @param {object} deps
+   * @param {import("../repositories/colaboracionRepository.js").ColaboracionRepository} deps.colaboracionRepository
+   * @param {import("./personaColaboradoraService.js").PersonaColaboradoraService} deps.personaColaboradoraService
+   * @param {import("./proyectoService.js").ProyectoService} deps.proyectoService
+   */
   constructor({ colaboracionRepository, personaColaboradoraService, proyectoService }) {
     this.colaboracionRepository = colaboracionRepository;
     this.personaColaboradoraService = personaColaboradoraService;
     this.proyectoService = proyectoService;
   }
 
+  /**
+   * Crea la colaboración de una persona en un perfil, si el proyecto sigue abierto y hay cupo.
+   * @param {Id} personaId
+   * @param {Id} proyectoId
+   * @param {Id} perfilId
+   * @param {boolean} [anonima]
+   * @returns {Promise<Colaboracion>} La colaboración con el `id` asignado.
+   * @throws {AppError} 404 si no existe la persona, el proyecto o el perfil; 409 si el proyecto
+   *   está finalizado o el perfil no tiene cupo.
+   */
   async crearColaboracion(personaId, proyectoId, perfilId, anonima) {
     const persona =
       await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
@@ -31,17 +54,32 @@ export class ColaboracionService {
       }
     }
 
-    const colaboracion = new Colaboracion(persona, proyecto, perfil, anonima);
+    // Se pasan los documentos completos: mongoose los castea a su _id al guardar (el modelo pide Id).
+    const colaboracion = new Colaboracion(
+      /** @type {any} */ (persona),
+      /** @type {any} */ (proyecto),
+      /** @type {any} */ (perfil),
+      anonima,
+    );
     const colaboracionGuardada = await this.colaboracionRepository.guardar(colaboracion);
     colaboracion.id = colaboracionGuardada.id;
 
     return colaboracion;
   }
 
+  /**
+   * Todas las colaboraciones.
+   * @returns {Promise<ColaboracionGuardada[]>}
+   */
   async obtenerColaboraciones() {
     return await this.colaboracionRepository.obtenerTodas();
   }
 
+  /**
+   * @param {Id} id
+   * @returns {Promise<ColaboracionGuardada>}
+   * @throws {AppError} 404 si no existe.
+   */
   async obtenerColaboracionPorId(id) {
     const colaboracion = await this.colaboracionRepository.obtenerPorId(id);
 
@@ -52,17 +90,36 @@ export class ColaboracionService {
     return colaboracion;
   }
 
+  /**
+   * Colaboraciones de una persona.
+   * @param {Id} personaId
+   * @returns {Promise<ColaboracionGuardada[]>}
+   * @throws {AppError} 404 si no existe la persona.
+   */
   async obtenerColaboracionesDePersona(personaId) {
     await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
     return await this.colaboracionRepository.obtenerDePersona(personaId);
   }
 
+  /**
+   * Colaboraciones de un proyecto.
+   * @param {Id} proyectoId
+   * @returns {Promise<ColaboracionGuardada[]>}
+   * @throws {AppError} 404 si no existe el proyecto.
+   */
   async obtenerColaboracionesDeProyecto(proyectoId) {
     await this.proyectoService.obtenerProyectoPorId(proyectoId);
     return await this.colaboracionRepository.obtenerDeProyecto(proyectoId);
   }
 
   // bajaPor (opcional): quién da la baja, "persona" o "colectivo" (OrigenBaja)
+  /**
+   * Da de baja (lógica) una colaboración activa.
+   * @param {Id} id
+   * @param {OrigenBajaValor} [bajaPor]
+   * @returns {Promise<void>}
+   * @throws {AppError} 400 si `bajaPor` no es válido; 404 si no existe; 409 si ya estaba dada de baja.
+   */
   async desactivarColaboracion(id, bajaPor) {
     if (bajaPor !== undefined && !Object.values(OrigenBaja).includes(bajaPor)) {
       throw new AppError(ErrorCatalog.COLABORACION_ORIGEN_BAJA_INVALIDO, 400);
@@ -82,6 +139,10 @@ export class ColaboracionService {
   }
 
   //Estadisticas
+  /**
+   * Total de colaboraciones y cuántas son anónimas o públicas.
+   * @returns {Promise<{ total: number, anonimas: number, publicas: number }>}
+   */
   async obtenerEstadisticas() {
     const resultado = await this.colaboracionRepository.contarTotalYAnonimas();
     const { total, anonimas } = resultado[0] ?? { total: 0, anonimas: 0 };

@@ -8,6 +8,10 @@ import validarPersonaColaboradora, {
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
+/**
+ * Rutas de personas colaboradoras (ABM, listado paginado, proyectos acordes y mensajes).
+ * @returns {import("express").Router}
+ */
 export default function personaColaboradoraRoutes() {
   const router = Router();
   exigirIdsValidos(router, {

@@ -3,6 +3,10 @@ import { colaboracionController } from "../container.js";
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
+/**
+ * Rutas de colaboraciones: consulta, baja y listados por persona o proyecto.
+ * @returns {import("express").Router}
+ */
 export default function colaboracionRoutes() {
   const router = Router();
   exigirIdsValidos(router, {

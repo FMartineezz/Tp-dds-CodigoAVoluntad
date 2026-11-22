@@ -7,6 +7,10 @@ import {
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
+/**
+ * Rutas de denuncias: alta desde una colaboración y gestión en /admin/denuncias.
+ * @returns {import("express").Router}
+ */
 export default function denunciaRoutes() {
   const router = Router();
   exigirIdsValidos(router, {

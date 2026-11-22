@@ -25,6 +25,14 @@ export const valoracionSchema = zod.object({
     .nullable(),
 });
 
+/**
+ * Valida el body de POST /valoraciones (colaboración, evaluador, puntaje 1 a 5 y comentario
+ * opcional) y reemplaza req.body por los datos parseados.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarValoracion = (req, res, next) => {
   const resultado = valoracionSchema.safeParse(req.body);
 

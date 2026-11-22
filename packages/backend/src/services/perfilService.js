@@ -1,6 +1,7 @@
 import { Perfil } from "../models/perfil.js";
 
 /** @typedef {import("../errors/appError.js").AppError} AppError */
+/** @typedef {import("../types.js").HabilidadGuardada} HabilidadGuardada */
 
 /**
  * Datos de un perfil tal como llegan en el body (habilidades por CÓDIGO).
@@ -9,12 +10,28 @@ import { Perfil } from "../models/perfil.js";
  * @property {string[]} habilidadesRequeridas
  * @property {string[]} habilidadesOpcionales
  * @property {number} horas
- * @property {string} tipoDeCompromiso
- * @property {string} modalidadDeColaboracion
+ * @property {import("../models/proyecto.js").TipoCompromisoValor} tipoDeCompromiso
+ * @property {import("../models/proyecto.js").ModalidadColaboracionValor} modalidadDeColaboracion
  * @property {number} [cantidadMaxima]
  */
 
+/**
+ * Cambios de un PATCH de perfil ya preparados: las habilidades pasan de códigos a documentos.
+ * @typedef {Omit<Partial<DatosDePerfil>, "habilidadesRequeridas" | "habilidadesOpcionales"> & {
+ *   habilidadesRequeridas?: HabilidadGuardada[],
+ *   habilidadesOpcionales?: HabilidadGuardada[],
+ * }} CambiosDePerfilPreparados
+ */
+
+/**
+ * Arma los perfiles de un proyecto traduciendo los códigos de habilidad a las habilidades
+ * guardadas.
+ */
 export class PerfilService {
+  /**
+   * @param {object} deps
+   * @param {import("./habilidadService.js").HabilidadService} deps.habilidadService
+   */
   constructor({ habilidadService }) {
     this.habilidadService = habilidadService;
   }
@@ -26,8 +43,8 @@ export class PerfilService {
    * @param {string[]} habilidadesRequeridas Códigos de habilidad (ej. "desarrollo_web_react").
    * @param {string[]} habilidadesOpcionales Códigos de habilidad.
    * @param {number} horas
-   * @param {string} tipoDeCompromiso Valor de TipoCompromiso.
-   * @param {string} modalidadDeColaboracion Valor de ModalidadColaboracion.
+   * @param {import("../models/proyecto.js").TipoCompromisoValor} tipoDeCompromiso
+   * @param {import("../models/proyecto.js").ModalidadColaboracionValor} modalidadDeColaboracion
    * @param {number} [cantidadMaxima] Cupo del perfil; sin cupo si no se indica.
    * @returns {Promise<Perfil>}
    * @throws {AppError} 400 si algún código de habilidad no existe.
@@ -97,11 +114,14 @@ export class PerfilService {
    * Solo toca las listas que vienen en `cambios`, con una sola consulta para las dos.
    *
    * @param {Partial<DatosDePerfil>} cambios
-   * @returns {Promise<object>} Los cambios listos para el repositorio.
+   * @returns {Promise<CambiosDePerfilPreparados>} Los cambios listos para el repositorio.
    * @throws {AppError} 400 si algún código de habilidad no existe.
    */
   async prepararCambios(cambios) {
-    const cambiosPreparados = { ...cambios };
+    // Arranca con los códigos tal cual; abajo se reemplazan por las habilidades encontradas
+    const cambiosPreparados = /** @type {CambiosDePerfilPreparados} */ (
+      /** @type {unknown} */ ({ ...cambios })
+    );
 
     const cambiaRequeridas = cambios.habilidadesRequeridas !== undefined;
     const cambiaOpcionales = cambios.habilidadesOpcionales !== undefined;

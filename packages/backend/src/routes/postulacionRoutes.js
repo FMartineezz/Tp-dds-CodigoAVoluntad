@@ -7,6 +7,10 @@ import {
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
+/**
+ * Rutas de postulaciones: alta, resolución y listados por persona o colectivo.
+ * @returns {import("express").Router}
+ */
 export default function postulacionRoutes() {
   const router = Router();
   exigirIdsValidos(router, {

@@ -1,3 +1,14 @@
+/**
+ * Entrada del catálogo de errores. `message` es un texto fijo o una función que arma el texto
+ * con los argumentos que recibe AppError.
+ * @typedef {object} EntradaErrorCatalog
+ * @property {string} code Código estable (ej. "ERR-VAL-001").
+ * @property {string | ((...args: any[]) => string)} message
+ */
+
+/**
+ * Catálogo de errores de la API, por nombre. Se congela al final del archivo.
+ */
 const ErrorCatalog = {
   // =========================
   // GENERALES

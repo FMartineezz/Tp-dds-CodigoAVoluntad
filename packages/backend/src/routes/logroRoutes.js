@@ -9,6 +9,10 @@ import ErrorCatalog from "../errors/errorCatalog.js";
 
 const pathLogros = "/proyectos/:proyectoId/logros";
 
+/**
+ * Rutas de logros de un proyecto (/proyectos/:proyectoId/logros).
+ * @returns {import("express").Router}
+ */
 export default function logroRoutes() {
   const router = Router();
   exigirIdsValidos(router, {

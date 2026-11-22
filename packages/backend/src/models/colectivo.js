@@ -1,3 +1,4 @@
+/** Ubicaciones aceptadas: Argentina, CABA o una de las 23 provincias (minúsculas, sin tildes). */
 const UBICACION_VALIDA = new Set([
   "argentina",
   "caba",
@@ -26,6 +27,7 @@ const UBICACION_VALIDA = new Set([
   "tucuman",
 ]);
 
+/** Tipos de colectivo. */
 const TipoColectivo = Object.freeze({
   FUNDACION: "fundacion",
   ONG: "ong",
@@ -33,7 +35,20 @@ const TipoColectivo = Object.freeze({
   ASAMBLEA: "asamblea",
 });
 
+/** @typedef {import("../types.js").Id} Id */
+
+/**
+ * Organización que lleva adelante una causa y publica proyectos.
+ */
 class Colectivo {
+  /**
+   * @param {string} nombre
+   * @param {string} descripcion
+   * @param {string | null} ubicacion Uno de UBICACION_VALIDA, o null.
+   * @param {typeof TipoColectivo[keyof typeof TipoColectivo]} tipoDeColectivo
+   * @param {Array<Id | object>} [proyectos] Ids o proyectos (ver cargarProyecto).
+   * @param {import("./redSocial.js").RedSocial[]} [redesSociales]
+   */
   constructor(
     nombre,
     descripcion,
@@ -42,6 +57,7 @@ class Colectivo {
     proyectos = [],
     redesSociales = [],
   ) {
+    /** @type {Id | null} */
     this.id = null;
     this.nombre = nombre;
     this.descripcion = descripcion;
@@ -50,9 +66,13 @@ class Colectivo {
     this.proyectos = proyectos;
     this.activo = true;
     this.redesSociales = redesSociales;
+    /** @type {import("./denuncia.js").Denuncia[]} */
     this.denuncias = [];
   }
 
+  /**
+   * @param {{ colectivo?: Colectivo }} proyecto
+   */
   cargarProyecto(proyecto) {
     proyecto.colectivo = this;
     this.proyectos.push(proyecto);

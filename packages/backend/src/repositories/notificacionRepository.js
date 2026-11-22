@@ -3,12 +3,26 @@ import { DestinatarioNotificacion } from "../models/notificacion.js";
 
 const CODIGO_ERROR_CLAVE_DUPLICADA = 11000;
 
+/** @typedef {import("../types.js").Id} Id */
+/** @typedef {import("../types.js").NotificacionGuardada} NotificacionGuardada */
+/** @typedef {import("../models/notificacion.js").Notificacion} Notificacion */
+
+/** Acceso a la colección de notificaciones (para personas y para colectivos). */
 export class NotificacionRepository {
   constructor() {
+    // Model<any>: los tipos que mongoose infiere del schema no coinciden con los de dominio
+    // (opcionales vs. null); el contrato real lo declara el JSDoc de cada método.
+    /** @type {import("mongoose").Model<any>} */
     this.model = NotificacionModel;
   }
 
   //Mensaje que envia el colectivo
+  /**
+   * Guarda una notificación; si ya existía (índice único) no la duplica.
+   * @param {Notificacion} notificacion
+   * @returns {Promise<(import("mongoose").Document & NotificacionGuardada) | null>} El documento
+   *   de mongoose (sin lean), o null si era un duplicado.
+   */
   async guardar(notificacion) {
     try {
       const nuevaNotificacion = new this.model(notificacion);
@@ -27,7 +41,8 @@ export class NotificacionRepository {
    * error 11000) se ignoran, igual que en {@link NotificacionRepository#guardar}.
    *
    * @param {import("../models/notificacion.js").Notificacion[]} notificaciones
-   * @returns {Promise<object[]>} Las notificaciones que se insertaron.
+   * @returns {Promise<Array<import("mongoose").Document & NotificacionGuardada>>} Las notificaciones
+   *   que se insertaron (documentos de mongoose, sin lean).
    */
   async guardarVarias(notificaciones) {
     if (notificaciones.length === 0) return [];
@@ -43,6 +58,12 @@ export class NotificacionRepository {
     }
   }
 
+  /**
+   * Notificaciones dirigidas a una persona, de la más nueva a la más vieja, con el título del
+   * proyecto poblado.
+   * @param {Id} personaId
+   * @returns {Promise<NotificacionGuardada[]>}
+   */
   async obtenerDePersona(personaId) {
     return await this.model
       .find({ personaColaboradora: personaId, destinatario: DestinatarioNotificacion.PERSONA })
@@ -51,6 +72,12 @@ export class NotificacionRepository {
       .lean();
   }
 
+  /**
+   * Notificaciones dirigidas a un colectivo, de la más nueva a la más vieja, con el título del
+   * proyecto y el nombre de fantasía de la persona poblados.
+   * @param {Id} colectivoId
+   * @returns {Promise<NotificacionGuardada[]>}
+   */
   async obtenerDeColectivo(colectivoId) {
     return await this.model
       .find({ colectivo: colectivoId, destinatario: DestinatarioNotificacion.COLECTIVO })

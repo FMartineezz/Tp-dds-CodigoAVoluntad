@@ -6,6 +6,10 @@ import ErrorCatalog from "../errors/errorCatalog.js";
 
 const pathHabilidades = "/habilidades";
 
+/**
+ * Rutas de habilidades: alta, listado y consulta por id.
+ * @returns {import("express").Router}
+ */
 export default function habilidadRoutes() {
   const router = Router();
   exigirIdsValidos(router, { id: ErrorCatalog.HABILIDAD_NO_ENCONTRADA_POR_ID });

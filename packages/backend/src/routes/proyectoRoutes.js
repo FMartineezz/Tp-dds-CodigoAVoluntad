@@ -9,6 +9,10 @@ import ErrorCatalog from "../errors/errorCatalog.js";
 
 const pathProyectos = "/proyectos";
 
+/**
+ * Rutas de proyectos: alta, consulta, listados paginados y actualización.
+ * @returns {import("express").Router}
+ */
 export default function proyectoRoutes() {
   const router = Router();
   exigirIdsValidos(router, {

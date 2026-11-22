@@ -5,6 +5,10 @@ import ErrorCatalog from "./errors/errorCatalog.js";
 
 // Arma la app de Express con las rutas que recibe. La usan index.js y los tests de integración,
 // así los tests prueban exactamente la misma configuración (json, cors, 404 y manejo de errores).
+/**
+ * @param {import("express").Router[]} routes Routers a montar (ver routes/routes.js).
+ * @returns {import("express").Express}
+ */
 export function buildApp(routes) {
   const app = express();
   app.use(express.json());

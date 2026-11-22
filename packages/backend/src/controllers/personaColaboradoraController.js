@@ -1,10 +1,21 @@
 import { respuestaPaginada } from "../utils/paginacion.js";
+/** Endpoints de personas colaboradoras, bajo /colaboradoras (routes/personaColaboradoraRoutes.js). */
 export class PersonaColaboradoraController {
+  /**
+   * @param {object} deps
+   * @param {import("../services/personaColaboradoraService.js").PersonaColaboradoraService} deps.personaColaboradoraService
+   * @param {import("../services/busquedaService.js").BusquedaService} deps.busquedaService
+   */
   constructor({ personaColaboradoraService, busquedaService }) {
     this.personaColaboradoraService = personaColaboradoraService;
     this.busquedaService = busquedaService;
   }
 
+  /**
+   * POST /colaboradoras (body validado por validarColaboradora) → 201 con la persona y header Location.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   crearPersonaColaboradora = async (req, res) => {
     const persona = await this.personaColaboradoraService.crearPersonaColaboradora(
       req.body.nombreFantasia,
@@ -22,6 +33,11 @@ export class PersonaColaboradoraController {
     res.status(201).location(`/colaboradoras/${persona.id}`).json(persona);
   };
 
+  /**
+   * PATCH /colaboradoras/:id (body parcial validado) → 200 con la persona actualizada.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   actualizarPersonaColaboradora = async (req, res) => {
     const id = req.params.id;
 
@@ -33,6 +49,11 @@ export class PersonaColaboradoraController {
     res.status(200).json(persona);
   };
 
+  /**
+   * GET /colaboradoras?pagina&limite → 200 con una RespuestaPaginada de personas.
+   * @param {import("../types.js").RequestPaginado} req
+   * @param {import("express").Response} res
+   */
   obtenerPersonasColaboradoras = async (req, res) => {
     const pagina = await this.personaColaboradoraService.obtenerPersonasColaboradoras(
       req.paginacion,
@@ -41,6 +62,11 @@ export class PersonaColaboradoraController {
     res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };
 
+  /**
+   * GET /colaboradoras/:id → 200 con la persona.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   obtenerPersonaColaboradoraPorId = async (req, res) => {
     const id = req.params.id;
 
@@ -49,6 +75,12 @@ export class PersonaColaboradoraController {
     res.status(200).json(persona);
   };
 
+  /**
+   * GET /colaboradoras/:id/proyectos-acordes?pagina&limite → 200 con una RespuestaPaginada de
+   * proyectos que encajan con la persona.
+   * @param {import("../types.js").RequestPaginado} req
+   * @param {import("express").Response} res
+   */
   obtenerProyectosAcordes = async (req, res) => {
     const id = req.params.id;
 
@@ -57,6 +89,11 @@ export class PersonaColaboradoraController {
     res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };
 
+  /**
+   * DELETE /colaboradoras/:id → 204 (sin cuerpo).
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   eliminarPersonaColaboradora = async (req, res) => {
     const id = req.params.id;
 

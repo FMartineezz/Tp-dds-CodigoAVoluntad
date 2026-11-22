@@ -31,6 +31,12 @@ export const logroSchema = z.object({
 // PATCH: todos los campos son opcionales, pero los que vengan se validan igual
 const logroParcialSchema = logroSchema.partial();
 
+/**
+ * Arma un middleware que valida req.body con `schema` y lo reemplaza por los datos parseados.
+ * Si falla, lanza AppError 400 con el error del catálogo que indique zod.
+ * @param {import("zod").ZodTypeAny} schema
+ * @returns {import("express").RequestHandler}
+ */
 const validarCon = (schema) => (req, res, next) => {
   const resultado = schema.safeParse(req.body);
 
@@ -43,5 +49,7 @@ const validarCon = (schema) => (req, res, next) => {
   next();
 };
 
+/** Valida el body de POST /proyectos/:proyectoId/logros (todos los campos obligatorios). */
 export const validarLogro = validarCon(logroSchema);
+/** Valida el body de PATCH /proyectos/:proyectoId/logros/:logroId (campos opcionales). */
 export const validarActualizacionLogro = validarCon(logroParcialSchema);

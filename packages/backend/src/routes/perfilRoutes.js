@@ -7,6 +7,10 @@ import validarPerfil, {
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
+/**
+ * Rutas de perfiles de un proyecto y de colaboradoras acordes a cada perfil.
+ * @returns {import("express").Router}
+ */
 export default function proyectoRoutes() {
   const router = Router();
   exigirIdsValidos(router, {

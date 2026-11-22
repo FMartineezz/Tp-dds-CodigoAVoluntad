@@ -305,10 +305,7 @@ describe("PersonaColaboradoraService", () => {
   });
 
   describe("eliminarPersonaColaboradora", () => {
-    // BUG: PersonaColaboradoraService no tiene el método eliminarPersonaColaboradora (que usa el
-    // controller de DELETE /colaboradoras/:id), aunque el repositorio ya implementa `eliminar`
-    // con la anonimización. Todas estas pruebas fallan con "is not a function".
-    test.failing("anonimiza los datos personales y la da de baja", async () => {
+    test("anonimiza los datos personales y la da de baja", async () => {
       // Preparación
       const creada = await crearPersona();
 
@@ -330,8 +327,7 @@ describe("PersonaColaboradoraService", () => {
       });
     });
 
-    // BUG: ver arriba, falta eliminarPersonaColaboradora en el service.
-    test.failing("falla con 409 si ya estaba dada de baja", async () => {
+    test("falla con 409 si ya estaba dada de baja", async () => {
       // Preparación
       const creada = await crearPersona();
       await personaColaboradoraService.eliminarPersonaColaboradora(creada.id);
@@ -344,8 +340,7 @@ describe("PersonaColaboradoraService", () => {
       );
     });
 
-    // BUG: ver arriba, falta eliminarPersonaColaboradora en el service.
-    test.failing("falla con 404 si no existe", async () => {
+    test("falla con 404 si no existe", async () => {
       // Ejecución y Validación
       await esperarAppError(
         personaColaboradoraService.eliminarPersonaColaboradora(idInexistente()),

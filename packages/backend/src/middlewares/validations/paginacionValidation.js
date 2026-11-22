@@ -19,6 +19,13 @@ const paginacionSchema = zod.object({
 });
 
 // Deja { pagina, limite } en req.paginacion (en Express 5 req.query es de solo lectura)
+/**
+ * Valida ?pagina y ?limite (enteros, limite hasta LIMITE_MAXIMO; con valores por defecto).
+ * @param {import("../../types.js").RequestPaginado} req Sale con `req.paginacion` cargado.
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 PAGINACION_PAGINA_INVALIDA o PAGINACION_LIMITE_INVALIDO.
+ */
 export const validarPaginacion = (req, res, next) => {
   const resultado = paginacionSchema.safeParse({
     pagina: req.query.pagina,
@@ -30,7 +37,8 @@ export const validarPaginacion = (req, res, next) => {
     throw new AppError(ErrorCatalog[codigo], 400, LIMITE_MAXIMO);
   }
 
-  req.paginacion = resultado.data;
+  // zod aplica los defaults, así que pagina y limite siempre vienen
+  req.paginacion = /** @type {import("../../types.js").Paginacion} */ (resultado.data);
   next();
 };
 

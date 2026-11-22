@@ -27,4 +27,9 @@ router.post(
   valoracionController.crearValoracion
 );
 
+/**
+ * Rutas de valoraciones: alta y listados de una persona colaboradora o de un colectivo.
+ * El router se arma una sola vez, al importar el módulo.
+ * @returns {import("express").Router}
+ */
 export default () => router;
