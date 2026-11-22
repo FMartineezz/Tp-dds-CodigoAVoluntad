@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { usarBaseDeDatos } from "../utils/db.js";
+import { consultasA, usarBaseDeDatos } from "../utils/db.js";
 import { esperarAppError } from "../utils/esperarAppError.js";
 import { proyectoService, habilidadService, colectivoService } from "../../src/container.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
@@ -48,6 +48,21 @@ beforeEach(async () => {
 });
 
 describe("ProyectoService.crearProyecto", () => {
+  test("busca las habilidades de TODOS los perfiles con una sola consulta (sin N+1)", async () => {
+    // Preparación: 3 perfiles con 2 habilidades cada uno
+    const perfiles = [
+      perfilBase({ descripcion: "Uno" }),
+      perfilBase({ descripcion: "Dos", habilidadesRequeridas: ["frontend"] }),
+      perfilBase({ descripcion: "Tres" }),
+    ];
+
+    // Ejecución
+    const consultas = await consultasA("habilidades", () => crearProyecto({ perfiles }));
+
+    // Validación: una única consulta a habilidades, no una por perfil ni por habilidad
+    expect(consultas).toEqual(["find"]);
+  });
+
   test("crea el proyecto con sus perfiles, resuelve las habilidades y lo agrega al colectivo", async () => {
     // Preparación
     const [backend, frontend] = await habilidadService.obtenerHabilidades();

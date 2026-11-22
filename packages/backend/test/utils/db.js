@@ -25,3 +25,19 @@ export function usarBaseDeDatos() {
   afterEach(limpiarBase);
   afterAll(desconectarBase);
 }
+
+// Cuenta las consultas que mongoose manda a una colección mientras corre `accion`.
+// Sirve para verificar que no haya consultas N+1 (una consulta por cada fila).
+// Devuelve la lista de métodos ejecutados, por ejemplo ["find"].
+export async function consultasA(coleccion, accion) {
+  const metodos = [];
+  mongoose.set("debug", (nombreColeccion, metodo) => {
+    if (nombreColeccion === coleccion) metodos.push(metodo);
+  });
+  try {
+    await accion();
+  } finally {
+    mongoose.set("debug", false);
+  }
+  return metodos;
+}

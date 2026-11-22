@@ -54,20 +54,8 @@ export class ProyectoService {
       }
     }
 
-    //consultar si vale la pena
-    const perfilesCreados = await Promise.all(
-      perfiles.map((perfil) =>
-        this.perfilService.crearPerfil(
-          perfil.descripcion,
-          perfil.habilidadesRequeridas,
-          perfil.habilidadesOpcionales,
-          perfil.horas,
-          perfil.tipoDeCompromiso,
-          perfil.modalidadDeColaboracion,
-          perfil.cantidadMaxima,
-        ),
-      ),
-    );
+    // Todos los perfiles se arman con UNA consulta de habilidades (no una por perfil)
+    const perfilesCreados = await this.perfilService.crearPerfiles(perfiles);
 
     const urlDonacionesFinal = urlDonaciones && urlDonaciones !== "" ? urlDonaciones : null;
 

@@ -47,4 +47,24 @@ export class HabilidadService {
   async obtenerHabilidadesPorCodigos(codigos) {
     return await this.repository.obtenerPorCodigos(codigos);
   }
+
+  /**
+   * Busca varias habilidades con UNA sola consulta (`$in`) y las devuelve en un Map
+   * código → habilidad. Es la forma de evitar consultas N+1: no se hace un findOne por código.
+   *
+   * @param {string[]} codigos Códigos de habilidad; puede tener repetidos.
+   * @returns {Promise<Map<string, HabilidadGuardada>>}
+   * @throws {AppError} 400 con la lista de códigos que no existen.
+   */
+  async obtenerMapaPorCodigos(codigos) {
+    const unicos = [...new Set(codigos)];
+    const encontradas = await this.repository.obtenerPorCodigos(unicos);
+    const mapa = new Map(encontradas.map((habilidad) => [habilidad.codigo, habilidad]));
+
+    const noEncontrados = unicos.filter((codigo) => !mapa.has(codigo));
+    if (noEncontrados.length > 0) {
+      throw new AppError(ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO, 400, noEncontrados);
+    }
+    return mapa;
+  }
 }

@@ -40,7 +40,8 @@ export class PerfilController {
       req.body.cantidadMaxima,
     );
 
-    res.status(201).json(perfil);
+    // 201 + header Location: la URL donde se puede consultar el perfil recién creado
+    res.status(201).location(`/proyectos/${proyectoId}/perfiles/${perfil._id}`).json(perfil);
   };
 
   actualizarPerfil = async (req, res) => {

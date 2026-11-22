@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { habilidadService, personaColaboradoraService } from "../../src/container.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
 import { PersonaColaboradoraModel } from "../../src/schemas/personaColaboradoraSchema.js";
-import { usarBaseDeDatos } from "../utils/db.js";
+import { consultasA, usarBaseDeDatos } from "../utils/db.js";
 import { esperarAppError } from "../utils/esperarAppError.js";
 
 usarBaseDeDatos();
@@ -43,6 +43,16 @@ describe("PersonaColaboradoraService", () => {
   });
 
   describe("crearPersonaColaboradora", () => {
+    test("busca todas sus habilidades con una sola consulta (sin N+1)", async () => {
+      // Ejecución
+      const consultas = await consultasA("habilidades", () =>
+        crearPersona({ habilidades: ["node", "react"] }),
+      );
+
+      // Validación: una única consulta a habilidades, no un findOne por cada una
+      expect(consultas).toEqual(["find"]);
+    });
+
     test("persiste la persona con las habilidades resueltas por código", async () => {
       // Ejecución
       const persona = await crearPersona({ habilidades: ["node", "react"] });

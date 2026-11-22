@@ -59,6 +59,7 @@ describe("POST /proyectos", () => {
 
     // Validación
     expect(respuesta.status).toBe(201);
+    expect(respuesta.headers.location).toBe(`/proyectos/${respuesta.body._id}`);
     expect(respuesta.body).toMatchObject({
       titulo: "Huerta digital",
       finalizado: false,
@@ -151,10 +152,7 @@ describe("POST /proyectos", () => {
     expect(await ProyectoModel.countDocuments()).toBe(0);
   });
 
-  // BUG: habilidadesOpcionales es opcional en la validación (zod le pone default []), pero el
-  // middleware no reemplaza req.body por el dato parseado; PerfilService.crearPerfil hace
-  // [...habilidadesRequeridas, ...undefined] y explota con TypeError → 500.
-  test.failing("crea el proyecto aunque un perfil no envíe habilidadesOpcionales", async () => {
+  test("crea el proyecto aunque un perfil no envíe habilidadesOpcionales", async () => {
     // Ejecución
     const respuesta = await postProyecto(
       proyectoBody({ perfiles: [perfilBody({ habilidadesOpcionales: undefined })] }),

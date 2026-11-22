@@ -28,21 +28,21 @@ export class NotificacionAutomaticaService {
   }
 
   async notificarAPersonasColaboradoras(proyecto, colectivoNombre) {
-    console.log(proyecto);
     const personasColaboradoras =
       await this.busquedaService.obtenerPersonasColaboradorasAcordesAProyecto(proyecto);
 
-    for (const persona of personasColaboradoras) {
-      console.log(persona);
-      const nuevaNotificacion = new Notificacion(
-        persona,
-        proyecto.colectivo,
-        proyecto,
-        DestinatarioNotificacion.PERSONA,
-        `Hola ${persona.nombre}!, se publico el proyecto " ${proyecto.titulo} " del colectivo ${colectivoNombre} que busca perfiles acordes a tus habilidades`,
-      );
-      await this.repository.guardar(nuevaNotificacion);
-    }
+    // Se arman todas en memoria y se guardan con un solo insertMany (no un insert por persona)
+    const notificaciones = personasColaboradoras.map(
+      (persona) =>
+        new Notificacion(
+          persona,
+          proyecto.colectivo,
+          proyecto,
+          DestinatarioNotificacion.PERSONA,
+          `Hola ${persona.nombre}!, se publico el proyecto " ${proyecto.titulo} " del colectivo ${colectivoNombre} que busca perfiles acordes a tus habilidades`,
+        ),
+    );
+    await this.repository.guardarVarias(notificaciones);
   }
 
   async notificarAColectivos(personaColaboradora) {
@@ -50,16 +50,17 @@ export class NotificacionAutomaticaService {
       personaColaboradora._id,
     );
 
-    for (const proyecto of proyectos) {
-      const nuevaNotificacion = new Notificacion(
-        personaColaboradora,
-        proyecto.colectivo,
-        proyecto,
-        DestinatarioNotificacion.COLECTIVO,
-        `Hola ${proyecto.colectivo.nombre}!, hay una nueva persona colaboradora " ${personaColaboradora.nombreFantasia} " la cual tiene habilidades acordes al proyecto " ${proyecto.titulo} "`,
-      );
-      await this.repository.guardar(nuevaNotificacion);
-    }
+    const notificaciones = proyectos.map(
+      (proyecto) =>
+        new Notificacion(
+          personaColaboradora,
+          proyecto.colectivo,
+          proyecto,
+          DestinatarioNotificacion.COLECTIVO,
+          `Hola ${proyecto.colectivo.nombre}!, hay una nueva persona colaboradora " ${personaColaboradora.nombreFantasia} " la cual tiene habilidades acordes al proyecto " ${proyecto.titulo} "`,
+        ),
+    );
+    await this.repository.guardarVarias(notificaciones);
   }
 
   //GET

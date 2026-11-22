@@ -13,6 +13,8 @@ export class ValoracionController {
       req.body.comentario,
     );
 
+    // Sin header Location: no hay GET de un solo recurso (las valoraciones se consultan en el listado de la persona o del colectivo),
+    // así que no existe una URL propia a la cual apuntar.
     res.status(201).json(valoracion);
   };
 

@@ -24,11 +24,9 @@ export class PersonaColaboradoraService {
   ) {
     const redesValidadas = validarYNormalizarRedesSociales(redesSociales) ?? [];
 
-    const habilidadesEncontradas = await Promise.all(
-      habilidades.map((codigo) => {
-        return this.habilidadService.obtenerHabilidadPorCodigo(codigo);
-      }),
-    );
+    // Una sola consulta para todas las habilidades (no un findOne por cada una)
+    const mapaHabilidades = await this.habilidadService.obtenerMapaPorCodigos(habilidades);
+    const habilidadesEncontradas = habilidades.map((codigo) => mapaHabilidades.get(codigo));
 
     const personaColaboradora = new PersonaColaboradora(
       nombreFantasia,
@@ -68,11 +66,8 @@ export class PersonaColaboradoraService {
     }
 
     if (cambios.habilidades !== undefined) {
-      cambiosPreparados.habilidades = await Promise.all(
-        cambios.habilidades.map((codigo) =>
-          this.habilidadService.obtenerHabilidadPorCodigo(codigo),
-        ),
-      );
+      const mapaHabilidades = await this.habilidadService.obtenerMapaPorCodigos(cambios.habilidades);
+      cambiosPreparados.habilidades = cambios.habilidades.map((codigo) => mapaHabilidades.get(codigo));
     }
 
     return await this.personaColaboradoraRepository.actualizar(id, cambiosPreparados);

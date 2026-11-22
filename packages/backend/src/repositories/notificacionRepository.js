@@ -21,6 +21,28 @@ export class NotificacionRepository {
     }
   }
 
+  /**
+   * Guarda varias notificaciones con UN solo `insertMany` (en vez de un insert por cada una).
+   * `ordered: false` sigue insertando aunque alguna falle: las que ya existían (índice único,
+   * error 11000) se ignoran, igual que en {@link NotificacionRepository#guardar}.
+   *
+   * @param {import("../models/notificacion.js").Notificacion[]} notificaciones
+   * @returns {Promise<object[]>} Las notificaciones que se insertaron.
+   */
+  async guardarVarias(notificaciones) {
+    if (notificaciones.length === 0) return [];
+    try {
+      return await this.model.insertMany(notificaciones, { ordered: false });
+    } catch (error) {
+      // writeErrors puede ser un objeto o una lista, y mongoose deja el código en `err.code`
+      const errores = [].concat(error.writeErrors ?? []);
+      const soloDuplicados =
+        errores.length > 0 && errores.every((e) => (e.code ?? e.err?.code) === CODIGO_ERROR_CLAVE_DUPLICADA);
+      if (soloDuplicados) return error.insertedDocs ?? [];
+      throw error;
+    }
+  }
+
   async obtenerDePersona(personaId) {
     return await this.model
       .find({ personaColaboradora: personaId, destinatario: DestinatarioNotificacion.PERSONA })

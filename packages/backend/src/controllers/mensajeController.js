@@ -11,6 +11,8 @@ export class MensajeController {
       req.body.emisor,
       req.body.texto,
     );
+    // Sin header Location: no hay GET de un solo recurso (los mensajes se consultan como conversación),
+    // así que no existe una URL propia a la cual apuntar.
     res.status(201).json(mensaje);
   };
 

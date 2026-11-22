@@ -15,7 +15,8 @@ export class ProyectoController {
       req.body.fechaLimiteBusqueda,
       req.body.urlDonaciones,
     );
-    res.status(201).json(proyecto);
+    // 201 + header Location: la URL donde se puede consultar el recurso recién creado
+    res.status(201).location(`/proyectos/${proyecto._id}`).json(proyecto);
   };
 
   obtenerProyectos = async (req, res) => {

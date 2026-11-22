@@ -106,6 +106,7 @@ describe("POST /proyectos/:id/perfiles", () => {
 
     // Validación
     expect(respuesta.status).toBe(201);
+    expect(respuesta.headers.location).toBe(`${rutaPerfiles}/${respuesta.body._id}`);
     expect(respuesta.body).toMatchObject({
       descripcion: "Testing",
       habilidadesRequeridas: [habilidades.testing],
@@ -169,9 +170,7 @@ describe("POST /proyectos/:id/perfiles", () => {
     expect(respuesta.body.code).toBe(error.code);
   });
 
-  // BUG: validarPerfil no reemplaza req.body por el dato parseado, así que el default [] de
-  // habilidadesOpcionales nunca se aplica y crearPerfil hace [...undefined] → TypeError → 500.
-  test.failing("agrega un perfil aunque no envíe habilidadesOpcionales", async () => {
+  test("agrega un perfil aunque no envíe habilidadesOpcionales", async () => {
     // Ejecución
     const respuesta = await request(app)
       .post(rutaPerfiles)
