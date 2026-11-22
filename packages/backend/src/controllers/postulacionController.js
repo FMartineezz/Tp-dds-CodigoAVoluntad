@@ -24,7 +24,7 @@ export class PostulacionController {
       req.body.anonima,
     );
 
-    // Sin header Location: no hay GET de un solo recurso (las postulaciones se consultan en listados (por persona o por colectivo)),
+    // Sin header Location: no hay GET de un solo recurso (las postulaciones se consultan en listados por persona o por colectivo),
     // así que no existe una URL propia a la cual apuntar.
     res.status(201).json(postulacion);
   };

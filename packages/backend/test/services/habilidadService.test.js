@@ -125,22 +125,30 @@ describe("HabilidadService", () => {
     });
   });
 
-  describe("obtenerHabilidadesPorCodigos", () => {
-    test("devuelve solo las habilidades existentes entre los códigos pedidos", async () => {
+  describe("obtenerMapaPorCodigos", () => {
+    test("devuelve un mapa código → habilidad con una sola consulta", async () => {
       // Preparación
       await habilidadService.crearHabilidad("Node", "Backend");
-      await habilidadService.crearHabilidad("React", "Frontend");
       await habilidadService.crearHabilidad("Python", "Datos");
 
       // Ejecución
-      const habilidades = await habilidadService.obtenerHabilidadesPorCodigos([
-        "node",
-        "python",
-        "no_existe",
-      ]);
+      const mapa = await habilidadService.obtenerMapaPorCodigos(["node", "python", "node"]);
 
       // Validación
-      expect(habilidades.map((h) => h.codigo).sort()).toEqual(["node", "python"]);
+      expect([...mapa.keys()].sort()).toEqual(["node", "python"]);
+      expect(mapa.get("node").titulo).toBe("Node");
+    });
+
+    test("responde 400 con los códigos que no existen", async () => {
+      // Preparación
+      await habilidadService.crearHabilidad("Node", "Backend");
+
+      // Ejecución y Validación
+      await esperarAppError(
+        habilidadService.obtenerMapaPorCodigos(["node", "cobol"]),
+        ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO,
+        400,
+      );
     });
   });
 });

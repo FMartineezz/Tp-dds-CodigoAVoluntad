@@ -76,15 +76,6 @@ export class HabilidadService {
   }
 
   /**
-   * Las habilidades cuyos códigos están en la lista (los inexistentes se ignoran).
-   * @param {string[]} codigos
-   * @returns {Promise<HabilidadGuardada[]>}
-   */
-  async obtenerHabilidadesPorCodigos(codigos) {
-    return await this.repository.obtenerPorCodigos(codigos);
-  }
-
-  /**
    * Busca varias habilidades con UNA sola consulta (`$in`) y las devuelve en un Map
    * código → habilidad. Es la forma de evitar consultas N+1: no se hace un findOne por código.
    *
