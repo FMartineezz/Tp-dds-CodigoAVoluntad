@@ -66,10 +66,7 @@ export class DenunciaService {
       throw new AppError(ErrorCatalog.DENUNCIA_COLABORACION_NO_ACREDITA_PARTICIPACION, 400);
     }
 
-    // Viene poblado (obtenerPorIdParaAdmin); su colectivo puede estar poblado o ser solo el id.
-    const proyecto = /** @type {{ colectivo?: any }} */ (
-      /** @type {unknown} */ (colaboracion.proyecto)
-    );
+    const proyecto = colaboracion.proyecto;
     const colectivoId =
       proyecto.colectivo?._id || proyecto.colectivo?.id || proyecto.colectivo;
 
@@ -159,7 +156,7 @@ export class DenunciaService {
 
     const denunciaActualizada = await this.colectivoRepository.actualizarEstadoDenuncia(
       denunciaId,
-      /** @type {EstadoDenunciaValor} */ (estadoNormalizado),
+      estadoNormalizado,
     );
 
     if (!denunciaActualizada) {

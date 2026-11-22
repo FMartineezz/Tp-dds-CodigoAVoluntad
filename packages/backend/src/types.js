@@ -1,9 +1,8 @@
 /**
  * TIPOS COMPARTIDOS (solo JSDoc: este archivo no exporta código).
  *
- * JavaScript no tiene tipos; estas definiciones los "compensan": el editor (VS Code) las usa
- * para autocompletar y avisar errores, y `npm run types` las verifica con TypeScript en modo
- * chequeo (`tsc --noEmit`) sin compilar nada.
+ * JavaScript no tiene tipos; estas definiciones los "compensan": documentan qué recibe y
+ * devuelve cada función, y el editor (VS Code) las usa para autocompletar.
  *
  * Cómo usarlos desde otro archivo: con un import de tipo dentro de un comentario JSDoc, por
  * ejemplo un typedef de Id que apunte a import("../types.js").Id, o un param de tipo
@@ -61,8 +60,7 @@
 /** @typedef {Guardado<import("./models/denuncia.js").Denuncia>} DenunciaGuardada */
 
 /**
- * Request de Express con los parámetros de ruta (:id, :colectivoId…) tipados como string.
- * Los tipos de Express 5 los dejan como `string | string[]` por las rutas con comodín, que acá no se usan.
+ * Request de Express con los parámetros de ruta (:id, :colectivoId…) como string.
  * @typedef {import("express").Request<Record<string, string>>} RequestConParams
  */
 

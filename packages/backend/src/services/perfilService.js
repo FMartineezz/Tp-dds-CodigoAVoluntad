@@ -118,10 +118,7 @@ export class PerfilService {
    * @throws {AppError} 400 si algún código de habilidad no existe.
    */
   async prepararCambios(cambios) {
-    // Arranca con los códigos tal cual; abajo se reemplazan por las habilidades encontradas
-    const cambiosPreparados = /** @type {CambiosDePerfilPreparados} */ (
-      /** @type {unknown} */ ({ ...cambios })
-    );
+    const cambiosPreparados = { ...cambios };
 
     const cambiaRequeridas = cambios.habilidadesRequeridas !== undefined;
     const cambiaOpcionales = cambios.habilidadesOpcionales !== undefined;

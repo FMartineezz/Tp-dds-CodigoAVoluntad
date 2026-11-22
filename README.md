@@ -27,7 +27,6 @@ El backend es la capa responsable de la lógica de negocio, la validación de da
 ```
 ───backend
    ├─── index.js             # Levanta la app (buildApp) y la conexión a MongoDB
-   ├─── jsconfig.json        # Chequeo de tipos de las anotaciones JSDoc (npm run types)
    ├─── package.json
    ├─── config               # Conexión a MongoDB
    │
@@ -96,11 +95,7 @@ Como el backend usa ES Modules, Jest se ejecuta con `node --experimental-vm-modu
 
 ### Tipos con JSDoc
 
-JavaScript no tiene tipos: los agregamos con anotaciones [JSDoc](https://jsdoc.app/) en models, services, repositorios y controllers. Los tipos compartidos están en `src/types.js`: `Id`, `Paginacion`, `Pagina<T>` y la versión guardada de cada modelo, como `ProyectoGuardado`. VS Code los usa para autocompletar y marcar errores mientras se escribe, y el chequeo se puede correr a mano:
-
-```bash
-npm run types --workspace=backend   # tsc --noEmit sobre src/ (no compila nada, solo verifica)
-```
+JavaScript no tiene tipos: los agregamos con anotaciones [JSDoc](https://jsdoc.app/) en models, services, repositorios y controllers. Los tipos compartidos están en `src/types.js`: `Id`, `Paginacion`, `Pagina<T>` y la versión guardada de cada modelo, como `ProyectoGuardado`. VS Code los usa para autocompletar mientras se escribe.
 
 ### Frontend
 

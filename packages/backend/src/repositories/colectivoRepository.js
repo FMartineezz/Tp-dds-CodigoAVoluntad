@@ -16,9 +16,6 @@ import { paginar } from "./paginar.js";
 /** Acceso a la colección de colectivos (y sus denuncias, que viven embebidas). */
 export class ColectivoRepository {
   constructor() {
-    // Model<any>: los tipos que mongoose infiere del schema no coinciden con los de dominio
-    // (opcionales vs. null); el contrato real lo declara el JSDoc de cada método.
-    /** @type {import("mongoose").Model<any>} */
     this.model = ColectivoModel;
   }
 

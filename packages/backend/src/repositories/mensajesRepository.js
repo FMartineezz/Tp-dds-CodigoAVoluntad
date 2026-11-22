@@ -7,9 +7,6 @@ import { MensajeModel } from "../schemas/mensajeSchema.js";
 /** Acceso a la colección de mensajes entre colectivos y personas colaboradoras. */
 export class MensajeRepository {
   constructor() {
-    // Model<any>: los tipos que mongoose infiere del schema no coinciden con los de dominio
-    // (opcionales vs. null); el contrato real lo declara el JSDoc de cada método.
-    /** @type {import("mongoose").Model<any>} */
     this.model = MensajeModel;
   }
 

@@ -10,9 +10,6 @@ const CODIGO_ERROR_CLAVE_DUPLICADA = 11000;
 /** Acceso a la colección de notificaciones (para personas y para colectivos). */
 export class NotificacionRepository {
   constructor() {
-    // Model<any>: los tipos que mongoose infiere del schema no coinciden con los de dominio
-    // (opcionales vs. null); el contrato real lo declara el JSDoc de cada método.
-    /** @type {import("mongoose").Model<any>} */
     this.model = NotificacionModel;
   }
 

@@ -6,9 +6,6 @@ import { HabilidadModel } from "../schemas/habilidadSchema.js";
 /** Acceso a la colección de habilidades (las precarga el equipo administrativo). */
 export class HabilidadRespository {
   constructor() {
-    // Model<any>: los tipos que mongoose infiere del schema no coinciden con los de dominio
-    // (opcionales vs. null); el contrato real lo declara el JSDoc de cada método.
-    /** @type {import("mongoose").Model<any>} */
     this.model = HabilidadModel;
   }
 

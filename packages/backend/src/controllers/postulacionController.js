@@ -67,10 +67,7 @@ export class PostulacionController {
   listarDeColectivo = async (req, res) => {
     const postulaciones = await this.postulacionService.obtenerDeColectivo(
       req.params.colectivoId,
-      // El cast es solo para tsc: ?estado llega como texto y se usa tal cual como filtro.
-      /** @type {import("../services/postulacionService.js").EstadoPostulacionValor} */ (
-        req.query.estado
-      ),
+      req.query.estado,
     );
 
     res.status(200).json(postulaciones);

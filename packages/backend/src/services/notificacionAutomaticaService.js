@@ -91,7 +91,7 @@ export class NotificacionAutomaticaService {
           proyecto.colectivo,
           proyecto,
           DestinatarioNotificacion.COLECTIVO,
-          `Hola ${/** @type {import("../types.js").ColectivoGuardado} */ (proyecto.colectivo).nombre}!, hay una nueva persona colaboradora " ${personaColaboradora.nombreFantasia} " la cual tiene habilidades acordes al proyecto " ${proyecto.titulo} "`,
+          `Hola ${proyecto.colectivo.nombre}!, hay una nueva persona colaboradora " ${personaColaboradora.nombreFantasia} " la cual tiene habilidades acordes al proyecto " ${proyecto.titulo} "`,
         ),
     );
     await this.repository.guardarVarias(notificaciones);

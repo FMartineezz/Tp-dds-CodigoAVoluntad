@@ -54,13 +54,8 @@ export class ColaboracionService {
       }
     }
 
-    // Se pasan los documentos completos: mongoose los castea a su _id al guardar (el modelo pide Id).
-    const colaboracion = new Colaboracion(
-      /** @type {any} */ (persona),
-      /** @type {any} */ (proyecto),
-      /** @type {any} */ (perfil),
-      anonima,
-    );
+    // Pasamos los documentos enteros: mongoose se queda con el _id al guardar
+    const colaboracion = new Colaboracion(persona, proyecto, perfil, anonima);
     const colaboracionGuardada = await this.colaboracionRepository.guardar(colaboracion);
     colaboracion.id = colaboracionGuardada.id;
 

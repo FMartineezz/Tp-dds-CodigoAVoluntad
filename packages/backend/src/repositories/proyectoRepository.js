@@ -14,9 +14,6 @@ import { paginar } from "./paginar.js";
 /** Acceso a la colección de proyectos (y sus perfiles y logros, que viven embebidos). */
 export class ProyectoRepository {
   constructor() {
-    // Model<any>: los tipos que mongoose infiere del schema no coinciden con los de dominio
-    // (opcionales vs. null); el contrato real lo declara el JSDoc de cada método.
-    /** @type {import("mongoose").Model<any>} */
     this.model = ProyectoModel;
   }
 
@@ -114,9 +111,7 @@ export class ProyectoRepository {
 
     if (!proyecto) return null;
 
-    // Cast: ProyectoGuardado tipa los perfiles embebidos como Perfil, pero guardados tienen _id
-    const perfiles = /** @type {PerfilGuardado[]} */ (proyecto.perfiles);
-    return perfiles.find((perfil) => String(perfil._id) === String(perfilId)) ?? null;
+    return proyecto.perfiles.find((perfil) => String(perfil._id) === String(perfilId)) ?? null;
   }
 
   /**

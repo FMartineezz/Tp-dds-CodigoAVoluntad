@@ -3,7 +3,7 @@ import { AppError } from "../../errors/appError.js";
 import ErrorCatalog from "../../errors/errorCatalog.js";
 import { LIMITE_MAXIMO, LIMITE_POR_DEFECTO } from "../../utils/paginacion.js";
 
-// ?pagina=N&limite=M en la query string (llegan como texto, por eso el coerce)
+// ?pagina=N&limite=M en la query string hace que lleguen esos params como texto, por eso el coerce para castearlos a numero
 const paginacionSchema = zod.object({
   pagina: zod.coerce
     .number({ invalid_type_error: "PAGINACION_PAGINA_INVALIDA" })
@@ -18,7 +18,7 @@ const paginacionSchema = zod.object({
     .default(LIMITE_POR_DEFECTO),
 });
 
-// Deja { pagina, limite } en req.paginacion (en Express 5 req.query es de solo lectura)
+// Deja { pagina, limite } en req.paginacion 
 /**
  * Valida ?pagina y ?limite (enteros, limite hasta LIMITE_MAXIMO; con valores por defecto).
  * @param {import("../../types.js").RequestPaginado} req Sale con `req.paginacion` cargado.
@@ -37,8 +37,7 @@ export const validarPaginacion = (req, res, next) => {
     throw new AppError(ErrorCatalog[codigo], 400, LIMITE_MAXIMO);
   }
 
-  // zod aplica los defaults, así que pagina y limite siempre vienen
-  req.paginacion = /** @type {import("../../types.js").Paginacion} */ (resultado.data);
+  req.paginacion = resultado.data;
   next();
 };
 

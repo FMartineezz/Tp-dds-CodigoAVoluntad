@@ -128,9 +128,7 @@ export class PostulacionService {
       throw new AppError(ErrorCatalog.POSTULACION_HABILIDAD_REQUERIDA, 400, persona.nombreFantasia);
     }
 
-    // Sin populate, colectivo es un ObjectId (mongoose le agrega `_id`, que se devuelve a sí mismo)
-    const colectivoId = /** @type {import("mongoose").Types.ObjectId} */ (proyecto.colectivo)._id;
-    const postulacion = new Postulacion(persona, colectivoId, proyecto, perfil, anonima);
+    const postulacion = new Postulacion(persona, proyecto.colectivo._id, proyecto, perfil, anonima);
     const postulacionGuardada = await this.repository.guardar(postulacion);
     postulacion.id = postulacionGuardada.id;
 

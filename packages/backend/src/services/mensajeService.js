@@ -96,14 +96,8 @@ export class MensajeService {
       );
     }
 
-    // Se pasan los documentos completos: mongoose los castea a su _id al guardar (el modelo pide Id).
-    const mensaje = new Mensaje(
-      /** @type {any} */ (colectivo),
-      /** @type {any} */ (personaColaboradora),
-      /** @type {any} */ (proyecto),
-      Emisor.COLECTIVO,
-      texto,
-    );
+    // Pasamos los documentos enteros: mongoose se queda con el _id al guardar
+    const mensaje = new Mensaje(colectivo, personaColaboradora, proyecto, Emisor.COLECTIVO, texto);
     const mensajeGuardado = await this.repository.guardar(mensaje);
     mensaje.id = mensajeGuardado.id;
 
@@ -160,13 +154,7 @@ export class MensajeService {
       throw new AppError(ErrorCatalog.MENSAJE_SIN_CONVERSACION_PREVIA, 403);
     }
 
-    const mensaje = new Mensaje(
-      /** @type {any} */ (colectivo),
-      /** @type {any} */ (personaColaboradora),
-      /** @type {any} */ (proyecto),
-      Emisor.PERSONA,
-      texto,
-    );
+    const mensaje = new Mensaje(colectivo, personaColaboradora, proyecto, Emisor.PERSONA, texto);
     const mensajeGuardado = await this.repository.guardar(mensaje);
     mensaje.id = mensajeGuardado.id;
 

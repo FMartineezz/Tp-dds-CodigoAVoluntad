@@ -9,15 +9,6 @@ import ErrorCatalog from "../errors/errorCatalog.js";
 /** @typedef {import("../repositories/valoracionRepository.js").DireccionValoracion} DireccionValoracion */
 
 /**
- * Colaboración tal como la lee este service: el proyecto y la persona pueden venir populados
- * o como ObjectId, por eso se leen con `?._id || ?.id || valor`.
- * @typedef {object} ColaboracionLeida
- * @property {boolean} [activo]
- * @property {any} proyecto Populado o ObjectId.
- * @property {any} personaColaboradora Populada o ObjectId.
- */
-
-/**
  * Valoraciones mutuas entre persona y colectivo al terminar una colaboración.
  */
 export class ValoracionService {
@@ -57,11 +48,9 @@ export class ValoracionService {
    *   la colaboración no terminó, el evaluador es inválido o ya hay una valoración suya.
    */
   async crearValoracion(colaboracionId, evaluador, puntaje, comentario = null) {
-    const colaboracion = /** @type {ColaboracionLeida | null} */ (
-      this.colaboracionRepository.obtenerPorIdCompleto
-        ? await this.colaboracionRepository.obtenerPorIdCompleto(colaboracionId)
-        : await this.colaboracionRepository.obtenerPorId(colaboracionId)
-    );
+    const colaboracion = this.colaboracionRepository.obtenerPorIdCompleto
+      ? await this.colaboracionRepository.obtenerPorIdCompleto(colaboracionId)
+      : await this.colaboracionRepository.obtenerPorId(colaboracionId);
 
     if (!colaboracion) {
       throw new AppError(ErrorCatalog.COLABORACION_NO_ENCONTRADA, 404, colaboracionId);

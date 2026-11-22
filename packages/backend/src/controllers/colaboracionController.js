@@ -72,9 +72,7 @@ export class ColaboracionController {
   desactivarColaboracion = async (req, res) => {
     const id = req.params.id;
 
-    // El cast es solo para tsc: el service valida que `por` sea un OrigenBaja (si no, 400).
-    const por = /** @type {import("../services/colaboracionService.js").OrigenBajaValor} */ (req.query.por);
-    await this.colaboracionService.desactivarColaboracion(id, por);
+    await this.colaboracionService.desactivarColaboracion(id, req.query.por);
     res.status(200).json( { message: "Colaboración desactivada correctamente" });
   }
 }

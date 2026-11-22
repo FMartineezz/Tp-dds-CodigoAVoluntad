@@ -27,14 +27,6 @@ import { eventos, EVENTO_PERSONA_CREADA } from "../events/events.js";
  */
 
 /**
- * Cambios de persona listos para el repositorio: habilidades y redes ya resueltas.
- * @typedef {Omit<CambiosDePersonaColaboradora, "habilidades" | "redesSociales"> & {
- *   habilidades?: HabilidadGuardada[],
- *   redesSociales?: RedSocial[],
- * }} CambiosDePersonaPreparados
- */
-
-/**
  * Estadísticas generales de las personas colaboradoras.
  * @typedef {object} EstadisticasDePersonas
  * @property {number} total
@@ -128,10 +120,7 @@ export class PersonaColaboradoraService {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
     }
 
-    // Arranca con los datos tal cual; abajo se reemplazan habilidades y redes ya resueltas
-    const cambiosPreparados = /** @type {CambiosDePersonaPreparados} */ (
-      /** @type {unknown} */ ({ ...cambios })
-    );
+    const cambiosPreparados = { ...cambios };
 
     if (cambios.redesSociales !== undefined) {
       cambiosPreparados.redesSociales = validarYNormalizarRedesSociales(cambios.redesSociales);
@@ -242,7 +231,7 @@ export class PersonaColaboradoraService {
    */
   async eliminarPersonaColaboradora(id) {
     const resultado = await this.personaColaboradoraRepository.eliminar(id);
-    if (!("razon" in resultado)) return; // se anonimizó bien
+    if (!resultado.razon) return; // se anonimizó bien
 
     if (resultado.razon === "NO_ENCONTRADO") {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
