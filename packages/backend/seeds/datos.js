@@ -265,6 +265,27 @@ export const proyectos = [
     logros: [["Carga inicial de huertas relevadas", 20, "https://github.com/huertas/mapa"]],
   },
   {
+    // Búsqueda abierta que coincide con FullstackFer: es su segundo proyecto sugerido en el panel
+    titulo: "Feria de Semillas Online",
+    descripcion:
+      "Catálogo para intercambiar semillas entre huertas y reservar retiros en la feria.",
+    colectivo: "Red de Huertas de Palermo",
+    urlSistema: "https://semillas.huertaspalermo.org",
+    diasLimiteBusqueda: 45,
+    perfiles: [
+      perfil(
+        "Desarrollo web",
+        ["programacion_en_java_script", "desarrollo_web_react"],
+        ["control_de_versiones_con_git"],
+        6,
+        TipoCompromiso.SEMANAL,
+        ModalidadColaboracion.GRATUITA,
+        2,
+      ),
+    ],
+    logros: [],
+  },
+  {
     // Finalizado: no aparece en las búsquedas y no acepta postulaciones nuevas
     titulo: "Sitio de la Asamblea",
     descripcion: "Sitio institucional con agenda de actividades y petitorios.",
@@ -588,6 +609,56 @@ export const mensajes = [
     texto: "¿Podrían explicarme por qué me dieron de baja?",
     dias: -2,
   },
+  // La colaboradora demo del front (FullstackFer): una conversación sobre su postulación
+  // pendiente y una invitación al proyecto sugerido. Los dos últimos quedan sin leer para
+  // que el panel muestre el contador de mensajes.
+  {
+    colectivo: "Colectivo Ambiental CABA",
+    colaboradora: "FullstackFer",
+    proyecto: "Plataforma de Donaciones Comunitarias",
+    emisor: Emisor.PERSONA,
+    texto:
+      "¡Hola! Me postulé al perfil de frontend. Tengo experiencia con React y puedo sumar unas 10 horas por semana.",
+    dias: -4,
+    leido: true,
+  },
+  {
+    colectivo: "Colectivo Ambiental CABA",
+    colaboradora: "FullstackFer",
+    proyecto: "Plataforma de Donaciones Comunitarias",
+    emisor: Emisor.COLECTIVO,
+    texto:
+      "¡Gracias, Fer! Estamos revisando las postulaciones esta semana. ¿Nos pasás algún proyecto tuyo en React para ver?",
+    dias: -3,
+    leido: true,
+  },
+  {
+    colectivo: "Colectivo Ambiental CABA",
+    colaboradora: "FullstackFer",
+    proyecto: "Plataforma de Donaciones Comunitarias",
+    emisor: Emisor.PERSONA,
+    texto: "Claro, en mi GitHub está el repo de una app de turnos que hice con React y Express.",
+    dias: -3,
+    leido: true,
+  },
+  {
+    colectivo: "Colectivo Ambiental CABA",
+    colaboradora: "FullstackFer",
+    proyecto: "Plataforma de Donaciones Comunitarias",
+    emisor: Emisor.COLECTIVO,
+    texto:
+      "Lo vimos y nos gustó mucho. ¿Podés el jueves a las 19 para una charla corta por videollamada?",
+    dias: -1,
+  },
+  {
+    colectivo: "Red de Huertas de Palermo",
+    colaboradora: "FullstackFer",
+    proyecto: "Feria de Semillas Online",
+    emisor: Emisor.COLECTIVO,
+    texto:
+      "¡Hola! Estamos armando el catálogo de la feria de semillas y buscamos alguien con React. ¿Te interesa sumarte?",
+    dias: 0,
+  },
 ];
 
 export const notificaciones = [
@@ -605,6 +676,13 @@ export const notificaciones = [
     destinatario: DestinatarioNotificacion.PERSONA,
     texto:
       'Hola FullstackFer!, se publico el proyecto "Mapa de Huertas Urbanas" del colectivo Red de Huertas de Palermo que busca perfiles acordes a tus habilidades',
+  },
+  {
+    colaboradora: "FullstackFer",
+    proyecto: "Feria de Semillas Online",
+    destinatario: DestinatarioNotificacion.PERSONA,
+    texto:
+      'Hola FullstackFer!, se publico el proyecto "Feria de Semillas Online" del colectivo Red de Huertas de Palermo que busca perfiles acordes a tus habilidades',
   },
   {
     colaboradora: "DataSol",
