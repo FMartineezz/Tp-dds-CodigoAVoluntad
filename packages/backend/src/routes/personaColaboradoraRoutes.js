@@ -5,6 +5,7 @@ import { mensajeController } from "../container.js";
 import validarPersonaColaboradora, {
   validarActualizacionColaboradora,
 } from "../middlewares/validations/personaColaboradoraValidation.js";
+import { validarCaptcha } from "../middlewares/validations/captchaValidation.js";
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
@@ -40,6 +41,7 @@ export default function personaColaboradoraRoutes() {
 
   router.post(
     "/colaboradoras",
+    validarCaptcha,
     validarPersonaColaboradora,
     personaColaboradoraController.crearPersonaColaboradora,
   );

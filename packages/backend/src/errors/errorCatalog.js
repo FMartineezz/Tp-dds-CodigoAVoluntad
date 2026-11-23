@@ -647,6 +647,19 @@ const ErrorCatalog = {
     code: "ERR-EST-1311",
     message: "No se puede valorar una colaboración que no ha finalizado",
   },
+
+  // =========================
+  // CAPTCHA
+  // =========================
+  CAPTCHA_REQUERIDO: {
+    code: "ERR-VAL-1400",
+    message: "La validacion Captcha es necesaria",
+  },
+
+  CAPTCHA_INVALIDO: {
+    code: "ERR-VAL-1401",
+    message: "La validacion Captcha es invalida",
+  },
 };
 
 Object.defineProperty(ErrorCatalog, "HABILIDADES_INEXISTENTES_GENERICO", {
