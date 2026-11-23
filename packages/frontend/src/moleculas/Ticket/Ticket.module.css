@@ -1,0 +1,32 @@
+/* Tarjeta tipo ticket con borde perforado: LA tarjeta de proyecto. Incluye TicketRow. */
+.ticket {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--space-5) var(--space-5) var(--space-5) calc(var(--space-6) + var(--space-2));
+  background: var(--color-surface);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-print);
+}
+.tilt { transform: rotate(2.2deg); }
+.ticket::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  bottom: 10px;
+  border-left: 3px dotted var(--color-border);
+  opacity: 0.5;
+}
+.head { display: flex; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); font-size: var(--text-label); text-transform: uppercase; letter-spacing: 0.08em; }
+.title { margin-bottom: var(--space-4); }
+.rows { margin: 0; display: grid; gap: var(--space-2); }
+.row { display: flex; gap: var(--space-3); font-size: var(--text-small); }
+.row dt { min-width: 6rem; flex-shrink: 0; color: var(--color-text-muted); text-transform: uppercase; font-size: var(--text-label); letter-spacing: 0.06em; padding-top: 2px; }
+.row dd { margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.footer { margin-top: auto; padding-top: var(--space-5); display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.stamp { position: absolute; right: -1.75rem; bottom: -2.25rem; }
+@media (max-width: 600px) { .stamp { right: var(--space-2); bottom: -2rem; } }
+@media (prefers-reduced-motion: reduce) { .tilt { transform: none; } }

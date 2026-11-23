@@ -1,3 +1,7 @@
+/**
+ * Contenedor de dependencias: crea una sola instancia de cada repositorio, service y controller,
+ * inyectando a cada uno lo que necesita por constructor. Las rutas importan de acá los controllers.
+ */
 import nodemailer from "nodemailer";
 import { ProyectoRepository } from "./repositories/proyectoRepository.js";
 import { ColectivoRepository } from "./repositories/colectivoRepository.js";
@@ -53,15 +57,19 @@ const postulacionRepository = new PostulacionRepository();
 const notificacionRepository = new NotificacionRepository();
 
 // Transporter de mails para las notificaciones por medios externos.
-const mailTransporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+// Sin SMTP configurado (por ejemplo, en desarrollo o en los tests) se usa el transporte JSON de
+// nodemailer: arma el mail completo igual que el SMTP, pero no lo envía por la red.
+const mailTransporter = process.env.SMTP_HOST
+  ? nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    })
+  : nodemailer.createTransport({ jsonTransport: true });
 
 // Services: dependen de repositorios y de otros services ya creados.
 const habilidadService = new HabilidadService({ repository: habilidadRepository });
@@ -137,6 +145,24 @@ export const notificacionAutomaticaService = new NotificacionAutomaticaService({
   colectivoService,
   busquedaService,
 });
+
+// Services exportados para poder probarlos contra la base real en los tests.
+export {
+  habilidadService,
+  perfilService,
+  colectivoService,
+  personaColaboradoraService,
+  proyectoService,
+  busquedaService,
+  colaboracionService,
+  mensajeService,
+  logroService,
+  postulacionService,
+  denunciaService,
+  valoracionService,
+  estadisticasService,
+  mailTransporter,
+};
 
 // Controllers: dependen de services.
 export const proyectoController = new ProyectoController({ proyectoService });

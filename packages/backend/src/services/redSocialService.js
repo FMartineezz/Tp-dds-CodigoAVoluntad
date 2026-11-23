@@ -2,6 +2,14 @@ import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 import { RedSocial, TipoRedSocial, esUrlValida } from "../models/redSocial.js";
 
+/**
+ * Valida la lista de redes sociales del body y la normaliza (tipo en minúsculas, URL sin
+ * espacios). No se permiten dos redes del mismo tipo.
+ * @param {unknown} redesSociales Lista de `{ tipo, url }`.
+ * @returns {RedSocial[] | undefined} undefined si no vino el campo (no hay que tocarlo).
+ * @throws {AppError} 400 si no es una lista o algún item tiene tipo o URL faltante, inválido
+ *   o repetido.
+ */
 export function validarYNormalizarRedesSociales(redesSociales) {
   if (redesSociales === undefined) {
     return undefined;

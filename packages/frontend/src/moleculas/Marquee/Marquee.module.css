@@ -1,0 +1,20 @@
+/* Cinta negra inclinada con textos que se desplazan. */
+/* la cinta se rota y escala: este contenedor evita el scroll horizontal que eso provoca */
+.clip { overflow: hidden; padding-block: var(--space-2); }
+.strip {
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--color-inverse-bg);
+  color: var(--color-inverse-text);
+  transform: rotate(-0.6deg) scale(1.02);
+}
+.track { display: inline-block; padding: var(--space-3) 0; animation: scroll 30s linear infinite; }
+.strip:hover .track { animation-play-state: paused; }
+.item { font: 800 1.4rem var(--font-display); font-stretch: 70%; text-transform: uppercase; }
+.item i { font-style: normal; margin: 0 var(--space-4); color: var(--sand-400); }
+.item i.red { color: var(--red-500); }
+@keyframes scroll { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .strip { overflow-x: auto; transform: none; }
+  .track { animation: none; }
+}

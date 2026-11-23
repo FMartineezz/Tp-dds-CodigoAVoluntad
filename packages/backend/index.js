@@ -1,34 +1,17 @@
+/**
+ * Punto de entrada del backend: arma la app, conecta a MongoDB, arranca los jobs
+ * (cierre de proyectos y notificaciones automáticas) y escucha en SERVER_PORT (3000 por defecto).
+ */
 import "dotenv/config";
-import express from "express";
-import cors from "cors";
 import routes from "./src/routes/routes.js";
-import errorHandler from "./src/middlewares/errorHandler.js";
-import ErrorCatalog from "./src/errors/errorCatalog.js";
+import { buildApp } from "./src/app.js";
 import { MongoDBClient } from "./config/database.js";
 import { cierreProyectos } from "./src/container.js";
 import { notificacionAutomaticaService } from "./src/container.js";
 
 const port = process.env.SERVER_PORT || 3000;
 
-const app = express();
-app.use(express.json());
-app.set("trust proxy", 1);
-
-app.use(
-  cors({
-    origin: process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
-      : true,
-  }),
-);
-
-routes.forEach((route) => app.use(route));
-
-app.use((req, res) => {
-  res.status(404).json(ErrorCatalog.RECURSO_NO_ENCONTRADO);
-});
-
-app.use(errorHandler);
+const app = buildApp(routes);
 
 MongoDBClient.connect();
 

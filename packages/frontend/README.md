@@ -1,70 +1,79 @@
-# Getting Started with Create React App
+# Frontend · Código a Voluntad
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+El front de la plataforma (26 pantallas, React + Vite + Axios) **escrito para leerlo y extenderlo**: cada pieza está en
+su carpeta, comentada y con indicaciones de cómo extenderla.
 
-## Available Scripts
+Estética: «serigrafía de barrio» (papel crema, tintas planas, títulos condensados, esquinas redondeadas, sombra de impresión).
+Todos los datos vienen del backend (`src/api/`). La sesión todavía es simulada, hasta integrar Keycloak.
 
-In the project directory, you can run:
+## Cómo verlo
 
-### `npm start`
+Necesita el backend levantado (ver el README de la raíz). Desde la raíz del repo:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+npm install
+cp packages/frontend/.env.example packages/frontend/.env.local   # VITE_API_URL=http://localhost:8000
+npm run start:frontend    # http://localhost:5173
+npm run test:frontend     # tests (átomos + integración de PostulacionesOrg)
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Para entrar con sesión (en `/ingresar`). Las cuentas de demo son ids fijos que crea el seed del backend:
 
-### `npm test`
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Colaboradora | `colaboradora@demo.org` | `demo1234` |
+| Organización | `organizacion@demo.org` | `demo1234` |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Mapa de carpetas (de lo más chico a lo más grande)
 
-### `npm run build`
+```
+src/
+├─ estilos/       ← TODO el aspecto: paleta (hex), roles de color, títulos h1–h6, espaciado, temas
+├─ atomos/        ← piezas mínimas e indivisibles: Button, Field, Tag, Heading, Icon…
+├─ moleculas/     ← combinan átomos: Ticket, Alert, Tabs, TagPicker, ConfirmDialog…
+├─ organismos/    ← bloques completos: Navbar, Footer, ProyectoCard, Dialogos…
+├─ plantillas/    ← estructura de página: LayoutPrincipal, menus.js, disposicion.module.css
+├─ paginas/       ← las 26 pantallas, agrupadas por área (publico, acceso, colaboradora, organizacion…)
+├─ api/           ← cliente HTTP (Axios) y adaptadores: lo único que conoce los nombres del backend
+├─ hooks/         ← lógica reutilizable (usePedido, useDisclosure)
+├─ contexto/      ← sesión (Auth) y modo daltónico
+├─ datos/         ← textos fijos (preguntas frecuentes, motivos de denuncia)
+├─ utilidades/    ← funciones chicas (cx)
+├─ App.js         ← mapa de rutas
+└─ main.js        ← entrada (fuentes + estilos + render)
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+**Regla de dependencias** (para no enredarse): cada nivel solo usa los *anteriores* de esta lista (estilos → átomos → moléculas → organismos → plantillas → páginas).
+Un átomo no conoce a las moléculas; una página puede usar todo. Así podés tocar un átomo con la certeza de
+que solo afecta hacia abajo (a lo que lo usa), y nunca rompe hacia arriba.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Cada carpeta tiene un `LEEME.md` corto, y cada archivo empieza con un comentario que explica
+**qué es, cómo se usa, qué implica cambiarlo o sacarlo y cómo agregarle hermanos**.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Los tres archivos que más vas a tocar
 
-### `npm run eject`
+| Querés cambiar… | Editá |
+|---|---|
+| Un color de todo el sitio | `src/estilos/paleta.css` (único lugar con hex) |
+| El tamaño o aspecto de h1–h6 | `src/estilos/titulos.css` |
+| Qué ítems tiene el menú | `src/plantillas/menus.js` |
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Más recetas (nueva columna de tabla, nuevo botón en la navbar, nuevo campo, nueva pantalla…): **`docs/RECETAS.md`**.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+**¿Primera vez con React?** Leé primero **`docs/GLOSARIO.md`**: explica con ejemplos del propio proyecto qué es un componente, props, estado,
+`map`, `filter`, `&&`, etc. Las pantallas (`src/paginas/`) están escritas para leerse de arriba hacia abajo:
+cada una tiene un bloque *ANATOMÍA DE ESTE ARCHIVO* y cuatro secciones con el mismo orden
+(1 datos y estado · 2 cálculos · 3 acciones · 4 lo que se dibuja), con un comentario en cada parte.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Cómo habla con el backend
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- `src/api/cliente.js` es la única instancia de Axios (URL base de `VITE_API_URL`, timeout de 10 s). El token del login real se va a agregar ahí, con un interceptor.
+- Cada `src/api/*.js` pide algo al backend y lo **adapta** a lo que muestra la pantalla. Si el backend cambia un nombre, se arregla solo ahí.
+- Las pantallas piden datos con `usePedido` (`src/hooks/usePedido.js`): `cargando` muestra los esqueletos y `error` el aviso rojo con el mensaje del backend (`api/errores.js`).
+- En producción el front se compila con `VITE_API_URL=/api` y lo sirve nginx (ver `deploy/nginx/Dockerfile` en la raíz).
 
-## Learn More
+## Lo que sigue simulado
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Sesión y roles (`contexto/Auth.js`): falta integrar Keycloak.
+- hCaptcha (`moleculas/CaptchaMock`) y login social (`moleculas/SocialButtons`).
+- Los íconos son provisorios (`atomos/Icon`): se reemplazan por la biblioteca que se elija, tocando solo ese archivo.

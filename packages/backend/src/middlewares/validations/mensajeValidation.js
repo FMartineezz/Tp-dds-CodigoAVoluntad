@@ -50,6 +50,13 @@ const lecturaSchema = zod.object({
   leido: zod.boolean(),
 });
 
+/**
+ * Valida el body de POST /mensajes: ids de colectivo, persona y proyecto, emisor y texto.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarMensaje = (req, res, next) => {
   const resultado = mensajeSchema.safeParse(req.body);
 
@@ -61,6 +68,13 @@ export const validarMensaje = (req, res, next) => {
   next();
 };
 
+/**
+ * Valida el body de PATCH /mensajes: ids de colectivo, persona y proyecto, lector y `leido`.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarLecturaDeMensajes = (req, res, next) => {
   const resultado = lecturaSchema.safeParse(req.body);
   if (!resultado.success) {

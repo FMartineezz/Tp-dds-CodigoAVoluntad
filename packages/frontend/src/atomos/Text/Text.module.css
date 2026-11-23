@@ -1,0 +1,13 @@
+/* Párrafo de texto con variantes de lectura. */
+.text { max-width: 62ch; }
+.body { font-size: var(--text-body); line-height: 1.65; }
+.lead { font-size: var(--text-lead); line-height: 1.55; }
+.small { font-size: var(--text-small); line-height: 1.55; }
+.muted { font-size: var(--text-small); color: var(--color-text-muted); }
+.prose {
+  font-family: var(--font-display);
+  font-stretch: 100%;
+  font-weight: 450;
+  font-size: 1.1875rem;
+  line-height: 1.7;
+}

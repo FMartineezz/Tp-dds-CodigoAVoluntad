@@ -1,0 +1,191 @@
+/**
+ * PANTALLA PerfilColaboradora
+ * Ruta: /org/colaboradoras/:id   ·   Quién la ve: Organización
+ * Qué muestra: Perfil público de una colaboradora, sus valoraciones y cómo escribirle.
+ * De dónde salen los datos: GET /colaboradoras/:id, GET /personaColaboradora/:id/valoraciones
+ *   y mis proyectos (GET /colectivos/:id/proyectos) para elegir desde cuál escribirle
+ *   (ver api/organizacion.js).
+ *   PENDIENTE (backend): los datos de contacto nunca salen en los GET; falta un endpoint
+ *   para que el colectivo vea los contactos de quien ya aceptó (por ejemplo
+ *   GET /colectivos/:id/colaboradoras/:personaId/contactos). Tampoco hay «logros» de la
+ *   persona ni el nombre del colectivo que escribió cada valoración.
+ *
+ * ANATOMÍA DE ESTE ARCHIVO:
+ *   1. DATOS Y ESTADO: la persona, sus valoraciones y mis proyectos (del backend) y el
+ *      proyecto elegido para escribirle.
+ *      ESPERA Y ERRORES: cargando, «no existe» (404) o aviso de error.
+ *   2. CÁLCULOS: los proyectos abiertos (para el desplegable).
+ *   3. ACCIONES: no hay (el botón es un enlace a Mensajes).
+ *   4. LO QUE SE DIBUJA: migas, cabecera, valoraciones y mensajes.
+ */
+import { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { Avatar, Button, Field, Heading, Tag, Text } from '../../atomos';
+import { Alert, Crumbs, Estrellas, RowsSkeleton } from '../../moleculas';
+import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { mensajeDeError } from '../../api/errores.js';
+import {
+  obtenerColaboradora,
+  obtenerProyectosDelColectivo,
+  obtenerValoracionesDeColaboradora,
+} from '../../api/organizacion.js';
+import { NoEncontrado } from '../../paginas/sistema/Errores.js';
+import { esNoEncontrado } from './auxiliares.js';
+import s from './Organizacion.module.css';
+import sh from '../../plantillas/disposicion.module.css';
+
+// Pide a la vez la persona, sus valoraciones y mis proyectos.
+async function cargarPerfil(personaId, colectivoId) {
+  const [colaboradora, valoraciones, proyectos] = await Promise.all([
+    obtenerColaboradora(personaId),
+    obtenerValoracionesDeColaboradora(personaId),
+    obtenerProyectosDelColectivo(colectivoId),
+  ]);
+  return { colaboradora, valoraciones, proyectos };
+}
+
+export default function PerfilColaboradora() {
+  // ───── 1. DATOS Y ESTADO ─────
+
+  // Lee la parte variable de la dirección: /org/colaboradoras/a000… → id = 'a000…'
+  // (ver docs/GLOSARIO.md → useParams)
+  const { id } = useParams();
+  const { id: idColectivo } = useAuth();
+
+  const { cargando, datos, error } = usePedido(
+    () => cargarPerfil(id, idColectivo),
+    [id, idColectivo]
+  );
+
+  // Proyecto desde el que se le va a escribir ('' = el primero de la lista).
+  const [proyectoElegido, setProyectoElegido] = useState('');
+
+  // ───── ESPERA Y ERRORES ─────
+  if (cargando) {
+    return (
+      <div className={`container ${sh.page}`}>
+        <RowsSkeleton n={4} />
+      </div>
+    );
+  }
+  if (esNoEncontrado(error)) {
+    const { code, message } = error.response.data;
+    return <NoEncontrado code={code} titulo="Esa colaboradora no existe" msg={message} />;
+  }
+  if (error) {
+    return (
+      <div className={`container ${sh.page}`}>
+        <Alert kind="error" title="No pudimos cargar el perfil">{mensajeDeError(error)}</Alert>
+      </div>
+    );
+  }
+
+  const { colaboradora, valoraciones, proyectos } = datos;
+
+  // ───── 2. CÁLCULOS ─────
+
+  // Solo se puede escribir desde un proyecto abierto (el mensaje queda asociado a él).
+  const abiertos = proyectos.filter((proyecto) => proyecto.estado === 'abierto');
+  // Si todavía no se eligió ninguno, se usa el primero (si hay).
+  const proyectoParaEscribir = proyectoElegido || abiertos[0]?.id;
+
+  // ───── 4. LO QUE SE DIBUJA ─────
+
+  // BLOQUE «Mensajes»: tres casos posibles.
+  let contenidoDeMensajes;
+  if (!colaboradora.mensajes) {
+    // Caso 1: la persona desactivó los mensajes de organizaciones.
+    contenidoDeMensajes = (
+      <Alert kind="warning">
+        Esta persona no recibe mensajes de organizaciones. (ERR-EST-801)
+      </Alert>
+    );
+  } else if (abiertos.length === 0) {
+    // Caso 2: no tengo proyectos abiertos desde donde escribirle.
+    contenidoDeMensajes = (
+      <Text variant="small">Para escribirle necesitás un proyecto abierto.</Text>
+    );
+  } else {
+    // Caso 3: elijo el proyecto y voy a Mensajes con esa persona y ese proyecto.
+    contenidoDeMensajes = (
+      <div className={`${sh.bar} ${sh.barInfo}`}>
+        <Field
+          as="select"
+          label="Desde el proyecto"
+          value={proyectoParaEscribir}
+          onChange={(e) => setProyectoElegido(e.target.value)}
+        >
+          {abiertos.map((proyecto) => (
+            <option key={proyecto.id} value={proyecto.id}>{proyecto.titulo}</option>
+          ))}
+        </Field>
+        <Button as={Link} to={`/org/mensajes?persona=${colaboradora.id}&proyecto=${proyectoParaEscribir}`}>
+          Enviar mensaje
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`container ${sh.page}`}>
+      {/* BLOQUE: Migas de pan */}
+      <Crumbs
+        items={[
+          { label: 'Colaboradoras', to: '/org/colaboradoras' },
+          { label: colaboradora.nombre },
+        ]}
+      />
+
+      {/* BLOQUE: Cabecera — nombre, alias, pronombres, presentación, habilidades, redes y foto */}
+      <header className={s.perfil}>
+        <div className={s.pinfo}>
+          <Heading level={1} size="h2">
+            {colaboradora.nombre}{' '}
+            {/* Los pronombres se muestran solo si los cargó. */}
+            {colaboradora.pronombres && <small className={s.pron}>({colaboradora.pronombres})</small>}
+          </Heading>
+          {colaboradora.alias && <Text variant="small">@{colaboradora.alias}</Text>}
+          {colaboradora.bio && <Text variant="prose">{colaboradora.bio}</Text>}
+          <span className={sh.tagsRow}>
+            {colaboradora.habilidades.map((habilidad) => (
+              <Tag key={habilidad} tone="sand">{habilidad}</Tag>
+            ))}
+          </span>
+          {/* Enlaces: su cuenta de GitHub/GitLab y una por cada red social cargada. */}
+          <div className={s.redes}>
+            {colaboradora.git && (
+              <a href={colaboradora.git} target="_blank" rel="noopener noreferrer">Repositorios</a>
+            )}
+            {colaboradora.redes.map((red) => (
+              <a key={red.tipo} href={red.url} target="_blank" rel="noopener noreferrer">{red.tipo}</a>
+            ))}
+          </div>
+        </div>
+        <Avatar nombre={colaboradora.nombre} size={120} square />
+      </header>
+
+      {/* BLOQUE: Valoraciones — las que recibió de colectivos (o un texto si no tiene) */}
+      <section className={sh.col} aria-labelledby="vals">
+        <Heading level={2} size="h3" id="vals">Valoraciones</Heading>
+        {valoraciones.length === 0 && <Text variant="small">Todavía no recibió valoraciones.</Text>}
+        {valoraciones.map((valoracion) => (
+          <div key={valoracion.id} className={s.val}>
+            <div className={sh.row}>
+              {/* El backend no dice qué colectivo la escribió: se muestra la fecha. */}
+              <b>{new Date(valoracion.fecha).toLocaleDateString('es-AR')}</b>
+              <Estrellas valor={valoracion.puntaje} />
+            </div>
+            {valoracion.texto && <Text variant="prose">{valoracion.texto}</Text>}
+          </div>
+        ))}
+      </section>
+
+      {/* BLOQUE: Mensajes — elegir proyecto y escribirle, o aviso si no recibe mensajes */}
+      <section className={sh.col} aria-labelledby="mensaje">
+        <Heading level={2} size="h3" id="mensaje">Mensajes</Heading>
+        {contenidoDeMensajes}
+      </section>
+    </div>
+  );
+}

@@ -1,0 +1,152 @@
+name: tpdds
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ---------- Proxy reverso + HTTPS + front estático (único servicio expuesto a internet) ----------
+  nginx:
+    # Imagen propia: nginx + el front compilado (ver deploy/nginx/Dockerfile)
+    build:
+      context: .
+      dockerfile: deploy/nginx/Dockerfile
+    container_name: nginx-tp
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - backend
+      - keycloak
+    mem_limit: 64m
+    logging: *logging
+
+  # ---------- Renovación automática del certificado ----------
+  certbot:
+    image: certbot/certbot
+    container_name: certbot-tp
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: >
+      /bin/sh -c 'trap exit TERM;
+      while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'
+    mem_limit: 128m
+    logging: *logging
+
+  # ---------- Backend (se construye SOLO con packages/backend y tu Dockerfile) ----------
+  backend:
+    build: ./packages/backend
+    container_name: backend-tp
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=3000
+      - MONGODB_URI=mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongodb:27017
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME}
+      - ALLOWED_ORIGINS=https://${DOMAIN}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - MI_API_KEY=${MI_API_KEY}
+    volumes:
+      # Swagger busca /docs/api-docs.json dentro del contenedor
+      - ./docs:/docs:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/healthCheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    mem_limit: 384m
+    logging: *logging
+
+  # ---------- MongoDB (reemplaza a Mongo Atlas) ----------
+  mongodb:
+    image: mongo:7
+    container_name: mongodb-tp
+    restart: unless-stopped
+    command: ["--wiredTigerCacheSizeGB", "0.5"]
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_APP_USER=${MONGO_APP_USER}
+      - MONGO_APP_PASSWORD=${MONGO_APP_PASSWORD}
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME}
+    volumes:
+      - mongo_data:/data/db
+      - ./deploy/mongo-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    mem_limit: 800m
+    logging: *logging
+
+  # ---------- Keycloak (modo producción, detrás de nginx en /auth) ----------
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.0
+    container_name: keycloak-tp
+    restart: unless-stopped
+    command: ["start"]
+    environment:
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://keycloak-db:5432/keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=${KC_DB_PASSWORD}
+      - KC_HTTP_RELATIVE_PATH=/auth
+      - KC_HOSTNAME=https://${DOMAIN}/auth
+      - KC_HTTP_ENABLED=true
+      - KC_PROXY_HEADERS=xforwarded
+      - KC_HEALTH_ENABLED=true
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KC_ADMIN_USER}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KC_ADMIN_PASSWORD}
+      - JAVA_OPTS_KC_HEAP=-Xms256m -Xmx768m
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      # Puerto de gestión (9000): solo verifica que Keycloak ya levantó
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+    mem_limit: 1280m
+    logging: *logging
+
+  keycloak-db:
+    image: postgres:16-alpine
+    container_name: keycloak-db-tp
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=${KC_DB_PASSWORD}
+    volumes:
+      - keycloak_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 256m
+    logging: *logging
+
+volumes:
+  mongo_data:
+  keycloak_pg_data:

@@ -1,0 +1,2 @@
+/* Marcador de color para una palabra clave dentro de un párrafo. */
+.mark { background: var(--color-fill); color: var(--ink-900); padding: 0 var(--space-1); }

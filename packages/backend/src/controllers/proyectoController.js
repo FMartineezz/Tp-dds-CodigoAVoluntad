@@ -1,8 +1,19 @@
+import { respuestaPaginada } from "../utils/paginacion.js";
+/** Endpoints de proyectos (routes/proyectoRoutes.js). */
 export class ProyectoController {
+  /**
+   * @param {object} deps
+   * @param {import("../services/proyectoService.js").ProyectoService} deps.proyectoService
+   */
   constructor({ proyectoService }) {
     this.proyectoService = proyectoService;
   }
 
+  /**
+   * POST /proyectos (body validado por proyectoValidation) → 201 con el proyecto y header Location.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   crearProyecto = async (req, res) => {
     const proyecto = await this.proyectoService.crearProyecto(
       req.body.titulo,
@@ -14,15 +25,41 @@ export class ProyectoController {
       req.body.fechaLimiteBusqueda,
       req.body.urlDonaciones,
     );
-    res.status(201).json(proyecto);
+    // 201 + header Location: la URL donde se puede consultar el recurso recién creado
+    res.status(201).location(`/proyectos/${proyecto._id}`).json(proyecto);
   };
 
+  /**
+   * GET /proyectos?pagina&limite → 200 con una RespuestaPaginada de proyectos.
+   * @param {import("../types.js").RequestPaginado} req
+   * @param {import("express").Response} res
+   */
   obtenerProyectos = async (req, res) => {
-    const proyectos = await this.proyectoService.obtenerProyectos();
+    const pagina = await this.proyectoService.obtenerProyectos(req.paginacion);
 
-    res.status(200).json(proyectos);
+    res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };
 
+  /**
+   * GET /colectivos/:colectivoId/proyectos?pagina&limite → 200 con una RespuestaPaginada de los
+   * proyectos del colectivo.
+   * @param {import("../types.js").RequestPaginado} req
+   * @param {import("express").Response} res
+   */
+  obtenerProyectosDeColectivo = async (req, res) => {
+    const pagina = await this.proyectoService.obtenerProyectosDeColectivo(
+      req.params.colectivoId,
+      req.paginacion,
+    );
+
+    res.status(200).json(respuestaPaginada(pagina, req.paginacion));
+  };
+
+  /**
+   * GET /proyectos/:id → 200 con el proyecto.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   obtenerProyectoPorId = async (req, res) => {
     const id = req.params.id;
 
@@ -32,6 +69,11 @@ export class ProyectoController {
   };
 
   // Alternativa recurso-céntrica a /finalizar (ver issue REST): PATCH /proyectos/:id { finalizado: true, fechaCierre:22:21:21T url: wwww }
+  /**
+   * PATCH /proyectos/:id (body validado por validarActualizacionProyecto) → 200 con el proyecto actualizado.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
   actualizarProyecto = async (req, res) => {
     const id = req.params.id;
 

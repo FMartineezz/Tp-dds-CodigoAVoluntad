@@ -1,0 +1,10 @@
+/* Pestañas reales: tablist + tab + tabpanel, con flechas del teclado. */
+.tabs { display: flex; gap: var(--space-1); border-bottom: var(--border); flex-wrap: wrap; }
+
+.tabs button { min-height: 2.75rem; padding: 0 var(--space-4); background: transparent; border: var(--border); border-bottom: 0; border-radius: var(--radius) var(--radius) 0 0; font-weight: 600; font-size: var(--text-label); text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; margin-bottom: -2px; }
+
+.tabs button:hover { background: var(--color-hover); }
+
+.tabs button[aria-selected='true'] { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+
+.panel { padding-top: var(--space-5); display: grid; gap: var(--space-5); }

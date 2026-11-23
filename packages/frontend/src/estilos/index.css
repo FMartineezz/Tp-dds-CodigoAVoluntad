@@ -1,0 +1,9 @@
+/* Punto de entrada de los estilos universales. EL ORDEN IMPORTA:
+   la paleta primero, después lo que la usa, y los temas al final. */
+@import './paleta.css';
+@import './colores-semanticos.css';
+@import './tipografia.css';
+@import './titulos.css';
+@import './espaciado-y-forma.css';
+@import './base.css';
+@import './temas/daltonico.css';

@@ -1,0 +1,4 @@
+/* Círculo o cuadrado con las iniciales de una persona o colectivo. */
+.avatar { display: inline-grid; place-items: center; flex-shrink: 0; border: var(--border); border-radius: 50%; background: var(--color-fill); font: 900 1em / 1 var(--font-display); font-stretch: 70%; text-transform: uppercase; }
+
+.sq { border-radius: var(--radius); }

@@ -13,6 +13,14 @@ const denunciaSchema = zod.object({
     .min(1, "DENUNCIA_DESCRIPCION_REQUERIDA"),
 });
 
+/**
+ * Valida el body de POST /colaboraciones/:id/denuncia (descripción no vacía) y reemplaza
+ * req.body por los datos parseados.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarDenuncia = (req, res, next) => {
   const resultado = denunciaSchema.safeParse(req.body);
 
@@ -46,6 +54,14 @@ const resolucionDenunciaSchema = zod.object({
   ),
 });
 
+/**
+ * Valida el `estado` de PATCH /admin/denuncias/:id/estado (en_revision, resuelta o descartada,
+ * sin importar mayúsculas) y lo deja normalizado en req.body.estado.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarEstadoDenuncia = (req, res, next) => {
   const resultado = resolucionDenunciaSchema.safeParse(req.body);
 

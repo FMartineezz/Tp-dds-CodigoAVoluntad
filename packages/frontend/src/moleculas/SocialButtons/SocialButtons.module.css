@@ -1,0 +1,6 @@
+/* Botones de login social (Google, LinkedIn). Simulados. */
+.social { display: grid; gap: var(--space-3); }
+
+.sep { display: flex; align-items: center; gap: var(--space-3); color: var(--color-text-muted); font-size: var(--text-label); text-transform: uppercase; }
+
+.sep::before, .sep::after { content: ''; flex: 1; border-top: 1px solid var(--color-border); opacity: 0.4; }

@@ -1,469 +1,441 @@
-import { jest } from "@jest/globals";
+import mongoose from "mongoose";
+import { consultasA, usarBaseDeDatos } from "../utils/db.js";
+import { esperarAppError } from "../utils/esperarAppError.js";
+import { proyectoService, habilidadService, colectivoService } from "../../src/container.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
-import {
-  crearContexto,
-  cargarEscenarioBase,
-  perfilDeEjemplo,
-  expectAppError,
-} from "../helpers/crearContexto.js";
+import { ProyectoModel } from "../../src/schemas/proyectoSchema.js";
 
-describe("ProyectoService", () => {
-  let ctx;
-  let escenario;
+usarBaseDeDatos();
 
-  beforeEach(async () => {
-    jest.spyOn(console, "log").mockImplementation(() => {});
-    ctx = crearContexto();
-    escenario = await cargarEscenarioBase(ctx);
+const UNA_HORA = 60 * 60 * 1000;
+
+function perfilBase(cambios = {}) {
+  return {
+    descripcion: "Desarrollo backend",
+    habilidadesRequeridas: ["backend"],
+    habilidadesOpcionales: ["frontend"],
+    horas: 10,
+    tipoDeCompromiso: "semanal",
+    modalidadDeColaboracion: "gratuita",
+    ...cambios,
+  };
+}
+
+function crearProyecto({
+  titulo = "Huerta digital",
+  perfiles = [perfilBase()],
+  colectivo = "Huerta Comunitaria",
+  fechaCierre,
+  fechaLimiteBusqueda,
+  urlDonaciones,
+} = {}) {
+  return proyectoService.crearProyecto(
+    titulo,
+    "Sistema para organizar la huerta",
+    perfiles,
+    colectivo,
+    "https://huerta.org",
+    fechaCierre,
+    fechaLimiteBusqueda,
+    urlDonaciones,
+  );
+}
+
+beforeEach(async () => {
+  await habilidadService.crearHabilidad("Backend", "APIs y bases de datos");
+  await habilidadService.crearHabilidad("Frontend", "Interfaces web");
+  await colectivoService.crearColectivo("Huerta Comunitaria", "Huerta del barrio", "caba", "ong");
+});
+
+describe("ProyectoService.crearProyecto", () => {
+  test("busca las habilidades de TODOS los perfiles con una sola consulta (sin N+1)", async () => {
+    // Preparación: 3 perfiles con 2 habilidades cada uno
+    const perfiles = [
+      perfilBase({ descripcion: "Uno" }),
+      perfilBase({ descripcion: "Dos", habilidadesRequeridas: ["frontend"] }),
+      perfilBase({ descripcion: "Tres" }),
+    ];
+
+    // Ejecución
+    const consultas = await consultasA("habilidades", () => crearProyecto({ perfiles }));
+
+    // Validación: una única consulta a habilidades, no una por perfil ni por habilidad
+    expect(consultas).toEqual(["find"]);
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+  test("crea el proyecto con sus perfiles, resuelve las habilidades y lo agrega al colectivo", async () => {
+    // Preparación
+    const [backend, frontend] = await habilidadService.obtenerHabilidades();
+
+    // Ejecución
+    const proyecto = await crearProyecto({ perfiles: [perfilBase({ cantidadMaxima: 3 })] });
+
+    // Validación
+    const guardado = await ProyectoModel.findById(proyecto._id).lean();
+    expect(guardado).toMatchObject({
+      titulo: "Huerta digital",
+      urlSistema: "https://huerta.org",
+      finalizado: false,
+      busquedaCerrada: false,
+      urlDonaciones: null,
+      logros: [],
+    });
+    expect(guardado.perfiles).toHaveLength(1);
+    expect(guardado.perfiles[0]).toMatchObject({
+      descripcion: "Desarrollo backend",
+      horas: 10,
+      tipoDeCompromiso: "semanal",
+      modalidadDeColaboracion: "gratuita",
+      cantidadMaxima: 3,
+    });
+    expect(guardado.perfiles[0]._id).toBeDefined();
+    expect(guardado.perfiles[0].habilidadesRequeridas.map(String)).toEqual([String(backend._id)]);
+    expect(guardado.perfiles[0].habilidadesOpcionales.map(String)).toEqual([String(frontend._id)]);
+
+    const colectivo = await colectivoService.obtenerColectivoPorNombre("Huerta Comunitaria");
+    expect(String(guardado.colectivo)).toBe(String(colectivo._id));
+    expect(colectivo.proyectos.map(String)).toContain(String(proyecto._id));
   });
 
-  describe("crearProyecto", () => {
-    test("guarda el proyecto abierto, con perfiles, URL del sistema y sin logros", async () => {
-      const proyecto = await ctx.proyectoService.obtenerProyectoPorId(escenario.proyecto.id);
+  test("un perfil sin cantidadMaxima queda sin cupo definido", async () => {
+    // Ejecución
+    const proyecto = await crearProyecto();
 
-      expect(proyecto).toMatchObject({
-        titulo: "Web institucional",
-        urlSistema: "https://fundacion.org",
-        finalizado: false,
-        logros: [],
-        colectivo: escenario.colectivo.id,
-      });
-      expect(proyecto.perfiles).toHaveLength(1);
-      expect(proyecto.perfiles[0].habilidadesRequeridas).toEqual([escenario.react.id]);
-      expect(proyecto.perfiles[0].habilidadesOpcionales).toEqual([escenario.testing.id]);
+    // Validación
+    const guardado = await ProyectoModel.findById(proyecto._id).lean();
+    expect(guardado.perfiles[0].cantidadMaxima).toBeUndefined();
+  });
+
+  test("guarda fechaCierre, fechaLimiteBusqueda y urlDonaciones", async () => {
+    // Preparación
+    const fechaCierre = new Date(Date.now() + 48 * UNA_HORA);
+    const fechaLimiteBusqueda = new Date(Date.now() + 24 * UNA_HORA);
+
+    // Ejecución
+    const proyecto = await crearProyecto({
+      fechaCierre,
+      fechaLimiteBusqueda,
+      urlDonaciones: "https://cafecito.app/huerta",
     });
 
-    test("vincula el proyecto a su colectivo", async () => {
-      const colectivo = await ctx.colectivoService.obtenerColectivoPorId(escenario.colectivo.id);
+    // Validación
+    const guardado = await proyectoService.obtenerProyectoPorId(proyecto._id);
+    expect(guardado.fechaCierre).toEqual(fechaCierre);
+    expect(guardado.fechaLimiteBusqueda).toEqual(fechaLimiteBusqueda);
+    expect(guardado.urlDonaciones).toBe("https://cafecito.app/huerta");
+  });
 
-      expect(colectivo.proyectos).toEqual([escenario.proyecto.id]);
+  test("una urlDonaciones vacía se guarda como null", async () => {
+    // Ejecución
+    const proyecto = await crearProyecto({ urlDonaciones: "" });
+
+    // Validación
+    const guardado = await proyectoService.obtenerProyectoPorId(proyecto._id);
+    expect(guardado.urlDonaciones).toBeNull();
+  });
+
+  test("rechaza una urlDonaciones que no es http/https", async () => {
+    // Ejecución + Validación
+    await esperarAppError(
+      crearProyecto({ urlDonaciones: "ftp://donaciones.org" }),
+      ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
+      400,
+    );
+    expect(await ProyectoModel.countDocuments()).toBe(0);
+  });
+
+  test("rechaza un título repetido dentro del mismo colectivo", async () => {
+    // Preparación
+    await crearProyecto();
+
+    // Ejecución + Validación
+    await esperarAppError(crearProyecto(), ErrorCatalog.PROYECTO_YA_EXISTENTE, 409);
+    expect(await ProyectoModel.countDocuments()).toBe(1);
+  });
+
+  test("permite el mismo título en otro colectivo", async () => {
+    // Preparación
+    await colectivoService.crearColectivo("Otra Huerta", "Otra", "cordoba", "asamblea");
+    await crearProyecto();
+
+    // Ejecución
+    await crearProyecto({ colectivo: "Otra Huerta" });
+
+    // Validación
+    expect(await ProyectoModel.countDocuments({ titulo: "Huerta digital" })).toBe(2);
+  });
+
+  test("falla si el colectivo no existe", async () => {
+    // Ejecución + Validación
+    await esperarAppError(
+      crearProyecto({ colectivo: "No existe" }),
+      ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE,
+      400,
+    );
+    expect(await ProyectoModel.countDocuments()).toBe(0);
+  });
+
+  test("falla si alguna habilidad de un perfil no existe y no guarda nada", async () => {
+    // Ejecución + Validación
+    await esperarAppError(
+      crearProyecto({
+        perfiles: [perfilBase({ habilidadesRequeridas: ["backend", "cobol"] })],
+      }),
+      ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO,
+      400,
+    );
+    expect(await ProyectoModel.countDocuments()).toBe(0);
+  });
+
+  test("también falla si la habilidad inexistente es opcional", async () => {
+    // Ejecución + Validación
+    await esperarAppError(
+      crearProyecto({ perfiles: [perfilBase({ habilidadesOpcionales: ["cobol"] })] }),
+      ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO,
+      400,
+    );
+  });
+});
+
+describe("ProyectoService.estaBusquedaAbierta", () => {
+  test("está abierta sin fecha límite", async () => {
+    // Preparación
+    const { _id } = await crearProyecto();
+    const proyecto = await proyectoService.obtenerProyectoPorId(_id);
+
+    // Ejecución + Validación
+    expect(proyectoService.estaBusquedaAbierta(proyecto)).toBe(true);
+  });
+
+  test("está abierta si la fecha límite es futura", async () => {
+    // Preparación
+    const { _id } = await crearProyecto({
+      fechaLimiteBusqueda: new Date(Date.now() + UNA_HORA),
+    });
+    const proyecto = await proyectoService.obtenerProyectoPorId(_id);
+
+    // Ejecución + Validación
+    expect(proyectoService.estaBusquedaAbierta(proyecto)).toBe(true);
+  });
+
+  test("está cerrada si la fecha límite ya pasó", async () => {
+    // Preparación
+    const { _id } = await crearProyecto({
+      fechaLimiteBusqueda: new Date(Date.now() - UNA_HORA),
+    });
+    const proyecto = await proyectoService.obtenerProyectoPorId(_id);
+
+    // Ejecución + Validación
+    expect(proyectoService.estaBusquedaAbierta(proyecto)).toBe(false);
+  });
+
+  test("está cerrada si busquedaCerrada es true", async () => {
+    // Preparación
+    const { _id } = await crearProyecto();
+    await ProyectoModel.updateOne({ _id }, { busquedaCerrada: true });
+    const proyecto = await proyectoService.obtenerProyectoPorId(_id);
+
+    // Ejecución + Validación
+    expect(proyectoService.estaBusquedaAbierta(proyecto)).toBe(false);
+  });
+});
+
+describe("ProyectoService consultas", () => {
+  test("obtenerProyectos devuelve todos los proyectos", async () => {
+    // Preparación
+    await crearProyecto({ titulo: "Uno" });
+    await crearProyecto({ titulo: "Dos" });
+
+    // Ejecución
+    const { resultados: proyectos, total } = await proyectoService.obtenerProyectos({
+      pagina: 1,
+      limite: 20,
     });
 
-    test("no permite dos proyectos con el mismo título en el mismo colectivo", async () => {
-      const duplicado = ctx.proyectoService.crearProyecto(
-        "Web institucional",
-        "otra",
-        [perfilDeEjemplo()],
-        "Fundación Ejemplo",
-        "https://otra.org",
-      );
+    // Validación
+    expect(proyectos.map((p) => p.titulo).sort()).toEqual(["Dos", "Uno"]);
+    expect(total).toBe(2);
+  });
 
-      await expectAppError(duplicado, ErrorCatalog.PROYECTO_YA_EXISTENTE, 409);
-      await expect(duplicado).rejects.toThrow(
-        "Ya existe un proyecto con titulo Web institucional para el colectivo Fundación Ejemplo",
-      );
-    });
-
-    test("el mismo título en otro colectivo está permitido", async () => {
-      await ctx.colectivoService.crearColectivo("Asamblea Sur", "d", "salta", "asamblea");
-
-      const proyecto = await ctx.proyectoService.crearProyecto(
-        "Web institucional",
-        "La web de la asamblea",
-        [perfilDeEjemplo()],
-        "Asamblea Sur",
-        "https://asamblea.org",
-      );
-
-      expect(proyecto.titulo).toBe("Web institucional");
-      expect(await ctx.proyectoService.obtenerProyectos()).toHaveLength(2);
-    });
-
-    test("falla si el colectivo no existe", async () => {
-      await expectAppError(
-        ctx.proyectoService.crearProyecto(
-          "Nuevo",
-          "d",
-          [perfilDeEjemplo()],
-          "Nadie",
-          "https://x.org",
-        ),
-        ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE,
-        400,
-      );
-    });
-
-    test("falla si un perfil pide una habilidad inexistente", async () => {
-      await expectAppError(
-        ctx.proyectoService.crearProyecto(
-          "Nuevo",
-          "d",
-          [perfilDeEjemplo({ habilidadesRequeridas: ["cobol"] })],
-          "Fundación Ejemplo",
-          "https://x.org",
-        ),
-        ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO,
-        400,
-      );
-    });
-    test("permite crear proyecto con urlDonaciones válida", async () => {
-      const proyecto = await ctx.proyectoService.crearProyecto(
-        "Proyecto Donaciones",
-        "d",
-        [perfilDeEjemplo()],
-        "Fundación Ejemplo",
-        "https://donaciones.org",
-        undefined,
-        undefined,
-        "https://cafecito.app/ejemplo",
-      );
-
-      expect(proyecto.urlDonaciones).toBe("https://cafecito.app/ejemplo");
-      const guardado = await ctx.proyectoService.obtenerProyectoPorId(proyecto.id);
-      expect(guardado.urlDonaciones).toBe("https://cafecito.app/ejemplo");
-    });
-
-    test("crear proyecto sin urlDonaciones la inicializa en null", async () => {
-      const proyecto = await ctx.proyectoService.crearProyecto(
-        "Proyecto Sin Donaciones",
-        "d",
-        [perfilDeEjemplo()],
-        "Fundación Ejemplo",
-        "https://sindonaciones.org",
-      );
-
-      expect(proyecto.urlDonaciones).toBeNull();
-    });
-
-    test("crear proyecto con urlDonaciones inválida falla con 400", async () => {
-      await expectAppError(
-        ctx.proyectoService.crearProyecto(
-          "Proyecto Donacion Invalida",
-          "d",
-          [perfilDeEjemplo()],
-          "Fundación Ejemplo",
-          "https://ok.org",
-          undefined,
-          undefined,
-          "esto-no-es-una-url",
-        ),
-        ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
-        400,
-      );
-    });
-
-    test("crear proyecto con protocolo no HTTP/HTTPS en urlDonaciones falla con 400", async () => {
-      await expectAppError(
-        ctx.proyectoService.crearProyecto(
-          "Proyecto Donacion FTP",
-          "d",
-          [perfilDeEjemplo()],
-          "Fundación Ejemplo",
-          "https://ok.org",
-          undefined,
-          undefined,
-          "ftp://cafecito.app/ejemplo",
-        ),
-        ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
-        400,
-      );
+  test("obtenerProyectos devuelve una lista vacía si no hay proyectos", async () => {
+    expect(await proyectoService.obtenerProyectos({ pagina: 1, limite: 20 })).toEqual({
+      resultados: [],
+      total: 0,
     });
   });
 
-  test("obtenerProyectos lista todos", async () => {
-    expect(await ctx.proyectoService.obtenerProyectos()).toHaveLength(1);
-  });
-
-  test("obtenerProyectoPorId falla con 404 si no existe", async () => {
-    await expectAppError(
-      ctx.proyectoService.obtenerProyectoPorId("inexistente"),
+  test("obtenerProyectoPorId falla con un id inexistente", async () => {
+    // Ejecución + Validación
+    await esperarAppError(
+      proyectoService.obtenerProyectoPorId(new mongoose.Types.ObjectId().toString()),
       ErrorCatalog.PROYECTO_NO_ENCONTRADO,
       404,
     );
   });
 
-  describe("cierre manual (finalizar)", () => {
-    test("marca el proyecto como finalizado y lo devuelve", async () => {
-      const proyecto = await ctx.proyectoService.finalizarProyecto(escenario.proyecto.id);
-
-      expect(proyecto).toMatchObject({ titulo: "Web institucional", finalizado: true });
-      expect(
-        (await ctx.proyectoService.obtenerProyectoPorId(escenario.proyecto.id)).finalizado,
-      ).toBe(true);
+  test("obtenerProyectosConAlgunaHabilidad filtra por habilidad requerida y excluye finalizados", async () => {
+    // Preparación
+    const backend = await habilidadService.obtenerHabilidadPorCodigo("backend");
+    const frontend = await habilidadService.obtenerHabilidadPorCodigo("frontend");
+    await crearProyecto({ titulo: "Con backend" });
+    await crearProyecto({
+      titulo: "Solo front",
+      perfiles: [perfilBase({ habilidadesRequeridas: ["frontend"], habilidadesOpcionales: [] })],
     });
+    const finalizado = await crearProyecto({ titulo: "Finalizado" });
+    await proyectoService.finalizarProyecto(finalizado._id);
 
-    test("no se puede finalizar dos veces", async () => {
-      await ctx.proyectoService.finalizarProyecto(escenario.proyecto.id);
+    // Ejecución
+    const conBackend = await proyectoService.obtenerProyectosConAlgunaHabilidad([backend._id]);
+    const conFront = await proyectoService.obtenerProyectosConAlgunaHabilidad([frontend._id]);
 
-      await expectAppError(
-        ctx.proyectoService.finalizarProyecto(escenario.proyecto.id),
-        ErrorCatalog.PROYECTO_FINALIZADO,
-        400,
-      );
-    });
+    // Validación
+    expect(conBackend.map((p) => p.titulo)).toEqual(["Con backend"]);
+    expect(conBackend[0].colectivo.nombre).toBe("Huerta Comunitaria");
+    expect(conFront.map((p) => p.titulo)).toEqual(["Solo front"]);
+  });
+});
 
-    test("falla con 404 si el proyecto no existe", async () => {
-      await expectAppError(
-        ctx.proyectoService.finalizarProyecto("inexistente"),
-        ErrorCatalog.PROYECTO_NO_ENCONTRADO,
-        404,
-      );
-    });
+describe("ProyectoService.actualizarProyecto", () => {
+  test("finaliza el proyecto", async () => {
+    // Preparación
+    const { _id } = await crearProyecto();
 
-    test("actualizarProyecto solo acepta { finalizado: true }", async () => {
-      await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, { finalizado: true });
+    // Ejecución
+    const actualizado = await proyectoService.actualizarProyecto(_id, { finalizado: true });
 
-      expect(
-        (await ctx.proyectoService.obtenerProyectoPorId(escenario.proyecto.id)).finalizado,
-      ).toBe(true);
-    });
-
-    test.each([
-      [{}],
-      [{ finalizado: false }],
-      [{ titulo: "Otro" }],
-      [{ finalizado: true, titulo: "x" }],
-    ])("actualizarProyecto rechaza %j", async (cambios) => {
-      await expectAppError(
-        ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, cambios),
-        ErrorCatalog.ARGUMENTO_INVALIDO,
-        400,
-      );
-    });
+    // Validación
+    expect(actualizado.finalizado).toBe(true);
+    expect((await ProyectoModel.findById(_id).lean()).finalizado).toBe(true);
   });
 
-  describe("actualizarProyecto - urlDonaciones", () => {
-    test("permite modificar urlDonaciones con una URL válida", async () => {
-      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-        urlDonaciones: "https://cafecito.app/nueva-url",
-      });
+  test("no permite finalizar dos veces", async () => {
+    // Preparación
+    const { _id } = await crearProyecto();
+    await proyectoService.actualizarProyecto(_id, { finalizado: true });
 
-      expect(actualizado.urlDonaciones).toBe("https://cafecito.app/nueva-url");
-      const enDb = await ctx.proyectoService.obtenerProyectoPorId(escenario.proyecto.id);
-      expect(enDb.urlDonaciones).toBe("https://cafecito.app/nueva-url");
+    // Ejecución + Validación
+    await esperarAppError(
+      proyectoService.actualizarProyecto(_id, { finalizado: true }),
+      ErrorCatalog.PROYECTO_FINALIZADO,
+      400,
+    );
+  });
+
+  test("no permite des-finalizar (finalizado: false)", async () => {
+    // Preparación
+    const { _id } = await crearProyecto();
+
+    // Ejecución + Validación
+    await esperarAppError(
+      proyectoService.actualizarProyecto(_id, { finalizado: false }),
+      ErrorCatalog.ARGUMENTO_INVALIDO,
+      400,
+    );
+  });
+
+  test("actualiza y borra la urlDonaciones", async () => {
+    // Preparación
+    const { _id } = await crearProyecto();
+
+    // Ejecución
+    const conUrl = await proyectoService.actualizarProyecto(_id, {
+      urlDonaciones: "https://mercadopago.com/huerta",
+    });
+    const sinUrl = await proyectoService.actualizarProyecto(_id, { urlDonaciones: null });
+
+    // Validación
+    expect(conUrl.urlDonaciones).toBe("https://mercadopago.com/huerta");
+    expect(sinUrl.urlDonaciones).toBeNull();
+  });
+
+  test("rechaza una urlDonaciones inválida o que no es texto", async () => {
+    // Preparación
+    const { _id } = await crearProyecto();
+
+    // Ejecución + Validación
+    await esperarAppError(
+      proyectoService.actualizarProyecto(_id, { urlDonaciones: "no es url" }),
+      ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
+      400,
+    );
+    await esperarAppError(
+      proyectoService.actualizarProyecto(_id, { urlDonaciones: 123 }),
+      ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
+      400,
+    );
+  });
+
+  test("actualiza la fechaCierre", async () => {
+    // Preparación
+    const { _id } = await crearProyecto();
+    const fecha = new Date(Date.now() + UNA_HORA);
+
+    // Ejecución
+    const actualizado = await proyectoService.actualizarProyecto(_id, {
+      fechaCierre: fecha.toISOString(),
     });
 
-    test("permite actualizar con protocolo http", async () => {
-      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-        urlDonaciones: "http://donaciones.org/proyecto",
-      });
+    // Validación
+    expect(actualizado.fechaCierre).toEqual(fecha);
+  });
 
-      expect(actualizado.urlDonaciones).toBe("http://donaciones.org/proyecto");
-    });
+  test("rechaza cambios vacíos o con campos no permitidos", async () => {
+    // Preparación
+    const { _id } = await crearProyecto();
 
-    test("conserva urlDonaciones si se omite en el PATCH", async () => {
-      await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-        urlDonaciones: "https://cafecito.app/mi-proyecto",
-      });
+    // Ejecución + Validación
+    await esperarAppError(
+      proyectoService.actualizarProyecto(_id, {}),
+      ErrorCatalog.ARGUMENTO_INVALIDO,
+      400,
+    );
+    await esperarAppError(
+      proyectoService.actualizarProyecto(_id, { titulo: "Otro" }),
+      ErrorCatalog.ARGUMENTO_INVALIDO,
+      400,
+    );
+    await esperarAppError(
+      proyectoService.actualizarProyecto(_id, [1]),
+      ErrorCatalog.ARGUMENTO_INVALIDO,
+      400,
+    );
+    expect((await ProyectoModel.findById(_id).lean()).titulo).toBe("Huerta digital");
+  });
 
-      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
+  test("falla si el proyecto no existe", async () => {
+    // Ejecución + Validación
+    await esperarAppError(
+      proyectoService.actualizarProyecto(new mongoose.Types.ObjectId().toString(), {
         finalizado: true,
-      });
+      }),
+      ErrorCatalog.PROYECTO_NO_ENCONTRADO,
+      404,
+    );
+  });
+});
 
-      expect(actualizado.finalizado).toBe(true);
-      expect(actualizado.urlDonaciones).toBe("https://cafecito.app/mi-proyecto");
-    });
-
-    test("permite eliminar urlDonaciones enviando null", async () => {
-      await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-        urlDonaciones: "https://cafecito.app/mi-proyecto",
-      });
-
-      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-        urlDonaciones: null,
-      });
-
-      expect(actualizado.urlDonaciones).toBeNull();
-      const enDb = await ctx.proyectoService.obtenerProyectoPorId(escenario.proyecto.id);
-      expect(enDb.urlDonaciones).toBeNull();
-    });
-
-    test("permite eliminar urlDonaciones enviando cadena vacía", async () => {
-      await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-        urlDonaciones: "https://cafecito.app/mi-proyecto",
-      });
-
-      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-        urlDonaciones: "",
-      });
-
-      expect(actualizado.urlDonaciones).toBeNull();
-      const enDb = await ctx.proyectoService.obtenerProyectoPorId(escenario.proyecto.id);
-      expect(enDb.urlDonaciones).toBeNull();
-    });
-
-    test("permite actualizar finalizado y urlDonaciones a la vez", async () => {
-      const actualizado = await ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-        finalizado: true,
-        urlDonaciones: "https://cafecito.app/final",
-      });
-
-      expect(actualizado.finalizado).toBe(true);
-      expect(actualizado.urlDonaciones).toBe("https://cafecito.app/final");
-    });
-
-    test("falla con 400 si urlDonaciones no es una URL válida", async () => {
-      await expectAppError(
-        ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-          urlDonaciones: "invalido",
-        }),
-        ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
-        400,
-      );
-    });
-
-    test("falla con 400 si urlDonaciones tiene protocolo no permitido", async () => {
-      await expectAppError(
-        ctx.proyectoService.actualizarProyecto(escenario.proyecto.id, {
-          urlDonaciones: "ftp://cafecito.app/algo",
-        }),
-        ErrorCatalog.PROYECTO_URL_DONACIONES_INVALIDA,
-        400,
-      );
-    });
-
-    test("falla con 404 al intentar actualizar proyecto inexistente", async () => {
-      await expectAppError(
-        ctx.proyectoService.actualizarProyecto("inexistente", {
-          urlDonaciones: "https://cafecito.app/ok",
-        }),
-        ErrorCatalog.PROYECTO_NO_ENCONTRADO,
-        404,
-      );
+describe("ProyectoService.obtenerEstadisticas", () => {
+  test("sin proyectos devuelve ceros", async () => {
+    expect(await proyectoService.obtenerEstadisticas()).toEqual({
+      total: 0,
+      activos: 0,
+      finalizados: 0,
     });
   });
 
-  describe("perfiles", () => {
-    test("agregarPerfil suma un perfil al proyecto", async () => {
-      await ctx.proyectoService.agregarPerfil(
-        escenario.proyecto.id,
-        "Tester",
-        ["testing_e_2_e"],
-        ["desarrollo_web_react"],
-        3,
-        "semanal",
-        "incentivo_economico",
-      );
+  test("cuenta activos y finalizados", async () => {
+    // Preparación
+    await crearProyecto({ titulo: "A" });
+    await crearProyecto({ titulo: "B" });
+    const c = await crearProyecto({ titulo: "C" });
+    await proyectoService.finalizarProyecto(c._id);
 
-      const perfiles = await ctx.proyectoService.obtenerPerfiles(escenario.proyecto.id);
-      expect(perfiles.map((p) => p.descripcion)).toEqual(["Desarrollo front", "Tester"]);
+    // Ejecución + Validación
+    expect(await proyectoService.obtenerEstadisticas()).toEqual({
+      total: 3,
+      activos: 2,
+      finalizados: 1,
     });
-
-    test("obtenerPerfilPorId devuelve el perfil", async () => {
-      const [perfil] = await ctx.proyectoService.obtenerPerfiles(escenario.proyecto.id);
-
-      expect(
-        await ctx.proyectoService.obtenerPerfilPorId(escenario.proyecto.id, perfil._id),
-      ).toMatchObject({ descripcion: "Desarrollo front" });
-    });
-
-    test("obtenerPerfilPorId falla con 404 si el perfil no existe", async () => {
-      await expectAppError(
-        ctx.proyectoService.obtenerPerfilPorId(escenario.proyecto.id, "inexistente"),
-        ErrorCatalog.PERFIL_NO_ENCONTRADO,
-        404,
-      );
-    });
-
-    test("obtenerPerfiles falla con 404 si el proyecto no existe", async () => {
-      await expectAppError(
-        ctx.proyectoService.obtenerPerfiles("inexistente"),
-        ErrorCatalog.PROYECTO_NO_ENCONTRADO,
-        404,
-      );
-    });
-
-    describe("actualizarPerfil", () => {
-      let perfilId;
-
-      beforeEach(async () => {
-        [{ _id: perfilId }] = await ctx.proyectoService.obtenerPerfiles(escenario.proyecto.id);
-      });
-
-      test("permite cambios parciales", async () => {
-        const perfil = await ctx.proyectoService.actualizarPerfil(escenario.proyecto.id, perfilId, {
-          descripcion: "Desarrollo front y diseño",
-          horas: 8,
-        });
-
-        expect(perfil).toMatchObject({
-          descripcion: "Desarrollo front y diseño",
-          horas: 8,
-          tipoDeCompromiso: "mensual",
-          habilidadesRequeridas: [escenario.react.id],
-        });
-      });
-
-      test("las habilidades se cambian por código y se guardan como id", async () => {
-        const perfil = await ctx.proyectoService.actualizarPerfil(escenario.proyecto.id, perfilId, {
-          habilidadesRequeridas: ["testing_e_2_e"],
-        });
-
-        expect(perfil.habilidadesRequeridas).toEqual([escenario.testing.id]);
-        expect(perfil.habilidadesOpcionales).toEqual([escenario.testing.id]);
-      });
-
-      test("falla con 400 si una habilidad no existe", async () => {
-        await expectAppError(
-          ctx.proyectoService.actualizarPerfil(escenario.proyecto.id, perfilId, {
-            habilidadesOpcionales: ["cobol"],
-          }),
-          ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO,
-          400,
-        );
-      });
-
-      test("falla con 404 si el proyecto no existe", async () => {
-        await expectAppError(
-          ctx.proyectoService.actualizarPerfil("inexistente", perfilId, { horas: 1 }),
-          ErrorCatalog.PROYECTO_NO_ENCONTRADO,
-          404,
-        );
-      });
-
-      test("falla con 404 si el perfil no existe", async () => {
-        await expectAppError(
-          ctx.proyectoService.actualizarPerfil(escenario.proyecto.id, "inexistente", { horas: 1 }),
-          ErrorCatalog.PERFIL_NO_ENCONTRADO,
-          404,
-        );
-      });
-    });
-
-    describe("eliminarPerfil", () => {
-      test("quita el perfil y lo devuelve", async () => {
-        const [perfil] = await ctx.proyectoService.obtenerPerfiles(escenario.proyecto.id);
-
-        const eliminado = await ctx.proyectoService.eliminarPerfil(
-          escenario.proyecto.id,
-          perfil._id,
-        );
-
-        expect(eliminado).toMatchObject({ _id: perfil._id, descripcion: "Desarrollo front" });
-        expect(await ctx.proyectoService.obtenerPerfiles(escenario.proyecto.id)).toEqual([]);
-      });
-
-      test("falla con 404 si el proyecto no existe", async () => {
-        await expectAppError(
-          ctx.proyectoService.eliminarPerfil("inexistente", "cualquiera"),
-          ErrorCatalog.PROYECTO_NO_ENCONTRADO,
-          404,
-        );
-      });
-
-      test("falla con 404 si el perfil no existe", async () => {
-        await expectAppError(
-          ctx.proyectoService.eliminarPerfil(escenario.proyecto.id, "inexistente"),
-          ErrorCatalog.PERFIL_NO_ENCONTRADO,
-          404,
-        );
-      });
-    });
-  });
-
-  test("obtenerProyectosConAlgunaHabilidad excluye los proyectos finalizados", async () => {
-    expect(
-      await ctx.proyectoService.obtenerProyectosConAlgunaHabilidad([escenario.react.id]),
-    ).toHaveLength(1);
-
-    await ctx.proyectoService.finalizarProyecto(escenario.proyecto.id);
-
-    expect(
-      await ctx.proyectoService.obtenerProyectosConAlgunaHabilidad([escenario.react.id]),
-    ).toHaveLength(0);
   });
 });

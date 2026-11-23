@@ -18,6 +18,13 @@ const habilidadSchema = zod.object({
     .min(1, "HABILIDAD_DESCRIPCION_REQUERIDA"),
 });
 
+/**
+ * Valida el body de POST /habilidades: título y descripción no vacíos.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 const validarHabilidad = (req, res, next) => {
   const resultado = habilidadSchema.safeParse(req.body);
 
