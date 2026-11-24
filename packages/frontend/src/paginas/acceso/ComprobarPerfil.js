@@ -1,6 +1,6 @@
 // src/components/ComprobarPerfil.jsx
 import React, { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import keycloak from "../../api/keycloack.js";
 import { normalizarRol, useAuth } from "../../contexto/Auth.js";
 
@@ -42,7 +42,6 @@ const ComprobarPerfil = () => {
           return;
         }
         if (normalizarRol(data.rol) == "colectivo") {
-          console.log("entre aca");        
           navigate('/org', { replace: true });
           return;
         }

@@ -19,7 +19,6 @@ import ComoFunciona from './paginas/publico/ComoFunciona.js';
 import Info from './paginas/publico/Info.js';
 // Acceso
 import Ingresar from './paginas/acceso/Ingresar.js';
-import IngresarK from './paginas/acceso/IngresarK.js';
 import ElegirTipoCuenta from './paginas/acceso/ElegirTipoCuenta.js';
 import RegistroColaboradora from './paginas/acceso/RegistroColaboradora.js';
 import RegistroOrganizacion from './paginas/acceso/RegistroOrganizacion.js';
@@ -43,6 +42,7 @@ import BuscarColaboradoras from './paginas/organizacion/BuscarColaboradoras.js';
 import PerfilColaboradora from './paginas/organizacion/PerfilColaboradora.js';
 import PerfilOrg from './paginas/organizacion/PerfilOrg.js';
 import ComprobarPerfil from './paginas/acceso/ComprobarPerfil.js';
+import React from 'react';
 
 export default function App() {
   return (
@@ -63,7 +63,7 @@ export default function App() {
 
           {/* Acceso */}
           {/* <Route path="ingresar" element={<Ingresar />} /> */}
-          <Route path="ingresar" element={<IngresarK />} />
+          <Route path="ingresar" element={<Ingresar />} />
           <Route path="comprobar-perfil" element={<ComprobarPerfil />} />
           <Route path="registro" element={<ElegirTipoCuenta />} />
           <Route path="registro/colaboradora" element={<RegistroColaboradora />} />
