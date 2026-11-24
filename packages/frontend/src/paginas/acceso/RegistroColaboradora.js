@@ -43,6 +43,7 @@ import { usePedido } from "../../hooks";
 import { obtenerHabilidades } from "../../api/habilidades.js";
 import { crearColaboradora } from "../../api/colaboradoras.js";
 import { mensajeDeError } from "../../api/errores.js";
+import { leerExportDeLinkedin } from "../../utilidades/linkedin.js";
 // piezas compartidas con el otro registro
 import { MAIL, useForm, Resumen, useSocial } from "./auxiliares.js";
 import s from "./Ingresar.module.css";
@@ -73,6 +74,8 @@ export default function RegistroColaboradora() {
   });
 
   const captchaRef = useRef(null);
+  const inputLinkedinRef = useRef(null);
+
   // Catálogo de habilidades del backend: [{ id, titulo, codigo, descripcion }].
   // `[]` = se pide una sola vez, al entrar.
   const { datos: catalogo, error: errorDelCatalogo } = usePedido(() => obtenerHabilidades(), []);
@@ -84,6 +87,8 @@ export default function RegistroColaboradora() {
   // Contactos internos: array de pares [tipo, dato], ej. ['WhatsApp', '1155550000'].
   // Empieza vacío; lo cambia el ContactosEditor.
   const [contactos, setContactos] = useState([]);
+
+  const [avisoLinkedin, setAvisoLinkedin] = useState("");
 
   // Manejo de validación (ver auxiliares.js → useForm). Devuelve funciones y banderas:
   // formulario.blur / .enviar / .errores y .cargando / .listo / .intento.
@@ -152,6 +157,38 @@ export default function RegistroColaboradora() {
   // Se ejecuta cuando la persona tilda el captcha de prueba (recibe true o false).
   function alCambiarCaptcha(token) {
     setDatos((previos) => ({ ...previos, captcha: token }));
+  }
+
+  async function alImportarLinkedin(evento) {
+    const archivo = evento.target.files[0];
+    evento.target.value = ""; // permite volver a elegir el mismo archivo
+    if (!archivo) return;
+    try {
+      const d = await leerExportDeLinkedin(archivo);
+
+      // Solo completa lo que está vacío, para no pisar lo que la persona ya escribió.
+      setDatos((previos) => ({
+        ...previos,
+        nombre: previos.nombre || d.nombre || "",
+        apellido: previos.apellido || d.apellido || "",
+        bio: previos.bio || d.bio || "",
+        github: previos.github || d.github || "",
+        mail: previos.mail || d.mail || "",
+      }));
+
+      // Habilidades: solo las que existen en TU catálogo (comparando sin mayúsculas).
+      const titulos = (catalogo ?? []).map((h) => h.titulo);
+      const coinciden = titulos.filter((t) =>
+        d.habilidades.some((x) => x.trim().toLowerCase() === t.toLowerCase()),
+      );
+      setHabilidadesElegidas((previas) => [...new Set([...previas, ...coinciden])]);
+
+      setAvisoLinkedin(
+        `Importamos tus datos. Habilidades reconocidas: ${coinciden.length} de ${d.habilidades.length}. Revisá todo antes de crear la cuenta.`,
+      );
+    } catch (error) {
+      setAvisoLinkedin(error.message);
+    }
   }
 
   // Arma el cuerpo que pide POST /colaboradoras y lo envía. useForm la llama solo si no hay
@@ -226,6 +263,22 @@ export default function RegistroColaboradora() {
       <div className={sh.form}>
         {/* onBlur = al salir del campo (activa su validación); `optional` = campo no
            obligatorio */}
+        <div className={sh.full}>
+          <input
+            ref={inputLinkedinRef}
+            type="file"
+            accept=".zip,.csv"
+            onChange={alImportarLinkedin}
+            hidden
+          />
+          <Button type="button" onClick={() => inputLinkedinRef.current.click()}>
+            Importar desde LinkedIn
+          </Button>
+          <small style={{ marginLeft: 8 }}>
+            Subí el ZIP o el CSV que exporta Linkedin. Revisá los datos antes de crear la cuenta.
+          </small>
+          {avisoLinkedin && <p>{avisoLinkedin}</p>}
+        </div>
         <Field
           label="Nombre de fantasía"
           hint="Podés mantenerte anónima."
