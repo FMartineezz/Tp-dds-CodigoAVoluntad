@@ -42,39 +42,9 @@ import EquipoOrg from './paginas/organizacion/EquipoOrg.js';
 import BuscarColaboradoras from './paginas/organizacion/BuscarColaboradoras.js';
 import PerfilColaboradora from './paginas/organizacion/PerfilColaboradora.js';
 import PerfilOrg from './paginas/organizacion/PerfilOrg.js';
-import keycloak from './api/keycloack.js';
-import { useEffect, useRef, useState } from 'react';
 import ComprobarPerfil from './paginas/acceso/ComprobarPerfil.js';
 
 export default function App() {
-/* const [isKeycloakReady, setIsKeycloakReady] = useState(false);
-  const isRun = useRef(false);
-
-  useEffect(() => {
-    // Evita la doble ejecución de init() por el StrictMode de React 18 en desarrollo
-    if (isRun.current) return;
-    isRun.current = true;
-
-    keycloak
-      .init({
-        onLoad: 'check-sso', // Revisa si ya hay sesión activa
-        pkceMethod: 'S256',   // Standard recomendado
-      })
-      .then((authenticated) => {
-        console.log('Keycloak inicializado correctamente. Autenticado:', authenticated);
-        setIsKeycloakReady(true);
-      })
-      .catch((err) => {
-        console.error('Error al inicializar Keycloak:', err);
-        // Marcamos como listo aunque falle para no dejar la pantalla en blanco
-        setIsKeycloakReady(true);
-      });
-  }, []);
-
-  if (!isKeycloakReady) {
-    return <div>Cargando autenticación...</div>;
-  } */
-
   return (
     <AuthProvider>
       <Routes>
