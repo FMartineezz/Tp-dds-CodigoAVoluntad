@@ -42,7 +42,8 @@ const ErrorCatalog = {
 
   FILTRO_MODALIDAD_INVALIDA: {
     code: "ERR-VAL-006",
-    message: "El parámetro modalidad debe ser gratuita, incentivo_economico o contratacion_eventual",
+    message:
+      "El parámetro modalidad debe ser gratuita, incentivo_economico o contratacion_eventual",
   },
 
   FILTRO_HABILIDAD_INVALIDA: {
@@ -676,6 +677,29 @@ const ErrorCatalog = {
 
   // =========================
   // CAPTCHA
+  // =========================
+  // Reportes de problemas (POST /reportes)
+  // =========================
+  REPORTE_TIPO_INVALIDO: {
+    code: "ERR-VAL-1501",
+    message: "El tipo de reporte debe ser error, sugerencia u otro",
+  },
+
+  REPORTE_DESCRIPCION_REQUERIDA: {
+    code: "ERR-VAL-1502",
+    message: "Contá qué pasó en la descripción del reporte",
+  },
+
+  REPORTE_DESCRIPCION_MUY_LARGA: {
+    code: "ERR-VAL-1503",
+    message: (maximo) => `La descripción del reporte puede tener hasta ${maximo} caracteres`,
+  },
+
+  REPORTE_CORREO_INVALIDO: {
+    code: "ERR-VAL-1504",
+    message: "El correo para avisarte no es válido",
+  },
+
   // =========================
   CAPTCHA_REQUERIDO: {
     code: "ERR-VAL-1400",

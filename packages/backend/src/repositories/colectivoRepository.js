@@ -140,6 +140,24 @@ export class ColectivoRepository {
    * @param {Id} colaboracionId
    * @returns {Promise<boolean>}
    */
+  // Una sola consulta para varias colaboraciones (en vez de preguntar una por una)
+  /**
+   * Ids (como texto) de las colaboraciones de la lista que ya tienen una denuncia.
+   * @param {Id[]} colaboracionIds
+   * @returns {Promise<Set<string>>}
+   */
+  async colaboracionesDenunciadas(colaboracionIds) {
+    const colectivos = await this.model
+      .find({ "denuncias.colaboracionId": { $in: colaboracionIds } })
+      .select("denuncias.colaboracionId")
+      .lean();
+    return new Set(
+      colectivos.flatMap((colectivo) =>
+        colectivo.denuncias.map((denuncia) => String(denuncia.colaboracionId)),
+      ),
+    );
+  }
+
   async existeDenunciaParaColaboracion(colaboracionId) {
     const count = await this.model.countDocuments({
       "denuncias.colaboracionId": colaboracionId,

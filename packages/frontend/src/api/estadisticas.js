@@ -3,7 +3,8 @@
  *
  * USO: const estadisticas = await obtenerEstadisticas();
  *   → { proyectos, activos, finalizados, colectivos, colaboradoras, colaboraciones,
- *       colectivosPorUbicacion: [[texto, cantidad]…], postulacionesPorProyecto: [[título, cantidad]…],
+ *       colectivosPorUbicacion: [[texto, cantidad]…],
+ *       postulacionesPorProyecto: [{ etiqueta, aceptadas, pendientes, rechazadas }…],
  *       crudo }   (crudo = la respuesta tal cual, para la página de la API pública)
  * OJO: el backend limita este endpoint a 5 pedidos cada 20 minutos por IP (si se pasa
  * responde 429). Por eso la respuesta se pide UNA vez y se guarda mientras la pestaña siga
@@ -44,10 +45,14 @@ function aEstadisticasDeLaVista(e) {
       textoDeUbicacion(u.ubicacion),
       u.cantidad,
     ]),
-    postulacionesPorProyecto: (e.estadisticasProyectos?.postulacionesPorProyecto ?? []).map((p) => [
-      p.proyecto,
-      p.cantidadPostulaciones,
-    ]),
+    // Por proyecto, cuántas postulaciones terminaron aceptadas, pendientes o rechazadas
+    // (para el gráfico de barras apiladas).
+    postulacionesPorProyecto: (e.estadisticasProyectos?.postulacionesPorProyecto ?? []).map((p) => ({
+      etiqueta: p.proyecto,
+      aceptadas: p.cantidadPostulacionesAceptadas ?? 0,
+      pendientes: p.cantidadPostulacionesPendientes ?? 0,
+      rechazadas: p.cantidadPostulacionesRechazadas ?? 0,
+    })),
     crudo: e,
   };
 }

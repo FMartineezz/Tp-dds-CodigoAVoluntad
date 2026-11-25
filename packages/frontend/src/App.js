@@ -17,6 +17,7 @@ import Colectivos from './paginas/publico/Colectivos.js';
 import DetalleColectivo from './paginas/publico/DetalleColectivo.js';
 import ComoFunciona from './paginas/publico/ComoFunciona.js';
 import Info from './paginas/publico/Info.js';
+import ReportarProblema from './paginas/publico/ReportarProblema.js';
 // Acceso
 import Ingresar from './paginas/acceso/Ingresar.js';
 import ElegirTipoCuenta from './paginas/acceso/ElegirTipoCuenta.js';
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="accesibilidad" element={<Info tema="accesibilidad" />} />
           <Route path="api-estadisticas" element={<Info tema="api" />} />
           <Route path="contacto" element={<Info tema="contacto" />} />
+          <Route path="reportar" element={<ReportarProblema />} />
 
           {/* Acceso */}
           <Route path="ingresar" element={<Ingresar />} />

@@ -1,7 +1,8 @@
 /**
  * Editor de medios de contacto internos (correo, WhatsApp, SMS).
  *
- * USO: value=[[tipo, dato]], onChange.
+ * USO: value=[[tipo, dato]], onChange, accion (opcional: algo para poner a la derecha del título,
+ *      ej. un checkbox).
  * SI LO CAMBIÁS O SACÁS: Los medios NO se muestran públicamente: solo al aceptar una postulación.
  *
  * CÓMO AGREGAR UN HERMANO / EXTENDERLO:
@@ -11,13 +12,16 @@ import { useState } from 'react';
 import { Button, Field, Icon } from '../../atomos';
 import s from './ContactosEditor.module.css';
 
-export function ContactosEditor({ value, onChange }) {
+export function ContactosEditor({ value, onChange, accion }) {
   const [tipo, setTipo] = useState('Correo');
   const [val, setVal] = useState('');
   const agregar = () => { if (!val.trim()) return; onChange([...value, [tipo, val.trim()]]); setVal(''); };
   return (
     <div className={s.contactos}>
-      <span className={s.titulo}>Medios de contacto <span className={s.hint}>(opcional, no se muestran públicamente)</span></span>
+      <div className={s.cabecera}>
+        <span className={s.titulo}>Medios de contacto <span className={s.hint}>(opcional, no se muestran públicamente)</span></span>
+        {accion}
+      </div>
       {value.length > 0 && (
         <ul className={s.lista}>
           {value.map(([t, v], i) => (
@@ -27,7 +31,7 @@ export function ContactosEditor({ value, onChange }) {
       )}
       <div className={s.agregar}>
         <Field as="select" label="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value)}><option>Correo</option><option>WhatsApp</option><option>SMS</option></Field>
-        <Field label="Dato de contacto" placeholder={tipo === 'Correo' ? 'nombre@correo.org' : '+54 11 5555-0000'} value={val} onChange={(e) => setVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregar(); } }} />
+        <Field label="Dato de contacto" placeholder={tipo === 'Correo' ? 'nombre@correo.org' : '1127891234 (10 dígitos, sin 0 ni 15)'} value={val} onChange={(e) => setVal(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); agregar(); } }} />
         <Button type="button" variant="secondary" onClick={agregar}>Agregar</Button>
       </div>
     </div>

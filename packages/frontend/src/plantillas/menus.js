@@ -33,6 +33,8 @@ export const ENLACES_PIE = [
   { to: "/accesibilidad", label: "Accesibilidad" },
   { to: "/api-estadisticas", label: "API de estadísticas" },
   { to: "/contacto", label: "Contacto" },
+  // conPantallaActual: el enlace lleva ?desde=/pantalla/actual (para saber dónde pasó)
+  { to: "/reportar", label: "Reportar un problema", conPantallaActual: true },
 ];
 
 /** Convierte el menú de un rol en los destinos de la barra inferior (móvil). */

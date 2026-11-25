@@ -1,0 +1,9 @@
+/* Sin fondo propio, así se funde con la página.
+   Recortada: la última se desvanece y el botón se monta encima del desvanecido.
+   Desplegada: el botón va abajo de la lista, sin pisar nada. */
+.actividad { display: grid; gap: var(--space-4); }
+.lista { display: grid; gap: var(--space-3); }
+.recortada { max-height: 9rem; overflow: hidden; mask-image: linear-gradient(to bottom, #000 45%, transparent 100%); }
+.verTodas { justify-self: center; }
+.recortada + .verTodas { margin-top: calc(-1 * var(--space-6)); position: relative; }
+.recortada + .verTodas:not(:hover) { background: var(--color-bg); }

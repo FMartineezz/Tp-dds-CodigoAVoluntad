@@ -207,12 +207,10 @@ function FormularioDePerfil({ id, inicial, opciones }) {
         </Alert>
       )}
 
-      {/* BLOQUE: campos — grilla; sh.twoRows / sh.centered / sh.fullWidth controlan cuánto ocupa cada uno */}
-      {/* `optional` = campo no obligatorio; error={errores.x} muestra el mensaje solo si existe */}
+      {/* BLOQUE: datos personales — a la izquierda foto, nombre de fantasía, nombre, apellido
+          y pronombres; a la derecha «Sobre vos» y habilidades (que ocupa el alto de las 4 filas) */}
       <div className={sh.form}>
-        {/* Avatar con la inicial del nombre de fantasía (o «?» si está vacío; `||` = «o, si no,
-           usá»). No hay foto: el backend todavía no guarda imágenes. */}
-        <div className={sh.twoRows}>
+        <div>
           <span className={s.etiqueta}>Foto</span>
           <div className={sh.photo}>
             <Avatar nombre={datos.fantasia || '?'} size={96} foto={fotoDe(id)} />
@@ -220,7 +218,6 @@ function FormularioDePerfil({ id, inicial, opciones }) {
         </div>
         <Field
           as="textarea"
-          className={sh.twoRows}
           label="Sobre vos"
           placeholder="Contá en pocas líneas quién sos y qué te gusta hacer…"
           value={datos.bio}
@@ -233,15 +230,14 @@ function FormularioDePerfil({ id, inicial, opciones }) {
           onChange={alCambiarCampo('fantasia')}
           error={errores.fantasia}
         />
-        <div>
+        <div className={s.habilidades}>
           <TagPicker
             label="Habilidades"
             value={datos.habilidades}
             options={opciones}
             onChange={alCambiarHabilidades}
+            error={errores.habilidades}
           />
-          {/* El TagPicker no muestra errores: el mensaje va debajo, solo si existe */}
-          {errores.habilidades && <Text variant="small" role="alert">{errores.habilidades}</Text>}
         </div>
         <Field
           label="Nombre"
@@ -262,13 +258,12 @@ function FormularioDePerfil({ id, inicial, opciones }) {
           value={datos.pronombres}
           onChange={alCambiarCampo('pronombres')}
         />
-        <Field
-          label="Cuenta de GitHub o GitLab"
-          placeholder="https://github.com/usuario"
-          value={datos.github}
-          onChange={alCambiarCampo('github')}
-          error={errores.github}
-        />
+      </div>
+
+      <hr className={s.separador} />
+
+      {/* BLOQUE: redes — LinkedIn y la cuenta de código, lado a lado */}
+      <div className={sh.form}>
         <Field
           label="LinkedIn"
           optional
@@ -277,20 +272,35 @@ function FormularioDePerfil({ id, inicial, opciones }) {
           onChange={alCambiarCampo('linkedin')}
           error={errores.linkedin}
         />
-        <div className={sh.centered}>
-          <Checkbox checked={datos.mensajes} onChange={alCambiarCampo('mensajes')}>
-            Permitir mensajes de organizaciones
-          </Checkbox>
-        </div>
-        <div className={sh.fullWidth}>
-          <ContactosEditor value={contactos} onChange={alCambiarContactos} />
-          <Text variant="small">
-            Por privacidad no mostramos los contactos que ya guardaste. Si agregás alguno acá,
-            al guardar reemplaza a los anteriores. Teléfonos: 10 dígitos, sin 0 ni 15
-            (ej. 1127891234).
-          </Text>
-        </div>
+        <Field
+          label="Cuenta de GitHub o GitLab"
+          placeholder="https://github.com/usuario"
+          value={datos.github}
+          onChange={alCambiarCampo('github')}
+          error={errores.github}
+        />
       </div>
+
+      <hr className={s.separador} />
+
+      {/* BLOQUE: contacto — medios privados y, en la misma fila del título, si acepta mensajes */}
+      <div>
+        <ContactosEditor
+          value={contactos}
+          onChange={alCambiarContactos}
+          accion={
+            <Checkbox checked={datos.mensajes} onChange={alCambiarCampo('mensajes')}>
+              Permitir mensajes de organizaciones
+            </Checkbox>
+          }
+        />
+        <Text variant="small">
+          Por privacidad no mostramos los contactos que ya guardaste. Si agregás alguno acá,
+          al guardar reemplaza a los anteriores.
+        </Text>
+      </div>
+
+      <hr className={s.separador} />
 
       {/* BLOQUE: botones finales — guardar (con «cargando» mientras guarda) o cancelar */}
       <div className={sh.formActions}>

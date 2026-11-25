@@ -35,6 +35,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
   ```
 
   Una página posterior a la última devuelve `resultados` vacío (con `200`). Un `pagina` que no sea un entero mayor o igual a 1 responde `400` con `ERR-VAL-002`; un `limite` fuera de rango, `400` con `ERR-VAL-003`. Ejemplo: `GET /proyectos?pagina=2&limite=6`.
+
 - **Filtros:** los filtros son opcionales, se combinan entre sí y con la paginación (el `total` cuenta solo lo que pasa los filtros). Un filtro vacío (`?estado=`) se ignora.
   - `GET /proyectos`: `busqueda` (texto en título o descripción, sin importar mayúsculas, hasta 100 caracteres), `estado` (`abierto`: busca gente; `en_curso`: no terminó pero cerró la búsqueda o venció la fecha límite; `finalizado`), `modalidad` (`gratuita`, `incentivo_economico` o `contratacion_eventual`: algún perfil la ofrece) y `habilidad` (código de habilidad: algún perfil la pide, requerida u opcional). Ejemplo: `GET /proyectos?estado=abierto&modalidad=gratuita&habilidad=desarrollo_web_react`.
   - `GET /colaboradoras`: `busqueda` (en nombre, apellido o nombre de fantasía), `habilidad` (código) y `aceptaMensajes` (`true` o `false`).
@@ -58,6 +59,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | [Notificaciones](#notificaciones) | `GET /colaboradoras/:colaboradoraId/notificaciones`, `GET /colectivos/:colectivoId/notificaciones`                                                                                          |
 | [Denuncias](#denuncias)           | `POST /colaboraciones/:id/denuncia`, `GET /admin/denuncias`, `GET /admin/denuncias/:id`, `PATCH /admin/denuncias/:id/estado`                                                                |
 | [Valoraciones](#valoraciones)     | `POST /valoraciones`, `GET /personaColaboradora/:personaColaboradoraId/valoraciones`, `GET /colectivo/:colectivoId/valoraciones`                                                            |
+| [Reportes](#reportes)             | `POST /reportes`                                                                                                                                                                            |
 | [Estadísticas](#estadísticas)     | `GET /estadisticas`                                                                                                                                                                         |
 
 ---
@@ -1473,6 +1475,41 @@ Obtiene el historial público de valoraciones recibidas por el colectivo (califi
 | 404    | `ERR-NOT-305` | No existe un colectivo con ese id |
 
 ---
+
+## Reportes
+
+Cualquier persona, con o sin cuenta, puede reportar un problema de la plataforma desde el formulario «Reportar un problema» del pie del sitio. Los reportes quedan guardados con estado `nuevo` para que los revise el equipo administrativo.
+
+### POST `/reportes`
+
+Público, con límite de **5 pedidos cada 20 minutos por IP** (aparte del límite de `/estadisticas`). Si se pasa, responde `429` con `ERR-LIM-001`.
+
+**Body:**
+
+| Campo         | Tipo   | Obligatorio | Descripción                                                |
+| ------------- | ------ | ----------- | ---------------------------------------------------------- |
+| `tipo`        | string | Sí          | `error`, `sugerencia` u `otro`                             |
+| `descripcion` | string | Sí          | Qué pasó (hasta 2000 caracteres)                           |
+| `pantalla`    | string | No          | Dirección de la pantalla donde pasó (ej. `/org/proyectos`) |
+| `correo`      | string | No          | Para avisarle a la persona cuando se resuelva              |
+
+Los campos opcionales vacíos cuentan como que no vinieron. Cualquier otro campo (por ejemplo `estado`) se ignora.
+
+**Respuesta 201:**
+
+```json
+{
+  "id": "6b0…",
+  "tipo": "error",
+  "descripcion": "El botón Guardar no hace nada",
+  "pantalla": "/org/proyectos/nuevo",
+  "correo": null,
+  "estado": "nuevo",
+  "fecha": "2026-11-26T15:00:00.000Z"
+}
+```
+
+**Errores 400:** `ERR-VAL-1501` tipo inválido, `ERR-VAL-1502` falta la descripción, `ERR-VAL-1503` descripción demasiado larga, `ERR-VAL-1504` correo inválido, `ERR-VAL-001` pantalla que no es texto.
 
 ## Estadísticas
 

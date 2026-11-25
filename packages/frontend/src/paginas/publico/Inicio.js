@@ -34,7 +34,7 @@ import {
   Tag,
   Text,
 } from "../../atomos";
-import { Alert, Barras, CardsSkeleton, Grid, Marquee, Ticket, TicketRow } from "../../moleculas";
+import { Alert, Barras, BarrasApiladas, CardsSkeleton, Grid, Marquee, Ticket, TicketRow } from "../../moleculas";
 import { ProyectoCard } from "../../organismos";
 import { usePedido } from "../../hooks";
 import { obtenerEstadisticas } from "../../api/estadisticas.js";
@@ -263,10 +263,9 @@ export default function Inicio() {
               />
             )}
             {postulacionesPorProyecto.length > 0 && (
-              <Barras
-                titulo="Proyectos con más postulaciones"
+              <BarrasApiladas
+                titulo="Proyectos con más postulaciones, según cómo terminaron"
                 datos={postulacionesPorProyecto}
-                unidad="postulaciones"
               />
             )}
           </div>

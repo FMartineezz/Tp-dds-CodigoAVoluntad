@@ -15,11 +15,18 @@ export class ColaboracionService {
    * @param {import("../repositories/colaboracionRepository.js").ColaboracionRepository} deps.colaboracionRepository
    * @param {import("./personaColaboradoraService.js").PersonaColaboradoraService} deps.personaColaboradoraService
    * @param {import("./proyectoService.js").ProyectoService} deps.proyectoService
+   * @param {import("../repositories/colectivoRepository.js").ColectivoRepository} deps.colectivoRepository
    */
-  constructor({ colaboracionRepository, personaColaboradoraService, proyectoService }) {
+  constructor({
+    colaboracionRepository,
+    personaColaboradoraService,
+    proyectoService,
+    colectivoRepository,
+  }) {
     this.colaboracionRepository = colaboracionRepository;
     this.personaColaboradoraService = personaColaboradoraService;
     this.proyectoService = proyectoService;
+    this.colectivoRepository = colectivoRepository;
   }
 
   /**
@@ -85,15 +92,24 @@ export class ColaboracionService {
     return colaboracion;
   }
 
+  // Cada una trae `denunciada`: así el front muestra «Ya denunciado» en vez de dejar
+  // intentar una denuncia que el backend va a rechazar (una sola por colaboración)
   /**
-   * Colaboraciones de una persona.
+   * Colaboraciones de una persona, cada una con `denunciada` (true si ya tiene denuncia).
    * @param {Id} personaId
-   * @returns {Promise<ColaboracionGuardada[]>}
+   * @returns {Promise<Array<ColaboracionGuardada & { denunciada: boolean }>>}
    * @throws {AppError} 404 si no existe la persona.
    */
   async obtenerColaboracionesDePersona(personaId) {
     await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(personaId);
-    return await this.colaboracionRepository.obtenerDePersona(personaId);
+    const colaboraciones = await this.colaboracionRepository.obtenerDePersona(personaId);
+    const denunciadas = await this.colectivoRepository.colaboracionesDenunciadas(
+      colaboraciones.map((colaboracion) => colaboracion._id),
+    );
+    return colaboraciones.map((colaboracion) => ({
+      ...colaboracion,
+      denunciada: denunciadas.has(String(colaboracion._id)),
+    }));
   }
 
   /**

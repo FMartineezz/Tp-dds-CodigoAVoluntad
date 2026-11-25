@@ -545,8 +545,7 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
           : mensajeDeError(error)
       );
       setGuardando(false);
-      // El aviso del backend está arriba de todo: subimos para que se vea
-      formulario.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // (No hace falta scrollear: el aviso de error sube solo hasta donde se vea, ver Alert)
     }
   }
 

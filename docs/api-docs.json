@@ -68,6 +68,10 @@
     {
       "name": "Estadísticas",
       "description": "Métricas agregadas de la plataforma."
+    },
+    {
+      "name": "Reportes",
+      "description": "Reportes de problemas en la plataforma"
     }
   ],
   "components": {
@@ -1816,6 +1820,60 @@
           }
         },
         "required": ["resultados", "pagina", "limite", "total", "totalPaginas"]
+      },
+      "ReporteInput": {
+        "type": "object",
+        "required": ["tipo", "descripcion"],
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": ["error", "sugerencia", "otro"]
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 2000,
+            "example": "El botón Guardar no hace nada"
+          },
+          "pantalla": {
+            "type": "string",
+            "example": "/org/proyectos/nuevo"
+          },
+          "correo": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "Reporte": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": ["error", "sugerencia", "otro"]
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "pantalla": {
+            "type": "string",
+            "nullable": true
+          },
+          "correo": {
+            "type": "string",
+            "nullable": true
+          },
+          "estado": {
+            "type": "string",
+            "enum": ["nuevo", "en_revision", "resuelto"]
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -5122,6 +5180,63 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reportes": {
+      "post": {
+        "tags": ["Reportes"],
+        "summary": "Reportar un problema de la plataforma (público)",
+        "description": "Lo puede mandar cualquiera, sin cuenta. Límite: 5 pedidos cada 20 minutos por IP.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReporteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reporte guardado con estado nuevo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reporte"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1501`, `ERR-VAL-1502`, `ERR-VAL-1503`, `ERR-VAL-1504`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-1502",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Demasiados reportes desde esta IP. Código: `ERR-LIM-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-LIM-001",
+                  "message": "Descripción del error"
                 }
               }
             }

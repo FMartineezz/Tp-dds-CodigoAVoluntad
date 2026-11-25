@@ -16,31 +16,25 @@ const denunciar = (colaboracionId, body = { descripcion: "Trato inadecuado" }) =
 
 describe("Denuncias (HTTP)", () => {
   describe("POST /colaboraciones/:id/denuncia", () => {
-    // BUG: ColaboracionRepository.obtenerPorIdParaAdmin no popula el proyecto, así que
-    // crearDenuncia no encuentra el colectivo y responde siempre 400 DENUNCIA_PROYECTO_SIN_COLECTIVO.
-    test.failing(
-      "responde 201 con la denuncia pendiente y el Location administrativo",
-      async () => {
-        // Preparación
-        const e = await armarEscenario();
-        const { colaboracionId } = await crearColaboracion(e);
+    test("responde 201 con la denuncia pendiente y el Location administrativo", async () => {
+      // Preparación
+      const e = await armarEscenario();
+      const { colaboracionId } = await crearColaboracion(e);
 
-        // Ejecución
-        const respuesta = await denunciar(colaboracionId);
+      // Ejecución
+      const respuesta = await denunciar(colaboracionId);
 
-        // Validación
-        expect(respuesta.status).toBe(201);
-        expect(respuesta.body).toMatchObject({
-          descripcion: "Trato inadecuado",
-          estado: "pendiente",
-          colaboracionId,
-        });
-        expect(respuesta.headers.location).toBe(`/admin/denuncias/${respuesta.body.id}`);
-      },
-    );
+      // Validación
+      expect(respuesta.status).toBe(201);
+      expect(respuesta.body).toMatchObject({
+        descripcion: "Trato inadecuado",
+        estado: "pendiente",
+        colaboracionId,
+      });
+      expect(respuesta.headers.location).toBe(`/admin/denuncias/${respuesta.body.id}`);
+    });
 
-    // BUG: mismo problema que arriba; el chequeo de duplicado nunca se alcanza.
-    test.failing("responde 409 si la colaboración ya fue denunciada", async () => {
+    test("responde 409 si la colaboración ya fue denunciada", async () => {
       const e = await armarEscenario();
       const { colaboracionId } = await crearColaboracion(e);
       await sembrarDenuncia(e.colectivoId, colaboracionId);

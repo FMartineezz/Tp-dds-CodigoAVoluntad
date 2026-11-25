@@ -33,4 +33,9 @@
   --color-danger: var(--red-700);        /* error / destructivo */
   --color-warning: var(--yellow-400);    /* advertencia (único uso del amarillo) */
   --color-print: var(--red-500);         /* decoración "tinta roja" (subrayados, números grandes) */
+
+  /* Resultado de una postulación (gráfico de «La plataforma en números») */
+  --color-aceptada: var(--green-700);
+  --color-pendiente: var(--yellow-400);
+  --color-rechazada: var(--orange-500);
 }

@@ -12,12 +12,13 @@
  *      ESPERA Y ERRORES: si falló el pedido, un aviso de error.
  *   2. CÁLCULOS: proyectos abiertos y a qué proyecto lleva «Revisar».
  *   3. ACCIONES: no hay (los botones son enlaces a otras pantallas).
- *   4. LO QUE SE DIBUJA: título, cifras, aviso, proyectos abiertos y botón de alta.
+ *   4. LO QUE SE DIBUJA: título, cifras, aviso, última actividad, proyectos abiertos y
+ *      botón de alta.
  */
 import { Link } from 'react-router-dom';
 import { Button, Heading, Icon } from '../../atomos';
 import { Alert, CardsSkeleton, Grid } from '../../moleculas';
-import { ProyectoCard } from '../../organismos';
+import { ProyectoCard, UltimaActividad } from '../../organismos';
 import { useAuth } from '../../contexto';
 import { usePedido } from '../../hooks';
 import { mensajeDeError } from '../../api/errores.js';
@@ -123,6 +124,9 @@ export default function PanelOrg() {
           )}
         </div>
       )}
+
+      {/* BLOQUE: Última actividad — componente compartido de la plantilla (organismos/) */}
+      <UltimaActividad />
 
       {/* BLOQUE: Mis proyectos — tarjetas de los proyectos abiertos */}
       <Heading level={2}>Mis proyectos abiertos</Heading>

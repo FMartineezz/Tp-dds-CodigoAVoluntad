@@ -1,9 +1,9 @@
 /**
  * PANTALLA DetalleProyecto
  * Ruta: /proyectos/:id   ·   Quién la ve: Todas (acciones según rol)
- * Qué muestra: Todo en una página, sin pestañas: cabecera con avance y botón de postular;
- *   a la izquierda la descripción y una tarjeta por perfil buscado; a la derecha una ficha
- *   con la búsqueda, enlaces, equipo y logros.
+ * Qué muestra: Todo en una página, en dos columnas. A la izquierda: título y estado,
+ *   descripción, colectivo, avance y una tarjeta por perfil buscado (con su botón de
+ *   postularse). A la derecha, la ficha: creado y estado de la búsqueda, enlaces, equipo y logros.
  * Para modificarla: un dato más de la ficha = otra <section> dentro de <aside>.
  * De dónde salen los datos (todo del backend, ver api/proyectos.js y api/colectivos.js):
  *   · el proyecto con sus perfiles y logros → GET /proyectos/:id
@@ -25,12 +25,12 @@
  *                        qué perfiles todavía tienen lugar.
  *   3. ACCIONES        → funciones para postularse, confirmar la postulación, denunciar
  *                        y decidir qué botón mostrar en cada fila de la tabla de perfiles.
- *   4. LO QUE SE DIBUJA → migas de pan, cabecera con botón de postular, avisos,
+ *   4. LO QUE SE DIBUJA → migas de pan, avisos, cabecera,
  *                        cuerpo (perfiles + ficha) y las dos ventanas emergentes.
  */
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Button, Heading, Icon, Progress, StatusBadge, Tag, Text } from '../../atomos';
+import { Avatar, Button, Heading, Icon, Progress, StatusBadge, Tag, Text } from '../../atomos';
 import { Alert, Crumbs, RowsSkeleton } from '../../moleculas';
 import { DenunciaDialog, PostularDialog } from '../../organismos';
 import { useAuth } from '../../contexto';
@@ -41,11 +41,22 @@ import { obtenerPostulaciones } from '../../api/colaboradora.js';
 import { denunciarColaboracion, obtenerColaboracionesDePersona } from '../../api/denuncias.js';
 import { mensajeDeError } from '../../api/errores.js';
 import { NoEncontrado } from '../../paginas/sistema/Errores.js';
+import { fotoDe } from '../../datos/fotos.js';
 import s from './Detalle.module.css';
+
+// Código del backend cuando la persona no tiene ninguna habilidad que pide el perfil
+// (POSTULACION_HABILIDAD_REQUERIDA en el catálogo de errores).
+const CODIGO_SIN_HABILIDADES = 'ERR-VAL-1007';
 
 // Fecha del backend ('2026-11-30T…') → texto corto en castellano ('30/11/2026').
 function fechaCorta(fecha) {
   return new Date(fecha).toLocaleDateString('es-AR');
+}
+
+// El backend no manda la fecha de creación, pero el _id de Mongo la trae adentro: los
+// primeros 8 caracteres son los segundos desde 1970 escritos en hexadecimal.
+function fechaDeCreacion(id) {
+  return new Date(parseInt(String(id).slice(0, 8), 16) * 1000);
 }
 
 // ═════ PEDIDOS QUE SE JUNTAN ═════
@@ -98,10 +109,13 @@ export default function DetalleProyecto() {
   const [enviando, setEnviando] = useState(false);
   // Mensaje verde de éxito que se ve arriba. '' = no se muestra nada.
   const [aviso, setAviso] = useState('');
-  // Mensaje rojo con el motivo que dio el backend si rechazó la postulación o la denuncia.
-  const [errorDeEnvio, setErrorDeEnvio] = useState('');
+  // Error del backend si rechazó la postulación o la denuncia (null = no hay). Se guarda
+  // entero, no solo el texto, para poder mirar su código (ver CODIGO_SIN_HABILIDADES).
+  const [errorDeEnvio, setErrorDeEnvio] = useState(null);
   // true = la ventana «Denunciar al colectivo» está abierta. La abre el botón «Denunciar».
   const [denunciaAbierta, setDenunciaAbierta] = useState(false);
+  // true si denunció en ESTA visita (las de antes vienen marcadas desde el backend).
+  const [denuncioRecien, setDenuncioRecien] = useState(false);
 
   // ───── ESPERA Y ERRORES ─────
   // Cada caso dibuja otra cosa y corta acá con `return`.
@@ -167,22 +181,25 @@ export default function DetalleProyecto() {
   const perfilesDisponibles = proyecto.perfiles.filter(
     (perfil) => tieneLugar(perfil) && !yaSePostuloA(perfil)
   );
-  // ¿Se postuló a alguno? (para el cartel «pendiente» de la cabecera)
-  const yaMePostule = proyecto.perfiles.some(yaSePostuloA);
-
   // La colaboración de la persona en ESTE proyecto (si participa). Sirve para denunciar:
   // el backend denuncia sobre una colaboración y deduce solo el colectivo.
   const miColaboracion = (sesion?.colaboraciones ?? []).find(
     (colaboracion) => String(colaboracion.proyectoId) === String(proyecto.id)
   );
   const puedeDenunciar = rol === 'col' && Boolean(miColaboracion);
+  // El backend acepta una sola denuncia por colaboración: después el botón queda «Ya denunciado».
+  const yaDenuncio = denuncioRecien || Boolean(miColaboracion?.denunciada);
 
-  // ¿Qué botón principal va en la cabecera? Dos casos distintos (ver el bloque «Cabecera»):
-  // - botón que abre la ventana: colaboradora, o cualquiera si la búsqueda está cerrada
-  //   (en ese caso queda deshabilitado);
-  // - botón que lleva a ingresar: visitante sin sesión con la búsqueda abierta.
-  const mostrarBotonDeCabecera = rol !== 'org';
-  const botonDeCabeceraAbreVentana = rol === 'col' || !busquedaAbierta;
+  // Segunda línea de «Creado» en la ficha: en qué anda la búsqueda y, si hay, su fecha.
+  // (El backend no guarda cuándo se finalizó: si fue por cierre automático, es esa fecha.)
+  let estadoDeLaFicha;
+  if (proyecto.finalizado) {
+    estadoDeLaFicha = { texto: 'Proyecto finalizado', fecha: proyecto.fechaCierre };
+  } else if (!busquedaAbierta) {
+    estadoDeLaFicha = { texto: 'Búsqueda cerrada', fecha: null };
+  } else {
+    estadoDeLaFicha = { texto: 'Recibe postulaciones hasta', fecha: proyecto.fechaLimiteBusqueda };
+  }
 
   // ───── 3. ACCIONES ─────
   // Decide qué se ve en la última columna de la fila de un perfil que todavía tiene lugar.
@@ -196,30 +213,24 @@ export default function DetalleProyecto() {
     if (yaSePostuloA(perfil)) {
       return <StatusBadge status="pendiente" />;
     }
-    // Si la búsqueda está cerrada, no hay botón.
+    // Si la búsqueda está cerrada, el botón queda deshabilitado y lo dice.
     if (!busquedaAbierta) {
-      return null;
+      return <Button disabled>Búsqueda cerrada</Button>;
     }
     // Colaboradora con sesión: el botón abre la ventana con este perfil preseleccionado.
     if (rol === 'col') {
       return (
-        <Button variant="secondary" disabled={enviando} onClick={() => setPerfilParaPostular(perfil.id)}>
+        <Button disabled={enviando} onClick={() => setPerfilParaPostular(perfil.id)}>
           Postularme
         </Button>
       );
     }
     // Visitante sin sesión: el botón la lleva a ingresar y después vuelve a este proyecto.
     return (
-      <Button as={Link} to={`/ingresar?volver=/proyectos/${proyecto.id}`} variant="secondary">
+      <Button as={Link} to={`/ingresar?volver=/proyectos/${proyecto.id}`}>
         Postularme
       </Button>
     );
-  }
-
-  // Se ejecuta al tocar el botón «Postularme» de la cabecera: abre la ventana con el
-  // primer perfil disponible (el `?.` evita un error si no queda ninguno).
-  function alPostularmeDesdeLaCabecera() {
-    setPerfilParaPostular(perfilesDisponibles[0]?.id);
   }
 
   // Se ejecuta al confirmar la ventana de postulación. Recibe el id del perfil elegido y si
@@ -228,7 +239,7 @@ export default function DetalleProyecto() {
   async function alConfirmarPostulacion({ perfil: perfilId, publica }) {
     setPerfilParaPostular(null);
     setAviso('');
-    setErrorDeEnvio('');
+    setErrorDeEnvio(null);
     setEnviando(true);
     try {
       await postularmeAPerfil(proyecto.id, perfilId, {
@@ -246,7 +257,7 @@ export default function DetalleProyecto() {
     } catch (errorDelBackend) {
       // El backend explica el motivo: «no tenés ninguna habilidad requerida», «la búsqueda
       // está cerrada», «ya te postulaste»… Se muestra tal cual.
-      setErrorDeEnvio(mensajeDeError(errorDelBackend));
+      setErrorDeEnvio(errorDelBackend);
     } finally {
       // `finally` corre siempre, haya salido bien o mal.
       setEnviando(false);
@@ -263,13 +274,14 @@ export default function DetalleProyecto() {
   async function alConfirmarDenuncia({ motivo, texto }) {
     setDenunciaAbierta(false);
     setAviso('');
-    setErrorDeEnvio('');
+    setErrorDeEnvio(null);
     setEnviando(true);
     try {
       await denunciarColaboracion(miColaboracion.id, `${motivo}: ${texto}`);
+      setDenuncioRecien(true);
       setAviso('Denuncia enviada. El equipo administrativo la va a evaluar.');
     } catch (errorDelBackend) {
-      setErrorDeEnvio(mensajeDeError(errorDelBackend));
+      setErrorDeEnvio(errorDelBackend);
     } finally {
       setEnviando(false);
     }
@@ -290,30 +302,57 @@ export default function DetalleProyecto() {
         ? `${ocupantesDelPerfil.length} en el equipo · sin cupo máximo`
         : `${ocupantesDelPerfil.length} de ${perfil.cantidadMaxima} lugares ocupados`;
 
+    // El botón (o la etiqueta «cerrado») que va al lado del nombre del perfil.
+    const accion = perfilCompleto ? <StatusBadge status="cerrado" /> : accionDelPerfil(perfil);
+    // Los perfiles que ya no reciben gente van plegados: se ve el nombre y se despliega el resto.
+    const cerrado = perfilCompleto || !busquedaAbierta;
+
+    const detalle = (
+      <dl className={s.datos}>
+        <dt>Habilidades</dt>
+        <dd>
+          <span className={s.tags}>
+            {perfil.requeridas.map((habilidad) => (
+              <Tag key={habilidad} tone="sand">{habilidad}</Tag>
+            ))}
+          </span>
+          {perfil.opcionales.length > 0 && (
+            <span className={s.nota}>Suman: {perfil.opcionales.join(', ')}</span>
+          )}
+        </dd>
+        <dt>Tiempo</dt>
+        <dd>{perfil.tiempo}</dd>
+        <dt>Modalidad</dt>
+        <dd>{perfil.modalidad}</dd>
+        <dt>Lugares</dt>
+        <dd>{textoDeLugares}</dd>
+      </dl>
+    );
+
+    // Cerrado: un <details> nativo (se abre y cierra solo, con teclado incluido).
+    if (cerrado) {
+      return (
+        <details key={perfil.id} className={s.perfil}>
+          <summary className={s.perfilCabecera}>
+            <Heading level={3} size="h3">{perfil.descripcion}</Heading>
+            <span className={s.perfilAccion}>{accion}</span>
+            <span className={s.flechita} aria-hidden="true">
+              <Icon name="chevron-abajo" size={22} />
+            </span>
+          </summary>
+          {detalle}
+        </details>
+      );
+    }
+
     return (
       <article key={perfil.id} className={s.perfil}>
-        {/* El backend no tiene un «nombre» de perfil: se usa la descripción */}
-        <Heading level={3} size="h3">{perfil.descripcion}</Heading>
-        <dl className={s.datos}>
-          <dt>Habilidades</dt>
-          <dd>
-            <span className={s.tags}>
-              {perfil.requeridas.map((habilidad) => (
-                <Tag key={habilidad} tone="sand">{habilidad}</Tag>
-              ))}
-            </span>
-            {perfil.opcionales.length > 0 && (
-              <span className={s.nota}>Suman: {perfil.opcionales.join(', ')}</span>
-            )}
-          </dd>
-          <dt>Tiempo</dt>
-          <dd>{perfil.tiempo}</dd>
-          <dt>Modalidad</dt>
-          <dd>{perfil.modalidad}</dd>
-          <dt>Lugares</dt>
-          <dd>{textoDeLugares}</dd>
-        </dl>
-        <div>{perfilCompleto ? <StatusBadge status="cerrado" /> : accionDelPerfil(perfil)}</div>
+        {/* Arriba: el nombre del perfil (el backend usa la descripción) y su botón */}
+        <div className={s.perfilCabecera}>
+          <Heading level={3} size="h3">{perfil.descripcion}</Heading>
+          <span className={s.perfilAccion}>{accion}</span>
+        </div>
+        {detalle}
       </article>
     );
   }
@@ -326,75 +365,56 @@ export default function DetalleProyecto() {
     <div className={`container ${s.page}`}>
       <Crumbs items={[{ label: 'Proyectos', to: '/proyectos' }, { label: proyecto.titulo }]} />
 
-      {/* BLOQUE: Cabecera — título, estado, colectivo, etiquetas y botón de postulación */}
-      <header className={s.top}>
-        <div className={s.title}>
-          <div className={s.row}>
-            <Heading level={1} size="h2">{proyecto.titulo}</Heading>
-            <StatusBadge status={proyecto.estado} />
-          </div>
-          <Text variant="small">
-            <Link to={`/colectivos/${proyecto.colectivoId}`}>{proyecto.colectivo}</Link>
-          </Text>
-          {/* Avance: suma de los logros cumplidos */}
-          <div className={s.avance}>
-            <span>Avance</span>
-            <Progress value={proyecto.avance} />
-            <b>{proyecto.avance} %</b>
-          </div>
-          <div className={s.tags}>
-            {/* «Denunciar al colectivo» aparece solo si es una colaboradora que participa
-                en este proyecto (`&&`: si es verdadero se dibuja; ver
-                docs/GLOSARIO.md → Renderizado condicional) */}
-            {puedeDenunciar && (
-              <Button variant="link" disabled={enviando} onClick={() => setDenunciaAbierta(true)}>
-                Denunciar al colectivo
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div className={s.right}>
-          {/* Botón que abre la ventana de postulación: aparece si no es organización y es
-              colaboradora o la búsqueda está cerrada. Si la búsqueda está cerrada o no quedan
-              perfiles disponibles, queda deshabilitado. */}
-          {mostrarBotonDeCabecera && botonDeCabeceraAbreVentana && (
-            <Button
-              disabled={!busquedaAbierta || perfilesDisponibles.length === 0 || enviando}
-              loading={enviando}
-              onClick={alPostularmeDesdeLaCabecera}
-            >
-              {busquedaAbierta ? 'Postularme' : 'Búsqueda cerrada'}
-            </Button>
-          )}
-          {/* Botón que lleva a ingresar: visita sin sesión con la búsqueda abierta */}
-          {mostrarBotonDeCabecera && !botonDeCabeceraAbreVentana && (
-            <Button as={Link} to={`/ingresar?volver=/proyectos/${proyecto.id}`}>
-              Postularme
-            </Button>
-          )}
-          {/* Si ya se postuló a algún perfil se ve la etiqueta «pendiente» */}
-          {rol === 'col' && yaMePostule && <StatusBadge status="pendiente" />}
-          {/* Mensaje para visitantes sin sesión cuando la búsqueda está abierta */}
-          {rol === null && busquedaAbierta && (
-            <Text variant="small">Ingresá como colaboradora para postularte</Text>
-          )}
-        </div>
-      </header>
-
       {/* BLOQUE: Avisos — verde si salió bien, rojo con el motivo del backend si no */}
       {aviso && <Alert kind="success" onClose={() => setAviso('')}>{aviso}</Alert>}
       {errorDeEnvio && (
-        <Alert kind="error" title="No se pudo enviar" onClose={() => setErrorDeEnvio('')}>
-          {errorDeEnvio}
+        <Alert kind="error" title="No se pudo enviar" onClose={() => setErrorDeEnvio(null)}>
+          {mensajeDeError(errorDeEnvio)}
+          {/* Si el problema son las habilidades, el arreglo está en su perfil */}
+          {errorDeEnvio.response?.data?.code === CODIGO_SIN_HABILIDADES && (
+            <>
+              {' '}
+              <Link to="/panel/perfil">Revisar mis habilidades</Link>
+            </>
+          )}
         </Alert>
       )}
 
-      {/* BLOQUE: Cuerpo — sin pestañas: a la izquierda qué es y dónde sumarse,
-          a la derecha la ficha con fechas, enlaces, equipo y logros */}
+      {/* BLOQUE: Cuerpo — dos columnas: a la izquierda qué es y dónde sumarse; a la
+          derecha la ficha (fechas, enlaces, equipo y logros) */}
       <div className={s.cuerpo}>
         <div className={s.principal}>
-          <Text variant="prose">{proyecto.descripcion}</Text>
+          {/* Cabecera: título con su estado, descripción, colectivo y avance */}
+          <header className={s.cabecera}>
+            <div className={s.row}>
+              <Heading level={1} size="h2">{proyecto.titulo}</Heading>
+              <StatusBadge status={proyecto.estado} />
+            </div>
+            <Text variant="prose">{proyecto.descripcion}</Text>
+            <div className={s.row}>
+              <Link to={`/colectivos/${proyecto.colectivoId}`} className={s.colectivo}>
+                <Avatar nombre={proyecto.colectivo} size={32} square foto={fotoDe(proyecto.colectivoId)} />
+                {proyecto.colectivo}
+              </Link>
+              {/* «Denunciar al colectivo» aparece solo si es una colaboradora que participa */}
+              {puedeDenunciar && (
+                <Button
+                  variant="link"
+                  disabled={enviando || yaDenuncio}
+                  onClick={() => setDenunciaAbierta(true)}
+                >
+                  {yaDenuncio ? 'Ya denunciado' : 'Denunciar al colectivo'}
+                </Button>
+              )}
+            </div>
+            {/* Avance: suma de los logros cumplidos */}
+            <div className={s.avance}>
+              <span>Avance</span>
+              <Progress value={proyecto.avance} />
+              <b>{proyecto.avance} %</b>
+            </div>
+          </header>
+
           <section className={s.perfiles} aria-labelledby="h-perfiles">
             <Heading level={2} size="h3" id="h-perfiles">Perfiles buscados</Heading>
             {proyecto.perfiles.map(tarjetaDePerfil)}
@@ -402,20 +422,22 @@ export default function DetalleProyecto() {
         </div>
 
         <aside className={s.ficha} aria-label="Ficha del proyecto">
-          <section aria-labelledby="h-busqueda">
-            <Heading level={2} size="h4" id="h-busqueda">Búsqueda</Heading>
-            <Text variant="small">
-              {proyecto.finalizado
-                ? 'Proyecto finalizado'
-                : !busquedaAbierta
-                  ? 'Búsqueda cerrada'
-                  : proyecto.fechaLimiteBusqueda
-                    ? `Recibe postulaciones hasta el ${fechaCorta(proyecto.fechaLimiteBusqueda)}`
-                    : 'Recibe postulaciones sin fecha límite'}
-            </Text>
-            {/* Fecha de cierre automático: solo si el colectivo la cargó y todavía no terminó */}
+          {/* Creado: fecha grande y, abajo, en qué anda la búsqueda */}
+          <section aria-labelledby="h-creado">
+            <div className={s.fichaFila}>
+              <Heading level={2} size="h4" id="h-creado">Creado</Heading>
+              <b className={s.fechaGrande}>{fechaCorta(fechaDeCreacion(proyecto.id))}</b>
+            </div>
+            <div className={s.fichaFila}>
+              <span>{estadoDeLaFicha.texto}</span>
+              {estadoDeLaFicha.fecha && <span>{fechaCorta(estadoDeLaFicha.fecha)}</span>}
+            </div>
+            {/* Cierre automático: solo si el colectivo lo cargó y todavía no terminó */}
             {proyecto.fechaCierre && !proyecto.finalizado && (
-              <Text variant="small">Cierra el {fechaCorta(proyecto.fechaCierre)}</Text>
+              <div className={s.fichaFila}>
+                <span>Cierra solo el</span>
+                <span>{fechaCorta(proyecto.fechaCierre)}</span>
+              </div>
             )}
           </section>
 

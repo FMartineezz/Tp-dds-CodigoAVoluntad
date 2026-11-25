@@ -42,6 +42,9 @@
   --sand-200: #e4d6b8;   /* hover y elemento seleccionado (un paso más oscuro que el fondo) */
   --sand-400: #d2bd93;   /* etiquetas, avatares, celdas destacadas. Texto encima: usar --ink-900 */
 
+  /* ---------- NARANJA ---------- */
+  --orange-500: #e8843a; /* gráficos: postulaciones rechazadas. SOLO relleno (con borde de tinta), no texto */
+
   /* ---------- VERDE ---------- */
   --green-700: #17632f;  /* positivo: Abierto, Aceptada, éxito, hover de «Aceptar» */
 }

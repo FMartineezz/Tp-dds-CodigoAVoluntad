@@ -69,9 +69,11 @@ export class ColaboracionRepository {
       .lean();
   }
 
+  // El proyecto se trae poblado (con su colectivo) porque la denuncia necesita saber a qué
+  // colectivo va. Sin esto `proyecto.colectivo` quedaba undefined y no se podía denunciar.
   /**
    * Busca una colaboración por id para el equipo administrativo: muestra la persona aunque sea
-   * anónima, con sus contactos.
+   * anónima, con sus contactos, y el proyecto con su colectivo.
    * @param {Id} id
    * @returns {Promise<(import("mongoose").Document & ColaboracionGuardada) | null>} Documento de
    *   mongoose (sin lean), o null.
@@ -79,7 +81,8 @@ export class ColaboracionRepository {
   async obtenerPorIdParaAdmin(id) {
     return await this.model
       .findById(id)
-      .populate({ path: "personaColaboradora", select: "+contactos" });
+      .populate({ path: "personaColaboradora", select: "+contactos" })
+      .populate({ path: "proyecto", select: "titulo colectivo" });
   }
 
   /**

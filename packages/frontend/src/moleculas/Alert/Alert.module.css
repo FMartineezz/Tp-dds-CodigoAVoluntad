@@ -23,3 +23,5 @@
 .warning .icon { background: var(--yellow-400); color: var(--ink-900); }
 .close { min-width: 2.75rem; min-height: 2.75rem; margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) 0 0; background: transparent; border: 0; cursor: pointer; font-weight: 800; }
 .close:hover { background: var(--color-inverse-bg); color: var(--color-inverse-text); }
+/* Al scrollear hasta un error, que no quede pegado al borde (ni debajo del header fijo) */
+.alert { scroll-margin-top: 6rem; }

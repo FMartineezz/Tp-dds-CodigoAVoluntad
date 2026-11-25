@@ -13,6 +13,8 @@
 
 @media (max-width: 800px) { .agregar { grid-template-columns: 1fr; } }
 
+.cabecera { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+
 .titulo { font-size: var(--text-small); font-weight: 600; }
 
 .hint { font-size: var(--text-small); color: var(--color-text-muted); }

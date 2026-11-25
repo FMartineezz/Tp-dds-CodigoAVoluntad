@@ -39,6 +39,9 @@ async function cargarCuentas() {
 }
 import s from './Ingresar.module.css';
 
+// Dónde empieza el área privada de cada rol (ver las rutas en App.js).
+const PANEL_POR_ROL = { col: '/panel', org: '/org' };
+
 export default function Ingresar() {
   // ───── 1. DATOS Y ESTADO ─────
 
@@ -82,11 +85,16 @@ export default function Ingresar() {
 
   // ───── 3. ACCIONES ─────
 
-  // Adónde ir después de ingresar: lo que diga «?volver=…» en la dirección;
-  // si no hay, el panel que corresponda al rol. `||` significa «usá lo de la derecha
-  // si lo de la izquierda está vacío».
-  function rutaDeDestino(rutaPorDefecto) {
-    return parametrosDeLaDireccion.get('volver') || rutaPorDefecto;
+  // Adónde ir después de ingresar: lo que diga «?volver=…» en la dirección; si no hay, el
+  // panel del rol. Ojo: si «volver» es del área del OTRO rol se ignora. Pasa al salir desde
+  // /panel y entrar como organización: sin esto, te mandaba de una a «No tenés permiso».
+  function rutaDeDestino(rol) {
+    const panelDelRol = PANEL_POR_ROL[rol];
+    const volver = parametrosDeLaDireccion.get('volver');
+    const esDelOtroRol = Object.values(PANEL_POR_ROL).some(
+      (panel) => panel !== panelDelRol && volver?.startsWith(panel)
+    );
+    return volver && !esDelOtroRol ? volver : panelDelRol;
   }
 
   // Se ejecuta al apretar «Ingresar» (o Enter en un campo).
@@ -135,9 +143,8 @@ export default function Ingresar() {
       const [rolElegido, idElegido] = cuentaElegida ? cuentaElegida.split(':') : [];
       const rol = rolElegido || (/^org/i.test(correo) ? 'org' : 'col');
       entrar(rol, idElegido);
-      const panelDelRol = rol === 'org' ? '/org' : '/panel';
       // replace: true reemplaza esta pantalla en el historial (el botón «atrás» no vuelve al login)
-      navegar(rutaDeDestino(panelDelRol), { replace: true });
+      navegar(rutaDeDestino(rol), { replace: true });
     }, 700);
   }
 
@@ -145,7 +152,7 @@ export default function Ingresar() {
   // directo como colaboradora, sin pedir datos.
   function alEntrarConRedSocial() {
     entrar('col');
-    navegar(rutaDeDestino('/panel'), { replace: true });
+    navegar(rutaDeDestino('col'), { replace: true });
   }
 
   // ───── 4. LO QUE SE DIBUJA ─────

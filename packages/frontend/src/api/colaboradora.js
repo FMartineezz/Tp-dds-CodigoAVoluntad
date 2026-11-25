@@ -219,13 +219,13 @@ export async function obtenerProyectosAcordes(id, { pagina = 1, limite = 20 } = 
 // Junta en un solo pedido todo lo que muestra /panel. Promise.all lanza los pedidos a la vez
 // y espera a que terminen todos (si uno falla, falla todo y la pantalla muestra el error).
 export async function obtenerPanel(id) {
-  const [perfil, postulaciones, colaboraciones, mensajes, notificaciones, acordes] =
+  // Las notificaciones no van acá: las pide «Última actividad» (hooks/useNotificaciones.js).
+  const [perfil, postulaciones, colaboraciones, mensajes, acordes] =
     await Promise.all([
       api.get(`/colaboradoras/${id}`).then(({ data }) => data),
       obtenerPostulaciones(id),
       obtenerMisColaboraciones(id),
       api.get(`/colaboradoras/${id}/mensajes`).then(({ data }) => data),
-      obtenerNotificaciones(id),
       obtenerProyectosAcordes(id, { pagina: 1, limite: 20 }),
     ]);
   return {
@@ -233,11 +233,8 @@ export async function obtenerPanel(id) {
     pendientes: postulaciones.filter((p) => p.estado === "pendiente").length,
     proyectosActivos: colaboraciones.filter((c) => c.activa && !c.proyecto.finalizado).length,
     mensajes: mensajes.filter((m) => m.emisor === "colectivo" && !m.leido).length,
-    // Todas las novedades, de la más nueva a la más vieja: el panel muestra las primeras
-    // y despliega el resto con «Ver todas las notificaciones».
-    novedades: notificaciones,
-    // Como mucho tres (una fila de tarjetas). El backend ya manda solo los que aceptan postulaciones; el filtro es
-    // por las dudas (por ejemplo, si la fecha límite vence justo ahora).
+    // Como mucho tres (una fila de tarjetas). El backend ya manda solo los que aceptan
+    // postulaciones; el filtro es por las dudas (ej. si la fecha límite vence justo ahora).
     sugeridos: acordes.resultados.filter((p) => p.estado === "abierto").slice(0, 3),
   };
 }

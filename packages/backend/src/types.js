@@ -47,6 +47,7 @@
  */
 
 /** @typedef {Guardado<import("./models/habilidad.js").Habilidad>} HabilidadGuardada */
+/** @typedef {Guardado<import("./models/reporte.js").Reporte>} ReporteGuardado */
 /** @typedef {Guardado<import("./models/colectivo.js").Colectivo>} ColectivoGuardado */
 /** @typedef {Guardado<import("./models/personaColaboradora.js").PersonaColaboradora>} PersonaColaboradoraGuardada */
 /** @typedef {Guardado<import("./models/perfil.js").Perfil>} PerfilGuardado */

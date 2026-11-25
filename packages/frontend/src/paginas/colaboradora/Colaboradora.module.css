@@ -20,12 +20,8 @@
   .celdas > div[data-l]::before { content: attr(data-l); margin-right: var(--space-3); font-size: var(--text-label); text-transform: uppercase; color: var(--color-text-muted); }
 }
 
-/* Panel: «Última actividad» sin fondo propio, así se funde con la página.
-   Recortada: la última novedad se desvanece y el botón se monta encima del desvanecido.
-   Desplegada: el botón va abajo de la lista, sin pisar nada. */
-.actividad { display: grid; gap: var(--space-4); }
-.novedades { display: grid; gap: var(--space-3); }
-.recortadas { max-height: 9rem; overflow: hidden; mask-image: linear-gradient(to bottom, #000 45%, transparent 100%); }
-.verTodas { justify-self: center; }
-.recortadas + .verTodas { margin-top: calc(-1 * var(--space-6)); position: relative; }
-.recortadas + .verTodas:not(:hover) { background: var(--color-bg); }
+/* Mi perfil: habilidades ocupa el alto de nombre de fantasía, nombre, apellido y pronombres */
+.habilidades { grid-row: span 4; }
+@media (max-width: 800px) { .habilidades { grid-row: auto; } }
+/* Línea que separa los bloques del formulario */
+.separador { width: 100%; margin: 0; border: 0; border-top: var(--border); }

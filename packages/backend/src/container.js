@@ -6,6 +6,7 @@ import nodemailer from "nodemailer";
 import { ProyectoRepository } from "./repositories/proyectoRepository.js";
 import { ColectivoRepository } from "./repositories/colectivoRepository.js";
 import { HabilidadRespository } from "./repositories/habilidadRepository.js";
+import { ReporteRepository } from "./repositories/reporteRepository.js";
 import { ColaboracionRepository } from "./repositories/colaboracionRepository.js";
 import { PersonaColaboradoraRepository } from "./repositories/personaColaboradoraRepository.js";
 import { MensajeRepository } from "./repositories/mensajesRepository.js";
@@ -16,6 +17,7 @@ import { NotificacionRepository } from "./repositories/notificacionRepository.js
 import { ProyectoService } from "./services/proyectoService.js";
 import { ColectivoService } from "./services/colectivoService.js";
 import { HabilidadService } from "./services/habilidadService.js";
+import { ReporteService } from "./services/reporteService.js";
 import { ColaboracionService } from "./services/colaboracionService.js";
 import { PersonaColaboradoraService } from "./services/personaColaboradoraService.js";
 import { PerfilService } from "./services/perfilService.js";
@@ -31,6 +33,7 @@ import { NotificacionAutomaticaService } from "./services/notificacionAutomatica
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
 import { HabilidadController } from "./controllers/habilidadController.js";
+import { ReporteController } from "./controllers/reporteController.js";
 import { ColaboracionController } from "./controllers/colaboracionController.js";
 import { PersonaColaboradoraController } from "./controllers/personaColaboradoraController.js";
 import { HealthCheckController } from "./controllers/healthCheckController.js";
@@ -49,6 +52,7 @@ import { cierreProyectosJob } from "./cronTasks/cierreProyectoJob.js";
 const proyectoRepository = new ProyectoRepository();
 const colectivoRepository = new ColectivoRepository();
 const habilidadRepository = new HabilidadRespository();
+const reporteRepository = new ReporteRepository();
 const colaboracionRepository = new ColaboracionRepository();
 const personaColaboradoraRepository = new PersonaColaboradoraRepository();
 const mensajeRepository = new MensajeRepository();
@@ -73,6 +77,7 @@ const mailTransporter = process.env.SMTP_HOST
 
 // Services: dependen de repositorios y de otros services ya creados.
 const habilidadService = new HabilidadService({ repository: habilidadRepository });
+const reporteService = new ReporteService({ reporteRepository });
 
 const perfilService = new PerfilService({ habilidadService });
 
@@ -96,6 +101,7 @@ const colaboracionService = new ColaboracionService({
   colaboracionRepository,
   personaColaboradoraService,
   proyectoService,
+  colectivoRepository,
 });
 
 const mensajeService = new MensajeService({
@@ -184,6 +190,7 @@ export const valoracionController = new ValoracionController({ valoracionService
 export const postulacionController = new PostulacionController({ postulacionService });
 export const denunciaController = new DenunciaController({ denunciaService });
 export const notificacionController = new NotificacionController({ notificacionAutomaticaService });
+export const reporteController = new ReporteController({ reporteService });
 
 //Job task
 export const cierreProyectos = new cierreProyectosJob({ proyectoService });

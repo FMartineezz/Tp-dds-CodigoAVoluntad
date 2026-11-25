@@ -36,5 +36,5 @@
   .dot { z-index: -1; left: -1.5rem; top: 1rem; bottom: auto; width: 6rem; opacity: 0.85; }
   .ticketWrap { justify-self: center; }
 }
-.charts { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
-@media (max-width: 800px) { .charts { grid-template-columns: 1fr; } }
+/* Gráficos a todo el ancho, uno debajo del otro: así las etiquetas largas entran enteras */
+.charts { width: 100%; display: grid; gap: var(--space-5); }

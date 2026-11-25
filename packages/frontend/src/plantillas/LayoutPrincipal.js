@@ -13,6 +13,12 @@ export function LayoutPrincipal() {
   const [noLeidos, setNoLeidos] = useState(0);
   const menu = MENUS[rol];
 
+  // Cada pantalla nueva arranca arriba de todo. Si no, al tocar un enlace del pie la
+  // pantalla siguiente aparece scrolleada hasta abajo y parece vacía.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   useEffect(() => {
     if (!rol || !id) {
       setNoLeidos(0);
