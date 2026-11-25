@@ -95,15 +95,6 @@ export default function RegistroColaboradora() {
   // Devuelve el manejador onChange de un campo: `alCambiarCampo('mail')` se ejecuta
   // cuando la persona escribe en «mail» (o tilda/destilda una casilla).
   // Casillas: se guarda `checked` (true/false); campos de texto: se guarda `value`.
-  /*   function alCambiarCampo(campo) {
-    return function (evento) {
-      const esCasilla = evento.target.type === 'checkbox';
-      const nuevoValor = esCasilla ? evento.target.checked : evento.target.value;
-      // `...datos` copia todo lo que había y `[campo]: nuevoValor` cambia solo ese campo
-      // (ver docs/GLOSARIO.md → Copiar con cambios).
-      setDatos({ ...datos, [campo]: nuevoValor });
-    };
-  } */
 
   function alCambiarCampo(campo) {
     return function (eventoOValor) {

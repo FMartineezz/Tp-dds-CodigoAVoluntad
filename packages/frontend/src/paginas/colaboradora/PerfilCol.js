@@ -14,19 +14,19 @@
  * Aviso de éxito: cualquier cambio en un campo borra el mensaje de éxito anterior
  * (así no queda un «Cambios guardados» que ya no es cierto).
  */
-
 // ───── Imports ─────
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, Button, Checkbox, Field, Heading } from '../../atomos';
 import { Alert, ContactosEditor, TagPicker } from '../../moleculas';
-import { HABILIDADES } from '../../datos'; // lista de habilidades que se pueden elegir
 import s from './Colaboradora.module.css';
 import sh from '../../plantillas/disposicion.module.css'; // sh = layout común (.page, .form…)
 import { useAuth } from '../../contexto';
+import Lodash from "lodash";
+
 
 export default function PerfilCol() {
-  const { usuario, cargando } = useAuth();
+  const { usuario, cargando, keycloak, recargarPerfil } = useAuth();
 
   // Mientras carga o si todavía no se hidrató el usuario, evitamos errores de renderizado
   if (cargando || !usuario) {
@@ -44,14 +44,14 @@ export default function PerfilCol() {
     apellido: usuario.appellido,
     pronombres: usuario.pronombres,
     github: usuario.git,
-    habilidades: usuario.habilidades,
-    contactos: usuario.contactos,
+    habilidades: usuario.habilidades.map((h) => h.titulo),
+    contactos: usuario.contactos.map((obj) => Object.values(obj)),
     linkedin: '',
     web: '',
     bio: usuario.presentacion,
-    mail: 'colaboradora@demo.org',
     mensajes: usuario.bloquearMensajeInterno,
   });
+  console.log(datos.contactos);
 
   // Habilidades elegidas, como array de textos. Empieza con dos de ejemplo; las cambia
   // el TagPicker y alImportarDeLinkedIn (que suma «Accesibilidad»).
@@ -77,55 +77,48 @@ export default function PerfilCol() {
   const [errores, setErrores] = useState({});
 
   const [habilidadesDisponibles, setHabilidadesDisponibles] = useState([]);
-
-
-    useEffect(() => {
-      const controlador = new AbortController();
   
-      async function cargarHabilidades() {
-        try {
-          const response = await fetch("http://localhost:3000/habilidades", {
-            signal: controlador.signal,
-          });
-          if (!response.ok) throw new Error("Error al cargar habilidades");
-          const data = await response.json();
-          setHabilidadesDisponibles(data);
-        } catch (error) {
-          if (error.name !== "AbortError") {
-            setErrorHabilidades(error.message);
-          }
+  useEffect(() => {
+    const controlador = new AbortController();
+    
+    async function cargarHabilidades() {
+      try {
+        const response = await fetch("http://localhost:3000/habilidades", {
+          signal: controlador.signal,
+        });
+        if (!response.ok) throw new Error("Error al cargar habilidades");
+        const data = await response.json();
+        console.log(data)
+        setHabilidadesDisponibles(data);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setErrorHabilidades(error.message);
         }
       }
-  
-      cargarHabilidades();
-      return () => controlador.abort();
-    }, []);
+    }
+    
+    cargarHabilidades();
+    return () => controlador.abort();
+  }, []);
   // ───── 3. ACCIONES ─────
 
   // Devuelve el manejador onChange de un campo: `alCambiarCampo('mail')` se ejecuta cuando
   // la persona escribe en «mail» (o tilda una casilla). Borra el aviso de éxito anterior.
   // Casillas: se guarda `checked` (true/false); campos de texto: se guarda `value`.
   function alCambiarCampo(campo) {
-    return function (evento) {
-      setMensajeOk('');
-      const esCasilla = evento.target.type === 'checkbox';
-      const nuevoValor = esCasilla ? evento.target.checked : evento.target.value;
-      // `...datos` copia todo lo que había y `[campo]: nuevoValor` cambia solo ese campo
-      // (ver docs/GLOSARIO.md → Copiar con cambios)
-      setDatos({ ...datos, [campo]: nuevoValor });
+    return function (eventoOValor) {
+      const nuevoValor =
+        eventoOValor && eventoOValor.target !== undefined
+          ? eventoOValor.target.type === "checkbox"
+            ? eventoOValor.target.checked
+            : eventoOValor.target.value
+          : eventoOValor;
+
+      setDatos((prev) => ({
+        ...prev,
+        [campo]: nuevoValor,
+      }));
     };
-  }
-
-  // Se ejecuta al cambiar las habilidades en el TagPicker (recibe la lista nueva).
-  function alCambiarHabilidades(habilidadesNuevas) {
-    setMensajeOk('');
-    setHabilidadesElegidas(habilidadesNuevas);
-  }
-
-  // Se ejecuta al cambiar los contactos en el ContactosEditor (recibe la lista nueva).
-  function alCambiarContactos(contactosNuevos) {
-    setMensajeOk('');
-    setContactos(contactosNuevos);
   }
 
   // Se ejecuta al apretar «Importar desde LinkedIn». Es una simulación: completa LinkedIn
@@ -149,7 +142,7 @@ export default function PerfilCol() {
 
   // Se ejecuta al apretar «Guardar cambios». Primero valida; si hay errores corta acá y
   // no «llama a la API».
-  function alGuardar(evento) {
+  async function alGuardar(evento) {
     // evita que el navegador recargue la página (comportamiento normal de un <form>)
     evento.preventDefault();
 
@@ -157,10 +150,6 @@ export default function PerfilCol() {
     const erroresNuevos = {};
     if (!datos.fantasia.trim()) {
       erroresNuevos.fantasia = 'Ingresá un nombre de fantasía.';
-    }
-    if (!/^\S+@\S+\.\S+$/.test(datos.mail)) {
-      // la expresión regular pide «algo@algo.algo», sin espacios
-      erroresNuevos.mail = 'Ingresá un correo válido.';
     }
     setErrores(erroresNuevos);
     setMensajeOk('');
@@ -172,11 +161,54 @@ export default function PerfilCol() {
 
     // Se simula la espera con setTimeout (ejecuta la función de adentro a los 700 ms);
     // en producción acá iría la llamada a la API y esto correría cuando responda.
-    setGuardando(true);
-    setTimeout(() => {
-      setGuardando(false);
-      setMensajeOk('Cambios guardados.');
-    }, 700);
+    console.log(datos);
+    const payload = {
+      nombreFantasia: datos.fantasia,
+      git: datos.github,
+      nombre: datos.nombre,
+      apellido: datos.apellido,
+      habilidades: (datos.habilidades || []).map(habilidad => Lodash.snakeCase(habilidad)),
+      pronombres: datos.pronombres == '' ? [] : datos.pronombres,
+      presentacion: datos.bio,
+      contactos: (datos.contactos || []).map(([tipo, valor]) => ({
+        tipo,
+        valor,
+      })),
+      bloquearMensajeInterno: datos.mensajes,
+    };
+    
+      try {
+        // 1. Nos aseguramos de que el token no esté vencido antes de enviarlo
+        await keycloak.updateToken(30);
+
+        // 2. Enviamos los datos del formulario al backend
+        const response = await fetch(`http://localhost:3000/colaboradoras/${usuario._id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        if (!response.ok) {
+          throw new Error(data.message || "Ocurrió un error al actualizar los datos");
+        }
+
+        // 4. Actualizamos el AuthContext (perfilCompletado = true, rol = 'colaboradora')
+        await recargarPerfil();
+
+        window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+        });
+
+      } catch (error) {
+        console.error("Error al registrar colaboradora:", error);
+      }
   }
 
   // ───── 4. LO QUE SE DIBUJA ─────
@@ -224,11 +256,7 @@ export default function PerfilCol() {
           label="Habilidades"
           value={datos.habilidades}
           options={habilidadesDisponibles.map((h) => h.titulo)}
-          onChange={(titulosSeleccionados) => {
-            const codigosSeleccionados = titulosSeleccionados
-              .map((titulo) => habilidadesDisponibles.find((h) => h.titulo === titulo)?.codigo)
-            alCambiarCampo("habilidades")(codigosSeleccionados);
-          }}
+          onChange={alCambiarCampo("habilidades")}
         />
         <Field
           label="Nombre"
@@ -252,13 +280,6 @@ export default function PerfilCol() {
           label="Cuenta de GitHub o GitLab"
           value={datos.github}
           onChange={alCambiarCampo('github')}
-        />
-        <Field
-          label="Correo de la cuenta"
-          type="email"
-          value={datos.mail}
-          onChange={alCambiarCampo('mail')}
-          error={errores.mail}
         />
         <Field
           label="LinkedIn"

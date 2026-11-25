@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA DetalleProyecto
  * Ruta: /proyectos/:id   ·   Quién la ve: Todas (acciones según rol)
