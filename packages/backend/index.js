@@ -30,7 +30,7 @@ app.use(errorHandler);
 
 MongoDBClient.connect();
 
-cierreProyectos.iniciar();
+/* cierreProyectos.iniciar(); */
 
 app.listen(port, () => {
   console.log("Backend escuchando en puerto " + port);

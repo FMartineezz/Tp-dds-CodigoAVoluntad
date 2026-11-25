@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA RegistroColaboradora
  * Ruta: /registro/colaboradora   ·   Quién la ve: Sin sesión
@@ -19,22 +20,15 @@
  */
 
 // ───── Imports ─────
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button, Checkbox, Field, Heading } from '../../atomos';
-import {
-  Alert,
-  CaptchaMock,
-  ContactosEditor,
-  PasswordField,
-  SocialButtons,
-  TagPicker,
-} from '../../moleculas';
-import { HABILIDADES } from '../../datos'; // lista de habilidades que se pueden elegir
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Button, Checkbox, Field, Heading } from "../../atomos";
+import { Alert, CaptchaMock, ContactosEditor, TagPicker } from "../../moleculas";
+import { HABILIDADES } from "../../datos"; // lista de habilidades que se pueden elegir
 // piezas compartidas con el otro registro
-import { MAIL, useForm, Resumen, useSocial } from './auxiliares.js';
-import s from './Ingresar.module.css';
-import sh from '../../plantillas/disposicion.module.css'; // sh = layout común (.page, .form…)
+import { useForm, Resumen } from "./auxiliares.js";
+import s from "./Ingresar.module.css";
+import sh from "../../plantillas/disposicion.module.css"; // sh = layout común (.page, .form…)
 
 export default function RegistroColaboradora() {
   // ───── 1. DATOS Y ESTADO ─────
@@ -44,14 +38,12 @@ export default function RegistroColaboradora() {
   // Empiezan vacíos (mensajes empieza tildado); los cambia alCambiarCampo y el captcha.
   // (ver docs/GLOSARIO.md → useState)
   const [datos, setDatos] = useState({
-    fantasia: '',
-    nombre: '',
-    apellido: '',
-    pronombres: '',
-    github: '',
-/*     mail: '',
-    pass: '', */
-    bio: '',
+    fantasia: "",
+    nombre: "",
+    apellido: "",
+    pronombres: "",
+    github: "",
+    bio: "",
     mensajes: true,
     terminos: false,
     captcha: false,
@@ -59,21 +51,12 @@ export default function RegistroColaboradora() {
     contactos: [],
   });
 
-  // Habilidades elegidas, como array de textos, ej. ['React', 'Node'].
-  // Empieza vacío; lo cambia el TagPicker.
-  const [habilidadesElegidas, setHabilidadesElegidas] = useState([]);
-
-  // Contactos internos: array de pares [tipo, dato], ej. ['WhatsApp', '+54 11…'].
-  // Empieza vacío; lo cambia el ContactosEditor.
-  const [contactos, setContactos] = useState([]);
+  const [habilidadesDisponibles, setHabilidadesDisponibles] = useState([]);
 
   // Manejo de validación (ver auxiliares.js → useForm). Devuelve funciones y banderas:
   // formulario.blur / .enviar / .errores y .cargando / .listo / .intento.
   // Se le pasa la función con las reglas (validarDatos, más abajo).
   const formulario = useForm(validarDatos);
-
-  // Función que, al elegir una red social, abre sesión como colaboradora ('col').
-  const entrarConRedSocial = useSocial();
 
   // ───── 2. CÁLCULOS ─────
 
@@ -83,19 +66,22 @@ export default function RegistroColaboradora() {
   function validarDatos(valores) {
     const erroresDelFormulario = {};
     if (!valores.fantasia.trim()) {
-      erroresDelFormulario.fantasia = 'Ingresá un nombre de fantasía.';
+      erroresDelFormulario.fantasia = "Ingresá un nombre de fantasía.";
     }
-/*     if (!MAIL.test(valores.mail)) {
-      erroresDelFormulario.mail = 'Ingresá un correo válido.';
+    if (!valores.github.trim()) {
+      erroresDelFormulario.github = "Ingresá un usuario de github.";
     }
-    if (valores.pass.length < 8) {
-      erroresDelFormulario.pass = 'La contraseña debe tener al menos 8 caracteres.';
-    } */
+    if (!valores.bio.trim()) {
+      erroresDelFormulario.bio = "Debes completar tu presentación.";
+    }
+    if (valores.habilidades == []) {
+      erroresDelFormulario.habilidades = "Debes agregar tus habilidades.";
+    }
     if (!valores.terminos) {
-      erroresDelFormulario.terminos = 'Tenés que aceptar los términos.';
+      erroresDelFormulario.terminos = "Debes que aceptar los términos.";
     }
     if (!valores.captcha) {
-      erroresDelFormulario.captcha = 'Confirmá que no sos un robot.';
+      erroresDelFormulario.captcha = "Confirmá que no sos un robot.";
     }
     return erroresDelFormulario;
   }
@@ -109,7 +95,7 @@ export default function RegistroColaboradora() {
   // Devuelve el manejador onChange de un campo: `alCambiarCampo('mail')` se ejecuta
   // cuando la persona escribe en «mail» (o tilda/destilda una casilla).
   // Casillas: se guarda `checked` (true/false); campos de texto: se guarda `value`.
-/*   function alCambiarCampo(campo) {
+  /*   function alCambiarCampo(campo) {
     return function (evento) {
       const esCasilla = evento.target.type === 'checkbox';
       const nuevoValor = esCasilla ? evento.target.checked : evento.target.value;
@@ -120,30 +106,56 @@ export default function RegistroColaboradora() {
   } */
 
   function alCambiarCampo(campo) {
-  return function (eventoOValor) {
-    const nuevoValor =
-      eventoOValor && eventoOValor.target !== undefined
-        ? eventoOValor.target.type === 'checkbox'
-          ? eventoOValor.target.checked
-          : eventoOValor.target.value
-        : eventoOValor;
+    return function (eventoOValor) {
+      const nuevoValor =
+        eventoOValor && eventoOValor.target !== undefined
+          ? eventoOValor.target.type === "checkbox"
+            ? eventoOValor.target.checked
+            : eventoOValor.target.value
+          : eventoOValor;
 
-    setDatos((prev) => ({
-      ...prev,
-      [campo]: nuevoValor,
-    }));
-  };
-}
+      setDatos((prev) => ({
+        ...prev,
+        [campo]: nuevoValor,
+      }));
+    };
+  }
 
   // Se ejecuta cuando la persona tilda el captcha de prueba (recibe true o false).
   function alCambiarCaptcha(resuelto) {
     setDatos({ ...datos, captcha: resuelto });
   }
 
+  useEffect(() => {
+    const controlador = new AbortController();
+
+    async function cargarHabilidades() {
+      try {
+        const response = await fetch("http://localhost:3000/habilidades", {
+          signal: controlador.signal,
+        });
+        if (!response.ok) throw new Error("Error al cargar habilidades");
+        const data = await response.json();
+        setHabilidadesDisponibles(data);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setErrorHabilidades(error.message);
+        }
+      }
+    }
+
+    cargarHabilidades();
+    return () => controlador.abort();
+  }, []);
+
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     // onSubmit: al enviar, formulario.enviar(datos) valida y simula el envío
-    <form className={`container ${sh.page}`} onSubmit={formulario.enviarColaboradora(datos)} noValidate>
+    <form
+      className={`container ${sh.page}`}
+      onSubmit={formulario.enviarColaboradora(datos)}
+      noValidate
+    >
       <Heading level={1}>Crear cuenta · Colaboradora</Heading>
 
       {/* Aparece solo cuando el envío simulado terminó (listo = true) */}
@@ -166,66 +178,68 @@ export default function RegistroColaboradora() {
           hint="Podés mantenerte anónima."
           placeholder="Cómo querés que te llamen"
           value={datos.fantasia}
-          onChange={alCambiarCampo('fantasia')}
-          onBlur={formulario.blur('fantasia')}
+          onChange={alCambiarCampo("fantasia")}
+          onBlur={formulario.blur("fantasia")}
           error={errores.fantasia}
         />
         <Field
           as="textarea"
           className={sh.r2}
           label="Sobre vos"
-          optional
           placeholder="Contá en pocas líneas quién sos y qué te gusta hacer…"
           value={datos.bio}
-          onChange={alCambiarCampo('bio')}
+          onChange={alCambiarCampo("bio")}
+          onBlur={formulario.blur("bio")}
+          error={errores.bio}
         />
         <Field
           label="Nombre"
           optional
           placeholder="Nombre"
           value={datos.nombre}
-          onChange={alCambiarCampo('nombre')}
+          onChange={alCambiarCampo("nombre")}
         />
         <Field
           label="Apellido"
           optional
           placeholder="Apellido"
           value={datos.apellido}
-          onChange={alCambiarCampo('apellido')}
+          onChange={alCambiarCampo("apellido")}
         />
         <Field
           label="Pronombres"
           optional
           placeholder="Ej: ella, él, elle"
           value={datos.pronombres}
-          onChange={alCambiarCampo('pronombres')}
+          onChange={alCambiarCampo("pronombres")}
         />
         <Field
           label="Cuenta de GitHub o GitLab"
-          optional
           placeholder="usuario"
           value={datos.github}
-          onChange={alCambiarCampo('github')}
+          onChange={alCambiarCampo("github")}
+          onBlur={formulario.blur("github")}
+          error={errores.github}
         />
         <TagPicker
           label="Habilidades"
           value={datos.habilidades}
-          options={HABILIDADES}
-          onChange={alCambiarCampo('habilidades')}
+          options={habilidadesDisponibles.map((h) => h.titulo)}
+         onChange={alCambiarCampo("habilidades")}
         />
         <div className={sh.mid}>
-          <Checkbox checked={datos.mensajes} onChange={alCambiarCampo('mensajes')}>
+          <Checkbox checked={datos.mensajes} onChange={alCambiarCampo("mensajes")}>
             Permitir mensajes de organizaciones
           </Checkbox>
         </div>
         <div className={sh.full}>
-          <ContactosEditor value={datos.contactos} onChange={alCambiarCampo('contactos')} />
+          <ContactosEditor value={datos.contactos} onChange={alCambiarCampo("contactos")} />
         </div>
         <div className={sh.full}>
           <CaptchaMock ok={datos.captcha} onChange={alCambiarCaptcha} error={errores.captcha} />
         </div>
         <div className={sh.full}>
-          <Checkbox checked={datos.terminos} onChange={alCambiarCampo('terminos')}>
+          <Checkbox checked={datos.terminos} onChange={alCambiarCampo("terminos")}>
             Acepto los <Link to="/terminos">términos y condiciones</Link>
           </Checkbox>
           {/* Aparece solo si hay error en términos (no se tildó y ya se tocó o se intentó enviar) */}
@@ -235,13 +249,10 @@ export default function RegistroColaboradora() {
 
       {/* BLOQUE: botón de envío — muestra «cargando» durante la espera simulada */}
       <div className={sh.formActs}>
-        <Button type="submit" loading={formulario.cargando}>Crear cuenta</Button>
+        <Button type="submit" loading={formulario.cargando}>
+          Crear cuenta
+        </Button>
       </div>
-
-      {/* BLOQUE: registro social — alternativa sin formulario */}
-{/*       <div className={s.narrow}>
-        <SocialButtons verbo="Registrarme" onEntrar={entrarConRedSocial('col')} />
-      </div> */}
     </form>
   );
 }

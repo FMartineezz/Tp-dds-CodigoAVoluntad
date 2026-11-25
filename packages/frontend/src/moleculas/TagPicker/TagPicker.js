@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * Selector de etiquetas: las elegidas se ven como chips y un desplegable agrega más.
  *

@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA PanelCol
  * Ruta: /panel   ·   Quién la ve: Colaboradora
@@ -20,8 +21,15 @@ import { proyecto } from './auxiliares.js'; // busca un proyecto por id
 import s from './Colaboradora.module.css';
 // sh = layout común (.page, .stats, .split…)
 import sh from '../../plantillas/disposicion.module.css';
+import { useAuth } from '../../contexto/Auth.js';
 
 export default function PanelCol() {
+    const { usuario, cargando } = useAuth();
+
+  // Mientras carga o si todavía no se hidrató el usuario, evitamos errores de renderizado
+  if (cargando || !usuario) {
+    return <p>Cargando datos del perfil...</p>;
+  }
   // ───── 2. CÁLCULOS ─────
 
   // Proyecto que se sugiere a la colaboradora: el que tiene id 50 en los datos de ejemplo.
@@ -31,20 +39,20 @@ export default function PanelCol() {
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     <div className={`container ${sh.page}`}>
-      <Heading level={1}>Hola, Lucía</Heading>
+      <Heading level={1}>Hola, {usuario.nombreFantasia}</Heading>
 
       {/* BLOQUE: cifras — tres tarjetas que son enlaces a las pantallas de detalle */}
       {/* `${sh.stat} ${s.link}` es una plantilla de texto: junta dos clases CSS (ver
          docs/GLOSARIO.md → Plantillas de texto) */}
       <div className={sh.stats}>
         <Link to="/panel/postulaciones" className={`${sh.stat} ${s.link}`}>
-          <b>2</b><span>postulaciones</span>
+          <b>{usuario.postulaciones.length}</b><span>postulaciones</span>
         </Link>
         <Link to="/panel/proyectos" className={`${sh.stat} ${s.link}`}>
           <b>1</b><span>proyecto activo</span>
         </Link>
         <Link to="/panel/mensajes" className={`${sh.stat} ${s.link}`}>
-          <b>3</b><span>mensajes</span>
+          <b>{usuario.mensajes.length}</b><span>mensajes</span>
         </Link>
       </div>
 

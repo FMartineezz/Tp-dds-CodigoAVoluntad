@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * Piezas del header con sesión: Campana (notificaciones), MenuUsuario (Mi cuenta) y BottomNav (barra inferior móvil).
  *

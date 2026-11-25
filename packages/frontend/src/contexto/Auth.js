@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * Sesión simulada (rol: null | 'col' | 'org') y modo daltónico.
  *
@@ -116,13 +117,11 @@ export function AuthProvider({ children }) {
   return (
     <Ctx.Provider
       value={{
-        // Interfaz compatible con toda tu app existente
         rol,
         entrar,
         salir,
         dalt,
         toggleDalt: () => setDalt((d) => !d),
-        // Propiedades de Keycloak y onboarding
         keycloak,
         token: keycloak.token,
         authenticated,

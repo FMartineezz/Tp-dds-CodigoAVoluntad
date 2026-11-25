@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * AUXILIARES de las pantallas de registro: constantes y funciones que usan varias
  * pantallas de esta carpeta.
@@ -12,11 +13,10 @@
  */
 
 // ───── Imports ─────
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
 import { Alert } from "../../moleculas";
 import { useAuth } from "../../contexto";
-
+import Lodash from "lodash";
 // ───── 1. MAIL ─────
 // Expresión regular que acepta «algo@algo.algo» sin espacios. No comprueba que el correo
 // exista, solo que tenga forma de correo.
@@ -71,6 +71,8 @@ export function useForm(validar) {
   const [listo, setListo] = useState(false);
 
   const { keycloak, token, recargarPerfil } = useAuth();
+
+  const bloqueoEnvioRef = useRef(false);
   // ───── 2. CÁLCULOS ─────
 
   // Devuelve solo los errores que corresponde MOSTRAR ahora: todos si ya se intentó
@@ -99,19 +101,17 @@ export function useForm(validar) {
       setTocados((previos) => ({ ...previos, [campo]: true }));
     };
   }
-  
   // Se usa como onSubmit del formulario: `enviar(valores)` devuelve el manejador
   // que corre al apretar «Crear cuenta». Si hay errores corta y no «llama a la API».
   function alEnviarFormularioColaboradora(valores) {
-    //const navigate = useNavigate();
     console.log(valores);
     const payload = {
       nombreFantasia: valores.fantasia,
       git: valores.github,
       nombre: valores.nombre,
       apellido: valores.apellido,
-      habilidades: (valores.habilidades || []).map(habilidad => (habilidad.toLowerCase())),
-      pronombres: valores.pronombres,
+      habilidades: (valores.habilidades || []).map(habilidad => Lodash.snakeCase(habilidad)),
+      pronombres: valores.pronombres == '' ? [] : valores.pronombres,
       presentacion: valores.bio,
       contactos: (valores.contactos || []).map(([tipo, valor]) => ({
         tipo,
@@ -122,6 +122,11 @@ export function useForm(validar) {
     
     return async function (evento) {
       evento.preventDefault(); // evita que el navegador recargue la página
+
+      // 1. Corte inmediato si ya se está enviando o si la cuenta ya fue creada
+      if (bloqueoEnvioRef.current || cargando || listo) {
+        return;
+      }
       setIntento(true); // desde ahora se muestran todos los errores
       setListo(false); // oculta un «Cuenta creada» anterior
 
@@ -130,9 +135,9 @@ export function useForm(validar) {
         return;
       }
 
-      // Se simula la espera con setTimeout (ejecuta la función de adentro a los 800 ms)
-      // para poder ver el estado «cargando». En producción acá iría la llamada a la API
-      // y esto correría cuando el servidor responda.
+      bloqueoEnvioRef.current = true;
+      setCargando(true);
+
       try {
         // 1. Nos aseguramos de que el token no esté vencido antes de enviarlo
         await keycloak.updateToken(30);
@@ -148,6 +153,7 @@ export function useForm(validar) {
         });
 
         const data = await response.json();
+        console.log(data);
 
         if (!response.ok) {
           throw new Error(data.message || "Ocurrió un error al crear la cuenta");
@@ -165,12 +171,10 @@ export function useForm(validar) {
         top: 0,
         behavior: 'smooth',
         });
-        // 5. Redirigimos al panel de la colaboradora (ajustá la ruta si tiene otro nombre)
-        //navigate('/panel', { replace: true });
 
       } catch (error) {
         console.error("Error al registrar colaboradora:", error);
-        setErrorServidor(error.message);
+        bloqueoEnvioRef.current = false;
       } finally {
         setCargando(false);
       }
@@ -178,7 +182,6 @@ export function useForm(validar) {
   }
 
   function alEnviarFormularioColectivo(valores) {
-    //const navigate = useNavigate();
     console.log(valores);
     const payload = {
     nombre: valores.nombre,
@@ -189,6 +192,11 @@ export function useForm(validar) {
     
     return async function (evento) {
       evento.preventDefault(); // evita que el navegador recargue la página
+
+      // 1. Corte inmediato si ya se está enviando o si la cuenta ya fue creada
+      if (bloqueoEnvioRef.current || cargando || listo) {
+        return;
+      }
       setIntento(true); // desde ahora se muestran todos los errores
       setListo(false); // oculta un «Cuenta creada» anterior
 
@@ -197,9 +205,9 @@ export function useForm(validar) {
         return;
       }
 
-      // Se simula la espera con setTimeout (ejecuta la función de adentro a los 800 ms)
-      // para poder ver el estado «cargando». En producción acá iría la llamada a la API
-      // y esto correría cuando el servidor responda.
+      bloqueoEnvioRef.current = true;
+      setCargando(true);
+
       try {
         // 1. Nos aseguramos de que el token no esté vencido antes de enviarlo
         await keycloak.updateToken(30);
@@ -232,12 +240,10 @@ export function useForm(validar) {
         top: 0,
         behavior: 'smooth',
         });
-        // 5. Redirigimos al panel de la colaboradora (ajustá la ruta si tiene otro nombre)
-        //navigate('/panel', { replace: true });
 
       } catch (error) {
         console.error("Error al registrar colectivo:", error);
-        setErrorServidor(error.message);
+        bloqueoEnvioRef.current = false;
       } finally {
         setCargando(false);
       }
@@ -278,23 +284,4 @@ export function Resumen({ errores, mostrar }) {
   );
 }
 
-// ───── 4. useSocial ─────
-// Hook para el registro con red social. Devuelve una función en dos pasos:
-// `social('col')` (rol) → devuelve el manejador que recibe el proveedor elegido.
-// Quién lo usa: ambos registros (colaboradora pasa 'col', organización pasa 'org').
-// En el prototipo no se contacta a ningún proveedor: abre la sesión directo y va al panel.
-// Si se cambia: cambia a dónde se llega al registrarse con una red social.
-export function useSocial() {
-  const { entrar } = useAuth(); // abre la sesión con un rol
-  const navegar = useNavigate(); // ir a otra pantalla desde código
 
-  return function conRol(rol) {
-    return function alElegirProveedor(proveedor) {
-      entrar(rol);
-      navegar(rol === "org" ? "/org" : "/panel");
-      // `proveedor` (Google, etc.) se recibe pero no se usa en el prototipo;
-      // `void` evita el aviso del linter de «variable sin usar».
-      void proveedor;
-    };
-  };
-}

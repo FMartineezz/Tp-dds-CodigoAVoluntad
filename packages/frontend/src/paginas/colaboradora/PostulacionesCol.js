@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA PostulacionesCol
  * Ruta: /panel/postulaciones   ·   Quién la ve: Colaboradora
@@ -21,26 +22,33 @@
  */
 
 // ───── Imports ─────
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button, Heading, StatusBadge, Text } from '../../atomos';
-import { Alert, ConfirmDialog, RowsSkeleton, Tabs } from '../../moleculas';
-import { POSTULACIONES_COL } from '../../datos'; // postulaciones de ejemplo
-import { useLoading } from '../../hooks'; // simula la espera de datos
-import { proyecto } from './auxiliares.js'; // busca un proyecto por id
-import s from './Colaboradora.module.css';
-import sh from '../../plantillas/disposicion.module.css';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button, Heading, StatusBadge, Text } from "../../atomos";
+import { Alert, ConfirmDialog, RowsSkeleton, Tabs } from "../../moleculas";
+import { POSTULACIONES_COL } from "../../datos"; // postulaciones de ejemplo
+import { useLoading } from "../../hooks"; // simula la espera de datos
+import { proyecto } from "./auxiliares.js"; // busca un proyecto por id
+import s from "./Colaboradora.module.css";
+import sh from "../../plantillas/disposicion.module.css";
+import { useAuth } from "../../contexto/Auth.js";
 
 export default function PostulacionesCol() {
+  const { usuario, cargando } = useAuth();
+
+  // Mientras carga o si todavía no se hidrató el usuario, evitamos errores de renderizado
+  if (cargando || !usuario) {
+    return <p>Cargando datos del perfil...</p>;
+  }
   // ───── 1. DATOS Y ESTADO ─────
 
   // Pestaña activa: 'todas', 'pendientes', 'aceptadas' o 'rechazadas'.
   // Empieza en 'todas'; la cambia el componente Tabs al tocar una pestaña.
   // (ver docs/GLOSARIO.md → useState)
-  const [pestanaActiva, setPestanaActiva] = useState('todas');
+  const [pestanaActiva, setPestanaActiva] = useState("todas");
 
   // Lista de postulaciones. Empieza con las de ejemplo; se le saca una al retirarla.
-  const [postulaciones, setPostulaciones] = useState(POSTULACIONES_COL);
+  const [postulaciones, setPostulaciones] = useState(usuario.postulaciones);
 
   // Id de la postulación que se está por retirar (null = ninguna, el diálogo está cerrado).
   // Lo pone el botón «Retirar» y lo borra «Cancelar» o confirmar.
@@ -49,26 +57,23 @@ export default function PostulacionesCol() {
   // true muestra el aviso verde «Postulación retirada». Lo activa retirar y lo cierra la «x».
   const [avisoVisible, setAvisoVisible] = useState(false);
 
-  // true mientras se «cargan» los datos (simulación; en producción vendría de la API).
-  const cargando = useLoading();
-
   // ───── 2. CÁLCULOS ─────
 
   // Pestañas que dibuja <Tabs>: `id` es el valor que se guarda en pestanaActiva
   // y `label` el texto visible.
   const pestanas = [
-    { id: 'todas', label: 'Todas' },
-    { id: 'pendientes', label: 'Pendientes' },
-    { id: 'aceptadas', label: 'Aceptadas' },
-    { id: 'rechazadas', label: 'Rechazadas' },
+    { id: "todas", label: "Todas" },
+    { id: "pendientes", label: "Pendientes" },
+    { id: "aceptadas", label: "Aceptadas" },
+    { id: "rechazadas", label: "Rechazadas" },
   ];
 
   // Qué estado de postulación corresponde a cada pestaña. null en «todas» = sin filtro.
   const estadoDeCadaPestana = {
     todas: null,
-    pendientes: 'pendiente',
-    aceptadas: 'aceptada',
-    rechazadas: 'rechazada',
+    pendientes: "pendiente",
+    aceptadas: "aceptada",
+    rechazadas: "rechazada",
   };
 
   // Postulaciones de la pestaña activa. .filter se queda con las que cumplen la condición
@@ -87,8 +92,12 @@ export default function PostulacionesCol() {
   } else if (postulacionesVisibles.length === 0) {
     contenidoDeLaPestana = (
       <div className={sh.empty}>
-        <Heading level={2} size="h3">No hay postulaciones acá</Heading>
-        <Button as={Link} to="/proyectos">Ir a Proyectos</Button>
+        <Heading level={2} size="h3">
+          No hay postulaciones acá
+        </Heading>
+        <Button as={Link} to="/proyectos">
+          Ir a Proyectos
+        </Button>
       </div>
     );
   } else {
@@ -106,28 +115,30 @@ export default function PostulacionesCol() {
 
         {/* Una fila por postulación */}
         {postulacionesVisibles.map((postulacion) => (
-          <div key={postulacion.id} className={s.r} role="row">
+          <div key={postulacion._id} className={s.r} role="row">
             <div className={s.cells}>
-              <div className={s.hl} role="cell">{proyecto(postulacion.proyecto).titulo}</div>
-              <div role="cell" data-l="Perfil">{postulacion.perfil}</div>
-              <div role="cell" data-l="Estado"><StatusBadge status={postulacion.estado} /></div>
+              <div className={s.hl} role="cell">
+                {postulacion.proyecto.titulo}
+              </div>
+              <div role="cell" data-l="Perfil">
+                {postulacion.perfil}
+              </div>
+              <div role="cell" data-l="Estado">
+                <StatusBadge status={postulacion.estado} />
+              </div>
             </div>
             {/* Acciones fuera de la tabla: dependen del estado de la postulación */}
             <div className={s.act}>
               {/* Solo si está pendiente: se puede retirar (abre el diálogo de confirmación) */}
-              {postulacion.estado === 'pendiente' && (
+              {postulacion.estado === "pendiente" && (
                 <Button variant="danger" onClick={() => setIdARetirar(postulacion.id)}>
                   Retirar
                 </Button>
               )}
               {/* Solo si fue aceptada: enlace al proyecto (`/proyectos/${…}` es una plantilla de
                  texto) */}
-              {postulacion.estado === 'aceptada' && (
-                <Button
-                  as={Link}
-                  to={`/proyectos/${postulacion.proyecto}`}
-                  variant="secondary"
-                >
+              {postulacion.estado === "aceptada" && (
+                <Button as={Link} to={`/proyectos/${postulacion.proyecto}`} variant="secondary">
                   Ver proyecto
                 </Button>
               )}

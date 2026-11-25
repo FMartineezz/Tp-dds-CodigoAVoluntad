@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA Inicio
  * Ruta: /   ·   Quién la ve: Todas

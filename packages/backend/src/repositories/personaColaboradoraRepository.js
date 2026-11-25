@@ -19,7 +19,7 @@ export class PersonaColaboradoraRepository {
   }
 
   async obtenerPorKeycloack(id) {
-    return await this.model.findOne({ keycloackId: id }).lean();
+    return await this.model.findOne({ keycloackId: id }).lean().select('+contactos').populate("habilidades");
   }
 
   async obtenerPorIdConContactos(id) {

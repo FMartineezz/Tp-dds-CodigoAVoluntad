@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA ProyectosCol
  * Ruta: /panel/proyectos   ·   Quién la ve: Colaboradora
@@ -23,30 +24,32 @@ import { Link } from 'react-router-dom';
 import { Button, Heading, Tag, Text } from '../../atomos';
 import { Alert, CardsSkeleton, ConfirmDialog, Grid, TicketRow } from '../../moleculas';
 import { ProyectoCard, ValoracionDialog } from '../../organismos';
-import { useLoading } from '../../hooks'; // simula la espera de datos
 import { proyecto } from './auxiliares.js'; // busca un proyecto por id
 import sh from '../../plantillas/disposicion.module.css';
+import { useAuth } from '../../contexto/Auth.js';
 
 export default function ProyectosCol() {
-  // ───── 1. DATOS Y ESTADO ─────
+  const { usuario, cargando } = useAuth();
 
+  // Mientras carga o si todavía no se hidrató el usuario, evitamos errores de renderizado
+  if (cargando ||!usuario) {
+    return <p>Cargando datos del perfil...</p>;
+  }
+  // ───── 1. DATOS Y ESTADO ─────
   // Proyectos en los que participa: cada uno guarda el id del proyecto y el rol que
   // cumple ahí. Empieza con tres de ejemplo; se le saca uno al desvincularse.
   // (ver docs/GLOSARIO.md → useState)
-  const [participaciones, setParticipaciones] = useState([
-    { id: 48, rol: 'Front-end' },
-    { id: 45, rol: 'Datos' },
-    { id: 44, rol: 'Testing' },
-  ]);
+  const [participaciones, setParticipaciones] = useState(usuario.postulaciones);
 
+  
   // Id del proyecto del que se quiere salir (null = ninguno, diálogo cerrado).
   // Lo pone «Desvincularme» y lo borra «Cancelar» o confirmar.
   const [idDeBaja, setIdDeBaja] = useState(null);
-
+  
   // Id del proyecto cerrado que se quiere valorar (null = ninguno, diálogo cerrado).
   // Lo pone «Valorar al colectivo» y lo borra «Cancelar» o confirmar.
   const [idAValorar, setIdAValorar] = useState(null);
-
+  
   // Ids de los proyectos que ya se valoraron (para mostrar «Valoración enviada»).
   // Empieza vacío; se agrega un id al confirmar una valoración.
   const [idsValorados, setIdsValorados] = useState([]);
@@ -54,9 +57,6 @@ export default function ProyectosCol() {
   // Texto del aviso verde de resultado ('' = no se muestra). Lo cambian desvincular y
   // confirmar valoración; lo borra la «x» del aviso.
   const [aviso, setAviso] = useState('');
-
-  // true mientras se «cargan» los datos (simulación; en producción vendría de la API).
-  const cargando = useLoading();
 
   // ───── 2. CÁLCULOS ─────
 
@@ -87,17 +87,45 @@ export default function ProyectosCol() {
 
   // Dibuja la tarjeta de un proyecto, con su rol y sus botones.
   function tarjetaDeParticipacion(participacion) {
-    const datosProyecto = proyecto(participacion.id);
+    //     id: number;
+    // titulo: string;
+    // colectivo: string;
+    // colectivoId: number;
+    // estado: string;
+    // habilidades: string[];
+    // tiempo: string;
+    // modalidad: string[];
+    // avance: number;
+    //console.log(participacion);
+    const proyecto = participacion.proyecto;
+    console.log(proyecto);
+    const perfil = proyecto.perfiles.find((perfil) => perfil._id === participacion.perfil)
+    //const habilidad = perfil.habilidadesRequeridas.find((habilidad) => habilidad._id === participacion.habilidad)
+    const datosProyecto = {
+      id: proyecto._id,
+      titulo: proyecto.titulo,
+      colectivo: proyecto.colectivo.nombre,
+      colectivoId: participacion.colectivo,
+      estado: participacion.estado,
+      habilidades: perfil.habilidadesRequeridas,
+      tiempo: perfil.horas,
+      tipo: perfil.tipoDeCompromiso,
+      modalidad: perfil.modalidadDeColaboracion,
+      avance: (proyecto.logros || []).reduce((acumulador, logro) => acumulador + (logro.porcentaje || 0), 0)
+    };
+    console.log(datosProyecto)
+    if (!datosProyecto) return null;
+    
     const proyectoCerrado = datosProyecto.estado === 'cerrado';
 
     return (
       <ProyectoCard
         key={participacion.id}
         p={datosProyecto}
-        extra={<TicketRow label="Tu rol">{participacion.rol}</TicketRow>}
+        extra={<TicketRow label="Tu rol">{perfil.descripcion}</TicketRow>}
         footer={(
           <>
-            <Button as={Link} to={`/proyectos/${participacion.id}`} variant="secondary">
+            <Button as={Link} to={`/proyectos/${participacion._id}`} variant="secondary">
               Ver proyecto
             </Button>
             {botonFinalDeLaTarjeta(participacion, proyectoCerrado)}

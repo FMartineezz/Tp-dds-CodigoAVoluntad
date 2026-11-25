@@ -91,7 +91,7 @@ const postulacionService = new PostulacionService({
   colaboracionService,
 });
 const authService = new AuthService({
-  personaColaboradoraRepository, colectivoRepository
+  personaColaboradoraRepository, colectivoRepository, postulacionRepository, mensajeRepository
 });
 
 // Controllers: dependen de services.

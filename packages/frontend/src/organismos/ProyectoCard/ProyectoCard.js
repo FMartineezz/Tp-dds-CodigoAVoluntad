@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * Tarjeta de un proyecto (usa Ticket). Se repite en Inicio, Proyectos, Colectivo, Mis proyectos…
  *
@@ -24,8 +26,9 @@ export function ProyectoCard({ p, footer, extra }) {
       <TicketRow label="Buscamos">
         {p.habilidades.map((k, i) => <Tag key={k} tone={i === 0 ? 'sand' : i === 1 ? 'blue' : 'outline'}>{k}</Tag>)}
       </TicketRow>
-      <TicketRow label="Tiempo">{p.tiempo}</TicketRow>
-      {p.modalidad && <TicketRow label="Modalidad">{p.modalidad.map((m) => <Tag key={m}>{m}</Tag>)}</TicketRow>}
+      <TicketRow label="Tiempo">{p.tiempo} horas</TicketRow>
+      <TicketRow label="Tipo">{p.tipo}</TicketRow>
+      {p.modalidad && <TicketRow label="Modalidad"><Tag key={p.modalidad}>{p.modalidad}</Tag></TicketRow>}
       <TicketRow label="Avance">
         <Progress value={p.avance} />
         <b>{p.avance} %</b>

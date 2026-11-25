@@ -26,7 +26,8 @@ export class PostulacionRepository {
   async obtenerPorPersona(personaId) {
     return await this.model
       .find({ personaColaboradora: personaId })
-      .populate("proyecto", "titulo perfiles")
+      .populate("proyecto")
+      .populate("perfil")
       .lean();
   }
 

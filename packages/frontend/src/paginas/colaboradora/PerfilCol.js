@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA PerfilCol
  * Ruta: /panel/perfil   ·   Quién la ve: Colaboradora
@@ -15,15 +16,22 @@
  */
 
 // ───── Imports ─────
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, Button, Checkbox, Field, Heading } from '../../atomos';
 import { Alert, ContactosEditor, TagPicker } from '../../moleculas';
 import { HABILIDADES } from '../../datos'; // lista de habilidades que se pueden elegir
 import s from './Colaboradora.module.css';
 import sh from '../../plantillas/disposicion.module.css'; // sh = layout común (.page, .form…)
+import { useAuth } from '../../contexto';
 
 export default function PerfilCol() {
+  const { usuario, cargando } = useAuth();
+
+  // Mientras carga o si todavía no se hidrató el usuario, evitamos errores de renderizado
+  if (cargando || !usuario) {
+    return <p>Cargando datos del perfil...</p>;
+  }
   // ───── 1. DATOS Y ESTADO ─────
 
   // Todos los campos simples del perfil juntos en un objeto: texto para los campos,
@@ -31,28 +39,30 @@ export default function PerfilCol() {
   // Los cambia alCambiarCampo y alImportarDeLinkedIn.
   // (ver docs/GLOSARIO.md → useState)
   const [datos, setDatos] = useState({
-    fantasia: 'Lucía',
-    nombre: 'Lucía',
-    apellido: 'Fernández',
-    pronombres: 'ella',
-    github: 'lucia-dev',
+    fantasia: usuario.nombreFantasia,
+    nombre: usuario.nombre,
+    apellido: usuario.appellido,
+    pronombres: usuario.pronombres,
+    github: usuario.git,
+    habilidades: usuario.habilidades,
+    contactos: usuario.contactos,
     linkedin: '',
     web: '',
-    bio: 'Desarrolladora front. Me gusta que las herramientas sean simples para quien las usa.',
+    bio: usuario.presentacion,
     mail: 'colaboradora@demo.org',
-    mensajes: true,
+    mensajes: usuario.bloquearMensajeInterno,
   });
 
   // Habilidades elegidas, como array de textos. Empieza con dos de ejemplo; las cambia
   // el TagPicker y alImportarDeLinkedIn (que suma «Accesibilidad»).
-  const [habilidadesElegidas, setHabilidadesElegidas] = useState(['React', 'Node']);
+/*   const [habilidadesElegidas, setHabilidadesElegidas] = useState(['React', 'Node']); */
 
   // Contactos internos: array de pares [tipo, dato]. Empieza con dos de ejemplo;
   // lo cambia el ContactosEditor.
-  const [contactos, setContactos] = useState([
+/*   const [contactos, setContactos] = useState([
     ['Correo', 'colaboradora@demo.org'],
     ['WhatsApp', '+54 11 5555-0199'],
-  ]);
+  ]); */
 
   // true durante la espera simulada del guardado (el botón muestra «cargando»).
   // Lo cambia alGuardar.
@@ -66,6 +76,30 @@ export default function PerfilCol() {
   // lo cambia alGuardar.
   const [errores, setErrores] = useState({});
 
+  const [habilidadesDisponibles, setHabilidadesDisponibles] = useState([]);
+
+
+    useEffect(() => {
+      const controlador = new AbortController();
+  
+      async function cargarHabilidades() {
+        try {
+          const response = await fetch("http://localhost:3000/habilidades", {
+            signal: controlador.signal,
+          });
+          if (!response.ok) throw new Error("Error al cargar habilidades");
+          const data = await response.json();
+          setHabilidadesDisponibles(data);
+        } catch (error) {
+          if (error.name !== "AbortError") {
+            setErrorHabilidades(error.message);
+          }
+        }
+      }
+  
+      cargarHabilidades();
+      return () => controlador.abort();
+    }, []);
   // ───── 3. ACCIONES ─────
 
   // Devuelve el manejador onChange de un campo: `alCambiarCampo('mail')` se ejecuta cuando
@@ -188,9 +222,13 @@ export default function PerfilCol() {
         />
         <TagPicker
           label="Habilidades"
-          value={habilidadesElegidas}
-          options={HABILIDADES}
-          onChange={alCambiarHabilidades}
+          value={datos.habilidades}
+          options={habilidadesDisponibles.map((h) => h.titulo)}
+          onChange={(titulosSeleccionados) => {
+            const codigosSeleccionados = titulosSeleccionados
+              .map((titulo) => habilidadesDisponibles.find((h) => h.titulo === titulo)?.codigo)
+            alCambiarCampo("habilidades")(codigosSeleccionados);
+          }}
         />
         <Field
           label="Nombre"
@@ -212,7 +250,6 @@ export default function PerfilCol() {
         />
         <Field
           label="Cuenta de GitHub o GitLab"
-          optional
           value={datos.github}
           onChange={alCambiarCampo('github')}
         />
@@ -243,7 +280,7 @@ export default function PerfilCol() {
           </Checkbox>
         </div>
         <div className={sh.full}>
-          <ContactosEditor value={contactos} onChange={alCambiarContactos} />
+          <ContactosEditor value={datos.contactos} onChange={alCambiarCampo('contactos')} />
         </div>
       </div>
 

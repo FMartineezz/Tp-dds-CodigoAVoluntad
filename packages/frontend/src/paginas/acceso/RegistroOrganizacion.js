@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA RegistroOrganizacion
  * Ruta: /registro/organizacion   ·   Quién la ve: Sin sesión
@@ -20,10 +21,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Checkbox, Field, Heading } from '../../atomos';
-import { Alert, CaptchaMock, PasswordField, SocialButtons, TagPicker } from '../../moleculas';
+import { Alert, CaptchaMock, TagPicker } from '../../moleculas';
 import { CAUSAS, TIPOS, UBICACIONES } from '../../datos'; // listas para el selector y las etiquetas
 // piezas compartidas con el otro registro
-import { MAIL, useForm, Resumen, useSocial } from './auxiliares.js';
+import { useForm, Resumen } from './auxiliares.js';
 import s from './Ingresar.module.css';
 import sh from '../../plantillas/disposicion.module.css'; // sh = layout común (.page, .form…)
 
@@ -40,22 +41,14 @@ export default function RegistroOrganizacion() {
     tipo: '',
     ubicacion: '',
     lugar: '',
-/*     mail: '',
-    pass: '', */
     terminos: false,
     captcha: false,
   });
-
-  // Causas elegidas, como array de textos. Empieza vacío; lo cambia el TagPicker.
-  const [causasElegidas, setCausasElegidas] = useState([]);
 
   // Manejo de validación (ver auxiliares.js → useForm). Devuelve funciones y banderas:
   // formulario.blur / .enviar / .errores y .cargando / .listo / .intento.
   // Se le pasa la función con las reglas (validarDatos, más abajo).
   const formulario = useForm(validarDatos);
-
-  // Función que, al elegir una red social, abre sesión como organización ('org').
-  const entrarConRedSocial = useSocial();
 
   // ───── 2. CÁLCULOS ─────
 
@@ -67,17 +60,17 @@ export default function RegistroOrganizacion() {
     if (!valores.nombre.trim()) {
       erroresDelFormulario.nombre = 'Ingresá el nombre del colectivo.';
     }
+    if (!valores.desc.trim()) {
+      erroresDelFormulario.desc = 'Debes completar tu presentación.';
+    }
     if (!valores.tipo) {
       erroresDelFormulario.tipo = 'Elegí el tipo de colectivo.';
     }
-/*     if (!MAIL.test(valores.mail)) {
-      erroresDelFormulario.mail = 'Ingresá un correo válido.';
+    if (!valores.ubicacion) {
+      erroresDelFormulario.ubicacion = 'Elegí la ubicación del colectivo.';
     }
-    if (valores.pass.length < 8) {
-      erroresDelFormulario.pass = 'La contraseña debe tener al menos 8 caracteres.';
-    } */
     if (!valores.terminos) {
-      erroresDelFormulario.terminos = 'Tenés que aceptar los términos.';
+      erroresDelFormulario.terminos = 'Debes que aceptar los términos.';
     }
     if (!valores.captcha) {
       erroresDelFormulario.captcha = 'Confirmá que no sos un robot.';
@@ -145,6 +138,8 @@ export default function RegistroOrganizacion() {
           placeholder="Qué hace la organización y a quién ayuda…"
           value={datos.desc}
           onChange={alCambiarCampo('desc')}
+          onBlur={formulario.blur('desc')}
+          error={errores.desc}
         />
         <Field
           as="select"
@@ -161,9 +156,10 @@ export default function RegistroOrganizacion() {
         <Field
           as="select"
           label="Ubicación"
-          optional
           value={datos.ubicacion}
           onChange={alCambiarCampo('ubicacion')}
+          onBlur={formulario.blur('ubicacion')}
+          error={errores.ubicacion}
         >
           <option value="">Sin indicar</option>
           {UBICACIONES.map((ubicacion) => <option key={ubicacion}>{ubicacion}</option>)}
@@ -174,29 +170,6 @@ export default function RegistroOrganizacion() {
           placeholder="Texto libre"
           value={datos.lugar}
           onChange={alCambiarCampo('lugar')}
-        />
-{/*         <Field
-          label="Correo de contacto"
-          type="email"
-          placeholder="contacto@colectivo.org"
-          value={datos.mail}
-          onChange={alCambiarCampo('mail')}
-          onBlur={formulario.blur('mail')}
-          error={errores.mail}
-        /> */}
-{/*         <PasswordField
-          label="Contraseña"
-          placeholder="Mínimo 8 caracteres"
-          value={datos.pass}
-          onChange={alCambiarCampo('pass')}
-          onBlur={formulario.blur('pass')}
-          error={errores.pass}
-        /> */}
-        <TagPicker
-          label="Causas"
-          value={causasElegidas}
-          options={CAUSAS}
-          onChange={setCausasElegidas}
         />
         <div className={sh.full}>
           <CaptchaMock ok={datos.captcha} onChange={alCambiarCaptcha} error={errores.captcha} />
@@ -215,10 +188,6 @@ export default function RegistroOrganizacion() {
         <Button type="submit" loading={formulario.cargando}>Crear cuenta</Button>
       </div>
 
-      {/* BLOQUE: registro social — alternativa sin formulario */}
-{/*       <div className={s.narrow}>
-        <SocialButtons verbo="Registrarme" onEntrar={entrarConRedSocial('org')} />
-      </div> */}
     </form>
   );
 }

@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * Campo de formulario accesible: etiqueta, ayuda y error ya conectados con aria.
  *

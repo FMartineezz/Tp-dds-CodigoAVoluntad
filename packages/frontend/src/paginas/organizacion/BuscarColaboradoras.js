@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA BuscarColaboradoras
  * Ruta: /org/colaboradoras   ·   Quién la ve: Organización

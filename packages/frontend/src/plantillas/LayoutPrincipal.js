@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * Estructura de todas las páginas: Navbar + contenido + Footer (+ barra inferior móvil con sesión).
  *
@@ -33,7 +34,6 @@ export function LayoutPrincipal() {
           ) : (
             <>
               <Button as={Link} to="/ingresar" variant="secondary">Ingresar</Button>
-              {/* <Button as={Link} to="/registro">Crear cuenta</Button> */}
             </>
           )
         }

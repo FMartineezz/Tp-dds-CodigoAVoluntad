@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * Editor de medios de contacto internos (correo, WhatsApp, SMS).
  *
@@ -12,6 +14,7 @@ import { Button, Field, Icon } from '../../atomos';
 import s from './ContactosEditor.module.css';
 
 export function ContactosEditor({ value, onChange }) {
+  console.log(value)
   const [tipo, setTipo] = useState('Email');
   const [val, setVal] = useState('');
   const agregar = () => { if (!val.trim()) return; onChange([...value, [tipo.toLowerCase(), val.trim()]]); setVal(''); };
@@ -20,8 +23,8 @@ export function ContactosEditor({ value, onChange }) {
       <span className={s.pl}>Medios de contacto <span className={s.hint}>(opcional, no se muestran públicamente)</span></span>
       {value.length > 0 && (
         <ul className={s.clist}>
-          {value.map(([t, v], i) => (
-            <li key={i}><b>{t}</b><span>{v}</span><button type="button" onClick={() => onChange(value.filter((_, j) => j !== i))} aria-label={`Quitar ${t} ${v}`}><Icon name="x" size={10} /></button></li>
+          {value.map(([tipo, valor], i) => (
+            <li key={i}><b>{tipo}</b><span>{valor}</span><button type="button" onClick={() => onChange(value.filter((_, j) => j !== i))} aria-label={`Quitar ${tipo} ${valor}`}><Icon name="x" size={10} /></button></li>
           ))}
         </ul>
       )}
