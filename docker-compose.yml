@@ -13,6 +13,11 @@ services:
     build:
       context: .
       dockerfile: deploy/nginx/Dockerfile
+      # Variables VITE_*: se hornean en el bundle al compilar el front (no se leen en runtime)
+      args:
+        VITE_API_URL: /api
+        VITE_HCAPTCHA_SITEKEY: ${HCAPTCHA_SITEKEY}
+        VITE_API_APIKEY: ${MI_API_KEY}
     container_name: nginx-tp
     restart: unless-stopped
     ports:
@@ -58,6 +63,8 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - MI_API_KEY=${MI_API_KEY}
+      - SITE_KEY=${HCAPTCHA_SITEKEY}
+      - SECRET_KEY=${HCAPTCHA_SECRET}
     volumes:
       # Swagger busca /docs/api-docs.json dentro del contenedor
       - ./docs:/docs:ro
