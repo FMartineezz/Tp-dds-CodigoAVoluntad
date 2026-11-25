@@ -16,6 +16,7 @@ export class PersonaColaboradora {
     contactos = [],
     bloquearMensajeInterno = false,
     keycloackId,
+    redesSociales = [],
     activo = true
   ) {
     this.id = null;
@@ -29,6 +30,7 @@ export class PersonaColaboradora {
     this.contactos = contactos;
     this.bloquearMensajeInterno = bloquearMensajeInterno;
     this.keycloackId = keycloackId;
+    this.redesSociales = redesSociales;
     this.activo = activo;
   }
 }

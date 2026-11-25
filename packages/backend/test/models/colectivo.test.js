@@ -1,4 +1,5 @@
 import { Colectivo, TipoColectivo, UBICACION_VALIDA } from "../../src/models/colectivo.js";
+import { RedSocial, TipoRedSocial } from "../../src/models/redSocial.js";
 
 describe("Colectivo", () => {
   test("se crea sin proyectos y con ubicación opcional", () => {
@@ -10,7 +11,23 @@ describe("Colectivo", () => {
       ubicacion: null,
       tipoDeColectivo: "asamblea",
       proyectos: [],
+      redesSociales: [],
     });
+  });
+
+  test("se crea con proyectos y redes sociales explícitos", () => {
+    const red = new RedSocial(TipoRedSocial.INSTAGRAM, "https://instagram.com/asamblea");
+    const colectivo = new Colectivo(
+      "Asamblea Norte",
+      "Asamblea barrial",
+      "caba",
+      "asamblea",
+      ["proyecto-1"],
+      [red],
+    );
+
+    expect(colectivo.proyectos).toEqual(["proyecto-1"]);
+    expect(colectivo.redesSociales).toEqual([red]);
   });
 
   test("cargarProyecto agrega el proyecto y le asigna el colectivo", () => {

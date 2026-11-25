@@ -2,6 +2,7 @@ import { z as zod } from "zod";
 import ErrorCatalog from "../../errors/errorCatalog.js";
 import { AppError } from "../../errors/appError.js";
 import { TipoMedioDeContacto } from "../../models/personaColaboradora.js";
+import { redesSocialesArraySchema } from "./redSocialValidation.js";
 
 const medioDeContactoSchema = zod
   .object({
@@ -34,8 +35,7 @@ const medioDeContactoSchema = zod
     }
   });
 
-const colaboradoraSchema = zod.object({
-  // zod.tipoDeDatoQueDeberiaSer({ required_error: CodigoSiEsteCampoNoViaja, invalid_type_error: CodigoSiViajaPeroConOtroTipoDeDato }).min(longitudMinima, CodigoSiNoLlegaAEsaLongitud)
+export const colaboradoraSchema = zod.object({
   nombreFantasia: zod
     .string({
       required_error: "COLABORADORA_NOMBRE_FANTASIA_REQUERIDO",
@@ -48,7 +48,6 @@ const colaboradoraSchema = zod.object({
       invalid_type_error: "ARGUMENTO_INVALIDO",
     })
     .min(1, "COLABORADORA_GIT_REQUERIDO"),
-  // zod.array(zod.tipoDeDatoDeCadaElemento({ invalid_type_error: CodigoSiAlgunElementoNoCumpleEseTipo }), { required_error: CodigoSiEsteCampoNoViaja, invalid_type_error: CodigoSiNoEsUnArray })
   habilidades: zod.array(zod.string({ invalid_type_error: "COLABORADORA_HABILIDADES_FORMATO" }), {
     required_error: "COLABORADORA_HABILIDADES_REQUERIDAS",
     invalid_type_error: "COLABORADORA_HABILIDADES_FORMATO",
@@ -65,6 +64,10 @@ const colaboradoraSchema = zod.object({
   bloquearMensajeInterno: zod
     .boolean({ invalid_type_error: "COLABORADORA_BLOQUEAR_MENSAJE_INTERNO_INVALIDO" })
     .optional(),
+  nombre: zod.string().optional(),
+  apellido: zod.string().optional(),
+  pronombres: zod.any().optional(),
+  redesSociales: redesSocialesArraySchema.optional(),
 });
 
 const validarColaboradora = (req, res, next) => {
@@ -75,12 +78,33 @@ const validarColaboradora = (req, res, next) => {
     throw new AppError(ErrorCatalog[codigo], 400);
   }
 
-  //Pasa al body los medios de contacto ya normalizados (En lowerCase)
+  // Pasa al body los medios de contacto ya normalizados (En lowerCase)
   if (resultado.data.contactos) {
     req.body.contactos = resultado.data.contactos;
+  }
+  if (resultado.data.redesSociales !== undefined) {
+    req.body.redesSociales = resultado.data.redesSociales;
   }
 
   next();
 };
 
+export const validarActualizacionColaboradora = (req, res, next) => {
+  const schemaActualizacion = colaboradoraSchema.partial();
+  const resultado = schemaActualizacion.safeParse(req.body);
+
+  if (!resultado.success) {
+    const codigo = resultado.error.issues[0].message;
+    throw new AppError(ErrorCatalog[codigo], 400);
+  }
+
+  if (Object.keys(resultado.data).length === 0) {
+    throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
+  }
+
+  req.body = resultado.data;
+  next();
+};
+
+export { validarColaboradora };
 export default validarColaboradora;

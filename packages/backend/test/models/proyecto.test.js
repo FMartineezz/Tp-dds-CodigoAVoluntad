@@ -23,6 +23,42 @@ describe("Proyecto", () => {
     });
   });
 
+  test("soporta atributo opcional urlDonaciones", () => {
+    const perfil = new Perfil("Front", [], [], 5, TipoCompromiso.MENSUAL, "gratuita");
+    const proyectoConDonacion = new Proyecto(
+      "Web",
+      "Sitio",
+      [perfil],
+      { nombre: "Colectivo" },
+      "https://web.org",
+      undefined,
+      undefined,
+      "https://cafecito.app/mi-proyecto",
+    );
+    expect(proyectoConDonacion.urlDonaciones).toBe("https://cafecito.app/mi-proyecto");
+
+    const proyectoSinDonacion = new Proyecto(
+      "Web",
+      "Sitio",
+      [perfil],
+      { nombre: "Colectivo" },
+      "https://web.org",
+    );
+    expect(proyectoSinDonacion.urlDonaciones).toBeNull();
+
+    const proyectoDonacionVacia = new Proyecto(
+      "Web",
+      "Sitio",
+      [perfil],
+      { nombre: "Colectivo" },
+      "https://web.org",
+      undefined,
+      undefined,
+      "",
+    );
+    expect(proyectoDonacionVacia.urlDonaciones).toBeNull();
+  });
+
   test("tipos de compromiso y modalidades disponibles", () => {
     expect(Object.values(TipoCompromiso)).toEqual(["total", "semanal", "mensual"]);
     expect(Object.values(ModalidadColaboracion)).toEqual([

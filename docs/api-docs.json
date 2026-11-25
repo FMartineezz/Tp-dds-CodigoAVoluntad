@@ -51,6 +51,12 @@
     },
     {
       "name": "Mensajes"
+    },
+    {
+      "name": "Denuncias"
+    },
+    {
+      "name": "Valoraciones"
     }
   ],
   "components": {
@@ -66,6 +72,90 @@
           "message": {
             "type": "string",
             "example": "El título del proyecto es requerido"
+          }
+        }
+      },
+      "EstadoDenuncia": {
+        "type": "string",
+        "enum": ["pendiente", "en_revision", "resuelta", "descartada"],
+        "description": "Estado de la denuncia."
+      },
+      "DenunciaInput": {
+        "type": "object",
+        "required": ["descripcion"],
+        "properties": {
+          "descripcion": {
+            "type": "string",
+            "example": "Incumplimiento reiterado de acuerdos y destrato en reuniones de equipo."
+          }
+        }
+      },
+      "Denuncia": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Incumplimiento reiterado de acuerdos y destrato en reuniones de equipo."
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-31T03:30:00.000Z"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoDenuncia"
+          },
+          "colaboracionId": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a7"
+          }
+        }
+      },
+      "DenunciaAdmin": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Incumplimiento reiterado de acuerdos y destrato en reuniones de equipo."
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-31T03:30:00.000Z"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoDenuncia"
+          },
+          "colaboracionId": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a7"
+          },
+          "colectivoId": {
+            "type": "string",
+            "example": "6acfd66064d02459ba8dc695"
+          },
+          "colectivoNombre": {
+            "type": "string",
+            "example": "Fundación Ejemplo"
+          }
+        }
+      },
+      "DenunciaEstadoInput": {
+        "type": "object",
+        "required": ["estado"],
+        "properties": {
+          "estado": {
+            "type": "string",
+            "enum": ["en_revision", "resuelta", "descartada"],
+            "example": "en_revision"
           }
         }
       },
@@ -213,6 +303,19 @@
           },
           "tipoDeColectivo": {
             "$ref": "#/components/schemas/TipoColectivo"
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales del colectivo (opcional). No se permiten tipos repetidos.",
+            "example": [
+              {
+                "tipo": "instagram",
+                "url": "https://instagram.com/colectivoambiental"
+              }
+            ]
           }
         }
       },
@@ -255,6 +358,19 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales públicas del colectivo.",
+            "example": [
+              {
+                "tipo": "instagram",
+                "url": "https://instagram.com/colectivoambiental"
+              }
+            ]
           }
         }
       },
@@ -320,6 +436,23 @@
             "type": "boolean",
             "default": false,
             "description": "Si es true, los colectivos no pueden enviarle mensajes internos."
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales (opcional). No se permiten tipos repetidos.",
+            "example": [
+              {
+                "tipo": "github",
+                "url": "https://github.com/devneko"
+              },
+              {
+                "tipo": "linkedin",
+                "url": "https://linkedin.com/in/devneko"
+              }
+            ]
           }
         }
       },
@@ -376,6 +509,19 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales públicas de la colaboradora.",
+            "example": [
+              {
+                "tipo": "github",
+                "url": "https://github.com/devneko"
+              }
+            ]
           }
         }
       },
@@ -409,6 +555,19 @@
           },
           "bloquearMensajeInterno": {
             "type": "boolean"
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Enlaces a redes sociales.",
+            "example": [
+              {
+                "tipo": "github",
+                "url": "https://github.com/devneko"
+              }
+            ]
           }
         }
       },
@@ -595,6 +754,13 @@
             "format": "uri",
             "description": "Enlace al sistema en funcionamiento.",
             "example": "https://donaciones.org"
+          },
+          "urlDonaciones": {
+            "type": "string",
+            "format": "uri",
+            "description": "Enlace externo para recibir contribuciones económicas (con protocolo HTTP o HTTPS).",
+            "example": "https://cafecito.app/mi-proyecto",
+            "nullable": true
           }
         }
       },
@@ -648,6 +814,13 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
+          },
+          "urlDonaciones": {
+            "type": "string",
+            "format": "uri",
+            "description": "Enlace externo para recibir contribuciones económicas.",
+            "example": "https://cafecito.app/mi-proyecto",
+            "nullable": true
           }
         }
       },
@@ -828,6 +1001,229 @@
           }
         },
         "description": "Todos los campos son opcionales. Los que vienen se validan igual que en el alta."
+      },
+      "TipoRedSocial": {
+        "type": "string",
+        "enum": ["instagram", "linkedin", "github", "facebook", "x", "youtube", "tiktok"],
+        "description": "Plataforma a la que pertenece el enlace de la red social (se acepta en mayúsculas o minúsculas)."
+      },
+      "RedSocial": {
+        "type": "object",
+        "required": ["tipo", "url"],
+        "description": "Enlace a red social embebido. Requiere protocolo HTTP o HTTPS.",
+        "properties": {
+          "tipo": {
+            "$ref": "#/components/schemas/TipoRedSocial"
+          },
+          "url": {
+            "type": "string",
+            "description": "Dirección URL válida del perfil (protocolo HTTP o HTTPS obligatorio).",
+            "example": "https://github.com/devneko"
+          }
+        }
+      },
+      "PersonaColaboradoraUpdate": {
+        "type": "object",
+        "description": "Campos para actualización parcial de colaboradora. Debe enviarse al menos un campo.",
+        "minProperties": 1,
+        "properties": {
+          "nombreFantasia": {
+            "type": "string",
+            "example": "DevNekoUpdated"
+          },
+          "git": {
+            "type": "string",
+            "example": "https://github.com/devneko-updated"
+          },
+          "nombre": {
+            "type": "string",
+            "example": "Lucía"
+          },
+          "apellido": {
+            "type": "string",
+            "example": "Gómez"
+          },
+          "habilidades": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "desarrollo_web_react"
+            }
+          },
+          "pronombres": {
+            "type": "string",
+            "example": "ella"
+          },
+          "presentacion": {
+            "type": "string",
+            "example": "Desarrolladora Fullstack interesada en impacto social."
+          },
+          "bloquearMensajeInterno": {
+            "type": "boolean",
+            "example": false
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Lista completa de redes sociales que reemplaza las existentes. Omitir para conservarlas; enviar array vacío para eliminarlas.",
+            "example": [
+              {
+                "tipo": "github",
+                "url": "https://github.com/devneko-updated"
+              },
+              {
+                "tipo": "x",
+                "url": "https://x.com/devneko"
+              }
+            ]
+          }
+        }
+      },
+      "ColectivoUpdate": {
+        "type": "object",
+        "description": "Campos para actualización parcial de colectivo. Debe enviarse al menos un campo.",
+        "minProperties": 1,
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "example": "Colectivo Ambiental Renovado"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Promovemos el cuidado del ambiente y huertas comunitarias."
+          },
+          "ubicacion": {
+            "$ref": "#/components/schemas/Ubicacion"
+          },
+          "tipoDeColectivo": {
+            "$ref": "#/components/schemas/TipoColectivo"
+          },
+          "redesSociales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedSocial"
+            },
+            "description": "Lista completa de redes sociales que reemplaza las existentes. Omitir para conservarlas; enviar array vacío para eliminarlas.",
+            "example": [
+              {
+                "tipo": "instagram",
+                "url": "https://instagram.com/eco_renovado"
+              },
+              {
+                "tipo": "youtube",
+                "url": "https://youtube.com/@ecorenovado"
+              }
+            ]
+          }
+        }
+      },
+      "ValoracionInput": {
+        "type": "object",
+        "required": ["colaboracionId", "evaluador", "puntaje"],
+        "properties": {
+          "colaboracionId": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8",
+            "description": "ID de la colaboración finalizada a evaluar."
+          },
+          "evaluador": {
+            "type": "string",
+            "enum": ["colectivo", "persona"],
+            "example": "colectivo",
+            "description": "Indica si quien valora es el colectivo o la persona colaboradora."
+          },
+          "puntaje": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5,
+            "description": "Puntaje entero de 1 a 5."
+          },
+          "comentario": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "Excelente compromiso y calidad técnica en la colaboración.",
+            "description": "Comentario opcional de hasta 500 caracteres."
+          }
+        }
+      },
+      "Valoracion": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6b0"
+          },
+          "colaboracion": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8"
+          },
+          "evaluador": {
+            "type": "string",
+            "enum": ["colectivo", "persona"],
+            "example": "colectivo"
+          },
+          "puntaje": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "comentario": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "Excelente compromiso y calidad técnica en la colaboración."
+          },
+          "autor": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a9",
+            "description": "ID del colectivo o persona colaboradora que emitió la valoración."
+          },
+          "destinatario": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a7",
+            "description": "ID del colectivo o persona colaboradora que recibió la valoración."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ValoracionPublica": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6b0"
+          },
+          "colaboracion": {
+            "type": "string",
+            "example": "6acfd66a64d02459ba8dc6a8"
+          },
+          "evaluador": {
+            "type": "string",
+            "enum": ["colectivo", "persona"],
+            "example": "colectivo"
+          },
+          "puntaje": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "comentario": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "Excelente compromiso y calidad técnica en la colaboración."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     }
   },
@@ -1068,7 +1464,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-301`, `ERR-VAL-302`, `ERR-VAL-304`, `ERR-VAL-307`, `ERR-VAL-001`",
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-301`, `ERR-VAL-302`, `ERR-VAL-304`, `ERR-VAL-307`, `ERR-VAL-001`, `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`",
             "content": {
               "application/json": {
                 "schema": {
@@ -1151,6 +1547,112 @@
           },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Colectivos"],
+        "summary": "Actualizar parcialmente un colectivo",
+        "description": "Actualiza los campos provistos del colectivo. Si `redesSociales` no se envía, se conservan los enlaces existentes. Si se envía una lista, se reemplaza la lista completa. Si se envía `[]`, se eliminan todos. Rechaza tipos duplicados, tipos inválidos o URLs inválidas.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id del colectivo",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66164d02459ba8dc69f"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ColectivoUpdate"
+              },
+              "examples": {
+                "actualizarRedes": {
+                  "summary": "Actualizar redes sociales",
+                  "value": {
+                    "redesSociales": [
+                      {
+                        "tipo": "instagram",
+                        "url": "https://instagram.com/eco_nuevo"
+                      },
+                      {
+                        "tipo": "youtube",
+                        "url": "https://youtube.com/@eco_nuevo"
+                      }
+                    ]
+                  }
+                },
+                "eliminarRedes": {
+                  "summary": "Eliminar todas las redes sociales",
+                  "value": {
+                    "redesSociales": []
+                  }
+                },
+                "sinRedesSociales": {
+                  "summary": "Actualizar otros campos conservando redes existentes",
+                  "value": {
+                    "descripcion": "Nueva descripción del colectivo"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Colectivo actualizado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Colectivo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-1105",
+                  "message": "La URL de la red social debe ser una URL válida con protocolo HTTP o HTTPS"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colectivo no encontrado. Código: `ERR-NOT-305`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-305",
+                  "message": "El colectivo no fue encontrado"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1311,7 +1813,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-401`, `ERR-VAL-402`, `ERR-VAL-403`, `ERR-VAL-404`, `ERR-VAL-406`, `ERR-VAL-407`, `ERR-VAL-701`, `ERR-VAL-702`, `ERR-VAL-703`, `ERR-VAL-704`, `ERR-VAL-705`, `ERR-VAL-706`, `ERR-VAL-707`, `ERR-VAL-207`, `ERR-VAL-001`",
+            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-401`, `ERR-VAL-402`, `ERR-VAL-403`, `ERR-VAL-404`, `ERR-VAL-406`, `ERR-VAL-407`, `ERR-VAL-701`, `ERR-VAL-702`, `ERR-VAL-703`, `ERR-VAL-704`, `ERR-VAL-705`, `ERR-VAL-706`, `ERR-VAL-707`, `ERR-VAL-207`, `ERR-VAL-001`, `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`",
             "content": {
               "application/json": {
                 "schema": {
@@ -1381,6 +1883,112 @@
           },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Colaboradoras"],
+        "summary": "Actualizar parcialmente una colaboradora",
+        "description": "Actualiza los campos provistos. Si `redesSociales` no se envía, se conservan los enlaces existentes. Si se envía una lista, se reemplaza la lista completa. Si se envía `[]`, se eliminan todos. Rechaza tipos duplicados, tipos inválidos o URLs inválidas.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id de la colaboradora",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonaColaboradoraUpdate"
+              },
+              "examples": {
+                "actualizarRedes": {
+                  "summary": "Actualizar redes sociales",
+                  "value": {
+                    "redesSociales": [
+                      {
+                        "tipo": "github",
+                        "url": "https://github.com/devneko-nuevo"
+                      },
+                      {
+                        "tipo": "linkedin",
+                        "url": "https://linkedin.com/in/devneko"
+                      }
+                    ]
+                  }
+                },
+                "eliminarRedes": {
+                  "summary": "Eliminar todas las redes sociales",
+                  "value": {
+                    "redesSociales": []
+                  }
+                },
+                "sinRedesSociales": {
+                  "summary": "Actualizar otros campos conservando redes existentes",
+                  "value": {
+                    "presentacion": "Nueva bio sin tocar redes sociales"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Colaboradora actualizada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonaColaboradora"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-1106",
+                  "message": "No se permiten tipos de redes sociales duplicados"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colaboradora no encontrada. Código: `ERR-NOT-405`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-405",
+                  "message": "La colaboradora no fue encontrada"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1563,7 +2171,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos, colectivo o habilidad inexistente. Códigos posibles: `ERR-VAL-101`, `ERR-VAL-102`, `ERR-VAL-103`, `ERR-VAL-107`, `ERR-VAL-112`, `ERR-VAL-115`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-NOT-306`, `ERR-VAL-207`, `ERR-VAL-001`",
+            "description": "Datos inválidos, colectivo o habilidad inexistente. Códigos posibles: `ERR-VAL-101`, `ERR-VAL-102`, `ERR-VAL-103`, `ERR-VAL-107`, `ERR-VAL-112`, `ERR-VAL-115`, `ERR-VAL-116`, `ERR-VAL-601`, `ERR-VAL-602`, `ERR-VAL-603`, `ERR-VAL-604`, `ERR-VAL-605`, `ERR-VAL-606`, `ERR-VAL-607`, `ERR-VAL-608`, `ERR-VAL-609`, `ERR-VAL-610`, `ERR-NOT-306`, `ERR-VAL-207`, `ERR-VAL-001`",
             "content": {
               "application/json": {
                 "schema": {
@@ -1658,8 +2266,8 @@
       },
       "patch": {
         "tags": ["Proyectos"],
-        "summary": "Finalizar un proyecto (cierre manual)",
-        "description": "Por ahora la única modificación soportada es `{ \"finalizado\": true }`. Después ya no se pueden anotar colaboradoras ni cargar logros.",
+        "summary": "Actualizar un proyecto (finalizar o actualizar enlace de donaciones)",
+        "description": "Permite finalizar un proyecto (cierre manual) y/o actualizar el enlace externo de donaciones (urlDonaciones). Si se envía null o cadena vacía, se elimina el enlace. Si se omite, se conserva el valor actual.",
         "parameters": [
           {
             "name": "id",
@@ -1691,7 +2299,7 @@
         },
         "responses": {
           "200": {
-            "description": "Proyecto finalizado",
+            "description": "Proyecto actualizado",
             "content": {
               "application/json": {
                 "schema": {
@@ -1701,7 +2309,7 @@
             }
           },
           "400": {
-            "description": "Cuerpo distinto de { finalizado: true } o proyecto ya finalizado. Códigos posibles: `ERR-VAL-001`, `ERR-EST-109`",
+            "description": "Cuerpo inválido, proyecto ya finalizado o URL de donaciones inválida. Códigos posibles: `ERR-VAL-001`, `ERR-EST-109`, `ERR-VAL-116`",
             "content": {
               "application/json": {
                 "schema": {
@@ -2649,6 +3257,331 @@
           },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colaboraciones/{id}/denuncia": {
+      "post": {
+        "tags": ["Denuncias"],
+        "summary": "Registra una denuncia contra el colectivo asociado a una colaboración",
+        "description": "Permite que una persona que haya participado en un proyecto con la organización denuncie a la misma. El colectivo denunciado se deduce automáticamente de la colaboración.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la colaboración desde la que se origina la denuncia.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenunciaInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Denuncia registrada con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Denuncia"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación o la colaboración no acredita participación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe la colaboración o el colectivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ya existe una denuncia registrada para esta colaboración.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/denuncias": {
+      "get": {
+        "tags": ["Denuncias"],
+        "summary": "Lista global de denuncias (Administración)",
+        "description": "Devuelve todas las denuncias registradas a través de los colectivos, optimizado mediante agregación.",
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "description": "Filtrar por estado de denuncia.",
+            "schema": {
+              "$ref": "#/components/schemas/EstadoDenuncia"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de denuncias.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DenunciaAdmin"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/denuncias/{id}": {
+      "get": {
+        "tags": ["Denuncias"],
+        "summary": "Detalle administrativo de una denuncia",
+        "description": "Devuelve la denuncia y la colaboración asociada completa para que la administración pueda contactar a la persona.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la denuncia.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle de la denuncia con su colaboración asociada."
+          },
+          "404": {
+            "description": "Denuncia no encontrada."
+          }
+        }
+      }
+    },
+    "/admin/denuncias/{id}/estado": {
+      "patch": {
+        "tags": ["Denuncias"],
+        "summary": "Actualizar estado administrativo de una denuncia",
+        "description": "Permite transicionar el estado de la denuncia a en_revision, resuelta o descartada.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de la denuncia.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenunciaEstadoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado de la denuncia actualizado."
+          },
+          "400": {
+            "description": "Estado inválido o faltante."
+          },
+          "404": {
+            "description": "Denuncia no encontrada."
+          }
+        }
+      }
+    },
+    "/valoraciones": {
+      "post": {
+        "tags": ["Valoraciones"],
+        "summary": "Registra una valoración sobre una colaboración finalizada",
+        "description": "Permite calificar a la contraparte de una colaboración concluida (el proyecto finalizó o la colaboración fue dada de baja). Cada parte puede calificar como máximo una vez. Autor y destinatario se calculan internamente.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValoracionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Valoración registrada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Valoracion"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos, colaboración no finalizada o valoración ya existente de esta parte",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colaboración no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/personaColaboradora/{personaColaboradoraId}/valoraciones": {
+      "get": {
+        "tags": ["Valoraciones"],
+        "summary": "Historial público de valoraciones de una colaboradora",
+        "description": "Devuelve las valoraciones recibidas por la persona colaboradora (evaluadas por colectivos).",
+        "parameters": [
+          {
+            "name": "personaColaboradoraId",
+            "in": "path",
+            "required": true,
+            "description": "ID de la persona colaboradora",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direccion",
+            "in": "query",
+            "required": false,
+            "description": "Filtro de dirección: 'recibidas' (default), 'emitidas', o 'todas'",
+            "schema": {
+              "type": "string",
+              "enum": ["recibidas", "emitidas", "todas"],
+              "default": "recibidas"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de valoraciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ValoracionPublica"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Persona colaboradora no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colectivo/{colectivoId}/valoraciones": {
+      "get": {
+        "tags": ["Valoraciones"],
+        "summary": "Historial público de valoraciones de un colectivo",
+        "description": "Devuelve las valoraciones recibidas por el colectivo (evaluadas por colaboradoras).",
+        "parameters": [
+          {
+            "name": "colectivoId",
+            "in": "path",
+            "required": true,
+            "description": "ID del colectivo",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direccion",
+            "in": "query",
+            "required": false,
+            "description": "Filtro de dirección: 'recibidas' (default), 'emitidas', o 'todas'",
+            "schema": {
+              "type": "string",
+              "enum": ["recibidas", "emitidas", "todas"],
+              "default": "recibidas"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de valoraciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ValoracionPublica"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Colectivo no encontrado",
             "content": {
               "application/json": {
                 "schema": {

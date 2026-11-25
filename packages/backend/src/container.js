@@ -5,6 +5,7 @@ import { HabilidadRespository } from "./repositories/habilidadRepository.js";
 import { ColaboracionRepository } from "./repositories/colaboracionRepository.js";
 import { PersonaColaboradoraRepository } from "./repositories/personaColaboradoraRepository.js";
 import { MensajeRepository } from "./repositories/mensajesRepository.js";
+import { ValoracionRepository } from "./repositories/valoracionRepository.js";
 import { PostulacionRepository } from "./repositories/postulacionRepository.js";
 
 import { ProyectoService } from "./services/proyectoService.js";
@@ -15,8 +16,11 @@ import { PersonaColaboradoraService } from "./services/personaColaboradoraServic
 import { PerfilService } from "./services/perfilService.js";
 import { MensajeService } from "./services/mensajeService.js";
 import { BusquedaService } from "./services/busquedaService.js";
+import { EstadisticasService } from "./services/estadisticasService.js";
 import { LogroService } from "./services/logroService.js";
+import { ValoracionService } from "./services/valoracionService.js";
 import { PostulacionService } from "./services/postulacionService.js";
+import { DenunciaService } from "./services/denunciaService.js";
 
 import { ProyectoController } from "./controllers/proyectoController.js";
 import { ColectivoController } from "./controllers/colectivoController.js";
@@ -26,12 +30,15 @@ import { PersonaColaboradoraController } from "./controllers/personaColaboradora
 import { HealthCheckController } from "./controllers/healthCheckController.js";
 import { PerfilController } from "./controllers/perfilController.js";
 import { MensajeController } from "./controllers/mensajeController.js";
+import { EstadisticasController } from "./controllers/estadisticasController.js";
 import { LogroController } from "./controllers/logroController.js";
+import { ValoracionController } from "./controllers/valoracionController.js";
 import { PostulacionController } from "./controllers/postulacionController.js";
+import { DenunciaController } from "./controllers/denunciaController.js";
 
-import { cierreProyectosJob } from "./cronTasks/CierreProyectoJob.js";
 import { AuthService } from "./services/authService.js";
 import { AuthController } from "./controllers/authController.js";
+import { cierreProyectosJob } from "./cronTasks/cierreProyectoJob.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
@@ -40,6 +47,7 @@ const habilidadRepository = new HabilidadRespository();
 const colaboracionRepository = new ColaboracionRepository();
 const personaColaboradoraRepository = new PersonaColaboradoraRepository();
 const mensajeRepository = new MensajeRepository();
+const valoracionRepository = new ValoracionRepository();
 const postulacionRepository = new PostulacionRepository();
 
 // Transporter de mails para las notificaciones por medios externos.
@@ -92,6 +100,26 @@ const postulacionService = new PostulacionService({
 });
 const authService = new AuthService({
   personaColaboradoraRepository, colectivoRepository, postulacionRepository, mensajeRepository
+})
+
+const denunciaService = new DenunciaService({
+  colectivoRepository,
+  colaboracionRepository,
+});
+
+const valoracionService = new ValoracionService({
+  valoracionRepository,
+  colaboracionRepository,
+  proyectoRepository,
+  colectivoRepository,
+  personaColaboradoraRepository,
+});
+const estadisticasService = new EstadisticasService({
+  colaboracionService,
+  colectivoService,
+  proyectoService,
+  personaColaboradoraService,
+  postulacionService,
 });
 
 // Controllers: dependen de services.
@@ -108,8 +136,11 @@ export const logroController = new LogroController({ logroService });
 export const healthCheckController = new HealthCheckController();
 export const perfilController = new PerfilController({ proyectoService, busquedaService });
 export const mensajeController = new MensajeController({ mensajeService });
+export const estadisticasController = new EstadisticasController({ estadisticasService });
+export const valoracionController = new ValoracionController({ valoracionService });
 export const postulacionController = new PostulacionController({ postulacionService });
 export const authController = new AuthController({ authService });
+export const denunciaController = new DenunciaController({ denunciaService });
 
 //Job task
 export const cierreProyectos = new cierreProyectosJob({ proyectoService });

@@ -91,18 +91,14 @@ export class ProyectoRepository {
     return perfil;
   }
 
-  async finalizarProyecto(id) {
+  async actualizarProyecto(id, cambios) {
     return await this.model
-      .findByIdAndUpdate(
-        id,
-        {
-          $set: {
-            finalizado: true,
-          },
-        },
-        { new: true },
-      )
+      .findByIdAndUpdate(id, { $set: cambios }, { new: true, runValidators: true })
       .lean();
+  }
+
+  async finalizarProyecto(id) {
+    return await this.actualizarProyecto(id, { finalizado: true });
   }
 
   async obtenerPorAlgunaHabilidad(idsHabilidad) {
@@ -195,6 +191,24 @@ export class ProyectoRepository {
       { $set: { finalizado: true } },
     );
     console.log(resultado);
+  }
+
+  async obtenerPorColectivoId(colectivoId) {
+    return await this.model.find({ colectivo: colectivoId }).lean();
+  }
+
+  //Estadisticas
+  async contarTotalYActicvos() {
+    return await this.model.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          activos: { $sum: { $cond: ["$finalizado", 0, 1] } },
+        },
+      },
+      { $project: { _id: 0, total: 1, activos: 1 } },
+    ]);
   }
 }
 

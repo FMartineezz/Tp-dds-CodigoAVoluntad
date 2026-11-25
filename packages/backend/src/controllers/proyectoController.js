@@ -12,6 +12,7 @@ export class ProyectoController {
       req.body.urlSistema,
       req.body.fechaCierre,
       req.body.fechaLimiteBusqueda,
+      req.body.urlDonaciones,
     );
     res.status(201).json(proyecto);
   };

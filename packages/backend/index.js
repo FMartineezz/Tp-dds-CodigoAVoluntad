@@ -11,6 +11,7 @@ const port = process.env.SERVER_PORT || 3000;
 
 const app = express();
 app.use(express.json());
+app.set("trust proxy", 1);
 
 app.use(
   cors({
@@ -30,7 +31,7 @@ app.use(errorHandler);
 
 MongoDBClient.connect();
 
-/* cierreProyectos.iniciar(); */
+cierreProyectos.iniciar();
 
 app.listen(port, () => {
   console.log("Backend escuchando en puerto " + port);
