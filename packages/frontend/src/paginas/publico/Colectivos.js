@@ -92,7 +92,7 @@ export default function Colectivos() {
         {!cargando && !error && colectivos.length > 0 && (
           <ul className={s.lista}>
             {/* Una fila por colectivo; `key` identifica cada una
-                (ver docs/GLOSARIO.md → Listas con map y key) */}
+                (ver packages/frontend/docs/GLOSARIO.md → Listas con map y key) */}
             {colectivos.map((colectivo) => (
               <li key={colectivo.id}>
                 {/* Cada colectivo es un enlace a su pantalla de detalle */}

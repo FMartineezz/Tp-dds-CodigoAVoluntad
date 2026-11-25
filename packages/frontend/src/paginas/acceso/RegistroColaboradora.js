@@ -57,7 +57,7 @@ export default function RegistroColaboradora() {
   // Todos los campos simples del formulario juntos en un objeto: texto para los
   // campos, true/false para las casillas (mensajes, terminos, captcha).
   // Empiezan vacíos (mensajes empieza tildado); los cambia alCambiarCampo y el captcha.
-  // (ver docs/GLOSARIO.md → useState)
+  // (ver packages/frontend/docs/GLOSARIO.md → useState)
   const [datos, setDatos] = useState({
     fantasia: "",
     nombre: "",
@@ -144,7 +144,7 @@ export default function RegistroColaboradora() {
       const esCasilla = evento.target.type === "checkbox";
       const nuevoValor = esCasilla ? evento.target.checked : evento.target.value;
       // `...datos` copia todo lo que había y `[campo]: nuevoValor` cambia solo ese campo
-      // (ver docs/GLOSARIO.md → Copiar con cambios).
+      // (ver packages/frontend/docs/GLOSARIO.md → Copiar con cambios).
       setDatos({ ...datos, [campo]: nuevoValor });
     };
   }

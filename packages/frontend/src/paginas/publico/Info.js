@@ -228,7 +228,7 @@ function EstadisticasEnVivo() {
 }
 
 // Recibe un único prop: `tema`, que puede ser 'terminos', 'accesibilidad', 'api' o 'contacto'.
-// Se lo define en App.js, una vez por cada ruta (ver docs/GLOSARIO.md → Props).
+// Se lo define en App.js, una vez por cada ruta (ver packages/frontend/docs/GLOSARIO.md → Props).
 export default function Info({ tema }) {
   // ───── 1. DATOS Y ESTADO ─────
   // `dalt` es true si el modo daltónico está activado, y `toggleDalt` lo prende o apaga.

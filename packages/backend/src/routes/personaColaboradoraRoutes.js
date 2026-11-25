@@ -31,6 +31,9 @@ export default function personaColaboradoraRoutes() {
 
   router.get("/colaboradoras/:id", personaColaboradoraController.obtenerPersonaColaboradoraPorId);
 
+  // Privados: solo la dueña o un colectivo con el que colabora (ver el controller)
+  router.get("/colaboradoras/:id/contactos", personaColaboradoraController.obtenerContactos);
+
   router.patch(
     "/colaboradoras/:id",
     validarActualizacionColaboradora,

@@ -468,12 +468,24 @@
                 "url": "https://linkedin.com/in/devneko"
               }
             ]
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de la foto de perfil. `null` la borra.",
+            "example": "https://imagenes.test/devneko.jpg"
+          },
+          "sitioWeb": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de su sitio personal o portfolio. `null` lo borra.",
+            "example": "https://devneko.dev"
           }
         }
       },
       "PersonaColaboradora": {
         "type": "object",
-        "description": "Vista pública: nunca incluye `contactos`.",
+        "description": "Vista pública: nunca incluye `contactos` (ver `GET /colaboradoras/{id}/contactos`).",
         "properties": {
           "_id": {
             "type": "string",
@@ -537,6 +549,18 @@
                 "url": "https://github.com/devneko"
               }
             ]
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de la foto de perfil. `null` la borra.",
+            "example": "https://imagenes.test/devneko.jpg"
+          },
+          "sitioWeb": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de su sitio personal o portfolio. `null` lo borra.",
+            "example": "https://devneko.dev"
           }
         }
       },
@@ -583,6 +607,18 @@
                 "url": "https://github.com/devneko"
               }
             ]
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de la foto de perfil. `null` la borra.",
+            "example": "https://imagenes.test/devneko.jpg"
+          },
+          "sitioWeb": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de su sitio personal o portfolio. `null` lo borra.",
+            "example": "https://devneko.dev"
           }
         }
       },
@@ -1125,6 +1161,18 @@
                 "url": "https://x.com/devneko"
               }
             ]
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de la foto de perfil. `null` la borra.",
+            "example": "https://imagenes.test/devneko.jpg"
+          },
+          "sitioWeb": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de su sitio personal o portfolio. `null` lo borra.",
+            "example": "https://devneko.dev"
           }
         }
       },
@@ -2663,7 +2711,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-401`, `ERR-VAL-402`, `ERR-VAL-403`, `ERR-VAL-404`, `ERR-VAL-406`, `ERR-VAL-407`, `ERR-VAL-701`, `ERR-VAL-702`, `ERR-VAL-703`, `ERR-VAL-704`, `ERR-VAL-705`, `ERR-VAL-706`, `ERR-VAL-707`, `ERR-VAL-207`, `ERR-VAL-001`, `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`",
+            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-401`, `ERR-VAL-402`, `ERR-VAL-403`, `ERR-VAL-404`, `ERR-VAL-406`, `ERR-VAL-407`, `ERR-VAL-701`, `ERR-VAL-702`, `ERR-VAL-703`, `ERR-VAL-704`, `ERR-VAL-705`, `ERR-VAL-706`, `ERR-VAL-707`, `ERR-VAL-207`, `ERR-VAL-001`, `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-409` (foto no es URL), `ERR-VAL-410` (sitio web no es URL)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2810,7 +2858,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-001`",
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-001`, `ERR-VAL-409` (foto no es URL), `ERR-VAL-410` (sitio web no es URL)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2843,6 +2891,92 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colaboradoras/{id}/contactos": {
+      "get": {
+        "tags": ["Colaboradoras"],
+        "summary": "Obtener los contactos privados de una colaboradora",
+        "description": "Solo los ven la dueña del perfil (`colaboradoraId` igual al `id`) o un colectivo con el que tiene una colaboración activa (`colectivoId`). Para cualquier otra persona responde 403.\n\nPENDIENTE (login): quién pide viaja por query porque todavía no hay sesión; cuando se integre el login saldrá del token.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id de la colaboradora",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          },
+          {
+            "name": "colaboradoraId",
+            "in": "query",
+            "required": false,
+            "description": "Id de la colaboradora que pide (debe ser la dueña).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "colectivoId",
+            "in": "query",
+            "required": false,
+            "description": "Id del colectivo que pide.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de medios de contacto (puede ser vacía)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MedioDeContacto"
+                  }
+                },
+                "example": [
+                  {
+                    "tipo": "email",
+                    "valor": "ana@mail.com"
+                  }
+                ]
+              }
+            }
+          },
+          "403": {
+            "description": "Quien pide no tiene acceso. Códigos posibles: `ERR-PER-411`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-PER-411",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe. Códigos posibles: `ERR-NOT-405`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-405",
+                  "message": "Descripción del error"
                 }
               }
             }

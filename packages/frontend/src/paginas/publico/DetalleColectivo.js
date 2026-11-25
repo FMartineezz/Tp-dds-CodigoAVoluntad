@@ -44,7 +44,7 @@ const PROYECTOS_POR_PAGINA = 6;
 export default function DetalleColectivo() {
   // ───── 1. DATOS Y ESTADO ─────
   // `id` es la parte variable de la dirección: en /colectivos/6650f… vale '6650f…' (siempre
-  // texto). (ver docs/GLOSARIO.md → useParams y Desestructurar)
+  // texto). (ver packages/frontend/docs/GLOSARIO.md → useParams y Desestructurar)
   const { id } = useParams();
   // Rol de la sesión: 'col' (colaboradora), 'org' (organización) o null (visitante),
   // y el id real de esa cuenta en el backend.
@@ -164,7 +164,7 @@ export default function DetalleColectivo() {
       <Crumbs items={[{ label: 'Colectivos', to: '/colectivos' }, { label: colectivo.nombre }]} />
 
       {/* Avisos de la denuncia: verde si salió bien, rojo con el motivo si no (`&&`: si es
-          verdadero se dibuja; ver docs/GLOSARIO.md → Renderizado condicional) */}
+          verdadero se dibuja; ver packages/frontend/docs/GLOSARIO.md → Renderizado condicional) */}
       {denunciaEnviada && (
         <Alert kind="success" onClose={alCerrarAviso}>
           Denuncia enviada. El equipo administrativo la va a evaluar.

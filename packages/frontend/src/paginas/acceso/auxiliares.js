@@ -53,7 +53,7 @@ export function useForm(validar, alEnviar) {
 
   // Campos que la persona ya «tocó» (entró y salió), ej. { mail: true }.
   // Empieza vacío; lo cambia alSalirDelCampo.
-  // (ver docs/GLOSARIO.md → useState)
+  // (ver packages/frontend/docs/GLOSARIO.md → useState)
   const [tocados, setTocados] = useState({});
 
   // true desde la primera vez que se aprieta «Crear cuenta». Una vez true, se muestran
@@ -95,7 +95,7 @@ export function useForm(validar, alEnviar) {
   function alSalirDelCampo(campo) {
     return function () {
       // `...previos` copia lo que ya había y `[campo]: true` agrega/pisa ese campo
-      // (ver docs/GLOSARIO.md → Copiar con cambios). React exige copiar, no modificar.
+      // (ver packages/frontend/docs/GLOSARIO.md → Copiar con cambios). React exige copiar, no modificar.
       setTocados((previos) => ({ ...previos, [campo]: true }));
     };
   }

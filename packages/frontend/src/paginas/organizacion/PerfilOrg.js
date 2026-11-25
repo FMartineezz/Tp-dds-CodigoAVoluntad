@@ -81,7 +81,7 @@ function FormularioOrg({ colectivo }) {
   // `id` del colectivo y `salir()` para cerrar la sesión (al eliminar la cuenta).
   const { id, salir } = useAuth();
 
-  // `navegar('/ruta')` lleva a otra pantalla desde código (ver docs/GLOSARIO.md → useNavigate).
+  // `navegar('/ruta')` lleva a otra pantalla desde código (ver packages/frontend/docs/GLOSARIO.md → useNavigate).
   const navegar = useNavigate();
 
   // Datos editables. Arrancan con lo que vino del backend; los cambia alCambiarCampo.
@@ -121,7 +121,7 @@ function FormularioOrg({ colectivo }) {
   const nombreNoCoincide = nombreEscrito.trim() !== nombreGuardado;
 
   // Mensaje de error del campo de confirmación: aparece solo si ya se escribió algo y no
-  // coincide (`&&` y `? :` → docs/GLOSARIO.md → Operadores). Vacío = sin error.
+  // coincide (`&&` y `? :` → packages/frontend/docs/GLOSARIO.md → Operadores). Vacío = sin error.
   const errorDeConfirmacion =
     nombreEscrito && nombreNoCoincide ? 'El nombre no coincide.' : undefined;
 

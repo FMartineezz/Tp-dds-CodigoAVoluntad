@@ -12,7 +12,8 @@ export function Avatar({ nombre, size = 56, square = false, foto }) {
     // alt vacío: al lado siempre está el nombre escrito, la foto es decorativa
     return <img className={clases} src={foto} alt="" width={size} height={size} loading="lazy" />;
   }
-  const iniciales = nombre.split(' ').map((palabra) => palabra[0]).slice(0, 2).join('');
+  // trim + /\s+/ para que los espacios de más no generen palabras vacías
+  const iniciales = nombre.trim().split(/\s+/).map((palabra) => palabra[0]).slice(0, 2).join('').toUpperCase();
   return (
     <span className={clases} style={{ width: size, height: size, fontSize: size * 0.38 }} aria-hidden="true">
       {iniciales}

@@ -86,6 +86,7 @@ const colectivoService = new ColectivoService({ repository: colectivoRepository 
 const personaColaboradoraService = new PersonaColaboradoraService({
   personaColaboradoraRepository,
   habilidadService,
+  colaboracionRepository,
 });
 
 const proyectoService = new ProyectoService({

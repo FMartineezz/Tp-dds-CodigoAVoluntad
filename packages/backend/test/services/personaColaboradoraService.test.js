@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
-import { habilidadService, personaColaboradoraService } from "../../src/container.js";
+import {
+  colaboracionService,
+  habilidadService,
+  personaColaboradoraService,
+} from "../../src/container.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
 import { PersonaColaboradoraModel } from "../../src/schemas/personaColaboradoraSchema.js";
 import { consultasA, usarBaseDeDatos } from "../utils/db.js";
 import { esperarAppError } from "../utils/esperarAppError.js";
+import { armarEscenario, crearColaboracion, crearColectivo } from "../utils/escenarios.js";
 
 usarBaseDeDatos();
 
@@ -344,6 +349,93 @@ describe("PersonaColaboradoraService", () => {
       // Ejecución y Validación
       await esperarAppError(
         personaColaboradoraService.eliminarPersonaColaboradora(idInexistente()),
+        ErrorCatalog.COLABORADORA_NO_ENCONTRADA,
+        404,
+      );
+    });
+  });
+
+  describe("obtenerContactos", () => {
+    const contactosDeAna = [{ tipo: "email", valor: "ana@mail.com" }];
+
+    test("la dueña del perfil ve sus contactos", async () => {
+      // Preparación
+      const { personaId } = await armarEscenario({ contactos: contactosDeAna });
+
+      // Ejecución
+      const contactos = await personaColaboradoraService.obtenerContactos(personaId, {
+        colaboradoraId: personaId,
+      });
+
+      // Validación
+      expect(contactos).toEqual(contactosDeAna);
+    });
+
+    test("un colectivo con el que colabora ve sus contactos", async () => {
+      // Preparación
+      const escenario = await armarEscenario({ contactos: contactosDeAna });
+      await crearColaboracion(escenario);
+
+      // Ejecución
+      const contactos = await personaColaboradoraService.obtenerContactos(escenario.personaId, {
+        colectivoId: escenario.colectivoId,
+      });
+
+      // Validación
+      expect(contactos).toEqual(contactosDeAna);
+    });
+
+    test("falla con 403 si el colectivo no tiene una colaboración con ella", async () => {
+      // Preparación
+      const { personaId } = await armarEscenario({ contactos: contactosDeAna });
+      const otroColectivo = await crearColectivo();
+
+      // Ejecución y Validación
+      await esperarAppError(
+        personaColaboradoraService.obtenerContactos(personaId, { colectivoId: otroColectivo.id }),
+        ErrorCatalog.COLABORADORA_CONTACTOS_SIN_ACCESO,
+        403,
+      );
+    });
+
+    test("falla con 403 si la colaboración ya se dio de baja", async () => {
+      // Preparación
+      const escenario = await armarEscenario({ contactos: contactosDeAna });
+      const { colaboracionId } = await crearColaboracion(escenario);
+      await colaboracionService.desactivarColaboracion(colaboracionId, "persona");
+
+      // Ejecución y Validación
+      await esperarAppError(
+        personaColaboradoraService.obtenerContactos(escenario.personaId, {
+          colectivoId: escenario.colectivoId,
+        }),
+        ErrorCatalog.COLABORADORA_CONTACTOS_SIN_ACCESO,
+        403,
+      );
+    });
+
+    test("falla con 403 si los pide otra colaboradora o nadie", async () => {
+      // Preparación
+      const { personaId } = await armarEscenario({ contactos: contactosDeAna });
+
+      // Ejecución y Validación
+      await esperarAppError(
+        personaColaboradoraService.obtenerContactos(personaId, { colaboradoraId: idInexistente() }),
+        ErrorCatalog.COLABORADORA_CONTACTOS_SIN_ACCESO,
+        403,
+      );
+      await esperarAppError(
+        personaColaboradoraService.obtenerContactos(personaId),
+        ErrorCatalog.COLABORADORA_CONTACTOS_SIN_ACCESO,
+        403,
+      );
+    });
+
+    test("falla con 404 si la persona no existe", async () => {
+      // Ejecución y Validación
+      const id = idInexistente();
+      await esperarAppError(
+        personaColaboradoraService.obtenerContactos(id, { colaboradoraId: id }),
         ErrorCatalog.COLABORADORA_NO_ENCONTRADA,
         404,
       );

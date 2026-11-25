@@ -30,6 +30,8 @@ export class PersonaColaboradora {
    * @param {MedioDeContacto[]} [contactos]
    * @param {boolean} [bloquearMensajeInterno] true si NO quiere recibir mensajes internos.
    * @param {import("./redSocial.js").RedSocial[]} [redesSociales]
+   * @param {string | null} [foto] URL de la foto de perfil.
+   * @param {string | null} [sitioWeb] URL de su sitio personal o portfolio.
    * @param {boolean} [activo] false cuando la cuenta se dio de baja (datos anonimizados).
    */
   constructor(
@@ -43,6 +45,8 @@ export class PersonaColaboradora {
     contactos = [],
     bloquearMensajeInterno = false,
     redesSociales = [],
+    foto = null,
+    sitioWeb = null,
     activo = true
   ) {
     /** @type {Id | null} */
@@ -57,6 +61,8 @@ export class PersonaColaboradora {
     this.contactos = contactos;
     this.bloquearMensajeInterno = bloquearMensajeInterno;
     this.redesSociales = redesSociales;
+    this.foto = foto;
+    this.sitioWeb = sitioWeb;
     this.activo = activo;
   }
 }

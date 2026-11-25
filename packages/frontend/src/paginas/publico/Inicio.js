@@ -88,7 +88,7 @@ export default function Inicio() {
   // ───── 2. CÁLCULOS ─────
   // Los proyectos que se muestran en «Proyectos abiertos»: de los 20 más nuevos, los de
   // estado «abierto» y, de esos, únicamente los 3 primeros (.filter se queda con los que
-  // cumplen, .slice(0, 3) corta la lista; ver docs/GLOSARIO.md → Métodos de arrays).
+  // cumplen, .slice(0, 3) corta la lista; ver packages/frontend/docs/GLOSARIO.md → Métodos de arrays).
   // Es una selección de «destacados», no un filtro del listado: por eso alcanza con mirar
   // la primera página. PENDIENTE (backend): GET /proyectos?estado=abierto lo haría exacto.
   const proyectosAbiertos = (paginaDeProyectos?.resultados ?? [])
@@ -279,7 +279,7 @@ export default function Inicio() {
         </Heading>
         <ol className={s.pasos}>
           {/* .map dibuja un <li> por cada paso; `key` ayuda a React a distinguirlos
-              (ver docs/GLOSARIO.md → Listas con map y key) */}
+              (ver packages/frontend/docs/GLOSARIO.md → Listas con map y key) */}
           {PASOS.map((paso) => (
             <li key={paso.numero} className={s.paso}>
               <span className={s.pasoIcono}>

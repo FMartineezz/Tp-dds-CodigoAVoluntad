@@ -75,7 +75,7 @@ export default function ProyectosCol() {
 
   // Mientras carga (o si falló), `colaboraciones` es null: `?? []` usa una lista vacía.
   const lista = colaboraciones ?? [];
-  // .filter se queda con las que cumplen (ver docs/GLOSARIO.md → Métodos de arrays).
+  // .filter se queda con las que cumplen (ver packages/frontend/docs/GLOSARIO.md → Métodos de arrays).
   // En curso: sigue activa y el proyecto no terminó. El resto (proyecto finalizado o
   // colaboración dada de baja) va a «Finalizados», donde se puede valorar al colectivo.
   const sigueEnCurso = (c) => c.activa && !c.proyecto.finalizado;

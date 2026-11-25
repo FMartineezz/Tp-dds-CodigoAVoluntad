@@ -65,13 +65,13 @@ export default function PostulacionesCol() {
 
   // Pestaña activa: 'todas', 'pendientes', 'aceptadas' o 'rechazadas'.
   // Empieza en 'todas'; la cambia el componente Tabs al tocar una pestaña.
-  // (ver docs/GLOSARIO.md → useState)
+  // (ver packages/frontend/docs/GLOSARIO.md → useState)
   const [pestanaActiva, setPestanaActiva] = useState('todas');
 
   // ───── 2. CÁLCULOS ─────
 
   // Postulaciones de la pestaña activa. .filter se queda con las que cumplen la condición
-  // (ver docs/GLOSARIO.md → Métodos de arrays). Si la pestaña no tiene estado (null)
+  // (ver packages/frontend/docs/GLOSARIO.md → Métodos de arrays). Si la pestaña no tiene estado (null)
   // pasan todas; si no, solo las que tienen ese estado. Mientras carga, `postulaciones` es
   // null: `?? []` usa una lista vacía para no romper.
   const estadoBuscado = ESTADO_DE_CADA_PESTANA[pestanaActiva];

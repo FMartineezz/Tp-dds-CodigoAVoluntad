@@ -4,6 +4,7 @@
  *
  * USO (siempre con el id de la sesión: const { id } = useAuth()):
  *   const perfil = await obtenerPerfil(id);                → ver aPerfilDeLaVista
+ *   const contactos = await obtenerMisContactos(id);       → [[tipo, dato]] para el editor
  *   await guardarPerfil(id, perfil, { contactos });        → PATCH /colaboradoras/:id
  *   const postulaciones = await obtenerPostulaciones(id);  → [{ id, proyecto, perfil, estado, anonima }]
  *   const colaboraciones = await obtenerMisColaboraciones(id);
@@ -35,12 +36,14 @@ export function haceCuanto(fecha) {
 
 // Nombres que ve la persona en el editor de contactos ↔ tipos que entiende el backend.
 const TIPOS_DE_CONTACTO = { Correo: "email", WhatsApp: "whatsapp", SMS: "sms" };
+// Al revés: tipo del backend → nombre para mostrar (lo usa también api/organizacion.js).
+export const NOMBRES_DE_CONTACTO = { email: "Correo", whatsapp: "WhatsApp", sms: "SMS" };
 
 // ───── 1. Perfil ─────
 
 // ADAPTADOR: colaboradora del backend → datos del formulario «Mi perfil».
-// `nombres` es el Map id → título de habilidades. Los contactos NO vienen: el backend nunca
-// los devuelve en un GET (son privados).
+// `nombres` es el Map id → título de habilidades. Los contactos NO vienen acá (son privados):
+// se piden aparte con obtenerMisContactos.
 function aPerfilDeLaVista(c, nombres) {
   // Las redes llegan como lista [{ tipo, url }]; buscamos la de LinkedIn para su campo.
   const redes = c.redesSociales ?? [];
@@ -54,6 +57,8 @@ function aPerfilDeLaVista(c, nombres) {
     github: c.git ?? "",
     linkedin: linkedin?.url ?? "",
     bio: c.presentacion ?? "",
+    foto: c.foto ?? "",
+    sitioWeb: c.sitioWeb ?? "",
     // El backend pregunta lo contrario: «¿bloquear mensajes?». `!` lo da vuelta.
     mensajes: !c.bloquearMensajeInterno,
     habilidades: titulos(c.habilidades, nombres),
@@ -69,6 +74,16 @@ export async function obtenerPerfil(id) {
     nombresDeHabilidades(),
   ]);
   return aPerfilDeLaVista(data, nombres);
+}
+
+// GET /colaboradoras/:id/contactos → los contactos privados de la dueña, como pares
+// [tipo, dato] para el ContactosEditor: [['Correo', 'ana@mail.com']].
+// PENDIENTE (login): `colaboradoraId` dice quién pide; con el login sale del token.
+export async function obtenerMisContactos(id) {
+  const { data } = await api.get(`/colaboradoras/${id}/contactos`, {
+    params: { colaboradoraId: id },
+  });
+  return data.map((c) => [NOMBRES_DE_CONTACTO[c.tipo] ?? c.tipo, c.valor]);
 }
 
 // PATCH /colaboradoras/:id → guarda el formulario. `perfil` tiene la forma de
@@ -95,6 +110,9 @@ export async function guardarPerfil(id, perfil, { contactos } = {}) {
       .map((p) => p.trim())
       .filter(Boolean),
     presentacion: perfil.bio.trim(),
+    // Vacío = null: así el backend borra el dato si la persona lo sacó.
+    foto: perfil.foto.trim() || null,
+    sitioWeb: perfil.sitioWeb.trim() || null,
     bloquearMensajeInterno: !perfil.mensajes,
     habilidades: perfil.habilidades.map((titulo) => codigoDe.get(titulo)).filter(Boolean),
     redesSociales: redes,

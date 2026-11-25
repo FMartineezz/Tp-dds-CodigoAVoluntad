@@ -3,6 +3,7 @@ import ErrorCatalog from "../../errors/errorCatalog.js";
 import { AppError } from "../../errors/appError.js";
 import { TipoMedioDeContacto } from "../../models/personaColaboradora.js";
 import { redesSocialesArraySchema } from "./redSocialValidation.js";
+import { esUrlValida } from "../../models/redSocial.js";
 
 const medioDeContactoSchema = zod
   .object({
@@ -79,6 +80,17 @@ export const colaboradoraSchema = zod.object({
     )
     .optional(),
   redesSociales: redesSocialesArraySchema.optional(),
+  // null borra el dato (útil en el PATCH)
+  foto: zod
+    .string({ invalid_type_error: "COLABORADORA_FOTO_INVALIDA" })
+    .refine(esUrlValida, "COLABORADORA_FOTO_INVALIDA")
+    .nullable()
+    .optional(),
+  sitioWeb: zod
+    .string({ invalid_type_error: "COLABORADORA_SITIO_WEB_INVALIDO" })
+    .refine(esUrlValida, "COLABORADORA_SITIO_WEB_INVALIDO")
+    .nullable()
+    .optional(),
 });
 
 /**

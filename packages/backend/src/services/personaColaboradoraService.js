@@ -43,10 +43,12 @@ export class PersonaColaboradoraService {
    * @param {object} deps
    * @param {import("../repositories/personaColaboradoraRepository.js").PersonaColaboradoraRepository} deps.personaColaboradoraRepository
    * @param {import("./habilidadService.js").HabilidadService} deps.habilidadService
+   * @param {import("../repositories/colaboracionRepository.js").ColaboracionRepository} deps.colaboracionRepository
    */
-  constructor({ personaColaboradoraRepository, habilidadService }) {
+  constructor({ personaColaboradoraRepository, habilidadService, colaboracionRepository }) {
     this.personaColaboradoraRepository = personaColaboradoraRepository;
     this.habilidadService = habilidadService;
+    this.colaboracionRepository = colaboracionRepository;
   }
 
   /**
@@ -61,6 +63,8 @@ export class PersonaColaboradoraService {
    * @param {MedioDeContacto[]} contactos
    * @param {boolean} bloquearMensajeInterno
    * @param {unknown} [redesSociales] Lista de `{ tipo, url }` a validar.
+   * @param {string | null} [foto] URL de la foto de perfil.
+   * @param {string | null} [sitioWeb]
    * @returns {Promise<PersonaColaboradora>} La persona con el `id` asignado.
    * @throws {AppError} 400 si algún código de habilidad no existe o las redes son inválidas.
    */
@@ -75,6 +79,8 @@ export class PersonaColaboradoraService {
     contactos,
     bloquearMensajeInterno,
     redesSociales = [],
+    foto = null,
+    sitioWeb = null,
   ) {
     const redesValidadas = validarYNormalizarRedesSociales(redesSociales) ?? [];
 
@@ -93,6 +99,8 @@ export class PersonaColaboradoraService {
       contactos,
       bloquearMensajeInterno,
       redesValidadas,
+      foto,
+      sitioWeb,
     );
     const personaColaboradoraGuardada =
       await this.personaColaboradoraRepository.guardar(personaColaboradora);
@@ -218,6 +226,29 @@ export class PersonaColaboradoraService {
     }
 
     return personaColaboradora;
+  }
+
+  /**
+   * Contactos privados de una persona. Según el enunciado solo los ven la dueña del perfil y
+   * los colectivos con los que colabora; para cualquier otra persona el pedido falla.
+   * @param {Id} id La persona dueña de los contactos.
+   * @param {{ colaboradoraId?: Id, colectivoId?: Id }} solicitante Quién los pide.
+   * @returns {Promise<MedioDeContacto[]>}
+   * @throws {AppError} 404 si la persona no existe; 403 si quien pide no tiene acceso.
+   */
+  async obtenerContactos(id, { colaboradoraId, colectivoId } = {}) {
+    const persona = await this.obtenerPersonaColaboradoraPorIdConContactos(id);
+
+    const esLaDuena = colaboradoraId != null && String(colaboradoraId) === String(id);
+    const esSuColectivo =
+      colectivoId != null &&
+      (await this.colaboracionRepository.existeActivaConColectivo(id, colectivoId));
+
+    if (!esLaDuena && !esSuColectivo) {
+      throw new AppError(ErrorCatalog.COLABORADORA_CONTACTOS_SIN_ACCESO, 403, id);
+    }
+
+    return persona.contactos ?? [];
   }
 
   //agregar en la query de la db?

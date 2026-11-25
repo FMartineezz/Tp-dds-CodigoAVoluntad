@@ -48,7 +48,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | [Health Check](#health-check)     | `GET /healthCheck`                                                                                                                                                                          |
 | [Habilidades](#habilidades)       | `GET /habilidades`, `GET /habilidades/:id`, `POST /habilidades`                                                                                                                             |
 | [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`, `PATCH /colectivos/:id`                                                                                                       |
-| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `POST /colaboradoras`, `PATCH /colaboradoras/:id`                                                                                           |
+| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `GET /colaboradoras/:id/contactos`, `POST /colaboradoras`, `PATCH /colaboradoras/:id`                                                       |
 | [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `GET /colectivos/:colectivoId/proyectos`, `POST /proyectos`, `PATCH /proyectos/:id`                                                                 |
 | [Perfiles](#perfiles)             | `GET`, `POST /proyectos/:idProyecto/perfiles`; `GET`, `PATCH`, `DELETE /proyectos/:idProyecto/perfiles/:idPerfil`                                                                           |
 | [Logros](#logros)                 | `GET`, `POST /proyectos/:proyectoId/logros`; `GET`, `PATCH`, `DELETE /proyectos/:proyectoId/logros/:logroId`                                                                                |
@@ -242,14 +242,15 @@ Actualización parcial de un colectivo. Si `redesSociales` se omite, se conserva
 
 ## Colaboradoras
 
-| Método | Path                 | Descripción                             |
-| ------ | -------------------- | --------------------------------------- |
-| GET    | `/colaboradoras`     | Lista todas las personas colaboradoras  |
-| GET    | `/colaboradoras/:id` | Obtiene una persona colaboradora por id |
-| POST   | `/colaboradoras`     | Registra una persona colaboradora       |
-| PATCH  | `/colaboradoras/:id` | Actualiza parcialmente una colaboradora |
+| Método | Path                           | Descripción                              |
+| ------ | ------------------------------ | ---------------------------------------- |
+| GET    | `/colaboradoras`               | Lista todas las personas colaboradoras   |
+| GET    | `/colaboradoras/:id`           | Obtiene una persona colaboradora por id  |
+| GET    | `/colaboradoras/:id/contactos` | Sus contactos privados (solo con acceso) |
+| POST   | `/colaboradoras`               | Registra una persona colaboradora        |
+| PATCH  | `/colaboradoras/:id`           | Actualiza parcialmente una colaboradora  |
 
-Los medios de contacto (`contactos`) quedan registrados internamente y **nunca** aparecen en los `GET`.
+Los medios de contacto (`contactos`) quedan registrados internamente y **nunca** aparecen en los `GET` del perfil. Solo se consultan con [`GET /colaboradoras/:id/contactos`](#get-colaboradorasidcontactos).
 
 ### GET `/colaboradoras`
 
@@ -268,6 +269,8 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
       "pronombres": "ella",
       "presentacion": "Desarrolladora front interesada en proyectos comunitarios.",
       "bloquearMensajeInterno": false,
+      "foto": "https://imagenes.test/ana.jpg",
+      "sitioWeb": "https://ana.dev",
       "createdAt": "2026-10-14T19:22:10.011Z",
       "updatedAt": "2026-10-14T19:22:10.011Z",
       "__v": 0
@@ -293,6 +296,33 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-VAL-002` / `ERR-VAL-003` | Parámetros de paginación inválidos            |
 | 404    | `ERR-NOT-405`                 | No existe una persona colaboradora con ese id |
 
+### GET `/colaboradoras/:id/contactos`
+
+Devuelve los medios de contacto privados de la persona. Según el enunciado, solo pueden verlos:
+
+- **la dueña del perfil:** `?colaboradoraId=<su id>` (igual al `:id`);
+- **un colectivo con el que colabora:** `?colectivoId=<id>`, si la persona tiene una colaboración **activa** en algún proyecto de ese colectivo.
+
+Para cualquier otra persona el pedido falla con 403.
+
+> **PENDIENTE (login):** quién pide viaja por query porque todavía no hay sesión. Cuando se integre el login, sale del token y estos parámetros se sacan.
+
+**Respuesta 200:** lista de contactos (vacía si no cargó ninguno).
+
+```json
+[
+  { "tipo": "email", "valor": "ana@mail.com" },
+  { "tipo": "whatsapp", "valor": "1127891234" }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                                                        |
+| ------ | ------------- | ------------------------------------------------------------- |
+| 403    | `ERR-PER-411` | Quien pide no es la dueña ni un colectivo con el que colabora |
+| 404    | `ERR-NOT-405` | No existe una persona colaboradora con ese id                 |
+
 ### POST `/colaboradoras`
 
 **Body:**
@@ -309,6 +339,8 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | `contactos`              | object[] | no        | cero o más medios de contacto: `{ "tipo": "email", "valor": "ana@mail.com" }`               |
 | `bloquearMensajeInterno` | boolean  | no        | `true` si no quiere recibir mensajes internos de los colectivos. Default `false`            |
 | `redesSociales`          | object[] | no        | enlaces a redes sociales: `{ "tipo": "github", "url": "https://..." }` (enum TipoRedSocial) |
+| `foto`                   | string   | no        | URL (http/https) de la foto de perfil. El backend guarda el enlace, no sube archivos        |
+| `sitioWeb`               | string   | no        | URL (http/https) de su sitio personal o portfolio                                           |
 
 **Medios de contacto:** `tipo` es uno de `email`, `whatsapp` o `sms` (en mayúsculas o minúsculas). Para `email`, `valor` debe ser un email válido; para `whatsapp` y `sms`, 10 dígitos juntos sin espacios ni símbolos (ej. `1127891234`).
 
@@ -332,11 +364,13 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-VAL-706` | El email no tiene formato válido                 |
 | 400    | `ERR-VAL-707` | El teléfono no tiene 10 dígitos                  |
 | 400    | `ERR-VAL-207` | Alguno de los códigos en `habilidades` no existe |
+| 400    | `ERR-VAL-409` | `foto` no es una URL http/https                  |
+| 400    | `ERR-VAL-410` | `sitioWeb` no es una URL http/https              |
 | 400    | `ERR-VAL-001` | Algún campo de texto no es de tipo string        |
 
 ### PATCH `/colaboradoras/:id`
 
-Actualización parcial de una colaboradora. Si `redesSociales` se omite, se conservan las existentes. Si se envía un array, se reemplaza la lista completa (un array vacío `[]` las elimina todas).
+Actualización parcial de una colaboradora. Si `redesSociales` se omite, se conservan las existentes. Si se envía un array, se reemplaza la lista completa (un array vacío `[]` las elimina todas). Lo mismo con `contactos`. Para borrar `foto` o `sitioWeb`, mandarlos en `null`.
 
 **Body:** campos a modificar (al menos uno requerido).
 
@@ -351,6 +385,8 @@ Actualización parcial de una colaboradora. Si `redesSociales` se omite, se cons
 | 400    | `ERR-VAL-1104` | `url` de red social vacía                            |
 | 400    | `ERR-VAL-1105` | `url` inválida o no utiliza protocolo HTTP/HTTPS     |
 | 400    | `ERR-VAL-1106` | Tipos de redes sociales duplicados dentro del perfil |
+| 400    | `ERR-VAL-409`  | `foto` no es una URL http/https                      |
+| 400    | `ERR-VAL-410`  | `sitioWeb` no es una URL http/https                  |
 | 404    | `ERR-NOT-405`  | No existe una persona colaboradora con ese id        |
 
 ---

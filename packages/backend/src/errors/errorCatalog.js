@@ -264,6 +264,23 @@ const ErrorCatalog = {
     message: "El campo bloquear mensaje interno debe ser un booleano",
   },
 
+  COLABORADORA_FOTO_INVALIDA: {
+    code: "ERR-VAL-409",
+    message: "La foto debe ser una URL válida con protocolo HTTP o HTTPS",
+  },
+
+  COLABORADORA_SITIO_WEB_INVALIDO: {
+    code: "ERR-VAL-410",
+    message: "El sitio web debe ser una URL válida con protocolo HTTP o HTTPS",
+  },
+
+  // PER = permiso: el pedido es válido pero quien lo hace no tiene acceso (403)
+  COLABORADORA_CONTACTOS_SIN_ACCESO: {
+    code: "ERR-PER-411",
+    message:
+      "Solo la dueña del perfil o un colectivo con el que colabora pueden ver sus contactos",
+  },
+
   COLABORADORA_YA_DADA_DE_BAJA: {
     code: "ERR-EST-408",
     message: (id) => `La persona colaboradora ${id} ya fue dada de baja`,

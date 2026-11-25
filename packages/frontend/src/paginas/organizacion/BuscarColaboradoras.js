@@ -51,7 +51,7 @@ function pedirPagina(perfilElegido, pagina, filtros) {
 
 export default function BuscarColaboradoras() {
   // ───── 1. DATOS Y ESTADO ─────
-  // (ver docs/GLOSARIO.md → Estado (useState))
+  // (ver packages/frontend/docs/GLOSARIO.md → Estado (useState))
   const { id } = useAuth();
 
   // Perfil elegido en el filtro: 'todas' o «idProyecto|idPerfil». Lo cambia el desplegable.

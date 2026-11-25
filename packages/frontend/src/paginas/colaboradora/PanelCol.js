@@ -64,7 +64,7 @@ export default function PanelCol() {
 
       {/* BLOQUE: cifras — tres tarjetas que son enlaces a las pantallas de detalle */}
       {/* `${sh.stat} ${s.link}` es una plantilla de texto: junta dos clases CSS (ver
-         docs/GLOSARIO.md → Plantillas de texto) */}
+         packages/frontend/docs/GLOSARIO.md → Plantillas de texto) */}
       <div className={sh.stats}>
         <Link to="/panel/postulaciones" className={`${sh.stat} ${s.link}`}>
           <b>{panel.pendientes}</b>

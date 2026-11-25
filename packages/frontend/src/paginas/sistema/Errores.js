@@ -23,7 +23,7 @@ import s from './Errores.module.css';
 // ───── 1. Pantalla (diseño común, no se exporta) ─────
 // Recibe por props lo que cambia entre un error y otro. `children` son los botones
 // que van entre la apertura y el cierre de <Pantalla>…</Pantalla>.
-// Las llaves { } en los parámetros «desestructuran» las props (ver docs/GLOSARIO.md →
+// Las llaves { } en los parámetros «desestructuran» las props (ver packages/frontend/docs/GLOSARIO.md →
 // Desestructurar).
 function Pantalla({ big, code, titulo, msg, children }) {
   return (

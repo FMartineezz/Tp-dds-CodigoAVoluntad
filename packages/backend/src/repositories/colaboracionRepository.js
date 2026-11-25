@@ -164,6 +164,23 @@ export class ColaboracionRepository {
   }
 
   /**
+   * true si la persona colabora (activamente) en algún proyecto del colectivo.
+   * @param {Id} personaId
+   * @param {Id} colectivoId
+   * @returns {Promise<boolean>}
+   */
+  async existeActivaConColectivo(personaId, colectivoId) {
+    const colaboraciones = await this.model
+      .find({ personaColaboradora: personaId, activo: true })
+      .populate({ path: "proyecto", select: "colectivo" })
+      .lean();
+
+    return colaboraciones.some(
+      (colaboracion) => String(colaboracion.proyecto?.colectivo) === String(colectivoId),
+    );
+  }
+
+  /**
    * Cuántas colaboraciones activas tiene un perfil de un proyecto (para el cupo).
    * @param {Id} proyectoId
    * @param {Id} perfilId

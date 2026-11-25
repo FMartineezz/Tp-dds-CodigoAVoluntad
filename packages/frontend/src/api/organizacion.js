@@ -16,6 +16,8 @@ import { api, sinVacios } from "./cliente.js";
 import { aProyectoDeLaVista } from "./proyectos.js";
 import { nombresDeHabilidades, obtenerHabilidades, titulos } from "./habilidades.js";
 import { textoDeCuando } from "./mensajes.js";
+import { NOMBRES_DE_CONTACTO } from "./colaboradora.js";
+import { esError } from "./errores.js";
 
 // ───── VALORES QUE ACEPTA EL BACKEND ─────
 // El backend guarda tipos y ubicaciones en minúsculas y sin tildes; la pantalla los muestra
@@ -282,6 +284,8 @@ export function aColaboradoraDeLaVista(p, nombres) {
     bio: p.presentacion ?? "",
     git: p.git ?? "",
     redes: p.redesSociales ?? [],
+    foto: p.foto ?? null,
+    sitioWeb: p.sitioWeb ?? null,
     habilidades: habilidades.filter(Boolean),
     // true = acepta mensajes internos de los colectivos.
     mensajes: !p.bloquearMensajeInterno,
@@ -322,6 +326,22 @@ export async function obtenerColaboradora(personaId) {
     nombresDeHabilidades(),
   ]);
   return aColaboradoraDeLaVista(data, nombres);
+}
+
+// GET /colaboradoras/:id/contactos?colectivoId= → [{ tipo, valor }] con el tipo ya para
+// mostrar ('Correo', 'WhatsApp'…). Devuelve null si el colectivo no tiene acceso (403): solo
+// los ven los colectivos con los que la persona colabora.
+// PENDIENTE (login): `colectivoId` dice quién pide; con el login sale del token.
+export async function obtenerContactosDeColaboradora(personaId, colectivoId) {
+  try {
+    const { data } = await api.get(`/colaboradoras/${personaId}/contactos`, {
+      params: { colectivoId },
+    });
+    return data.map((c) => ({ tipo: NOMBRES_DE_CONTACTO[c.tipo] ?? c.tipo, valor: c.valor }));
+  } catch (error) {
+    if (esError(error, 403)) return null;
+    throw error;
+  }
 }
 
 // ───── NOTIFICACIONES ─────

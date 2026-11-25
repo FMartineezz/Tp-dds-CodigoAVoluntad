@@ -52,7 +52,7 @@ export default function PanelOrg() {
   const pendientes = panel?.pendientes ?? [];
 
   // Se queda solo con los proyectos cuyo estado es 'abierto'.
-  // (.filter → docs/GLOSARIO.md → Métodos de arrays)
+  // (.filter → packages/frontend/docs/GLOSARIO.md → Métodos de arrays)
   const abiertos = proyectos.filter((proyecto) => proyecto.estado === 'abierto');
 
   // «Revisar» lleva al primer proyecto que tenga postulaciones pendientes. Las postulaciones
@@ -71,7 +71,7 @@ export default function PanelOrg() {
   } else if (abiertos.length > 0) {
     // Caso 2: hay proyectos abiertos, se dibuja una tarjeta por cada uno.
     // `key` le permite a React distinguir cada tarjeta
-    // (ver docs/GLOSARIO.md → Listas con map y key).
+    // (ver packages/frontend/docs/GLOSARIO.md → Listas con map y key).
     proyectosAbiertos = (
       <Grid>
         {abiertos.map((proyecto) => (

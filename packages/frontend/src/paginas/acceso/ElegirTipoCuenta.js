@@ -23,7 +23,7 @@ export default function ElegirTipoCuenta() {
     <div className={s.puertas}>
       {/* BLOQUE: puerta 1 (clara) — lleva al registro de colaboradora */}
       {/* `${...} ${...}` es una plantilla de texto: junta dos clases CSS (ver
-         docs/GLOSARIO.md → Plantillas de texto) */}
+         packages/frontend/docs/GLOSARIO.md → Plantillas de texto) */}
       <Link to="/registro/colaboradora" className={`${s.puerta} ${s.claro}`}>
         <div className={s.contenido}>
           <span className={s.opcion}>Opción 1</span>

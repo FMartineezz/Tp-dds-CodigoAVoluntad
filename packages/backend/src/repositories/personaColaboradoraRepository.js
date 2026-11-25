@@ -143,6 +143,8 @@ export class PersonaColaboradoraRepository {
           pronombres: [],
           presentacion: "Presentacion Usuario Eliminado",
           contactos: [],
+          foto: null,
+          sitioWeb: null,
           activo: false,
         },
       },

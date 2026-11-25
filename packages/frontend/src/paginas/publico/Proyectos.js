@@ -61,7 +61,7 @@ export default function Proyectos() {
 
   // Rol e id de la sesión: rol 'col' (colaboradora), 'org' (organización) o null (visitante);
   // id = el _id real de esa cuenta en el backend.
-  // Las llaves { } sacan solo las piezas que necesitamos (ver docs/GLOSARIO.md → Desestructurar).
+  // Las llaves { } sacan solo las piezas que necesitamos (ver packages/frontend/docs/GLOSARIO.md → Desestructurar).
   const { rol, id } = useAuth();
   // ¿Se usa el endpoint de «acordes»? Solo si es colaboradora y tildó la casilla.
   const usarAcordes = rol === 'col' && soloQueEncajan;
@@ -87,7 +87,7 @@ export default function Proyectos() {
 
   // ───── 2. CÁLCULOS ─────
   // Mientras carga (o si falló) `respuesta` es null: `?.` corta sin romper y `??` pone
-  // un valor por defecto (ver docs/GLOSARIO.md → Operadores).
+  // un valor por defecto (ver packages/frontend/docs/GLOSARIO.md → Operadores).
   const proyectos = respuesta?.resultados ?? [];
   // `total` es la cantidad de proyectos en TODAS las páginas, no solo en esta.
   const total = respuesta?.total ?? 0;

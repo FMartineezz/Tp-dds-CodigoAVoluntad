@@ -46,11 +46,11 @@ export default function Ingresar() {
   // ───── 1. DATOS Y ESTADO ─────
 
   // Función para ir a otra pantalla desde código, ej. navegar('/panel')
-  // (ver docs/GLOSARIO.md → useNavigate).
+  // (ver packages/frontend/docs/GLOSARIO.md → useNavigate).
   const navegar = useNavigate();
 
   // `entrar(rol, id?)` abre la sesión con rol 'col' u 'org' y el id de esa cuenta (sin id,
-  // la de demo del .env.local). Se saca del objeto con { } (ver docs/GLOSARIO.md → Desestructurar).
+  // la de demo del .env.local). Se saca del objeto con { } (ver packages/frontend/docs/GLOSARIO.md → Desestructurar).
   const { entrar } = useAuth();
 
   // Listas de cuentas reales para el selector. Si fallan, el selector no se muestra y se
@@ -62,11 +62,11 @@ export default function Ingresar() {
 
   // Lee lo que va después del «?» en la dirección; acá, el parámetro opcional «volver»
   // (adónde ir después de ingresar). Se usa solo el primer valor del array
-  // (ver docs/GLOSARIO.md → useSearchParams).
+  // (ver packages/frontend/docs/GLOSARIO.md → useSearchParams).
   const [parametrosDeLaDireccion] = useSearchParams();
 
   // Texto del campo «Correo electrónico». Empieza vacío; lo cambia el onChange del campo.
-  // (ver docs/GLOSARIO.md → useState)
+  // (ver packages/frontend/docs/GLOSARIO.md → useState)
   const [correo, setCorreo] = useState('');
 
   // Texto del campo «Contraseña». Empieza vacío; lo cambia el onChange del campo.
@@ -163,7 +163,7 @@ export default function Ingresar() {
       <form className={s.form} onSubmit={alEnviarFormulario} noValidate>
         <Heading level={1}>Ingresar</Heading>
 
-        {/* Aparece solo si `fallo` es true: la contraseña no coincidió (ver docs/GLOSARIO.md →
+        {/* Aparece solo si `fallo` es true: la contraseña no coincidió (ver packages/frontend/docs/GLOSARIO.md →
            Renderizado condicional) */}
         {fallo && (
           <Alert kind="error">

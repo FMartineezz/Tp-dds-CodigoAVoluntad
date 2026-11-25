@@ -155,7 +155,7 @@ export default function Mensajes({ rol }) {
 
   // Chats que pasan los tres filtros a la vez (relación, proyecto y búsqueda por nombre).
   // useMemo guarda el resultado y solo lo recalcula si cambia algo de la lista del final
-  // (ver docs/GLOSARIO.md → useMemo).
+  // (ver packages/frontend/docs/GLOSARIO.md → useMemo).
   const chatsVisibles = useMemo(() => {
     const textoBuscado = busqueda.trim().toLowerCase();
     return chats.filter((chat) => {

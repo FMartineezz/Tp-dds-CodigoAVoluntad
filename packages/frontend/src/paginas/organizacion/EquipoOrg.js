@@ -54,7 +54,7 @@ export default function EquipoOrg() {
   // ───── 1. DATOS Y ESTADO ─────
 
   // Lee la parte variable de la dirección: /org/proyectos/6afe…/equipo → id = '6afe…'
-  // (ver docs/GLOSARIO.md → useParams)
+  // (ver packages/frontend/docs/GLOSARIO.md → useParams)
   const { id } = useParams();
   const { id: idColectivo } = useAuth();
 

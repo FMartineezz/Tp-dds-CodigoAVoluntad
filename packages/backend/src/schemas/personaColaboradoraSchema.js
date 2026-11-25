@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { PersonaColaboradora, TipoMedioDeContacto } from "../models/personaColaboradora.js";
-import { TipoRedSocial } from "../models/redSocial.js";
+import { TipoRedSocial, esUrlValida } from "../models/redSocial.js";
+
+// Mongoose corre el validador también con null, que acá significa «sin cargar»
+const esUrlOVacio = (valor) => valor == null || esUrlValida(valor);
 
 export const personaColaboradoraSchema = new mongoose.Schema(
   {
@@ -45,6 +48,17 @@ export const personaColaboradoraSchema = new mongoose.Schema(
     presentacion: {
       type: String,
       required: false,
+    },
+    // URL de la imagen (el backend no sube archivos, guarda el enlace). Vacío = null.
+    foto: {
+      type: String,
+      required: false,
+      validate: { validator: esUrlOVacio, message: "La foto debe ser una URL válida" },
+    },
+    sitioWeb: {
+      type: String,
+      required: false,
+      validate: { validator: esUrlOVacio, message: "El sitio web debe ser una URL válida" },
     },
     contactos: {
       type: [

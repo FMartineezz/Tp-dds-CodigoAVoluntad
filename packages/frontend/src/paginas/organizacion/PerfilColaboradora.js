@@ -1,22 +1,22 @@
 /**
  * PANTALLA PerfilColaboradora
  * Ruta: /org/colaboradoras/:id   ·   Quién la ve: Organización
- * Qué muestra: Perfil público de una colaboradora, sus valoraciones y cómo escribirle.
- * De dónde salen los datos: GET /colaboradoras/:id, GET /personaColaboradora/:id/valoraciones
- *   y mis proyectos (GET /colectivos/:id/proyectos) para elegir desde cuál escribirle
+ * Qué muestra: Perfil público de una colaboradora, sus valoraciones, cómo escribirle y, si
+ *   colabora en algún proyecto mío, sus contactos privados.
+ * De dónde salen los datos: GET /colaboradoras/:id, GET /personaColaboradora/:id/valoraciones,
+ *   GET /colaboradoras/:id/contactos (el backend responde 403 si no colabora conmigo) y mis
+ *   proyectos (GET /colectivos/:id/proyectos) para elegir desde cuál escribirle
  *   (ver api/organizacion.js).
- *   PENDIENTE (backend): los datos de contacto nunca salen en los GET; falta un endpoint
- *   para que el colectivo vea los contactos de quien ya aceptó (por ejemplo
- *   GET /colectivos/:id/colaboradoras/:personaId/contactos). Tampoco hay «logros» de la
- *   persona ni el nombre del colectivo que escribió cada valoración.
+ *   PENDIENTE (backend): no hay «logros» de la persona ni el nombre del colectivo que
+ *   escribió cada valoración.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: la persona, sus valoraciones y mis proyectos (del backend) y el
+ *   1. DATOS Y ESTADO: la persona, sus valoraciones, sus contactos y mis proyectos (del backend) y el
  *      proyecto elegido para escribirle.
  *      ESPERA Y ERRORES: cargando, «no existe» (404) o aviso de error.
  *   2. CÁLCULOS: los proyectos abiertos (para el desplegable).
  *   3. ACCIONES: no hay (el botón es un enlace a Mensajes).
- *   4. LO QUE SE DIBUJA: migas, credencial (con cómo escribirle) y valoraciones.
+ *   4. LO QUE SE DIBUJA: migas, credencial (con cómo escribirle), contactos y valoraciones.
  */
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -27,6 +27,7 @@ import { usePedido } from '../../hooks';
 import { mensajeDeError } from '../../api/errores.js';
 import {
   obtenerColaboradora,
+  obtenerContactosDeColaboradora,
   obtenerProyectosDelColectivo,
   obtenerValoracionesDeColaboradora,
 } from '../../api/organizacion.js';
@@ -36,21 +37,23 @@ import s from './Organizacion.module.css';
 import sh from '../../plantillas/disposicion.module.css';
 import { fotoDe } from '../../datos/fotos.js';
 
-// Pide a la vez la persona, sus valoraciones y mis proyectos.
+// Pide a la vez la persona, sus valoraciones, sus contactos (null si no colabora conmigo) y
+// mis proyectos.
 async function cargarPerfil(personaId, colectivoId) {
-  const [colaboradora, valoraciones, proyectos] = await Promise.all([
+  const [colaboradora, valoraciones, contactos, proyectos] = await Promise.all([
     obtenerColaboradora(personaId),
     obtenerValoracionesDeColaboradora(personaId),
+    obtenerContactosDeColaboradora(personaId, colectivoId),
     obtenerProyectosDelColectivo(colectivoId),
   ]);
-  return { colaboradora, valoraciones, proyectos };
+  return { colaboradora, valoraciones, contactos, proyectos };
 }
 
 export default function PerfilColaboradora() {
   // ───── 1. DATOS Y ESTADO ─────
 
   // Lee la parte variable de la dirección: /org/colaboradoras/a000… → id = 'a000…'
-  // (ver docs/GLOSARIO.md → useParams)
+  // (ver packages/frontend/docs/GLOSARIO.md → useParams)
   const { id } = useParams();
   const { id: idColectivo } = useAuth();
 
@@ -82,7 +85,7 @@ export default function PerfilColaboradora() {
     );
   }
 
-  const { colaboradora, valoraciones, proyectos } = datos;
+  const { colaboradora, valoraciones, contactos, proyectos } = datos;
 
   // ───── 2. CÁLCULOS ─────
 
@@ -148,7 +151,7 @@ export default function PerfilColaboradora() {
       <header className={s.credencial}>
         <div className={s.credencialBanda} aria-hidden="true" />
         <div className={s.credencialCabeza}>
-          <Avatar nombre={colaboradora.nombre} size={128} square foto={fotoDe(colaboradora.id)} />
+          <Avatar nombre={colaboradora.nombre} size={128} square foto={colaboradora.foto || fotoDe(colaboradora.id)} />
           <div>
             <Heading level={1} size="h2">
               {colaboradora.nombre}{' '}
@@ -189,11 +192,33 @@ export default function PerfilColaboradora() {
           {colaboradora.redes.map((red) => (
             <a key={red.tipo} href={red.url} target="_blank" rel="noopener noreferrer">{red.tipo}</a>
           ))}
+          {colaboradora.sitioWeb && (
+            <a href={colaboradora.sitioWeb} target="_blank" rel="noopener noreferrer">Sitio web</a>
+          )}
         </div>
 
         {/* Escribirle: va en la misma tarjeta para no tener que bajar a buscarlo */}
         <div className={s.credencialMensaje}>{contenidoDeMensajes}</div>
       </header>
+
+      {/* BLOQUE: Contactos — privados: solo si colabora en algún proyecto mío (si no, null) */}
+      <section className={sh.column} aria-labelledby="contactos">
+        <Heading level={2} size="h3" id="contactos">Contactos</Heading>
+        {contactos === null && (
+          <Text variant="small">Vas a ver sus contactos cuando colabore en alguno de tus proyectos.</Text>
+        )}
+        {contactos?.length === 0 && <Text variant="small">No cargó medios de contacto.</Text>}
+        {contactos?.length > 0 && (
+          <ul className={s.contactos}>
+            {contactos.map((contacto) => (
+              <li key={`${contacto.tipo}-${contacto.valor}`}>
+                <b>{contacto.tipo}</b>
+                <span>{contacto.valor}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {/* BLOQUE: Valoraciones — las que recibió de colectivos (o un texto si no tiene) */}
       <section className={sh.column} aria-labelledby="vals">

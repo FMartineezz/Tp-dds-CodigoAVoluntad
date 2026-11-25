@@ -92,7 +92,7 @@ async function cargarSesion(rol, idCuenta) {
 export default function DetalleProyecto() {
   // ───── 1. DATOS Y ESTADO ─────
   // `id` es la parte variable de la dirección: en /proyectos/6afe… vale '6afe…' (siempre texto).
-  // (ver docs/GLOSARIO.md → useParams y Desestructurar)
+  // (ver packages/frontend/docs/GLOSARIO.md → useParams y Desestructurar)
   const { id } = useParams();
   // Rol de la sesión ('col', 'org' o null) y el id real de esa cuenta en el backend.
   const { rol, id: idCuenta } = useAuth();
@@ -247,7 +247,7 @@ export default function DetalleProyecto() {
         anonima: !publica,
       });
       // Salió bien: se marca el perfil como postulado. `...anteriores` copia lo que había y
-      // `[perfilId]: true` agrega este (ver docs/GLOSARIO.md → Copiar con cambios).
+      // `[perfilId]: true` agrega este (ver packages/frontend/docs/GLOSARIO.md → Copiar con cambios).
       setPerfilesPostulados((anteriores) => ({ ...anteriores, [perfilId]: true }));
       const perfil = proyecto.perfiles.find((candidato) => candidato.id === perfilId);
       const fraseAnonima = publica ? '' : 'Tu contribución será anónima. ';

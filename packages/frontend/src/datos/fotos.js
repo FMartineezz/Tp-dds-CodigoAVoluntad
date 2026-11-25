@@ -4,21 +4,21 @@
  * El backend todavía no guarda fotos: hasta que lo haga, el front las busca acá con el id
  * fijo que les da el seed (ver backend/seeds/sembrar.js → idFijo). Una cuenta sin foto
  * muestra sus iniciales (ver atomos/Avatar).
- * Para sumar una: poné la imagen en assets/fotos/… e importala abajo con su id.
+ * Para sumar una: poné la imagen en assets/pfp/… e importala abajo con su id.
  */
-import ambiental from '../assets/fotos/colectivos/ong-ambiental.jpeg';
-import huertas from '../assets/fotos/colectivos/huerta-palermo.jpg';
-import espaciosVerdes from '../assets/fotos/colectivos/espacios-verdes.jpg';
-import comedor from '../assets/fotos/colectivos/comedor-popular.jpeg';
-import biblioteca from '../assets/fotos/colectivos/biblioteca-popular.jpeg';
-import lucia from '../assets/fotos/colaboradores/lucia.jpg';
-import beto from '../assets/fotos/colaboradores/backendbeto.jpeg';
-import martin from '../assets/fotos/colaboradores/martin.jpeg';
-import sol from '../assets/fotos/colaboradores/sol.jpeg';
-import fernanda from '../assets/fotos/colaboradores/fernanda.avif';
-import ana from '../assets/fotos/colaboradores/ana.jpeg';
-import pixel from '../assets/fotos/colaboradores/pixel.jpeg';
-import eliminado from '../assets/fotos/colaboradores/eliminado.jpg';
+import ambiental from '../assets/pfp/colectivos/ong-ambiental.jpeg';
+import huertas from '../assets/pfp/colectivos/huerta-palermo.jpg';
+import espaciosVerdes from '../assets/pfp/colectivos/espacios-verdes.jpg';
+import comedor from '../assets/pfp/colectivos/comedor-popular.jpeg';
+import biblioteca from '../assets/pfp/colectivos/biblioteca-popular.jpeg';
+import lucia from '../assets/pfp/colaboradores/lucia.jpg';
+import beto from '../assets/pfp/colaboradores/backendbeto.jpeg';
+import martin from '../assets/pfp/colaboradores/martin.jpeg';
+import sol from '../assets/pfp/colaboradores/sol.jpeg';
+import fernanda from '../assets/pfp/colaboradores/fernanda.avif';
+import ana from '../assets/pfp/colaboradores/ana.jpeg';
+import pixel from '../assets/pfp/colaboradores/pixel.jpeg';
+import eliminado from '../assets/pfp/colaboradores/eliminado.jpg';
 
 const FOTOS = {
   // Colectivos (c…1 a c…5)

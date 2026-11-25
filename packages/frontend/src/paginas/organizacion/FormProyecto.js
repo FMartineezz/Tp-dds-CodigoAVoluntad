@@ -27,7 +27,7 @@
  *
  * Una idea clave del archivo: React exige NO modificar listas ni objetos que ya están
  * en el estado. Para cambiar algo se arma una copia con el cambio y se la entrega al
- * `set…` correspondiente (ver docs/GLOSARIO.md → Copiar con cambios).
+ * `set…` correspondiente (ver packages/frontend/docs/GLOSARIO.md → Copiar con cambios).
  */
 import { useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -129,7 +129,7 @@ const cambio = (a, b) => JSON.stringify(a) !== JSON.stringify(b);
 function PerfilesEditor({ value, onChange, errores, habilidades }) {
   // Cambia UNO O VARIOS campos de UN perfil sin tocar los demás.
   function cambiarPerfil(indice, cambios) {
-    // (.map y `...` → docs/GLOSARIO.md → Métodos de arrays / Copiar con cambios)
+    // (.map y `...` → packages/frontend/docs/GLOSARIO.md → Métodos de arrays / Copiar con cambios)
     onChange(value.map((perfil, posicion) => (posicion === indice ? { ...perfil, ...cambios } : perfil)));
   }
 
@@ -396,7 +396,7 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
 
   // Avance del proyecto: suma de los porcentajes de los logros. No puede pasar de 100
   // (ERR-EST-113). `Number(...) || 0` toma 0 si el campo está vacío.
-  // (.reduce → docs/GLOSARIO.md → Métodos de arrays)
+  // (.reduce → packages/frontend/docs/GLOSARIO.md → Métodos de arrays)
   const avance = logros.reduce((suma, logro) => suma + (Number(logro.porcentaje) || 0), 0);
 
   // ───── 3. ACCIONES ─────

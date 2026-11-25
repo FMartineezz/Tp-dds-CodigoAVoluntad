@@ -28,6 +28,8 @@ export class PersonaColaboradoraController {
       req.body.contactos,
       req.body.bloquearMensajeInterno,
       req.body.redesSociales,
+      req.body.foto,
+      req.body.sitioWeb,
     );
 
     res.status(201).location(`/colaboradoras/${persona.id}`).json(persona);
@@ -75,6 +77,23 @@ export class PersonaColaboradoraController {
     const persona = await this.personaColaboradoraService.obtenerPersonaColaboradoraPorId(id);
 
     res.status(200).json(persona);
+  };
+
+  /**
+   * GET /colaboradoras/:id/contactos?colaboradoraId | ?colectivoId → 200 con la lista de
+   * contactos, o 403 si quien pide no tiene acceso.
+   * PENDIENTE (login): quién pide viaja por query porque todavía no hay sesión. Cuando se
+   * integre feature/login, sale del token (req.user) y se sacan estos parámetros.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
+  obtenerContactos = async (req, res) => {
+    const contactos = await this.personaColaboradoraService.obtenerContactos(req.params.id, {
+      colaboradoraId: req.query.colaboradoraId,
+      colectivoId: req.query.colectivoId,
+    });
+
+    res.status(200).json(contactos);
   };
 
   /**
