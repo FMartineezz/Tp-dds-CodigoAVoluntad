@@ -7,7 +7,7 @@
  *   GET /proyectos/:id/colaboraciones (las activas) y las valoraciones ya hechas de
  *   GET /colectivo/:id/valoraciones?direccion=emitidas (ver api/organizacion.js).
  *   Desvincular = DELETE /colaboraciones/:id?por=colectivo. Valorar = POST /valoraciones.
- * Para modificarla: un dato más en la tarjeta = otro elemento dentro de .mi.
+ * Para modificarla: un dato más en la tarjeta = otro elemento dentro de .identidad.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
  *   1. DATOS Y ESTADO: proyecto, equipo y valoraciones del backend; a quién se quiere
@@ -35,6 +35,7 @@ import { NoEncontrado } from '../../paginas/sistema/Errores.js';
 import { esNoEncontrado, obtenerMiProyecto } from './auxiliares.js';
 import s from './Organizacion.module.css';
 import sh from '../../plantillas/disposicion.module.css';
+import { fotoDe } from '../../datos/fotos.js';
 
 // Pide a la vez el proyecto (solo si es mío), su equipo y las colaboraciones ya valoradas.
 async function cargarEquipo(proyectoId, colectivoId) {
@@ -47,7 +48,7 @@ async function cargarEquipo(proyectoId, colectivoId) {
 }
 
 // Nombre para mostrar de un integrante (las colaboraciones anónimas no traen a la persona).
-const nombreDe = (integrante) => integrante?.persona?.nombre ?? 'Colaboradora anónima';
+const nombreDe = (integrante) => integrante?.persona?.nombre ?? 'Colaborador anónimo';
 
 export default function EquipoOrg() {
   // ───── 1. DATOS Y ESTADO ─────
@@ -205,8 +206,8 @@ export default function EquipoOrg() {
       <Grid>
         {equipo.map((integrante) => (
           <div key={integrante.id} className={s.miembro}>
-            <div className={s.mi}>
-              <Avatar nombre={nombreDe(integrante)} size={56} />
+            <div className={s.identidad}>
+              <Avatar nombre={nombreDe(integrante)} size={56} foto={fotoDe(integrante.persona?.id)} />
               <div>
                 {/* Si no es anónima, el nombre lleva a su perfil. */}
                 {integrante.persona ? (

@@ -36,6 +36,7 @@ import { mensajeDeError } from '../../api/errores.js';
 import { NoEncontrado } from '../../paginas/sistema/Errores.js';
 import s from './Colectivos.module.css';
 import d from './DetalleColectivo.module.css';
+import { fotoDe } from '../../datos/fotos.js';
 
 // Cuántas tarjetas de proyecto se piden por página.
 const PROYECTOS_POR_PAGINA = 6;
@@ -201,12 +202,12 @@ export default function DetalleColectivo() {
               tiene enlace de donaciones propio (solo los proyectos tienen urlDonaciones). */}
           {/* «Denunciar» aparece solo si es una colaboradora que participa con este colectivo */}
           {puedeDenunciar && (
-            <div className={d.acts}>
+            <div className={d.acciones}>
               <Button variant="link" disabled={enviando} onClick={alTocarDenunciar}>Denunciar</Button>
             </div>
           )}
         </div>
-        <Avatar nombre={colectivo.nombre} size={120} square />
+        <Avatar nombre={colectivo.nombre} size={120} square foto={fotoDe(colectivo.id)} />
       </header>
 
       {/* BLOQUE: Sus proyectos — tarjetas de los proyectos del colectivo */}
@@ -242,12 +243,12 @@ export default function DetalleColectivo() {
       {/* BLOQUE: Valoraciones — opiniones recibidas; se ve solo si hay al menos una.
           Por privacidad el backend no dice quién escribió cada valoración. */}
       {valoraciones.length > 0 && (
-        <section aria-labelledby="vals" className={d.vals}>
+        <section aria-labelledby="vals" className={d.valoraciones}>
           <Heading level={2} id="vals">Valoraciones</Heading>
           <ul>
             {valoraciones.map((valoracion) => (
               <li key={valoracion.id}>
-                <div className={d.vh}>
+                <div className={d.valoracionCabecera}>
                   <b>
                     Una colaboradora
                     {valoracion.fecha && ` · ${valoracion.fecha.toLocaleDateString('es-AR')}`}

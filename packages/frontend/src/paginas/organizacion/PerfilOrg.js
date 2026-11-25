@@ -27,6 +27,7 @@ import { Alert, ConfirmDialog, RowsSkeleton } from '../../moleculas';
 import { useAuth } from '../../contexto';
 import { usePedido } from '../../hooks';
 import { mensajeDeError } from '../../api/errores.js';
+import { llevarAlPrimerError } from '../../utilidades/llevarAlPrimerError.js';
 import {
   REDES_SOCIALES,
   TIPOS_DE_COLECTIVO,
@@ -36,6 +37,7 @@ import {
 } from '../../api/organizacion.js';
 import s from './Organizacion.module.css';
 import sh from '../../plantillas/disposicion.module.css';
+import { fotoDe } from '../../datos/fotos.js';
 
 // ───── A. PerfilOrg ─────
 export default function PerfilOrg() {
@@ -156,7 +158,10 @@ function FormularioOrg({ colectivo }) {
     setErrores(erroresNuevos);
     setSeGuardo(false);
     setErrorGuardado('');
-    if (Object.keys(erroresNuevos).length) return;
+    if (Object.keys(erroresNuevos).length) {
+      llevarAlPrimerError(e.currentTarget);
+      return;
+    }
 
     // El cuerpo del PATCH, con los nombres que usa el backend. Las redes viajan como lista
     // [{ tipo, url }] solo con las que tienen enlace (la lista reemplaza a la anterior).
@@ -217,15 +222,15 @@ function FormularioOrg({ colectivo }) {
 
         <div className={sh.form}>
           {/* Logo: la inicial del nombre (el backend no guarda imágenes). */}
-          <div className={sh.r2}>
-            <span className={s.lab}>Logo</span>
-            <div className={sh.foto}>
-              <Avatar nombre={datos.nombre || 'O'} size={96} square />
+          <div className={sh.twoRows}>
+            <span className={s.etiqueta}>Logo</span>
+            <div className={sh.photo}>
+              <Avatar nombre={datos.nombre || 'O'} size={96} square foto={fotoDe(id)} />
             </div>
           </div>
           <Field
             as="textarea"
-            className={sh.r2}
+            className={sh.twoRows}
             label="Descripción"
             placeholder="Qué hace la organización y a quién ayuda…"
             value={datos.desc}
@@ -275,7 +280,7 @@ function FormularioOrg({ colectivo }) {
         </div>
 
         {/* BLOQUE: Botones — guardar (con indicador de carga) o cancelar */}
-        <div className={sh.formActs}>
+        <div className={sh.formActions}>
           <Button type="submit" loading={guardando}>Guardar</Button>
           <Button as={Link} to="/org" variant="secondary">Cancelar</Button>
         </div>

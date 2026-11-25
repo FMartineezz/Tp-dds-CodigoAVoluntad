@@ -41,8 +41,10 @@ import { usePedido } from '../../hooks';
 import { guardarPerfil, obtenerPerfil } from '../../api/colaboradora.js';
 import { obtenerHabilidades } from '../../api/habilidades.js';
 import { mensajeDeError } from '../../api/errores.js';
+import { llevarAlPrimerError } from '../../utilidades/llevarAlPrimerError.js';
 import s from './Colaboradora.module.css';
 import sh from '../../plantillas/disposicion.module.css'; // sh = layout común (.page, .form…)
+import { fotoDe } from '../../datos/fotos.js';
 
 // Pide a la vez el perfil y el catálogo de habilidades (para las opciones del TagPicker).
 async function pedirPerfilYCatalogo(id) {
@@ -168,6 +170,7 @@ function FormularioDePerfil({ id, inicial, opciones }) {
 
     const hayErrores = Object.keys(erroresNuevos).length > 0;
     if (hayErrores) {
+      llevarAlPrimerError(evento.currentTarget);
       return;
     }
 
@@ -204,20 +207,20 @@ function FormularioDePerfil({ id, inicial, opciones }) {
         </Alert>
       )}
 
-      {/* BLOQUE: campos — grilla; sh.r2 / sh.mid / sh.full controlan cuánto ocupa cada uno */}
+      {/* BLOQUE: campos — grilla; sh.twoRows / sh.centered / sh.fullWidth controlan cuánto ocupa cada uno */}
       {/* `optional` = campo no obligatorio; error={errores.x} muestra el mensaje solo si existe */}
       <div className={sh.form}>
         {/* Avatar con la inicial del nombre de fantasía (o «?» si está vacío; `||` = «o, si no,
            usá»). No hay foto: el backend todavía no guarda imágenes. */}
-        <div className={sh.r2}>
-          <span className={s.lab}>Foto</span>
-          <div className={sh.foto}>
-            <Avatar nombre={datos.fantasia || '?'} size={96} />
+        <div className={sh.twoRows}>
+          <span className={s.etiqueta}>Foto</span>
+          <div className={sh.photo}>
+            <Avatar nombre={datos.fantasia || '?'} size={96} foto={fotoDe(id)} />
           </div>
         </div>
         <Field
           as="textarea"
-          className={sh.r2}
+          className={sh.twoRows}
           label="Sobre vos"
           placeholder="Contá en pocas líneas quién sos y qué te gusta hacer…"
           value={datos.bio}
@@ -274,12 +277,12 @@ function FormularioDePerfil({ id, inicial, opciones }) {
           onChange={alCambiarCampo('linkedin')}
           error={errores.linkedin}
         />
-        <div className={sh.mid}>
+        <div className={sh.centered}>
           <Checkbox checked={datos.mensajes} onChange={alCambiarCampo('mensajes')}>
             Permitir mensajes de organizaciones
           </Checkbox>
         </div>
-        <div className={sh.full}>
+        <div className={sh.fullWidth}>
           <ContactosEditor value={contactos} onChange={alCambiarContactos} />
           <Text variant="small">
             Por privacidad no mostramos los contactos que ya guardaste. Si agregás alguno acá,
@@ -290,7 +293,7 @@ function FormularioDePerfil({ id, inicial, opciones }) {
       </div>
 
       {/* BLOQUE: botones finales — guardar (con «cargando» mientras guarda) o cancelar */}
-      <div className={sh.formActs}>
+      <div className={sh.formActions}>
         <Button type="submit" loading={guardando}>Guardar cambios</Button>
         <Button as={Link} to="/panel" variant="secondary">Cancelar</Button>
       </div>

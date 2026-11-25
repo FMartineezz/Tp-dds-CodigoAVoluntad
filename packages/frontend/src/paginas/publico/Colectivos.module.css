@@ -6,7 +6,7 @@
 .filtros { display: grid; gap: var(--space-5); padding: var(--space-5); background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius); }
 .grupo { border: 0; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
 .grupo legend { padding: 0; margin-bottom: var(--space-2); font-weight: 600; font-size: var(--text-small); }
-.dir { display: grid; gap: var(--space-5); }
+.directorio { display: grid; gap: var(--space-5); }
 .count { font-size: var(--text-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); }
 .letra { font: 900 3rem / 1 var(--font-display); font-stretch: 70%; color: var(--red-500); margin-bottom: var(--space-3); border-bottom: var(--border); padding-bottom: var(--space-2); }
 .lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }

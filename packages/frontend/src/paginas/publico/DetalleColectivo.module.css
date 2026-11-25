@@ -4,8 +4,8 @@
 .tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .links { display: flex; gap: var(--space-5); flex-wrap: wrap; }
 .links a { color: var(--color-accent); font-weight: 600; min-height: 2.75rem; display: inline-flex; align-items: center; }
-.acts { display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap; }
-.vals { display: grid; gap: var(--space-4); }
-.vals ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
-.vals li { display: grid; gap: var(--space-2); padding: var(--space-4) var(--space-5); background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius); }
-.vh { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
+.acciones { display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap; }
+.valoraciones { display: grid; gap: var(--space-4); }
+.valoraciones ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.valoraciones li { display: grid; gap: var(--space-2); padding: var(--space-4) var(--space-5); background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius); }
+.valoracionCabecera { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }

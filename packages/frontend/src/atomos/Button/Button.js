@@ -33,7 +33,7 @@ export default function Button({
 
   return (
     <Tag
-      className={cx(s.btn, s[variant], size === 'lg' && s.lg, fullWidth && s.full, className)}
+      className={cx(s.button, s[variant], size === 'lg' && s.large, fullWidth && s.fullWidth, className)}
       data-variant={variant}
       aria-disabled={bloqueado || undefined}
       aria-busy={loading || undefined}

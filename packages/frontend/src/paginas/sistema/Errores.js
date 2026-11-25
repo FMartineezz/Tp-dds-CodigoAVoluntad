@@ -27,16 +27,16 @@ import s from './Errores.module.css';
 // Desestructurar).
 function Pantalla({ big, code, titulo, msg, children }) {
   return (
-    <div className={`container ${s.err}`}>
+    <div className={`container ${s.pantalla}`}>
       {/* BLOQUE: número gigante — decorativo, por eso aria-hidden (los lectores de pantalla
          lo saltean) */}
-      <div className={s.big} aria-hidden="true">{big}</div>
+      <div className={s.numero} aria-hidden="true">{big}</div>
       {/* BLOQUE: texto — código del error, título, mensaje y botones */}
       <div className={s.body}>
         <span className={s.code}>{code}</span>
         <Heading level={1} size="h1">{titulo}</Heading>
         <Text>{msg}</Text>
-        <div className={s.btns}>{children}</div>
+        <div className={s.botones}>{children}</div>
       </div>
       {/* BLOQUE: sello — adorno visual «Fuera de mapa» */}
       <Stamp className={s.stamp}>Fuera<br />de<br />mapa</Stamp>

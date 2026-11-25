@@ -1,8 +1,10 @@
 /**
  * PANTALLA DetalleProyecto
  * Ruta: /proyectos/:id   ·   Quién la ve: Todas (acciones según rol)
- * Qué muestra: Resumen, Perfiles (cupo, equipo, postulación) y Avance (logros) en pestañas.
- * Para modificarla: una pestaña nueva = un objeto en el array de <Tabs> + un bloque {tab === "x" && …}.
+ * Qué muestra: Todo en una página, sin pestañas: cabecera con avance y botón de postular;
+ *   a la izquierda la descripción y una tarjeta por perfil buscado; a la derecha una ficha
+ *   con la búsqueda, enlaces, equipo y logros.
+ * Para modificarla: un dato más de la ficha = otra <section> dentro de <aside>.
  * De dónde salen los datos (todo del backend, ver api/proyectos.js y api/colectivos.js):
  *   · el proyecto con sus perfiles y logros → GET /proyectos/:id
  *   · el nombre del colectivo               → GET /colectivos/:id
@@ -24,12 +26,12 @@
  *   3. ACCIONES        → funciones para postularse, confirmar la postulación, denunciar
  *                        y decidir qué botón mostrar en cada fila de la tabla de perfiles.
  *   4. LO QUE SE DIBUJA → migas de pan, cabecera con botón de postular, avisos,
- *                        pestañas (Resumen / Perfiles / Avance) y las dos ventanas emergentes.
+ *                        cuerpo (perfiles + ficha) y las dos ventanas emergentes.
  */
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Heading, Icon, Progress, StatusBadge, Tag, Text } from '../../atomos';
-import { Alert, Crumbs, RowsSkeleton, Tabs } from '../../moleculas';
+import { Alert, Crumbs, RowsSkeleton } from '../../moleculas';
 import { DenunciaDialog, PostularDialog } from '../../organismos';
 import { useAuth } from '../../contexto';
 import { usePedido } from '../../hooks';
@@ -40,13 +42,6 @@ import { denunciarColaboracion, obtenerColaboracionesDePersona } from '../../api
 import { mensajeDeError } from '../../api/errores.js';
 import { NoEncontrado } from '../../paginas/sistema/Errores.js';
 import s from './Detalle.module.css';
-
-// Las tres pestañas de la pantalla: `id` es el valor interno, `label` el texto que se ve.
-const PESTANAS = [
-  { id: 'resumen', label: 'Resumen' },
-  { id: 'perfiles', label: 'Perfiles' },
-  { id: 'avance', label: 'Avance' },
-];
 
 // Fecha del backend ('2026-11-30T…') → texto corto en castellano ('30/11/2026').
 function fechaCorta(fecha) {
@@ -94,8 +89,6 @@ export default function DetalleProyecto() {
   const { cargando, datos, error } = usePedido(() => cargarProyecto(id), [id]);
   // Pedido de la sesión: a qué perfiles ya se postuló y si participó del proyecto.
   const { datos: sesion } = usePedido(() => cargarSesion(rol, idCuenta), [rol, idCuenta]);
-  // Pestaña visible: 'resumen', 'perfiles' o 'avance'. Empieza en 'resumen'; la cambia <Tabs>.
-  const [pestanaActiva, setPestanaActiva] = useState('resumen');
   // Perfiles a los que se postuló EN ESTA VISITA (los anteriores salen de `sesion`).
   // Objeto con el id del perfil como clave, ej. { '6afe…': true }. Lo cambia alConfirmarPostulacion.
   const [perfilesPostulados, setPerfilesPostulados] = useState({});
@@ -287,71 +280,46 @@ export default function DetalleProyecto() {
     setDenunciaAbierta(false);
   }
 
-  // Dibuja una fila de la tabla de «Perfiles» (se llama una vez por cada perfil del proyecto).
-  function filaDePerfil(perfil) {
+  // Dibuja la tarjeta de un perfil buscado (se llama una vez por cada perfil del proyecto).
+  function tarjetaDePerfil(perfil) {
     const ocupantesDelPerfil = ocupantesDe(perfil);
     const perfilCompleto = !tieneLugar(perfil);
-    const hayOcupantes = ocupantesDelPerfil.length > 0;
-    const hayOpcionales = perfil.opcionales.length > 0;
-    // Cupo: «1/2» si el perfil tiene máximo; si no, solo cuántos hay.
-    const textoDeCupo =
+    // Lugares: «1 de 2 ocupados» si el perfil tiene cupo; si no, solo cuántos hay.
+    const textoDeLugares =
       perfil.cantidadMaxima == null
-        ? `${ocupantesDelPerfil.length}`
-        : `${ocupantesDelPerfil.length}/${perfil.cantidadMaxima}`;
+        ? `${ocupantesDelPerfil.length} en el equipo · sin cupo máximo`
+        : `${ocupantesDelPerfil.length} de ${perfil.cantidadMaxima} lugares ocupados`;
 
     return (
-      <tr key={perfil.id}>
-        {/* Columna 1: el perfil. El backend no tiene un «nombre» de perfil: se usa la descripción. */}
-        <td data-l="Perfil">
-          <b>{perfil.descripcion}</b>
-        </td>
-
-        {/* Columna 2: habilidades requeridas y, si hay, las opcionales */}
-        <td data-l="Habilidades">
-          <span className={s.tags}>
-            {perfil.requeridas.map((habilidad) => (
-              <Tag key={habilidad} tone="sand">{habilidad}</Tag>
-            ))}
-          </span>
-          {/* Se ve solo si el perfil tiene habilidades opcionales */}
-          {hayOpcionales && (
-            <span className={s.opc}>Opcionales: {perfil.opcionales.join(', ')}</span>
-          )}
-        </td>
-
-        {/* Columna 3: compromiso de tiempo y modalidad de trabajo */}
-        <td data-l="Compromiso">
-          {perfil.tiempo}
-          <span className={s.tags}>
-            <Tag>{perfil.modalidad}</Tag>
-          </span>
-        </td>
-
-        {/* Columna 4: cuántos lugares están ocupados y quiénes son */}
-        <td data-l="Equipo">
-          <b>{textoDeCupo}</b>
-          {/* Tres casos: no se pudo consultar el equipo / hay integrantes / no hay nadie */}
-          {ocupantes === null ? (
-            <span className={s.opc}>No pudimos consultar el equipo</span>
-          ) : hayOcupantes ? (
-            <ul className={s.ocup}>
-              {ocupantesDelPerfil.map((ocupante) => (
-                <li key={ocupante.colaboracionId}>{ocupante.nombre}</li>
+      <article key={perfil.id} className={s.perfil}>
+        {/* El backend no tiene un «nombre» de perfil: se usa la descripción */}
+        <Heading level={3} size="h3">{perfil.descripcion}</Heading>
+        <dl className={s.datos}>
+          <dt>Habilidades</dt>
+          <dd>
+            <span className={s.tags}>
+              {perfil.requeridas.map((habilidad) => (
+                <Tag key={habilidad} tone="sand">{habilidad}</Tag>
               ))}
-            </ul>
-          ) : (
-            <span className={s.opc}>Sin integrantes todavía</span>
-          )}
-        </td>
-
-        {/* Columna 5: si el perfil está completo se ve «cerrado»;
-            si no, el botón que corresponda */}
-        <td className={s.act}>
-          {perfilCompleto ? <StatusBadge status="cerrado" /> : accionDelPerfil(perfil)}
-        </td>
-      </tr>
+            </span>
+            {perfil.opcionales.length > 0 && (
+              <span className={s.nota}>Suman: {perfil.opcionales.join(', ')}</span>
+            )}
+          </dd>
+          <dt>Tiempo</dt>
+          <dd>{perfil.tiempo}</dd>
+          <dt>Modalidad</dt>
+          <dd>{perfil.modalidad}</dd>
+          <dt>Lugares</dt>
+          <dd>{textoDeLugares}</dd>
+        </dl>
+        <div>{perfilCompleto ? <StatusBadge status="cerrado" /> : accionDelPerfil(perfil)}</div>
+      </article>
     );
   }
+
+  // Todas las personas del equipo, de todos los perfiles (para la ficha del costado).
+  const equipo = proyecto.perfiles.flatMap(ocupantesDe);
 
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
@@ -368,21 +336,13 @@ export default function DetalleProyecto() {
           <Text variant="small">
             <Link to={`/colectivos/${proyecto.colectivoId}`}>{proyecto.colectivo}</Link>
           </Text>
+          {/* Avance: suma de los logros cumplidos */}
+          <div className={s.avance}>
+            <span>Avance</span>
+            <Progress value={proyecto.avance} />
+            <b>{proyecto.avance} %</b>
+          </div>
           <div className={s.tags}>
-            {/* La etiqueta cambia según el estado de la búsqueda (con fecha límite si tiene) */}
-            <Tag tone={busquedaAbierta ? 'sand' : 'outline'}>
-              {proyecto.finalizado
-                ? 'Proyecto finalizado'
-                : !busquedaAbierta
-                  ? 'Búsqueda cerrada'
-                  : proyecto.fechaLimiteBusqueda
-                    ? `Búsqueda abierta hasta ${fechaCorta(proyecto.fechaLimiteBusqueda)}`
-                    : 'Búsqueda abierta'}
-            </Tag>
-            {/* Fecha de cierre automático: solo si el colectivo la cargó y todavía no terminó */}
-            {proyecto.fechaCierre && !proyecto.finalizado && (
-              <Tag>Cierra automáticamente el {fechaCorta(proyecto.fechaCierre)}</Tag>
-            )}
             {/* «Denunciar al colectivo» aparece solo si es una colaboradora que participa
                 en este proyecto (`&&`: si es verdadero se dibuja; ver
                 docs/GLOSARIO.md → Renderizado condicional) */}
@@ -430,84 +390,87 @@ export default function DetalleProyecto() {
         </Alert>
       )}
 
-      {/* BLOQUE: Pestañas — Resumen / Perfiles / Avance; se ve el contenido de la activa */}
-      <Tabs tabs={PESTANAS} value={pestanaActiva} onChange={setPestanaActiva}>
-        {/* Pestaña «Resumen»: descripción, habilidades y modalidades del proyecto */}
-        {pestanaActiva === 'resumen' && (
-          <>
-            <Text variant="prose">{proyecto.descripcion}</Text>
-            <div className={s.tags}>
-              {proyecto.habilidades.map((habilidad) => (
-                <Tag key={habilidad} tone="sand">{habilidad}</Tag>
-              ))}
-            </div>
-            <div className={s.tags}>
-              {proyecto.modalidad.map((modalidad) => (
-                <Tag key={modalidad}>{modalidad}</Tag>
-              ))}
-            </div>
-            {/* Enlaces externos que cargó el colectivo (cada uno solo si existe) */}
-            <div className={s.tags}>
+      {/* BLOQUE: Cuerpo — sin pestañas: a la izquierda qué es y dónde sumarse,
+          a la derecha la ficha con fechas, enlaces, equipo y logros */}
+      <div className={s.cuerpo}>
+        <div className={s.principal}>
+          <Text variant="prose">{proyecto.descripcion}</Text>
+          <section className={s.perfiles} aria-labelledby="h-perfiles">
+            <Heading level={2} size="h3" id="h-perfiles">Perfiles buscados</Heading>
+            {proyecto.perfiles.map(tarjetaDePerfil)}
+          </section>
+        </div>
+
+        <aside className={s.ficha} aria-label="Ficha del proyecto">
+          <section aria-labelledby="h-busqueda">
+            <Heading level={2} size="h4" id="h-busqueda">Búsqueda</Heading>
+            <Text variant="small">
+              {proyecto.finalizado
+                ? 'Proyecto finalizado'
+                : !busquedaAbierta
+                  ? 'Búsqueda cerrada'
+                  : proyecto.fechaLimiteBusqueda
+                    ? `Recibe postulaciones hasta el ${fechaCorta(proyecto.fechaLimiteBusqueda)}`
+                    : 'Recibe postulaciones sin fecha límite'}
+            </Text>
+            {/* Fecha de cierre automático: solo si el colectivo la cargó y todavía no terminó */}
+            {proyecto.fechaCierre && !proyecto.finalizado && (
+              <Text variant="small">Cierra el {fechaCorta(proyecto.fechaCierre)}</Text>
+            )}
+          </section>
+
+          {/* Enlaces externos que cargó el colectivo (cada uno solo si existe) */}
+          {(proyecto.urlSistema || proyecto.urlDonaciones) && (
+            <section aria-labelledby="h-enlaces">
+              <Heading level={2} size="h4" id="h-enlaces">Enlaces</Heading>
               {proyecto.urlSistema && (
-                <Button variant="link" as="a" href={proyecto.urlSistema} target="_blank" rel="noopener noreferrer">
-                  Ver el sistema en funcionamiento
-                </Button>
+                <a href={proyecto.urlSistema} target="_blank" rel="noopener noreferrer">
+                  Ver el sistema funcionando
+                </a>
               )}
               {proyecto.urlDonaciones && (
-                <Button variant="link" as="a" href={proyecto.urlDonaciones} target="_blank" rel="noopener noreferrer">
+                <a href={proyecto.urlDonaciones} target="_blank" rel="noopener noreferrer">
                   Colaborar con una donación
-                </Button>
+                </a>
               )}
-            </div>
-          </>
-        )}
+            </section>
+          )}
 
-        {/* Pestaña «Perfiles»: tabla con una fila por perfil (ver filaDePerfil) */}
-        {pestanaActiva === 'perfiles' && (
-          <table className={s.tabla}>
-            <thead>
-              <tr>
-                <th>Perfil</th>
-                <th>Habilidades</th>
-                <th>Compromiso</th>
-                <th>Equipo</th>
-                <th><span className="sr-only">Acción</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {proyecto.perfiles.map(filaDePerfil)}
-            </tbody>
-          </table>
-        )}
+          <section aria-labelledby="h-equipo">
+            <Heading level={2} size="h4" id="h-equipo">Equipo</Heading>
+            {ocupantes === null && <Text variant="small">No pudimos consultar el equipo.</Text>}
+            {ocupantes !== null && equipo.length === 0 && (
+              <Text variant="small">Todavía nadie se sumó.</Text>
+            )}
+            {equipo.length > 0 && (
+              <ul className={s.integrantes}>
+                {equipo.map((integrante) => (
+                  <li key={integrante.colaboracionId}>{integrante.nombre}</li>
+                ))}
+              </ul>
+            )}
+          </section>
 
-        {/* Pestaña «Avance»: porcentaje, barra de progreso y lista de logros.
-            En el backend un logro es un hito YA cumplido con su porcentaje: el avance es la
-            suma de esos porcentajes (ver avanceDelProyecto en api/proyectos.js). */}
-        {pestanaActiva === 'avance' && (
-          <>
-            <div className={s.avance}><b>{proyecto.avance} %</b><span>finalizado</span></div>
-            <Progress value={proyecto.avance} />
+          {/* Logros: en el backend un logro es un hito YA cumplido con su porcentaje; el
+              avance de la cabecera es la suma (ver avanceDelProyecto en api/proyectos.js) */}
+          <section aria-labelledby="h-logros">
+            <Heading level={2} size="h4" id="h-logros">Logros</Heading>
             {proyecto.logros.length === 0 ? (
               <Text variant="small">Todavía no se cargó ningún logro.</Text>
             ) : (
               <ul className={s.hitos}>
                 {proyecto.logros.map((logro) => (
-                  // Todos los logros están cumplidos: llevan la clase `done` y el tilde.
-                  <li key={logro._id} className={s.done}>
+                  <li key={logro._id}>
                     <span className={s.check}>
-                      <Icon name="check" size={12} />
+                      <Icon name="check" size={10} />
                     </span>
                     <span>
-                      {logro.descripcion}
-                      <span className="sr-only"> (completado)</span>
-                      {/* Enlace al código de ese logro, si lo cargaron */}
-                      {logro.urlCodigoFuente && (
-                        <>
-                          {' · '}
-                          <a href={logro.urlCodigoFuente} target="_blank" rel="noopener noreferrer">
-                            código
-                          </a>
-                        </>
+                      {logro.urlCodigoFuente ? (
+                        <a href={logro.urlCodigoFuente} target="_blank" rel="noopener noreferrer">
+                          {logro.descripcion}
+                        </a>
+                      ) : (
+                        logro.descripcion
                       )}
                     </span>
                     <b>{logro.porcentaje} %</b>
@@ -515,12 +478,9 @@ export default function DetalleProyecto() {
                 ))}
               </ul>
             )}
-            <Text variant="small">
-              El avance es la suma de los porcentajes de los logros cumplidos.
-            </Text>
-          </>
-        )}
-      </Tabs>
+          </section>
+        </aside>
+      </div>
 
       {/* BLOQUE: Ventanas emergentes — postularse y denunciar
           (cada una se ve solo si está abierta) */}

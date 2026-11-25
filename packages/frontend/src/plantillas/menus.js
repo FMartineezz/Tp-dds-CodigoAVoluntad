@@ -13,7 +13,7 @@ export const MENUS = {
   org: [
     ["/org", "Panel", true],
     ["/org/proyectos", "Mis proyectos"],
-    ["/org/colaboradoras", "Colaboradoras"],
+    ["/org/colaboradoras", "Colaboradores"],
     ["/org/mensajes", "Mensajes"],
   ],
 };
@@ -25,7 +25,7 @@ export const ICONOS = {
 };
 
 // Etiquetas más cortas para la barra inferior del móvil (opcional).
-export const ETIQUETA_MOVIL = { "Mis proyectos": "Proyectos", Colaboradoras: "Personas" };
+export const ETIQUETA_MOVIL = { "Mis proyectos": "Proyectos", Colaboradores: "Personas" };
 
 // Enlaces del pie de página.
 export const ENLACES_PIE = [

@@ -35,7 +35,7 @@ export function LayoutPrincipal() {
   }, [rol, id, pathname]);
 
   return (
-    <div className={rol ? s.conBottom : undefined}>
+    <div className={rol ? s.conBarraInferior : undefined}>
       <a className="skip-link" href="#contenido">
         Saltar al contenido
       </a>

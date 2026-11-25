@@ -7,14 +7,12 @@
  *   · GET /proyectos?pagina=&limite=                         (ver api/proyectos.js)
  *   · GET /colaboradoras/:id/proyectos-acordes?pagina=&limite= (ver api/colaboradora.js)
  *
- * ¿Y la búsqueda, los filtros por estado/colectivo/habilidad y el orden?
- *   PENDIENTE (backend): GET /proyectos no acepta filtros ni orden. Como el backend manda
- *   UNA página por vez, filtrar en el navegador solo filtraría esos 6 proyectos y el contador
- *   y el paginador quedarían mintiendo. Por eso se sacaron de la pantalla hasta que el backend
- *   acepte, por ejemplo: GET /proyectos?busqueda=&estado=abierto|cerrado&colectivo=:id
- *   &habilidades=id1,id2&orden=recientes|avance|titulo&pagina=&limite=
- *   Para sumar uno cuando exista: un useState para el valor, pasarlo a obtenerProyectos (y
- *   agregarlo a la lista de dependencias de usePedido) y un <Field> en la sección «Filtros».
+ * Filtros (como en LinkedIn): búsqueda, estado, modalidad y habilidad. Los resuelve el
+ *   backend (GET /proyectos?busqueda=&estado=&modalidad=&habilidad=), así el contador y el
+ *   paginador cuentan solo lo filtrado. Para sumar uno: un campo más en FILTROS_VACIOS,
+ *   un <Field> en la sección «Filtros» y que el backend lo acepte.
+ *   Con «solo los que encajan» se usa el endpoint de acordes, que no tiene filtros: por eso
+ *   los filtros se deshabilitan mientras esa casilla está tildada.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
  *   1. DATOS Y ESTADO  → página actual y casilla «solo los que encajan» (useState), la sesión,
@@ -25,12 +23,13 @@
  *                        carga, aviso si falló, mensaje si no hay proyectos o las tarjetas.
  */
 import { useState } from 'react';
-import { Checkbox, Heading, Text } from '../../atomos';
+import { Button, Checkbox, Field, Heading, Text } from '../../atomos';
 import { Alert, CardsSkeleton, Crumbs, Grid, Pager } from '../../moleculas';
 import { ProyectoCard } from '../../organismos';
 import { useAuth } from '../../contexto';
-import { usePedido } from '../../hooks';
-import { obtenerProyectos } from '../../api/proyectos.js';
+import { useDemorado, usePedido } from '../../hooks';
+import { MODALIDADES, obtenerProyectos } from '../../api/proyectos.js';
+import { obtenerHabilidades } from '../../api/habilidades.js';
 import { obtenerProyectosAcordes } from '../../api/colaboradora.js';
 import { mensajeDeError } from '../../api/errores.js';
 import s from './Proyectos.module.css';
@@ -38,6 +37,12 @@ import s from './Proyectos.module.css';
 // Cuántas tarjetas de proyecto entran en cada página del listado (es el `limite` que se
 // le pide al backend).
 const POR_PAGINA = 6;
+
+// Filtros sin completar: '' en un filtro significa «todos» (no viaja al backend).
+const FILTROS_VACIOS = { busqueda: '', estado: '', modalidad: '', habilidad: '' };
+
+// Opciones del filtro de estado: valor que entiende el backend → texto que se ve.
+const ESTADOS = { abierto: 'Buscan gente', en_curso: 'En curso', finalizado: 'Finalizados' };
 
 export default function Proyectos() {
   // ───── 1. DATOS Y ESTADO ─────
@@ -47,6 +52,12 @@ export default function Proyectos() {
   // true = mostrar solo proyectos que encajan con las habilidades de la colaboradora.
   // Lo cambia el checkbox (solo lo ve una colaboradora).
   const [soloQueEncajan, setSoloQueEncajan] = useState(false);
+  // Lo que eligió en cada filtro (ver FILTROS_VACIOS).
+  const [filtros, setFiltros] = useState(FILTROS_VACIOS);
+  // La búsqueda viaja recién cuando deja de escribir, no en cada tecla.
+  const busquedaDemorada = useDemorado(filtros.busqueda);
+  // Catálogo de habilidades para el desplegable (título que se ve, código que viaja).
+  const { datos: habilidades } = usePedido(() => obtenerHabilidades(), []);
 
   // Rol e id de la sesión: rol 'col' (colaboradora), 'org' (organización) o null (visitante);
   // id = el _id real de esa cuenta en el backend.
@@ -56,15 +67,22 @@ export default function Proyectos() {
   const usarAcordes = rol === 'col' && soloQueEncajan;
 
   // Pide UNA página al backend. Se vuelve a pedir cada vez que cambia algo de la lista
-  // [pagina, usarAcordes, id] (por ejemplo, al tocar el paginador).
+  // de dependencias (por ejemplo, al tocar el paginador o cambiar un filtro).
   // `datos: respuesta` = «lo que viene en `datos` guardalo con el nombre `respuesta`».
   // La respuesta es { resultados: [proyectos…], pagina, limite, total, totalPaginas }.
   const { cargando, datos: respuesta, error } = usePedido(
     () =>
       usarAcordes
         ? obtenerProyectosAcordes(id, { pagina, limite: POR_PAGINA })
-        : obtenerProyectos({ pagina, limite: POR_PAGINA }),
-    [pagina, usarAcordes, id]
+        : obtenerProyectos({
+            pagina,
+            limite: POR_PAGINA,
+            busqueda: busquedaDemorada.trim(),
+            estado: filtros.estado,
+            modalidad: filtros.modalidad,
+            habilidad: filtros.habilidad,
+          }),
+    [pagina, usarAcordes, id, busquedaDemorada, filtros.estado, filtros.modalidad, filtros.habilidad]
   );
 
   // ───── 2. CÁLCULOS ─────
@@ -77,12 +95,28 @@ export default function Proyectos() {
   const hayResultados = proyectos.length > 0;
   // Texto del contador, con singular o plural: «1 proyecto», «66 proyectos».
   const textoContador = `${total} ${total === 1 ? 'proyecto' : 'proyectos'}`;
+  // ¿Tocó algún filtro? (para el botón «Limpiar» y el mensaje de lista vacía)
+  const hayFiltros = Object.values(filtros).some((valor) => valor !== '');
 
   // ───── 3. ACCIONES ─────
   // Se ejecuta al tildar o destildar «solo proyectos que encajan con mis habilidades».
   // `evento.target.checked` es true o false según quedó la casilla. Vuelve a la página 1.
   function alCambiarEncaje(evento) {
     setSoloQueEncajan(evento.target.checked);
+    setPagina(1);
+  }
+
+  // Devuelve la función que guarda el valor de un filtro y vuelve a la página 1.
+  // Ej: onChange={alCambiarFiltro('estado')}
+  function alCambiarFiltro(campo) {
+    return (evento) => {
+      setFiltros({ ...filtros, [campo]: evento.target.value });
+      setPagina(1);
+    };
+  }
+
+  function limpiarFiltros() {
+    setFiltros(FILTROS_VACIOS);
     setPagina(1);
   }
 
@@ -94,22 +128,50 @@ export default function Proyectos() {
       {/* BLOQUE: Encabezado — título de la página y frase de invitación */}
       <header className={s.head}>
         <Heading level={1}>Proyectos</Heading>
-        <Text variant="lead">Elegí uno que te quede cómodo y postulate. Cada hora cuenta.</Text>
+        <Text variant="lead">Tu oficio puede sostener un comedor, una radio o una huerta. Elegí un proyecto y postulate: cada hora que donás cuenta.</Text>
       </header>
 
-      {/* BLOQUE: Filtros — por ahora solo el de «encaje», que el backend sí resuelve.
-          Aparece solo si quien mira es una colaboradora (rol 'col'). `&&` significa: si lo
-          de la izquierda es verdadero, se dibuja lo de la derecha
-          (ver docs/GLOSARIO.md → Renderizado condicional). */}
-      {rol === 'col' && (
-        <section className={s.filters} aria-label="Filtros">
-          <div className={s.encaje}>
+      {/* BLOQUE: Filtros — búsqueda, estado, modalidad y habilidad. La casilla de «encaje»
+          aparece solo si quien mira es una colaboradora (rol 'col'). */}
+      <section className={s.filters} aria-label="Filtros">
+        <Field
+          label="Buscar"
+          type="search"
+          placeholder="Título o descripción"
+          value={filtros.busqueda}
+          onChange={alCambiarFiltro('busqueda')}
+          disabled={usarAcordes}
+        />
+        <Field as="select" label="Estado" value={filtros.estado} onChange={alCambiarFiltro('estado')} disabled={usarAcordes}>
+          <option value="">Todos</option>
+          {Object.entries(ESTADOS).map(([valor, texto]) => (
+            <option key={valor} value={valor}>{texto}</option>
+          ))}
+        </Field>
+        <Field as="select" label="Modalidad" value={filtros.modalidad} onChange={alCambiarFiltro('modalidad')} disabled={usarAcordes}>
+          <option value="">Todas</option>
+          {Object.entries(MODALIDADES).map(([valor, texto]) => (
+            <option key={valor} value={valor}>{texto}</option>
+          ))}
+        </Field>
+        <Field as="select" label="Habilidad" value={filtros.habilidad} onChange={alCambiarFiltro('habilidad')} disabled={usarAcordes}>
+          <option value="">Todas</option>
+          {(habilidades ?? []).map((habilidad) => (
+            <option key={habilidad.codigo} value={habilidad.codigo}>{habilidad.titulo}</option>
+          ))}
+        </Field>
+        <div className={s.encaje}>
+          {rol === 'col' && (
             <Checkbox checked={soloQueEncajan} onChange={alCambiarEncaje}>
               Mostrar solo proyectos abiertos que encajan con mis habilidades
+              {usarAcordes && ' (los otros filtros no se aplican)'}
             </Checkbox>
-          </div>
-        </section>
-      )}
+          )}
+          {hayFiltros && !usarAcordes && (
+            <Button variant="link" onClick={limpiarFiltros}>Limpiar filtros</Button>
+          )}
+        </div>
+      </section>
 
       {/* BLOQUE: Contador — «Cargando…» o cuántos proyectos hay en total */}
       <p className={s.count} role="status">
@@ -146,7 +208,9 @@ export default function Proyectos() {
           <Text>
             {usarAcordes
               ? 'Todavía no hay proyectos abiertos que pidan tus habilidades.'
-              : 'Todavía no se publicó ningún proyecto.'}
+              : hayFiltros
+                ? 'Ningún proyecto coincide con esos filtros. Probá sacando alguno.'
+                : 'Todavía no se publicó ningún proyecto.'}
           </Text>
         </div>
       )}

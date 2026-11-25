@@ -12,7 +12,7 @@
  * backend; si falla, Axios lanza el error y la pantalla lo muestra con mensajeDeError(error).
  * SI EL BACKEND CAMBIA UN NOMBRE: se arregla solo acá, en el adaptador correspondiente.
  */
-import { api } from "./cliente.js";
+import { api, sinVacios } from "./cliente.js";
 import { aProyectoDeLaVista } from "./proyectos.js";
 import { nombresDeHabilidades, obtenerHabilidades, titulos } from "./habilidades.js";
 import { textoDeCuando } from "./mensajes.js";
@@ -289,17 +289,18 @@ export function aColaboradoraDeLaVista(p, nombres) {
 }
 
 // Una página de colaboradoras ya adaptadas: { resultados, pagina, totalPaginas, total }.
-async function paginaDeColaboradoras(ruta, { pagina, limite }) {
+async function paginaDeColaboradoras(ruta, { pagina, limite, ...filtros }) {
   const [{ data }, nombres] = await Promise.all([
-    api.get(ruta, { params: { pagina, limite } }),
+    api.get(ruta, { params: sinVacios({ pagina, limite, ...filtros }) }),
     nombresDeHabilidades(),
   ]);
   return { ...data, resultados: data.resultados.map((p) => aColaboradoraDeLaVista(p, nombres)) };
 }
 
-// GET /colaboradoras?pagina=&limite=
-export function obtenerColaboradoras({ pagina = 1, limite = 10 } = {}) {
-  return paginaDeColaboradoras("/colaboradoras", { pagina, limite });
+// GET /colaboradoras?pagina=&limite= y filtros opcionales: busqueda (nombre o alias),
+// habilidad (código) y aceptaMensajes (true = solo quienes reciben mensajes).
+export function obtenerColaboradoras({ pagina = 1, limite = 10, ...filtros } = {}) {
+  return paginaDeColaboradoras("/colaboradoras", { pagina, limite, ...filtros });
 }
 
 // GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes?pagina=&limite=

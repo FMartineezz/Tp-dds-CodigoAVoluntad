@@ -32,6 +32,7 @@ import { obtenerPostulacionesDelColectivo, resolverPostulacion } from '../../api
 import { NoEncontrado } from '../../paginas/sistema/Errores.js';
 import { esNoEncontrado, obtenerMiProyecto } from './auxiliares.js';
 import sh from '../../plantillas/disposicion.module.css';
+import { fotoDe } from '../../datos/fotos.js';
 
 // Pide el proyecto (solo si es mío) y todas las postulaciones del colectivo, y se queda
 // con las de este proyecto.
@@ -169,6 +170,11 @@ export default function PostulacionesOrg() {
     contenidoDeLaPestana = (
       <div className={sh.empty}>
         <Heading level={2} size="h3">No hay postulaciones en esta lista</Heading>
+        {/* En vez de esperar, la org puede salir a buscar gente que encaje con el proyecto */}
+        <Text>Buscá personas con las habilidades que necesitás y escribiles vos.</Text>
+        <Button as={Link} to="/org/colaboradoras" iconRight="→">
+          Contactá colaboradores
+        </Button>
       </div>
     );
   } else {
@@ -186,7 +192,7 @@ export default function PostulacionesOrg() {
               <tr key={postulacion.id}>
                 <td data-l="Persona">
                   <Link to={`/org/colaboradoras/${colaboradora.id}`} className={sh.person}>
-                    <Avatar nombre={colaboradora.nombre} size={36} />
+                    <Avatar nombre={colaboradora.nombre} size={36} foto={fotoDe(colaboradora.id)} />
                     {colaboradora.nombre}
                   </Link>
                 </td>
@@ -198,7 +204,7 @@ export default function PostulacionesOrg() {
                     ))}
                   </span>
                 </td>
-                <td className={sh.act}>
+                <td className={sh.actions}>
                   <div className={sh.row}>
                     {/* Los botones aparecen solo si la postulación está pendiente; las
                         aceptadas y rechazadas ya no se pueden cambiar. */}

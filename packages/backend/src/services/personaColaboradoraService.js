@@ -145,14 +145,24 @@ export class PersonaColaboradoraService {
     return await this.actualizarPersonaColaboradora(id, cambios);
   }
 
-  // Vista expuesta (sin contactos)
+  // Vista expuesta (sin contactos). La habilidad llega por CÓDIGO y se pasa a id para filtrar
   /**
-   * Página de personas colaboradoras (sin contactos).
+   * Página de personas colaboradoras (sin contactos), con filtros opcionales.
    * @param {Paginacion} paginacion
+   * @param {{ busqueda?: string, habilidad?: string, aceptaMensajes?: boolean }} [filtros]
    * @returns {Promise<import("../types.js").Pagina<PersonaColaboradoraGuardada>>}
+   * @throws {AppError} 400 si no existe una habilidad con ese código.
    */
-  async obtenerPersonasColaboradoras(paginacion) {
-    return await this.personaColaboradoraRepository.obtenerPagina(paginacion);
+  async obtenerPersonasColaboradoras(paginacion, { busqueda, habilidad, aceptaMensajes } = {}) {
+    const habilidadId = habilidad
+      ? (await this.habilidadService.obtenerHabilidadPorCodigo(habilidad))._id
+      : undefined;
+
+    return await this.personaColaboradoraRepository.obtenerPagina(paginacion, {
+      busqueda,
+      habilidadId,
+      aceptaMensajes,
+    });
   }
 
   /**

@@ -63,7 +63,7 @@ export default function ComoFunciona() {
       {/* BLOQUE: Dos columnas — qué hace una organización y qué hace una colaboradora */}
       <div className={s.split}>
         {/* Columna 1: para organizaciones, con botón que lleva a su registro */}
-        <section className={s.col} aria-labelledby="c-org">
+        <section className={s.column} aria-labelledby="c-org">
           <Heading level={2} size="h2" id="c-org">Si sos una organización</Heading>
           <Text variant="prose">
             Registrás a tu colectivo y publicás un proyecto con los perfiles que necesitás:
@@ -81,7 +81,7 @@ export default function ComoFunciona() {
         </section>
 
         {/* Columna 2: para colaboradoras, con botón que lleva a su registro */}
-        <section className={s.col} aria-labelledby="c-col">
+        <section className={s.column} aria-labelledby="c-col">
           <Heading level={2} size="h2" id="c-col">Si querés colaborar</Heading>
           <Text variant="prose">
             Armás tu perfil con tus habilidades y el tiempo que tenés. Tus datos de contacto

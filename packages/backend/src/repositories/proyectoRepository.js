@@ -1,5 +1,7 @@
 import { ProyectoModel } from "../schemas/proyectoSchema.js";
 import { paginar } from "./paginar.js";
+import { contieneTexto, todasLasCondiciones } from "./filtros.js";
+import { EstadoDeProyecto } from "../models/proyecto.js";
 
 /** @typedef {import("../types.js").Id} Id */
 /** @typedef {import("../types.js").ProyectoGuardado} ProyectoGuardado */
@@ -10,6 +12,55 @@ import { paginar } from "./paginar.js";
 /** @typedef {import("../models/logro.js").Logro} Logro */
 /** @typedef {import("../types.js").Paginacion} Paginacion */
 /** @typedef {import("../types.js").Pagina<ProyectoGuardado>} PaginaDeProyectos */
+
+/**
+ * Filtros opcionales del listado de proyectos (los que vienen en undefined no se aplican).
+ * @typedef {object} FiltrosDeProyectos
+ * @property {string} [busqueda] Texto que aparece en el título o la descripción.
+ * @property {"abierto" | "en_curso" | "finalizado"} [estado] Ver EstadoDeProyecto.
+ * @property {import("../models/proyecto.js").ModalidadColaboracionValor} [modalidad] Algún perfil la ofrece.
+ * @property {Id} [habilidadId] Algún perfil la pide, como requerida u opcional.
+ */
+
+// Condiciones de cada estado. "Busca gente" es lo mismo que usa el listado de proyectos acordes
+// y el front (estadoDelProyecto): no finalizado, búsqueda abierta y fecha límite sin vencer.
+const CONDICIONES_DE_ESTADO = {
+  [EstadoDeProyecto.ABIERTO]: () => ({
+    finalizado: { $ne: true },
+    busquedaCerrada: { $ne: true },
+    $or: [{ fechaLimiteBusqueda: null }, { fechaLimiteBusqueda: { $gt: new Date() } }],
+  }),
+  [EstadoDeProyecto.EN_CURSO]: () => ({
+    finalizado: { $ne: true },
+    $or: [{ busquedaCerrada: true }, { fechaLimiteBusqueda: { $lte: new Date() } }],
+  }),
+  [EstadoDeProyecto.FINALIZADO]: () => ({ finalizado: true }),
+};
+
+/**
+ * Arma el filtro de mongo del listado de proyectos.
+ * @param {FiltrosDeProyectos} filtros
+ * @returns {Record<string, any>}
+ */
+function filtroDeProyectos({ busqueda, estado, modalidad, habilidadId }) {
+  const condiciones = [];
+  if (busqueda) {
+    condiciones.push({
+      $or: [{ titulo: contieneTexto(busqueda) }, { descripcion: contieneTexto(busqueda) }],
+    });
+  }
+  if (estado) condiciones.push(CONDICIONES_DE_ESTADO[estado]());
+  if (modalidad) condiciones.push({ "perfiles.modalidadDeColaboracion": modalidad });
+  if (habilidadId) {
+    condiciones.push({
+      $or: [
+        { "perfiles.habilidadesRequeridas": habilidadId },
+        { "perfiles.habilidadesOpcionales": habilidadId },
+      ],
+    });
+  }
+  return todasLasCondiciones(condiciones);
+}
 
 /** Acceso a la colección de proyectos (y sus perfiles y logros, que viven embebidos). */
 export class ProyectoRepository {
@@ -35,13 +86,15 @@ export class ProyectoRepository {
     return await this.model.find().lean();
   }
 
-  // El listado trae el nombre del colectivo, para mostrarlo sin un pedido extra por proyecto
+  // El listado trae el nombre del colectivo, para mostrarlo sin un pedido extra por proyecto.
+  // El total se cuenta con los mismos filtros, así la paginación sigue cerrando.
   /**
    * @param {Paginacion} paginacion
+   * @param {FiltrosDeProyectos} [filtros]
    * @returns {Promise<PaginaDeProyectos>} Con `colectivo` poblado (solo `nombre`).
    */
-  async obtenerPagina(paginacion) {
-    return await paginar(this.model, {}, paginacion, {
+  async obtenerPagina(paginacion, filtros = {}) {
+    return await paginar(this.model, filtroDeProyectos(filtros), paginacion, {
       populate: { path: "colectivo", select: "nombre" },
     });
   }

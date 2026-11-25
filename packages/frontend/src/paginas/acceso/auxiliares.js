@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { Alert } from '../../moleculas';
 import { useAuth } from '../../contexto';
 import { mensajeDeError } from '../../api/errores.js';
+import { llevarAlPrimerError } from '../../utilidades/llevarAlPrimerError.js';
 
 // ───── 1. MAIL ─────
 // Expresión regular que acepta «algo@algo.algo» sin espacios. No comprueba que el correo
@@ -109,6 +110,7 @@ export function useForm(validar, alEnviar) {
 
       const hayErrores = Object.keys(validar(valores)).length > 0;
       if (hayErrores) {
+        llevarAlPrimerError(evento.currentTarget);
         return;
       }
 

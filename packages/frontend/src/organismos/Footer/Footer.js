@@ -14,9 +14,9 @@ import s from './Footer.module.css';
 export function Footer({ enlaces, dalt, onToggleDalt }) {
   return (
     <footer className={s.footer}>
-      <div className={`container ${s.footerIn}`}>
+      <div className={`container ${s.contenido}`}>
         <Logo as="span" />
-        <nav aria-label="Información" className={s.flinks}>
+        <nav aria-label="Información" className={s.enlaces}>
           {enlaces.map((e) => <Link key={e.to} to={e.to}>{e.label}</Link>)}
           <button type="button" role="switch" aria-checked={dalt} onClick={onToggleDalt}>Modo daltónico: {dalt ? 'sí' : 'no'}</button>
         </nav>

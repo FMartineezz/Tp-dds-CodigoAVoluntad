@@ -4,6 +4,6 @@
 .form :global(.sr-only) { position: absolute; }
 .form a:not([class]) { color: var(--color-accent); font-weight: 600; }
 
-.err { color: var(--color-danger); font-size: var(--text-small); font-weight: 600; }
+.error { color: var(--color-danger); font-size: var(--text-small); font-weight: 600; }
 .olvido { justify-self: start; }
 .narrow { width: min(100%, 22rem); }

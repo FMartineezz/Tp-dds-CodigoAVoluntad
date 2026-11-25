@@ -2549,6 +2549,34 @@
               "maximum": 100,
               "default": 20
             }
+          },
+          {
+            "name": "busqueda",
+            "in": "query",
+            "required": false,
+            "description": "Texto en el nombre, el apellido o el nombre de fantasía.",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "habilidad",
+            "in": "query",
+            "required": false,
+            "description": "Código de habilidad que la persona tiene.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aceptaMensajes",
+            "in": "query",
+            "required": false,
+            "description": "true: solo quienes reciben mensajes; false: solo quienes los bloquean.",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ]
       },
@@ -3092,6 +3120,45 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20
+            }
+          },
+          {
+            "name": "busqueda",
+            "in": "query",
+            "required": false,
+            "description": "Texto en el título o la descripción (sin importar mayúsculas).",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "description": "abierto: busca gente; en_curso: no terminó pero ya no busca; finalizado.",
+            "schema": {
+              "type": "string",
+              "enum": ["abierto", "en_curso", "finalizado"]
+            }
+          },
+          {
+            "name": "modalidad",
+            "in": "query",
+            "required": false,
+            "description": "Algún perfil ofrece esta modalidad.",
+            "schema": {
+              "type": "string",
+              "enum": ["gratuita", "incentivo_economico", "contratacion_eventual"]
+            }
+          },
+          {
+            "name": "habilidad",
+            "in": "query",
+            "required": false,
+            "description": "Código de habilidad que algún perfil pide (requerida u opcional).",
+            "schema": {
+              "type": "string"
             }
           }
         ]

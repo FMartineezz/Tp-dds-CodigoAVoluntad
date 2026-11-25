@@ -121,7 +121,7 @@ export const MENSAJES_ORG = {
 
 export const FAQ = [
   ['¿Es gratis?', 'Sí. Es una plataforma sin fines de lucro: no se cobra a organizaciones ni a colaboradoras.'],
-  ['¿Cuánto tiempo hay que dedicar?', 'Cada proyecto indica las horas por semana que necesita. Vos elegís el que te quede cómodo.'],
+  ['¿Cuánto tiempo hay que dedicar?', 'Cada proyecto indica las horas por semana que necesita. Elegí el que encaje con el tiempo que podés donar.'],
   ['¿Quién ve mis datos?', 'Tus datos de contacto no son públicos. Solo las organizaciones con sesión ven tu perfil, y te escriben por mensajes internos si no los desactivaste.'],
 ];
 

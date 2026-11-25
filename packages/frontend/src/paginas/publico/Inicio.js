@@ -26,6 +26,7 @@ import {
   Eyebrow,
   Heading,
   Highlight,
+  Icon,
   Overprint,
   Stamp,
   Stat,
@@ -41,23 +42,25 @@ import { obtenerProyectos } from "../../api/proyectos.js";
 import { obtenerHabilidades } from "../../api/habilidades.js";
 import { mensajeDeError } from "../../api/errores.js";
 import s from "./Inicio.module.css";
-import sh from "../../plantillas/disposicion.module.css";
 
 // Los tres pasos de «Cómo funciona». Son texto fijo: nunca cambian mientras se usa la página.
-// Cada paso es un objeto con su número, su título corto y su explicación.
+// Cada paso es un objeto con su número, su ícono (ver atomos/Icon), su título y su explicación.
 const PASOS = [
   {
     numero: "1",
+    icono: "megafono",
     titulo: "Publicá",
     descripcion: "Una organización cuenta qué necesita y qué perfiles busca.",
   },
   {
     numero: "2",
+    icono: "mano",
     titulo: "Postulate",
-    descripcion: "Una persona con oficio levanta la mano para el perfil que le queda cómodo.",
+    descripcion: "Una persona con oficio levanta la mano para el perfil donde más puede aportar.",
   },
   {
     numero: "3",
+    icono: "codigo",
     titulo: "Construyan",
     descripcion: "Coordinan por mensajes y siguen el avance por hitos.",
   },
@@ -105,7 +108,7 @@ export default function Inicio() {
     <>
       {/* BLOQUE: Hero — título grande, bajada, botones de registro y un ticket de ejemplo */}
       <section className={s.hero} aria-labelledby="h-hero">
-        <div className={`container ${s.heroIn}`}>
+        <div className={`container ${s.heroContenido}`}>
           {/* Columna izquierda: textos y llamados a la acción */}
           <div className={s.text}>
             <Eyebrow tag="Red solidaria IT">Código abierto · 100% voluntario</Eyebrow>
@@ -120,7 +123,7 @@ export default function Inicio() {
               Asambleas, fundaciones y colectivos necesitan tecnología. Vos tenés el{" "}
               <Highlight>oficio</Highlight>. Acá se encuentran.
             </Text>
-            <div className={s.btns}>
+            <div className={s.botones}>
               <Button as={Link} to="/registro/colaboradora" size="lg" iconRight="→">
                 Quiero colaborar
               </Button>
@@ -193,9 +196,18 @@ export default function Inicio() {
           </Alert>
         ) : (
           <>
-            <Stat value={cargandoCifras ? "…" : estadisticas.proyectos} label="proyectos" />
-            <Stat value={cargandoCifras ? "…" : estadisticas.colectivos} label="colectivos" />
             <Stat
+              icon="proyectos"
+              value={cargandoCifras ? "…" : estadisticas.proyectos}
+              label="proyectos"
+            />
+            <Stat
+              icon="colectivos"
+              value={cargandoCifras ? "…" : estadisticas.colectivos}
+              label="colectivos"
+            />
+            <Stat
+              icon="check"
               value={cargandoCifras ? "…" : estadisticas.finalizados}
               label="proyectos finalizados"
             />
@@ -204,7 +216,7 @@ export default function Inicio() {
       </section>
 
       {/* BLOQUE: Proyectos abiertos — hasta 3 tarjetas y un enlace al listado completo */}
-      <section className={`container ${s.sec}`} aria-labelledby="h-abiertos">
+      <section className={`container ${s.seccion}`} aria-labelledby="h-abiertos">
         <Heading level={2} id="h-abiertos">
           Proyectos abiertos
         </Heading>
@@ -237,7 +249,7 @@ export default function Inicio() {
           «Colaboraciones por perfil») no tienen datos en /estadisticas; se reemplazaron por
           los que sí hay: colectivos por ubicación y postulaciones por proyecto. */}
       {estadisticas && (
-        <section className={`container ${s.sec}`} aria-labelledby="h-num">
+        <section className={`container ${s.seccion}`} aria-labelledby="h-num">
           <Heading level={2} id="h-num">
             La plataforma en números
           </Heading>
@@ -262,7 +274,7 @@ export default function Inicio() {
       )}
 
       {/* BLOQUE: Cómo funciona — lista numerada con los 3 pasos (salen de PASOS, arriba) */}
-      <section className={`container ${s.sec}`} aria-labelledby="h-como">
+      <section className={`container ${s.seccion}`} aria-labelledby="h-como">
         <Heading level={2} id="h-como">
           Cómo funciona
         </Heading>
@@ -270,9 +282,12 @@ export default function Inicio() {
           {/* .map dibuja un <li> por cada paso; `key` ayuda a React a distinguirlos
               (ver docs/GLOSARIO.md → Listas con map y key) */}
           {PASOS.map((paso) => (
-            <li key={paso.numero} className={sh.stat}>
-              <b>{paso.numero}</b>
-              <span>{paso.titulo}</span>
+            <li key={paso.numero} className={s.paso}>
+              <span className={s.pasoIcono}>
+                <Icon name={paso.icono} size={30} />
+              </span>
+              <span className={s.pasoNumero}>Paso {paso.numero}</span>
+              <Heading level={3} size="h3">{paso.titulo}</Heading>
               <Text variant="small">{paso.descripcion}</Text>
             </li>
           ))}

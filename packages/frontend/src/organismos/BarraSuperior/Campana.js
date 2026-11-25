@@ -40,11 +40,11 @@ export function Campana() {
   const [leidas, setLeidas] = useState(false);
   const n = leidas ? 0 : items.length;
   return (
-    <div className={s.wrap} ref={ref}>
-      <button type="button" className={s.btn} aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
+    <div className={s.desplegable} ref={ref}>
+      <button type="button" className={s.boton} aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
         <Icon name="campana" size={18} />
         <span className="sr-only">Notificaciones{n ? `, ${n} sin leer` : ''}</span>
-        {n > 0 && <span className={s.count} aria-hidden="true">{n}</span>}
+        {n > 0 && <span className={s.contador} aria-hidden="true">{n}</span>}
       </button>
       {open && (
         <div id={id} className={s.panel} role="region" aria-label="Notificaciones">

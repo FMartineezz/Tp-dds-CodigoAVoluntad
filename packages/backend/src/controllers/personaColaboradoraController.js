@@ -50,13 +50,15 @@ export class PersonaColaboradoraController {
   };
 
   /**
-   * GET /colaboradoras?pagina&limite → 200 con una RespuestaPaginada de personas.
-   * @param {import("../types.js").RequestPaginado} req
+   * GET /colaboradoras?pagina&limite&busqueda&habilidad&aceptaMensajes → 200 con una
+   * RespuestaPaginada de las personas que cumplen los filtros (validados en req.filtros).
+   * @param {import("../types.js").RequestPaginado & { filtros: object }} req
    * @param {import("express").Response} res
    */
   obtenerPersonasColaboradoras = async (req, res) => {
     const pagina = await this.personaColaboradoraService.obtenerPersonasColaboradoras(
       req.paginacion,
+      req.filtros,
     );
 
     res.status(200).json(respuestaPaginada(pagina, req.paginacion));

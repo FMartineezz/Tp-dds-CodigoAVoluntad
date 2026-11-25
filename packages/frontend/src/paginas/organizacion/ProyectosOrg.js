@@ -159,7 +159,7 @@ export default function ProyectosOrg() {
               <td data-l="Proyecto"><b>{proyecto.titulo}</b></td>
               <td data-l="Estado"><StatusBadge status={proyecto.estado} /></td>
               <td data-l="Postulaciones">{celdaDePostulaciones(proyecto)}</td>
-              <td className={sh.act}>
+              <td className={sh.actions}>
                 <div className={sh.row}>
                   <Button
                     as={Link}
@@ -193,7 +193,7 @@ export default function ProyectosOrg() {
   return (
     <div className={`container ${sh.page}`}>
       {/* BLOQUE: Encabezado — título y botón para crear un proyecto */}
-      <div className={`${sh.row} ${sh.sb}`}>
+      <div className={`${sh.row} ${sh.spaceBetween}`}>
         <Heading level={1}>Mis proyectos</Heading>
         <Button as={Link} to="/org/proyectos/nuevo" iconRight={<Icon name="mas" size={14} />}>
           Nuevo proyecto

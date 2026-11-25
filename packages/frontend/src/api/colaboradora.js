@@ -233,10 +233,11 @@ export async function obtenerPanel(id) {
     pendientes: postulaciones.filter((p) => p.estado === "pendiente").length,
     proyectosActivos: colaboraciones.filter((c) => c.activa && !c.proyecto.finalizado).length,
     mensajes: mensajes.filter((m) => m.emisor === "colectivo" && !m.leido).length,
-    // Las tres novedades más recientes (ya vienen ordenadas).
-    novedades: notificaciones.slice(0, 3),
-    // Como mucho dos. El backend ya manda solo los que aceptan postulaciones; el filtro es
+    // Todas las novedades, de la más nueva a la más vieja: el panel muestra las primeras
+    // y despliega el resto con «Ver todas las notificaciones».
+    novedades: notificaciones,
+    // Como mucho tres (una fila de tarjetas). El backend ya manda solo los que aceptan postulaciones; el filtro es
     // por las dudas (por ejemplo, si la fecha límite vence justo ahora).
-    sugeridos: acordes.resultados.filter((p) => p.estado === "abierto").slice(0, 2),
+    sugeridos: acordes.resultados.filter((p) => p.estado === "abierto").slice(0, 3),
   };
 }

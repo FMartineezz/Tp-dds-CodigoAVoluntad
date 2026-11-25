@@ -4,7 +4,7 @@
  * Qué muestra: Mis postulaciones por estado (pendiente / aceptada / rechazada).
  * De dónde salen los datos: del backend, GET /colaboradoras/:id/postulaciones
  *   (obtenerPostulaciones en api/colaboradora.js).
- * Para modificarla: una columna nueva = un div más en .cells (y en la fila de encabezado).
+ * Para modificarla: una columna nueva = un div más en .celdas (y en la fila de encabezado).
  *
  * ANATOMÍA DE ESTE ARCHIVO:
  *   1. DATOS Y ESTADO: quién tiene la sesión, el pedido al backend y la pestaña elegida.
@@ -99,22 +99,22 @@ export default function PostulacionesCol() {
     );
   } else {
     contenidoDeLaPestana = (
-      <div className={s.rows} role="table" aria-label="Postulaciones">
+      <div className={s.filas} role="table" aria-label="Postulaciones">
         {/* Fila de encabezado; la última celda vacía deja el lugar de la columna de acciones */}
-        <div className={`${s.r} ${s.h}`} role="row">
-          <div className={s.cells}>
+        <div className={`${s.fila} ${s.encabezado}`} role="row">
+          <div className={s.celdas}>
             <div role="columnheader">Proyecto</div>
             <div role="columnheader">Perfil</div>
             <div role="columnheader">Estado</div>
           </div>
-          <div className={s.act} aria-hidden="true" />
+          <div className={s.acciones} aria-hidden="true" />
         </div>
 
         {/* Una fila por postulación */}
         {postulacionesVisibles.map((postulacion) => (
-          <div key={postulacion.id} className={s.r} role="row">
-            <div className={s.cells}>
-              <div className={s.hl} role="cell">{postulacion.proyecto}</div>
+          <div key={postulacion.id} className={s.fila} role="row">
+            <div className={s.celdas}>
+              <div className={s.destacada} role="cell">{postulacion.proyecto}</div>
               <div role="cell" data-l="Perfil">
                 {postulacion.perfil}
                 {/* Si se postuló en forma anónima, se marca con una etiqueta */}
@@ -123,7 +123,7 @@ export default function PostulacionesCol() {
               <div role="cell" data-l="Estado"><StatusBadge status={postulacion.estado} /></div>
             </div>
             {/* Acciones fuera de la tabla: solo las aceptadas tienen una (ir a Mis proyectos) */}
-            <div className={s.act}>
+            <div className={s.acciones}>
               {postulacion.estado === 'aceptada' && (
                 <Button as={Link} to="/panel/proyectos" variant="secondary">
                   Ver en Mis proyectos

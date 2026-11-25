@@ -32,6 +32,7 @@ import { usePedido } from '../../hooks';
 import { obtenerColectivos } from '../../api/colectivos.js';
 import { mensajeDeError } from '../../api/errores.js';
 import s from './Colectivos.module.css';
+import { fotoDe } from '../../datos/fotos.js';
 
 // Cuántos colectivos entran en cada página del directorio (es el `limite` que se le pide
 // al backend).
@@ -61,7 +62,7 @@ export default function Colectivos() {
   return (
     <div className={`container ${s.page}`}>
       <Heading level={1}>Colectivos</Heading>
-      <div className={s.dir}>
+      <div className={s.directorio}>
         {/* BLOQUE: Barra superior del directorio — contador */}
         <div className={s.barra}>
           <p className={s.count} role="status">
@@ -96,7 +97,7 @@ export default function Colectivos() {
               <li key={colectivo.id}>
                 {/* Cada colectivo es un enlace a su pantalla de detalle */}
                 <Link to={`/colectivos/${colectivo.id}`} className={s.row}>
-                  <Avatar nombre={colectivo.nombre} size={56} square />
+                  <Avatar nombre={colectivo.nombre} size={56} square foto={fotoDe(colectivo.id)} />
                   <span className={s.info}>
                     <b>{colectivo.nombre}</b>
                     <small>

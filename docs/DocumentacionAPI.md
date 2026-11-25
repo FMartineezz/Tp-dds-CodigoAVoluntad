@@ -35,6 +35,10 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
   ```
 
   Una página posterior a la última devuelve `resultados` vacío (con `200`). Un `pagina` que no sea un entero mayor o igual a 1 responde `400` con `ERR-VAL-002`; un `limite` fuera de rango, `400` con `ERR-VAL-003`. Ejemplo: `GET /proyectos?pagina=2&limite=6`.
+- **Filtros:** los filtros son opcionales, se combinan entre sí y con la paginación (el `total` cuenta solo lo que pasa los filtros). Un filtro vacío (`?estado=`) se ignora.
+  - `GET /proyectos`: `busqueda` (texto en título o descripción, sin importar mayúsculas, hasta 100 caracteres), `estado` (`abierto`: busca gente; `en_curso`: no terminó pero cerró la búsqueda o venció la fecha límite; `finalizado`), `modalidad` (`gratuita`, `incentivo_economico` o `contratacion_eventual`: algún perfil la ofrece) y `habilidad` (código de habilidad: algún perfil la pide, requerida u opcional). Ejemplo: `GET /proyectos?estado=abierto&modalidad=gratuita&habilidad=desarrollo_web_react`.
+  - `GET /colaboradoras`: `busqueda` (en nombre, apellido o nombre de fantasía), `habilidad` (código) y `aceptaMensajes` (`true` o `false`).
+  - Errores `400`: `ERR-VAL-004` búsqueda demasiado larga, `ERR-VAL-005` estado inválido, `ERR-VAL-006` modalidad inválida, `ERR-VAL-007` habilidad repetida (`?habilidad=a&habilidad=b`), `ERR-VAL-008` aceptaMensajes que no es `true`/`false`, y `ERR-VAL-207` si no existe una habilidad con ese código.
 
 ### Índice
 

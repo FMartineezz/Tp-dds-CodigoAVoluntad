@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { validarPaginacion } from "../middlewares/validations/paginacionValidation.js";
+import { validarFiltrosDeColaboradoras } from "../middlewares/validations/filtrosValidation.js";
 import { personaColaboradoraController } from "../container.js";
 import { mensajeController } from "../container.js";
 import validarPersonaColaboradora, {
@@ -20,9 +21,11 @@ export default function personaColaboradoraRoutes() {
     personaColaboradoraId: ErrorCatalog.COLABORADORA_NO_ENCONTRADA,
   });
 
+  // Filtros opcionales: ?busqueda, ?habilidad y ?aceptaMensajes (ver filtrosValidation.js)
   router.get(
     "/colaboradoras",
     validarPaginacion,
+    validarFiltrosDeColaboradoras,
     personaColaboradoraController.obtenerPersonasColaboradoras,
   );
 

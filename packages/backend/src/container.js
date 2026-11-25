@@ -87,6 +87,7 @@ const proyectoService = new ProyectoService({
   proyectoRepository,
   perfilService,
   colectivoService,
+  habilidadService,
 });
 
 const busquedaService = new BusquedaService({ proyectoService, personaColaboradoraService });

@@ -10,14 +10,16 @@
  * ANATOMÍA DE ESTE ARCHIVO:
  *   1. DATOS Y ESTADO: quién tiene la sesión y el pedido del panel al backend.
  *      ESPERA Y ERRORES: filas grises mientras llega; un aviso si falla.
- *   4. LO QUE SE DIBUJA: saludo, tres tarjetas de cifras (enlaces), las últimas novedades
- *      y los proyectos sugeridos. No hay acciones: es una pantalla para mirar.
+ *   2. CÁLCULOS: cuántas novedades se ven antes de tocar «Ver todas».
+ *   4. LO QUE SE DIBUJA: una sola columna (sin huecos): saludo, cifras (enlaces), la
+ *      última actividad (solo si hay) y los proyectos sugeridos.
  */
 
 // ───── Imports ─────
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Heading, Text } from "../../atomos";
-import { Alert, RowsSkeleton } from "../../moleculas";
+import { Alert, Grid, RowsSkeleton } from "../../moleculas";
 import { ProyectoCard } from "../../organismos"; // tarjeta que muestra un proyecto
 import { useAuth } from "../../contexto";
 import { usePedido } from "../../hooks";
@@ -34,6 +36,9 @@ export default function PanelCol() {
   // Pide todo el panel junto. Se vuelve a pedir si cambia la sesión (por eso [id]).
   // `datos: panel` = «lo que viene en `datos` guardalo con el nombre `panel`».
   const { cargando, datos: panel, error } = usePedido(() => obtenerPanel(id), [id]);
+
+  // true cuando tocó «Ver todas las notificaciones» (se despliega la lista entera).
+  const [verTodas, setVerTodas] = useState(false);
 
   // ───── ESPERA Y ERRORES ─────
   // Caso 1: todavía no llegó la respuesta → filas grises de relleno.
@@ -55,6 +60,12 @@ export default function PanelCol() {
       </div>
     );
   }
+
+  // ───── 2. CÁLCULOS ─────
+  // Cuántas novedades se ven antes de desplegar: la última de estas aparece desvanecida.
+  const NOVEDADES_A_LA_VISTA = 2;
+  const hayMasNovedades = panel.novedades.length > NOVEDADES_A_LA_VISTA;
+  const novedadesVisibles = verTodas ? panel.novedades : panel.novedades.slice(0, NOVEDADES_A_LA_VISTA);
 
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
@@ -80,43 +91,57 @@ export default function PanelCol() {
         </Link>
       </div>
 
-      <div className={sh.split}>
-        {/* BLOQUE: novedades — las últimas notificaciones del sistema (aria-labelledby apunta
-           al título con id="ult") */}
-        <section className={sh.col} aria-labelledby="ult">
+      {/* BLOQUE: última actividad — solo si hay novedades (si no, no ocupa lugar).
+          Se ven las primeras y la última se desvanece; el botón despliega todas. */}
+      {panel.novedades.length > 0 && (
+        <section className={s.actividad} aria-labelledby="ult">
           <Heading level={2} size="h3" id="ult">
             Última actividad
           </Heading>
-          {panel.novedades.length === 0 && <Text variant="small">Todavía no tenés novedades.</Text>}
-          {panel.novedades.map((novedad) => (
-            <Alert key={novedad.id} kind="info">
-              {novedad.texto} <small>({novedad.cuando})</small>
-            </Alert>
-          ))}
+          <div className={`${s.novedades} ${hayMasNovedades && !verTodas ? s.recortadas : ""}`}>
+            {novedadesVisibles.map((novedad) => (
+              <Alert key={novedad.id} kind="info">
+                {novedad.texto} <small>({novedad.cuando})</small>
+              </Alert>
+            ))}
+          </div>
+          {hayMasNovedades && (
+            <Button
+              variant="secondary"
+              className={s.verTodas}
+              aria-expanded={verTodas}
+              onClick={() => setVerTodas(!verTodas)}
+            >
+              {verTodas ? "Ver menos" : "Ver todas las notificaciones"}
+            </Button>
+          )}
         </section>
+      )}
 
-        {/* BLOQUE: proyectos para vos — los que buscan alguna de sus habilidades (título con
-           id="sug") */}
-        <section className={sh.col} aria-labelledby="sug">
-          <Heading level={2} size="h3" id="sug">
-            Proyectos para vos
-          </Heading>
-          {panel.sugeridos.length === 0 && (
-            <>
-              <Text variant="small">
-                No hay proyectos abiertos que busquen tus habilidades. Sumá habilidades en tu
-                perfil.
-              </Text>
+      {/* BLOQUE: proyectos para vos — los que buscan alguna de sus habilidades */}
+      <section className={sh.column} aria-labelledby="sug">
+        <Heading level={2} size="h3" id="sug">
+          Proyectos para vos
+        </Heading>
+        {panel.sugeridos.length === 0 && (
+          <>
+            <Text variant="small">
+              No hay proyectos abiertos que busquen tus habilidades. Sumá habilidades en tu
+              perfil.
+            </Text>
+            <div>
               <Button as={Link} to="/panel/perfil" variant="secondary">
                 Editar mi perfil
               </Button>
-            </>
-          )}
+            </div>
+          </>
+        )}
+        <Grid>
           {panel.sugeridos.map((proyecto) => (
             <ProyectoCard key={proyecto.id} p={proyecto} />
           ))}
-        </section>
-      </div>
+        </Grid>
+      </section>
     </div>
   );
 }

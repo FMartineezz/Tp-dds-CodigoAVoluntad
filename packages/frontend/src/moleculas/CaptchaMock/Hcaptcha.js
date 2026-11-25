@@ -14,7 +14,7 @@ export const Captcha = forwardRef(function Captcha({ onChange, error }, ref) {
         onExpire={() => onChange("")}
         onError={() => onChange("")}
       />
-      {error && <p className={s.cerr}>{error}</p>}
+      {error && <p className={s.error}>{error}</p>}
     </div>
   );
 });

@@ -167,7 +167,7 @@ export default function RegistroOrganizacion() {
       {/* BLOQUE: resumen de errores — aparece solo después de intentar enviar y si hay errores */}
       <Resumen errores={errores} mostrar={formulario.intento} />
 
-      {/* BLOQUE: campos — grilla del formulario; sh.r2 / sh.full controlan cuánto ocupa cada
+      {/* BLOQUE: campos — grilla del formulario; sh.twoRows / sh.fullWidth controlan cuánto ocupa cada
          uno */}
       <div className={sh.form}>
         {/* onBlur = al salir del campo (activa su validación); `optional` = campo no
@@ -182,7 +182,7 @@ export default function RegistroOrganizacion() {
         />
         <Field
           as="textarea"
-          className={sh.r2}
+          className={sh.twoRows}
           label="Descripción"
           placeholder="Qué hace la organización y a quién ayuda…"
           value={datos.desc}
@@ -241,20 +241,20 @@ export default function RegistroOrganizacion() {
           onBlur={formulario.blur("pass")}
           error={errores.pass}
         />
-        <div className={sh.full}>
+        <div className={sh.fullWidth}>
           <Captcha ref={captchaRef} onChange={alCambiarCaptcha} error={errores.captcha} />
         </div>
-        <div className={sh.full}>
+        <div className={sh.fullWidth}>
           <Checkbox checked={datos.terminos} onChange={alCambiarCampo("terminos")}>
             Acepto los <Link to="/terminos">términos y condiciones</Link>
           </Checkbox>
           {/* Aparece solo si hay error en términos (no se tildó y ya se tocó o se intentó enviar) */}
-          {errores.terminos && <p className={s.err}>{errores.terminos}</p>}
+          {errores.terminos && <p className={s.error}>{errores.terminos}</p>}
         </div>
       </div>
 
       {/* BLOQUE: botón de envío — muestra «cargando» mientras espera al backend */}
-      <div className={sh.formActs}>
+      <div className={sh.formActions}>
         <Button type="submit" loading={formulario.cargando}>
           Crear cuenta
         </Button>

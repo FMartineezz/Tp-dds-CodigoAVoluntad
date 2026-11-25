@@ -16,7 +16,7 @@
  *      ESPERA Y ERRORES: cargando, «no existe» (404) o aviso de error.
  *   2. CÁLCULOS: los proyectos abiertos (para el desplegable).
  *   3. ACCIONES: no hay (el botón es un enlace a Mensajes).
- *   4. LO QUE SE DIBUJA: migas, cabecera, valoraciones y mensajes.
+ *   4. LO QUE SE DIBUJA: migas, credencial (con cómo escribirle) y valoraciones.
  */
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -34,6 +34,7 @@ import { NoEncontrado } from '../../paginas/sistema/Errores.js';
 import { esNoEncontrado } from './auxiliares.js';
 import s from './Organizacion.module.css';
 import sh from '../../plantillas/disposicion.module.css';
+import { fotoDe } from '../../datos/fotos.js';
 
 // Pide a la vez la persona, sus valoraciones y mis proyectos.
 async function cargarPerfil(personaId, colectivoId) {
@@ -71,7 +72,7 @@ export default function PerfilColaboradora() {
   }
   if (esNoEncontrado(error)) {
     const { code, message } = error.response.data;
-    return <NoEncontrado code={code} titulo="Esa colaboradora no existe" msg={message} />;
+    return <NoEncontrado code={code} titulo="Ese colaborador no existe" msg={message} />;
   }
   if (error) {
     return (
@@ -87,6 +88,11 @@ export default function PerfilColaboradora() {
 
   // Solo se puede escribir desde un proyecto abierto (el mensaje queda asociado a él).
   const abiertos = proyectos.filter((proyecto) => proyecto.estado === 'abierto');
+  // Promedio de estrellas con un decimal (null si no tiene valoraciones).
+  const promedio = valoraciones.length
+    ? (valoraciones.reduce((suma, v) => suma + v.puntaje, 0) / valoraciones.length).toFixed(1).replace('.', ',')
+    : null;
+
   // Si todavía no se eligió ninguno, se usa el primero (si hay).
   const proyectoParaEscribir = proyectoElegido || abiertos[0]?.id;
 
@@ -98,7 +104,7 @@ export default function PerfilColaboradora() {
     // Caso 1: la persona desactivó los mensajes de organizaciones.
     contenidoDeMensajes = (
       <Alert kind="warning">
-        Esta persona no recibe mensajes de organizaciones. (ERR-EST-801)
+        Esta persona no recibe mensajes de organizaciones.
       </Alert>
     );
   } else if (abiertos.length === 0) {
@@ -132,45 +138,69 @@ export default function PerfilColaboradora() {
       {/* BLOQUE: Migas de pan */}
       <Crumbs
         items={[
-          { label: 'Colaboradoras', to: '/org/colaboradoras' },
+          { label: 'Colaboradores', to: '/org/colaboradoras' },
           { label: colaboradora.nombre },
         ]}
       />
 
-      {/* BLOQUE: Cabecera — nombre, alias, pronombres, presentación, habilidades, redes y foto */}
-      <header className={s.perfil}>
-        <div className={s.pinfo}>
-          <Heading level={1} size="h2">
-            {colaboradora.nombre}{' '}
-            {/* Los pronombres se muestran solo si los cargó. */}
-            {colaboradora.pronombres && <small className={s.pron}>({colaboradora.pronombres})</small>}
-          </Heading>
-          {colaboradora.alias && <Text variant="small">@{colaboradora.alias}</Text>}
-          {colaboradora.bio && <Text variant="prose">{colaboradora.bio}</Text>}
-          <span className={sh.tagsRow}>
-            {colaboradora.habilidades.map((habilidad) => (
-              <Tag key={habilidad} tone="sand">{habilidad}</Tag>
-            ))}
-          </span>
-          {/* Enlaces: su cuenta de GitHub/GitLab y una por cada red social cargada. */}
-          <div className={s.redes}>
-            {colaboradora.git && (
-              <a href={colaboradora.git} target="_blank" rel="noopener noreferrer">Repositorios</a>
-            )}
-            {colaboradora.redes.map((red) => (
-              <a key={red.tipo} href={red.url} target="_blank" rel="noopener noreferrer">{red.tipo}</a>
-            ))}
+      {/* BLOQUE: Credencial — banda de puntos, foto, nombre, números, bio, habilidades,
+          redes y cómo escribirle. Todo lo que hace falta para decidir, en una tarjeta. */}
+      <header className={s.credencial}>
+        <div className={s.credencialBanda} aria-hidden="true" />
+        <div className={s.credencialCabeza}>
+          <Avatar nombre={colaboradora.nombre} size={128} square foto={fotoDe(colaboradora.id)} />
+          <div>
+            <Heading level={1} size="h2">
+              {colaboradora.nombre}{' '}
+              {/* Los pronombres se muestran solo si los cargó. */}
+              {colaboradora.pronombres && <small className={s.pronombres}>({colaboradora.pronombres})</small>}
+            </Heading>
+            {colaboradora.alias && <Text variant="small">@{colaboradora.alias}</Text>}
           </div>
         </div>
-        <Avatar nombre={colaboradora.nombre} size={120} square />
+
+        {/* Números que salen de lo que ya tenemos: valoraciones y habilidades */}
+        <dl className={s.credencialNumeros}>
+          <div>
+            <dt>Valoraciones</dt>
+            <dd>{valoraciones.length}</dd>
+          </div>
+          <div>
+            <dt>Promedio</dt>
+            <dd>{promedio ? `${promedio}★` : '—'}</dd>
+          </div>
+          <div>
+            <dt>Habilidades</dt>
+            <dd>{colaboradora.habilidades.length}</dd>
+          </div>
+        </dl>
+
+        {colaboradora.bio && <Text variant="prose">{colaboradora.bio}</Text>}
+        <span className={sh.tagsRow}>
+          {colaboradora.habilidades.map((habilidad) => (
+            <Tag key={habilidad} tone="sand">{habilidad}</Tag>
+          ))}
+        </span>
+        {/* Enlaces: su cuenta de GitHub/GitLab y una por cada red social cargada. */}
+        <div className={s.redes}>
+          {colaboradora.git && (
+            <a href={colaboradora.git} target="_blank" rel="noopener noreferrer">Repositorios</a>
+          )}
+          {colaboradora.redes.map((red) => (
+            <a key={red.tipo} href={red.url} target="_blank" rel="noopener noreferrer">{red.tipo}</a>
+          ))}
+        </div>
+
+        {/* Escribirle: va en la misma tarjeta para no tener que bajar a buscarlo */}
+        <div className={s.credencialMensaje}>{contenidoDeMensajes}</div>
       </header>
 
       {/* BLOQUE: Valoraciones — las que recibió de colectivos (o un texto si no tiene) */}
-      <section className={sh.col} aria-labelledby="vals">
+      <section className={sh.column} aria-labelledby="vals">
         <Heading level={2} size="h3" id="vals">Valoraciones</Heading>
         {valoraciones.length === 0 && <Text variant="small">Todavía no recibió valoraciones.</Text>}
         {valoraciones.map((valoracion) => (
-          <div key={valoracion.id} className={s.val}>
+          <div key={valoracion.id} className={s.valoracion}>
             <div className={sh.row}>
               {/* El backend no dice qué colectivo la escribió: se muestra la fecha. */}
               <b>{new Date(valoracion.fecha).toLocaleDateString('es-AR')}</b>
@@ -181,11 +211,6 @@ export default function PerfilColaboradora() {
         ))}
       </section>
 
-      {/* BLOQUE: Mensajes — elegir proyecto y escribirle, o aviso si no recibe mensajes */}
-      <section className={sh.col} aria-labelledby="mensaje">
-        <Heading level={2} size="h3" id="mensaje">Mensajes</Heading>
-        {contenidoDeMensajes}
-      </section>
     </div>
   );
 }

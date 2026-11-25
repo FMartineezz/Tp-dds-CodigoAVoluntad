@@ -14,3 +14,12 @@ export const api = axios.create({
   // Si el backend no contesta en 10 segundos se corta el pedido y cae en el caso de error.
   timeout: 10000,
 });
+
+// Saca de los parámetros los que no se completaron ('' , null, undefined o false), así un
+// filtro vacío no viaja como ?estado= y la URL queda limpia.
+// Ej: sinVacios({ pagina: 1, estado: '', busqueda: 'huerta' }) → { pagina: 1, busqueda: 'huerta' }
+export function sinVacios(parametros) {
+  return Object.fromEntries(
+    Object.entries(parametros).filter(([, valor]) => valor !== '' && valor != null && valor !== false)
+  );
+}

@@ -12,13 +12,13 @@ import s from "./Barras.module.css";
 export function Barras({ titulo, datos, unidad }) {
   const max = Math.max(1, ...datos.map((d) => d[1]));
   return (
-    <figure className={s.fig}>
+    <figure className={s.grafico}>
       <figcaption>{titulo}</figcaption>
       <ul>
         {datos.map(([k, v]) => (
           <li key={k}>
-            <span className={s.bk}>{k}</span>
-            <span className={s.bt} aria-hidden="true">
+            <span className={s.etiqueta}>{k}</span>
+            <span className={s.barra} aria-hidden="true">
               <span style={{ width: `${(v / max) * 100}%` }} />
             </span>
             <b>

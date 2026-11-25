@@ -29,9 +29,9 @@
 
 // ───── Imports ─────
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Button, Field, Heading, Icon, Tag, Text } from "../../atomos";
-import { Alert, RowsSkeleton } from "../../moleculas";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Avatar, Field, Heading, Icon, Text } from "../../atomos";
+import { Alert, ConfirmDialog, RowsSkeleton } from "../../moleculas";
 import { useAuth } from "../../contexto";
 import { usePedido } from "../../hooks";
 import { mensajeDeError } from "../../api/errores.js";
@@ -44,6 +44,7 @@ import {
 } from "../../api/mensajes.js";
 import { obtenerColaboradora } from "../../api/organizacion.js";
 import { obtenerProyecto } from "../../api/proyectos.js";
+import { fotoDe } from "../../datos/fotos.js";
 import s from "./Mensajes.module.css";
 import sh from "../../plantillas/disposicion.module.css";
 
@@ -134,6 +135,13 @@ export default function Mensajes({ rol }) {
   // true mientras se espera la respuesta del backend al enviar.
   const [enviando, setEnviando] = useState(false);
 
+  // true mientras está abierta la ficha de la otra parte (se abre tocando su nombre).
+  const [fichaAbierta, setFichaAbierta] = useState(false);
+  const navegar = useNavigate();
+
+  // La caja de mensajes, para bajarla hasta el último (como cualquier chat).
+  const cajaDeMensajes = useRef(null);
+
   // ───── 2. CÁLCULOS ─────
 
   const relaciones = RELACIONES[rol];
@@ -192,6 +200,23 @@ export default function Mensajes({ rol }) {
       });
   }, [chatActual, leidos, movilAbierto, rol]);
 
+  // Baja hasta el último mensaje al abrir un chat o cuando llega/sale uno nuevo.
+  const cantidadDeMensajes = chatActual?.msgs.length;
+  useEffect(() => {
+    const caja = cajaDeMensajes.current;
+    if (caja) caja.scrollTop = caja.scrollHeight;
+  }, [chatActual?.id, cantidadDeMensajes]);
+
+  // La otra parte de la conversación: la org habla con personas y la persona con colectivos.
+  const idDeLaOtraParte = (chat) => (rol === "org" ? chat.personaId : chat.colectivoId);
+  const perfilDeLaOtraParte = (chat) =>
+    rol === "org" ? `/org/colaboradoras/${chat.personaId}` : `/colectivos/${chat.colectivoId}`;
+
+  // ¿La conversación la empezó la cuenta que está mirando? (yo me postulé / yo contacté).
+  // Si sí, la flechita sale hacia afuera (↗); si me buscaron a mí, entra (↘).
+  const empezoYo = (chat) =>
+    rol === "col" ? chat.rel === relaciones[1] : chat.rel === relaciones[2];
+
   // Color de la etiqueta de relación: azul para la segunda opción, arena para el resto.
   function tonoDeLaRelacion(relacion) {
     return relacion === relaciones[1] ? "blue" : "sand";
@@ -245,6 +270,14 @@ export default function Mensajes({ rol }) {
     }
   }
 
+  // Enter manda el mensaje y Shift+Enter baja de renglón (como en WhatsApp Web).
+  function alApretarTeclaEnElMensaje(evento) {
+    if (evento.key === "Enter" && !evento.shiftKey) {
+      evento.preventDefault();
+      evento.currentTarget.form.requestSubmit();
+    }
+  }
+
   // ───── 4. LO QUE SE DIBUJA ─────
 
   // Contenido del recuadro de la conversación: espera, chat abierto o texto de ayuda.
@@ -257,7 +290,7 @@ export default function Mensajes({ rol }) {
     contenidoDelChat = (
       <>
         {/* Cabecera: flecha de volver (solo se ve en celular), nombre y etiquetas */}
-        <header className={s.chead}>
+        <header className={s.chatCabecera}>
           <button
             type="button"
             className={s.volver}
@@ -266,22 +299,53 @@ export default function Mensajes({ rol }) {
           >
             <Icon name="chevron-izq" size={16} />
           </button>
-          <div className={s.cinfo}>
-            <b>{chatActual.con}</b>
-            <span className={s.tags}>
-              <Tag>{chatActual.proyecto}</Tag>
-              <Tag tone={tonoDeLaRelacion(chatActual.rel)}>{chatActual.rel}</Tag>
+          {/* Tocando la foto o el nombre se abre su ficha */}
+          <button
+            type="button"
+            className={s.chatInfo}
+            onClick={() => setFichaAbierta(true)}
+            aria-label={`Ver la ficha de ${chatActual.con}`}
+          >
+            <Avatar nombre={chatActual.con} size={44} foto={fotoDe(idDeLaOtraParte(chatActual))} />
+            {/* Como el «en línea» de WhatsApp: abajo del nombre, chiquito, la relación y el proyecto */}
+            <span className={s.chatNombre}>
+              <b>{chatActual.con}</b>
+              <small className={s.chatDetalle}>
+                <span className={s.relacionChica} data-tono={tonoDeLaRelacion(chatActual.rel)}>
+                  {chatActual.rel}
+                </span>
+                {chatActual.proyecto}
+              </small>
             </span>
-          </div>
+          </button>
         </header>
 
-        {/* Mensajes: cada uno es un par [quién, texto]; los propios ('yo') llevan s.yo */}
-        <div className={s.msgs}>
+        <ConfirmDialog
+          open={fichaAbierta}
+          title={chatActual.con}
+          confirmLabel="Ver perfil completo"
+          cancelLabel="Cerrar"
+          onConfirm={() => navegar(perfilDeLaOtraParte(chatActual))}
+          onCancel={() => setFichaAbierta(false)}
+        >
+          <div className={s.ficha}>
+            <Avatar nombre={chatActual.con} size={120} square foto={fotoDe(idDeLaOtraParte(chatActual))} />
+            <dl>
+              <dt>Proyecto</dt>
+              <dd>{chatActual.proyecto}</dd>
+              <dt>Relación</dt>
+              <dd>{chatActual.rel}</dd>
+            </dl>
+          </div>
+        </ConfirmDialog>
+
+        {/* Mensajes: cada uno es un par [quién, texto]; los propios ('yo') llevan s.propio */}
+        <div className={s.mensajes} ref={cajaDeMensajes}>
           {chatActual.msgs.length === 0 && (
             <Text variant="small">Todavía no hay mensajes. Escribí el primero.</Text>
           )}
           {chatActual.msgs.map(([quien, contenido], posicion) => (
-            <p key={posicion} className={`${s.msg} ${quien === "yo" ? s.yo : ""}`}>
+            <p key={posicion} className={`${s.mensaje} ${quien === "yo" ? s.propio : ""}`}>
               {contenido}
             </p>
           ))}
@@ -290,21 +354,32 @@ export default function Mensajes({ rol }) {
         {/* Si la persona bloqueó los mensajes, la org ya no puede escribirle. */}
         {chatActual.bloqueada ? (
           <Alert kind="warning">
-            Esta persona no recibe mensajes de organizaciones. (ERR-EST-801)
+            Esta persona no recibe mensajes de organizaciones.
           </Alert>
         ) : (
-          <form className={s.compose} onSubmit={alEnviarMensaje} noValidate>
+          <form className={s.redactar} onSubmit={alEnviarMensaje} noValidate>
             {errorMensaje && <Alert kind="error">{errorMensaje}</Alert>}
-            <Field
-              as="textarea"
-              label="Tu mensaje"
-              placeholder="Escribí tu respuesta…"
-              value={textoMensaje}
-              onChange={(evento) => setTextoMensaje(evento.target.value)}
-            />
-            <Button type="submit" loading={enviando}>
-              Enviar
-            </Button>
+            <div className={s.barraDeEscritura}>
+              <Field
+                as="textarea"
+                rows={1}
+                className={s.campoDeMensaje}
+                label="Tu mensaje"
+                placeholder="Escribí un mensaje"
+                value={textoMensaje}
+                onChange={(evento) => setTextoMensaje(evento.target.value)}
+                onKeyDown={alApretarTeclaEnElMensaje}
+              />
+              <button
+                type="submit"
+                className={s.enviar}
+                aria-label="Enviar mensaje"
+                aria-busy={enviando || undefined}
+                disabled={enviando}
+              >
+                <Icon name="flecha-der" size={20} />
+              </button>
+            </div>
           </form>
         )}
       </>
@@ -345,7 +420,7 @@ export default function Mensajes({ rol }) {
             <option key={nombre}>{nombre}</option>
           ))}
         </Field>
-        <div className={s.rels} role="group" aria-label="Relación">
+        <div className={s.relaciones} role="group" aria-label="Relación">
           {/* Un botón por relación; aria-pressed marca cuál está activo (el filtro actual) */}
           {relaciones.map((relacion, posicion) => (
             <button
@@ -361,7 +436,7 @@ export default function Mensajes({ rol }) {
         </div>
       </div>
 
-      <div className={s.cols}>
+      <div className={s.columnas}>
         {/* BLOQUE: lista de chats — en celular se oculta cuando hay un chat abierto */}
         <ul className={`${s.lista} ${claseOcultarSiChatAbierto}`}>
           {/* Mientras carga: filas grises de relleno */}
@@ -386,26 +461,39 @@ export default function Mensajes({ rol }) {
               <li key={chat.id}>
                 <button
                   type="button"
-                  className={`${s.conv} ${chat.id === chatActual?.id ? s.sel : ""}`}
+                  className={`${s.conversacion} ${chat.id === chatActual?.id ? s.seleccionada : ""}`}
                   aria-current={chat.id === chatActual?.id}
                   onClick={() => abrirChat(chat)}
                 >
-                  <span className={s.l1}>
+                  {/* Dos renglones como WhatsApp: foto (con la flechita de la relación),
+                      nombre y hora arriba; último mensaje y burbuja de no leídos abajo */}
+                  <span className={s.fotoConMarca}>
+                    <Avatar nombre={chat.con} size={44} foto={fotoDe(idDeLaOtraParte(chat))} />
+                    <span
+                      className={s.marcaRelacion}
+                      data-tono={tonoDeLaRelacion(chat.rel)}
+                      title={chat.rel}
+                      aria-hidden="true"
+                    >
+                      {empezoYo(chat) ? "↗" : "↘"}
+                    </span>
+                  </span>
+                  <span className={s.lineaSuperior}>
                     <b>{chat.con}</b>
-                    <small>{chat.hora}</small>
+                    <small className={nuevosDe(chat) > 0 ? s.horaNueva : undefined}>{chat.hora}</small>
                   </span>
-                  {/* Vista previa: el texto del último mensaje (si hay) */}
-                  <span className={s.snip}>
-                    {chat.msgs.length ? chat.msgs[chat.msgs.length - 1][1] : "Conversación nueva"}
-                  </span>
-                  <span className={s.tags}>
-                    <Tag>{chat.proyecto}</Tag>
-                    <Tag tone={tonoDeLaRelacion(chat.rel)}>{chat.rel}</Tag>
-                    {/* Aparece solo si hay mensajes sin leer */}
+                  <span className={s.lineaInferior}>
+                    <span className={s.vistaPrevia}>
+                      {chat.msgs.length ? chat.msgs[chat.msgs.length - 1][1] : "Conversación nueva"}
+                    </span>
                     {nuevosDe(chat) > 0 && (
-                      <span className={s.nuevos}>{nuevosDe(chat)} nuevos</span>
+                      <span className={s.burbuja} aria-label={`${nuevosDe(chat)} sin leer`}>
+                        {nuevosDe(chat)}
+                      </span>
                     )}
                   </span>
+                  {/* Para el lector de pantalla, la flechita dicha en palabras */}
+                  <span className="sr-only">{chat.rel} · {chat.proyecto}</span>
                 </button>
               </li>
             ))}

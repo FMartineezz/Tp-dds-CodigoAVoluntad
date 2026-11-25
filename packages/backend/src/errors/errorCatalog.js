@@ -29,6 +29,32 @@ const ErrorCatalog = {
     message: (maximo) => `El parámetro limite debe ser un número entero entre 1 y ${maximo}`,
   },
 
+  // Filtros de los listados (?busqueda, ?estado, ?modalidad, ?habilidad, ?aceptaMensajes)
+  FILTRO_BUSQUEDA_INVALIDA: {
+    code: "ERR-VAL-004",
+    message: (maximo) => `El parámetro busqueda debe ser un texto de hasta ${maximo} caracteres`,
+  },
+
+  FILTRO_ESTADO_PROYECTO_INVALIDO: {
+    code: "ERR-VAL-005",
+    message: "El parámetro estado debe ser abierto, en_curso o finalizado",
+  },
+
+  FILTRO_MODALIDAD_INVALIDA: {
+    code: "ERR-VAL-006",
+    message: "El parámetro modalidad debe ser gratuita, incentivo_economico o contratacion_eventual",
+  },
+
+  FILTRO_HABILIDAD_INVALIDA: {
+    code: "ERR-VAL-007",
+    message: "El parámetro habilidad debe ser un único código de habilidad",
+  },
+
+  FILTRO_ACEPTA_MENSAJES_INVALIDO: {
+    code: "ERR-VAL-008",
+    message: "El parámetro aceptaMensajes debe ser true o false",
+  },
+
   RECURSO_NO_ENCONTRADO: {
     code: "ERR-CSR-001",
     message: "El recurso solicitado no fue encontrado",
