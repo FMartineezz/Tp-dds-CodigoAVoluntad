@@ -107,9 +107,7 @@ describe("DenunciaService", () => {
       expect(resueltas[0].descripcion).toBe("Uno");
     });
 
-    // BUG: el controller arma el filtro con colectivoId, pero el repositorio
-    // (obtenerTodasLasDenuncias) solo aplica el filtro por estado e ignora el colectivo.
-    test.failing("obtenerDenunciasParaAdmin filtra por colectivo", async () => {
+    test("obtenerDenunciasParaAdmin filtra por colectivo", async () => {
       const e1 = await armarEscenario();
       const e2 = await armarEscenario();
       const { colaboracionId: c1 } = await crearColaboracion(e1);

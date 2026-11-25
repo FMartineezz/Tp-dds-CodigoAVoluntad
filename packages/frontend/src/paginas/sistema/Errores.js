@@ -63,7 +63,7 @@ export function NoEncontrado({
 // ───── 3. SinPermiso (403) ─────
 // Se muestra cuando alguien entra a una zona que su cuenta no puede ver.
 export function SinPermiso() {
-  // rol de la sesión: 'col' (colaboradora), 'org' (organización) o null (sin sesión)
+  // rol de la sesión: 'col' (colaboradora), 'org' (organización), 'adm' (admin) o null
   const { rol } = useAuth();
 
   // Elige a dónde lleva el botón principal según quién tenga la sesión.
@@ -72,6 +72,8 @@ export function SinPermiso() {
     rutaDelBotonPrincipal = '/org';
   } else if (rol === 'col') {
     rutaDelBotonPrincipal = '/panel';
+  } else if (rol === 'adm') {
+    rutaDelBotonPrincipal = '/admin';
   } else {
     rutaDelBotonPrincipal = '/ingresar';
   }

@@ -1,5 +1,5 @@
 /**
- * Sesión simulada (rol: null | 'col' | 'org' + id de la cuenta) y modo daltónico.
+ * Sesión simulada (rol: null | 'col' | 'org' | 'adm' + id de la cuenta) y modo daltónico.
  *
  * USO: useAuth() → { rol, id, entrar(rol, id?), salir(), dalt, toggleDalt }.
  *      <Privada rol="org"> protege una ruta.
@@ -8,6 +8,7 @@
  *          mis postulaciones…).
  *   · entrar(rol) sin id usa la cuenta de demo del .env.local (VITE_DEMO_COLECTIVO_ID o
  *     VITE_DEMO_COLABORADORA_ID). Esos ids existen porque el seed del backend les da ids fijos.
+ *   · 'adm' (equipo administrativo) no tiene id: el admin no es una cuenta del backend.
  * SI LO CAMBIÁS O SACÁS: Cuando exista login real (Keycloak): reemplazá entrar/salir por el
  * login real, el id sale del token, y el token se agrega a los pedidos en api/cliente.js.
  */
@@ -22,7 +23,7 @@ export const CUENTAS_DEMO = {
   col: import.meta.env.VITE_DEMO_COLABORADORA_ID,
 };
 
-/** Sesión simulada: rol = null | 'col' | 'org'. Se reemplaza cuando se integre Keycloak. */
+/** Sesión simulada: rol = null | 'col' | 'org' | 'adm'. Se reemplaza cuando se integre Keycloak. */
 export function AuthProvider({ children }) {
   const [rol, setRol] = useState(() => {
     try { return sessionStorage.getItem('cav-rol') || null; } catch { return null; }
@@ -38,7 +39,9 @@ export function AuthProvider({ children }) {
     try {
       if (r) {
         sessionStorage.setItem('cav-rol', r);
+        // Sin id (el admin) se borra el de la sesión anterior: si no, al recargar volvía
         if (nuevoId) sessionStorage.setItem('cav-id', nuevoId);
+        else sessionStorage.removeItem('cav-id');
       } else {
         sessionStorage.removeItem('cav-rol');
         sessionStorage.removeItem('cav-id');

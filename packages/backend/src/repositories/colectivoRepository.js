@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { ColectivoModel } from "../schemas/colectivoSchema.js";
 import { paginar } from "./paginar.js";
 
@@ -166,13 +167,20 @@ export class ColectivoRepository {
   }
 
   /**
-   * Todas las denuncias de todos los colectivos, opcionalmente filtradas por estado.
-   * @param {{ estado?: EstadoDenunciaValor }} [filtro]
+   * Todas las denuncias de todos los colectivos (las más nuevas primero), opcionalmente
+   * filtradas por estado y/o por colectivo.
+   * @param {{ estado?: EstadoDenunciaValor, colectivoId?: Id }} [filtro]
    * @returns {Promise<DenunciaConColectivo[]>}
    */
   async obtenerTodasLasDenuncias(filtro = {}) {
     /** @type {import("mongoose").PipelineStage[]} */
-    const pipeline = [{ $unwind: "$denuncias" }];
+    const pipeline = [];
+    if (filtro.colectivoId) {
+      // Un id con formato inválido no puede ser de ningún colectivo: lista vacía
+      if (!mongoose.isValidObjectId(filtro.colectivoId)) return [];
+      pipeline.push({ $match: { _id: new mongoose.Types.ObjectId(String(filtro.colectivoId)) } });
+    }
+    pipeline.push({ $unwind: "$denuncias" });
     if (filtro.estado) {
       pipeline.push({ $match: { "denuncias.estado": filtro.estado } });
     }
@@ -187,6 +195,7 @@ export class ColectivoRepository {
         colectivoNombre: "$nombre",
       },
     });
+    pipeline.push({ $sort: { fecha: -1 } });
     return await this.model.aggregate(pipeline);
   }
 

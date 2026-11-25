@@ -83,4 +83,77 @@ describe("Reportes de problemas (HTTP)", () => {
       expect(await ReporteModel.countDocuments()).toBe(0);
     });
   });
+
+  describe("/admin/reportes", () => {
+    // Crea un reporte por la ruta pública y devuelve su id
+    async function crearReporte(descripcion = "Algo no anda") {
+      const respuesta = await reportar({ tipo: "error", descripcion });
+      return respuesta.body.id;
+    }
+
+    test("GET lista los reportes, los más nuevos primero", async () => {
+      // Preparación
+      await crearReporte("Primero");
+      await crearReporte("Segundo");
+
+      // Ejecución
+      const respuesta = await request(app).get("/admin/reportes");
+
+      // Validación
+      expect(respuesta.status).toBe(200);
+      expect(respuesta.body.map((reporte) => reporte.descripcion)).toEqual(["Segundo", "Primero"]);
+    });
+
+    test("PATCH cambia el estado y GET ?estado= filtra por él", async () => {
+      // Preparación
+      const id = await crearReporte();
+      await crearReporte();
+
+      // Ejecución
+      const cambio = await request(app)
+        .patch(`/admin/reportes/${id}/estado`)
+        .send({ estado: "resuelto" });
+      const resueltos = await request(app).get("/admin/reportes?estado=resuelto");
+
+      // Validación
+      expect(cambio.status).toBe(200);
+      expect(cambio.body.estado).toBe("resuelto");
+      expect(resueltos.body).toHaveLength(1);
+      expect(String(resueltos.body[0]._id)).toBe(id);
+    });
+
+    test("GET /:id devuelve el reporte", async () => {
+      // Preparación
+      const id = await crearReporte("Detalle");
+
+      // Ejecución
+      const respuesta = await request(app).get(`/admin/reportes/${id}`);
+
+      // Validación
+      expect(respuesta.status).toBe(200);
+      expect(respuesta.body.descripcion).toBe("Detalle");
+    });
+
+    test.each([
+      ["patch", "estado", { estado: "archivado" }, 400, ErrorCatalog.REPORTE_ESTADO_INVALIDO.code],
+      ["get", "", undefined, 404, ErrorCatalog.REPORTE_NO_ENCONTRADO.code],
+    ])("%s con datos inválidos responde %#", async (metodo, sufijo, body, status, codigo) => {
+      // Ejecución: un id que no existe (para el PATCH, uno que sí existe con estado inválido)
+      const id = metodo === "patch" ? await crearReporte() : "aaaaaaaaaaaaaaaaaaaaaaaa";
+      const respuesta = await request(app)[metodo](`/admin/reportes/${id}/${sufijo}`).send(body);
+
+      // Validación
+      expect(respuesta.status).toBe(status);
+      expect(respuesta.body.code).toBe(codigo);
+    });
+
+    test("GET ?estado= con un estado que no existe responde 400", async () => {
+      // Ejecución
+      const respuesta = await request(app).get("/admin/reportes?estado=archivado");
+
+      // Validación
+      expect(respuesta.status).toBe(400);
+      expect(respuesta.body.code).toBe(ErrorCatalog.REPORTE_ESTADO_INVALIDO.code);
+    });
+  });
 });

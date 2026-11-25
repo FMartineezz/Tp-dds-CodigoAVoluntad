@@ -51,7 +51,8 @@ export function LayoutPrincipal() {
         actions={
           rol ? (
             <>
-              <Campana />
+              {/* El admin no tiene notificaciones: sin campana */}
+              {rol !== "adm" && <Campana />}
               <MenuUsuario />
             </>
           ) : (

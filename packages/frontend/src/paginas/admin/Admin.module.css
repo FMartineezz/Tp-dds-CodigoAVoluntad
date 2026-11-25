@@ -1,0 +1,23 @@
+/* Piezas propias de las pantallas de admin (lo común está en plantillas/disposicion.module.css) */
+
+/* lista corta del panel: título, resumen de una línea y fecha */
+.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.lista li { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); background: var(--color-surface); border: var(--border-thin); border-radius: var(--radius); }
+.lista a { font-weight: 600; }
+
+/* texto largo cortado en una línea con «…» */
+.resumen { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.celdaTexto { min-width: 14rem; max-width: 28rem; }
+
+/* detalle de una denuncia: pares «Dato: valor» */
+.datos { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2) var(--space-5); margin: 0; }
+.datos dt { font-size: var(--text-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); }
+.datos dd { margin: 0; }
+
+/* texto de la denuncia o del reporte, tal como lo escribieron */
+.cita { margin: 0; padding: var(--space-4) var(--space-5); background: var(--color-surface); border: var(--border-thin); border-left: 4px solid var(--color-accent); border-radius: var(--radius); white-space: pre-wrap; }
+
+@media (max-width: 800px) {
+  .datos { grid-template-columns: 1fr; gap: var(--space-1); }
+  .datos dd + dt { margin-top: var(--space-3); }
+}

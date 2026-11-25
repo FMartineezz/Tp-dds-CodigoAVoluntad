@@ -91,9 +91,7 @@ describe("Denuncias (HTTP)", () => {
       expect(resueltas.body).toHaveLength(0);
     });
 
-    // BUG: el query param colectivoId llega al service pero el repositorio lo ignora,
-    // así que devuelve las denuncias de todos los colectivos.
-    test.failing("GET /admin/denuncias?colectivoId filtra por colectivo", async () => {
+    test("GET /admin/denuncias?colectivoId filtra por colectivo", async () => {
       const e1 = await armarEscenario();
       const e2 = await armarEscenario();
       await sembrarDenuncia(e1.colectivoId, (await crearColaboracion(e1)).colaboracionId);

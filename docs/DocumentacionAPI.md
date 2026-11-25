@@ -59,7 +59,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | [Notificaciones](#notificaciones) | `GET /colaboradoras/:colaboradoraId/notificaciones`, `GET /colectivos/:colectivoId/notificaciones`                                                                                          |
 | [Denuncias](#denuncias)           | `POST /colaboraciones/:id/denuncia`, `GET /admin/denuncias`, `GET /admin/denuncias/:id`, `PATCH /admin/denuncias/:id/estado`                                                                |
 | [Valoraciones](#valoraciones)     | `POST /valoraciones`, `GET /personaColaboradora/:personaColaboradoraId/valoraciones`, `GET /colectivo/:colectivoId/valoraciones`                                                            |
-| [Reportes](#reportes)             | `POST /reportes`                                                                                                                                                                            |
+| [Reportes](#reportes)             | `POST /reportes`, `GET /admin/reportes`, `GET /admin/reportes/:id`, `PATCH /admin/reportes/:id/estado`                                                                                     |
 | [Estadísticas](#estadísticas)     | `GET /estadisticas`                                                                                                                                                                         |
 
 ---
@@ -1321,8 +1321,9 @@ Consulta global de denuncias embebidas en los distintos colectivos, optimizada m
 **Query params opcionales:**
 
 - `estado`: filtra por estado (`pendiente`, `en_revision`, `resuelta`, `descartada`).
+- `colectivoId`: solo las denuncias a ese colectivo (un id con formato inválido devuelve `[]`).
 
-**Respuesta 200:** array de denuncias con información de su colectivo.
+**Respuesta 200:** array de denuncias con información de su colectivo, de la más nueva a la más vieja.
 
 ```json
 [
@@ -1546,6 +1547,32 @@ Los campos opcionales vacíos cuentan como que no vinieron. Cualquier otro campo
 ```
 
 **Errores 400:** `ERR-VAL-1501` tipo inválido, `ERR-VAL-1502` falta la descripción, `ERR-VAL-1503` descripción demasiado larga, `ERR-VAL-1504` correo inválido, `ERR-VAL-001` pantalla que no es texto.
+
+La respuesta trae el header `Location: /admin/reportes/:id`.
+
+> Las rutas `/admin/reportes` son del equipo administrativo y, como `/admin/denuncias`, todavía no están protegidas (falta la autenticación).
+
+### GET `/admin/reportes`
+
+Todos los reportes, del más nuevo al más viejo.
+
+**Query params opcionales:** `estado` (`nuevo`, `en_revision` o `resuelto`). Vacío cuenta como que no vino.
+
+**Respuesta 200:** array de reportes (cada uno con `_id`, `tipo`, `descripcion`, `pantalla`, `correo`, `estado` y `fecha`).
+
+**Error 400:** `ERR-VAL-1505` estado inválido.
+
+### GET `/admin/reportes/:id`
+
+**Respuesta 200:** el reporte. **Error 404:** `ERR-NOT-1506` no existe (también si el id tiene formato inválido).
+
+### PATCH `/admin/reportes/:id/estado`
+
+Pasa el reporte a otro estado. Se puede volver a `nuevo` (por ejemplo, para reabrir uno resuelto).
+
+**Body:** `{ "estado": "resuelto" }` (`nuevo`, `en_revision` o `resuelto`).
+
+**Respuesta 200:** el reporte actualizado. **Errores:** `400` `ERR-VAL-1505` estado inválido, `404` `ERR-NOT-1506` no existe.
 
 ## Estadísticas
 

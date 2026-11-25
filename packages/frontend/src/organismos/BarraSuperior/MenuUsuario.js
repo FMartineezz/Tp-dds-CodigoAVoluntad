@@ -18,7 +18,10 @@ export function MenuUsuario() {
       </button>
       {open && (
         <ul id={id} className={`${s.panel} ${s.menu}`}>
-          <li><Link to={rol === 'org' ? '/org/perfil' : '/panel/perfil'} onClick={() => setOpen(false)}>Mi perfil</Link></li>
+          {/* El admin no tiene perfil: no es una cuenta del backend */}
+          {rol !== 'adm' && (
+            <li><Link to={rol === 'org' ? '/org/perfil' : '/panel/perfil'} onClick={() => setOpen(false)}>Mi perfil</Link></li>
+          )}
           <li>
             <button type="button" role="switch" aria-checked={dalt} onClick={toggleDalt}>
               Modo daltónico <span className={`${s.interruptor} ${dalt ? s.encendido : ''}`} aria-hidden="true" />

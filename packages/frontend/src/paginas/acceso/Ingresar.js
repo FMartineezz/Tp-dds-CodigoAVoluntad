@@ -1,8 +1,8 @@
 /**
  * PANTALLA Ingresar
  * Ruta: /ingresar   ·   Quién la ve: Sin sesión
- * Qué muestra: Formulario de login (demo: colaboradora@demo.org u organizacion@demo.org
- *   + demo1234) y login social.
+ * Qué muestra: Formulario de login (demo: colaboradora@demo.org, organizacion@demo.org o
+ *   admin@demo.org + demo1234) y login social.
  * Para modificarla: cuando haya API real reemplazá el setTimeout por la llamada a Axios.
  * Cuenta de demo: un selector opcional con colectivos y colaboradoras REALES del backend
  *   (GET /colectivos y GET /colaboradoras, primera página de 100). Si se elige una, se entra
@@ -40,7 +40,7 @@ async function cargarCuentas() {
 import s from './Ingresar.module.css';
 
 // Dónde empieza el área privada de cada rol (ver las rutas en App.js).
-const PANEL_POR_ROL = { col: '/panel', org: '/org' };
+const PANEL_POR_ROL = { col: '/panel', org: '/org', adm: '/admin' };
 
 export default function Ingresar() {
   // ───── 1. DATOS Y ESTADO ─────
@@ -138,10 +138,14 @@ export default function Ingresar() {
       }
 
       // Si se eligió una cuenta de demo, se entra con su rol y su id. 'org:c00…'.split(':')
-      // da ['org', 'c00…']. Si no, el rol sale del correo: si empieza con «org» (sin importar
-      // mayúsculas) se entra como organización; si no, como colaboradora (con la cuenta del .env).
+      // da ['org', 'c00…']. Si no, el rol sale del correo (sin importar mayúsculas): «admin…»
+      // entra como admin, «org…» como organización y cualquier otro como colaboradora
+      // (con la cuenta del .env).
       const [rolElegido, idElegido] = cuentaElegida ? cuentaElegida.split(':') : [];
-      const rol = rolElegido || (/^org/i.test(correo) ? 'org' : 'col');
+      let rol = 'col';
+      if (/^admin/i.test(correo)) rol = 'adm';
+      else if (/^org/i.test(correo)) rol = 'org';
+      if (rolElegido) rol = rolElegido;
       entrar(rol, idElegido);
       // replace: true reemplaza esta pantalla en el historial (el botón «atrás» no vuelve al login)
       navegar(rutaDeDestino(rol), { replace: true });
@@ -205,6 +209,7 @@ export default function Ingresar() {
             onChange={(evento) => setCuentaElegida(evento.target.value)}
           >
             <option value="">La del correo (demo por defecto)</option>
+            <option value="adm:">Equipo administrativo</option>
             <optgroup label="Organizaciones">
               {cuentas.colectivos.map((colectivo) => (
                 <option key={colectivo.id} value={`org:${colectivo.id}`}>{colectivo.nombre}</option>
@@ -234,8 +239,8 @@ export default function Ingresar() {
 
         {/* BLOQUE: aviso de prototipo — dice con qué datos de demostración se puede entrar */}
         <Alert kind="info" title="Prototipo">
-          Entrá con <b>colaboradora@demo.org</b> u{' '}
-          <b>organizacion@demo.org</b> y la contraseña <b>demo1234</b>. Para entrar como otra
+          Entrá con <b>colaboradora@demo.org</b>, <b>organizacion@demo.org</b> o{' '}
+          <b>admin@demo.org</b> y la contraseña <b>demo1234</b>. Para entrar como otra
           cuenta real, elegila en «Cuenta de demo» (con cualquier correo y la misma contraseña).
         </Alert>
       </form>

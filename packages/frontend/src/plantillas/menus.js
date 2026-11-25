@@ -16,12 +16,21 @@ export const MENUS = {
     ["/org/colaboradoras", "Colaboradores"],
     ["/org/mensajes", "Mensajes"],
   ],
+  adm: [
+    ["/admin", "Panel", true],
+    ["/admin/denuncias", "Denuncias"],
+    ["/admin/problemas", "Problemas"],
+    ["/admin/colectivos", "Colectivos"],
+    ["/admin/proyectos", "Proyectos"],
+    ["/admin/colaboradoras", "Personas"],
+  ],
 };
 
 // Un ícono por ítem de MENUS[rol], EN EL MISMO ORDEN (los usa la barra inferior del móvil).
 export const ICONOS = {
   col: ["panel", "proyectos", "postulaciones", "mensajes"],
   org: ["panel", "proyectos", "colaboradoras", "mensajes"],
+  adm: ["panel", "megafono", "x", "colectivos", "proyectos", "colaboradoras"],
 };
 
 // Etiquetas más cortas para la barra inferior del móvil (opcional).

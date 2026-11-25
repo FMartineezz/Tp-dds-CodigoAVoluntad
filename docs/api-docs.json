@@ -5032,6 +5032,15 @@
             "schema": {
               "$ref": "#/components/schemas/EstadoDenuncia"
             }
+          },
+          {
+            "name": "colectivoId",
+            "in": "query",
+            "required": false,
+            "description": "Solo las denuncias a ese colectivo",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -5371,6 +5380,152 @@
                 "example": {
                   "code": "ERR-LIM-001",
                   "message": "Descripción del error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/reportes": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Lista de reportes (Administración)",
+        "description": "Del más nuevo al más viejo. Todavía sin protección (falta la autenticación).",
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["nuevo", "en_revision", "resuelto"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de reportes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reporte"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ERR-VAL-1505 estado inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/reportes/{id}": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Detalle de un reporte (Administración)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "El reporte",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reporte"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ERR-NOT-1506 no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/reportes/{id}/estado": {
+      "patch": {
+        "tags": ["Reportes"],
+        "summary": "Cambiar el estado de un reporte (Administración)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["estado"],
+                "properties": {
+                  "estado": {
+                    "type": "string",
+                    "enum": ["nuevo", "en_revision", "resuelto"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "El reporte actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reporte"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ERR-VAL-1505 estado inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ERR-NOT-1506 no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

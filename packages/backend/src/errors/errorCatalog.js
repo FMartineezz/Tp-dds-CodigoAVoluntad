@@ -693,9 +693,7 @@ const ErrorCatalog = {
   },
 
   // =========================
-  // CAPTCHA
-  // =========================
-  // Reportes de problemas (POST /reportes)
+  // Reportes de problemas (POST /reportes y /admin/reportes)
   // =========================
   REPORTE_TIPO_INVALIDO: {
     code: "ERR-VAL-1501",
@@ -717,6 +715,18 @@ const ErrorCatalog = {
     message: "El correo para avisarte no es válido",
   },
 
+  REPORTE_ESTADO_INVALIDO: {
+    code: "ERR-VAL-1505",
+    message: "El estado del reporte debe ser: nuevo, en_revision o resuelto",
+  },
+
+  REPORTE_NO_ENCONTRADO: {
+    code: "ERR-NOT-1506",
+    message: (id) => `El reporte ${id} no fue encontrado`,
+  },
+
+  // =========================
+  // CAPTCHA
   // =========================
   CAPTCHA_REQUERIDO: {
     code: "ERR-VAL-1400",
