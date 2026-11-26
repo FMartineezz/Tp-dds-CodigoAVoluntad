@@ -77,7 +77,7 @@ export default function ComoFunciona() {
             Dividís el proyecto en hitos con un peso, y el avance se calcula solo a medida
             que los completan.
           </Text>
-          <Button as={Link} to="/registro/organizacion">Crear cuenta de organización</Button>
+          <Button as={Link} to="/ingresar">Crear cuenta de organización</Button>
         </section>
 
         {/* Columna 2: para colaboradoras, con botón que lleva a su registro */}
@@ -94,7 +94,7 @@ export default function ComoFunciona() {
             Si te aceptan, sumás al equipo y llevás un registro de tus logros dentro de la
             plataforma.
           </Text>
-          <Button as={Link} to="/registro/colaboradora">Crear cuenta de colaboradora</Button>
+          <Button as={Link} to="/ingresar">Crear cuenta de colaboradora</Button>
         </section>
       </div>
 

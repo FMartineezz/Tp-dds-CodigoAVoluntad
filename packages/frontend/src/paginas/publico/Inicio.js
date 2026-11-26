@@ -122,10 +122,10 @@ export default function Inicio() {
               <Highlight>oficio</Highlight>. Acá se encuentran.
             </Text>
             <div className={s.btns}>
-              <Button as={Link} to="/registro/colaboradora" size="lg" iconRight="→">
+              <Button as={Link} to="/ingresar" size="lg" iconRight="→">
                 Quiero colaborar
               </Button>
-              <Button as={Link} to="/registro/organizacion" variant="link">
+              <Button as={Link} to="/ingresar" variant="link">
                 Somos una organización
               </Button>
             </div>
