@@ -2,24 +2,30 @@
  * TEST DE INTEGRACIÓN DEL FRONT: aceptar y rechazar una postulación (PostulacionesOrg).
  *
  * Qué se integra: la pantalla real + sus adaptadores reales (api/organizacion.js,
- * api/proyectos.js, api/habilidades.js) + el contexto de sesión y el router. Lo único que
- * se reemplaza es el cliente HTTP (api/cliente.js): en lugar de hablar con el backend,
- * contesta con respuestas armadas igual que las del backend. Así se prueba que la pantalla
- * pide lo que tiene que pedir, traduce bien las respuestas y muestra el feedback.
+ * api/proyectos.js, api/habilidades.js) + el router. Se reemplazan dos cosas:
+ *   · el cliente HTTP (api/cliente.js): en lugar de hablar con el backend, contesta con
+ *     respuestas armadas igual que las del backend.
+ *   · la sesión (useAuth): la real necesita Keycloak, acá la org ya está logueada.
+ * Así se prueba que la pantalla pide lo que tiene que pedir, traduce bien las respuestas
+ * y muestra el feedback.
  *
  * Cada test sigue la estructura preparación → ejecución → validación.
  */
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from '../../contexto';
 import PostulacionesOrg from './PostulacionesOrg.js';
 import { api } from '../../api/cliente.js';
+
+const COLECTIVO_ID = 'c00000000000000000000001';
 
 vi.mock('../../api/cliente.js', () => ({
   api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
 }));
 
-const COLECTIVO_ID = 'c00000000000000000000001';
+// Sesión de la org dueña del proyecto, sin pasar por Keycloak
+vi.mock('../../contexto', () => ({
+  useAuth: () => ({ rol: 'org', id: 'c00000000000000000000001' }),
+}));
 const PROYECTO_ID = 'p00000000000000000000001';
 const POSTULACION_ID = 'f00000000000000000000001';
 
@@ -77,23 +83,18 @@ function backendConPostulaciones(obtenerPostulaciones) {
 
 // Abre la pantalla como la organización dueña del proyecto.
 function renderizarPantalla() {
-  sessionStorage.setItem('cav-rol', 'org');
-  sessionStorage.setItem('cav-id', COLECTIVO_ID);
   return render(
-    <AuthProvider>
-      <MemoryRouter initialEntries={[`/org/proyectos/${PROYECTO_ID}/postulaciones`]}>
-        <Routes>
-          <Route path="/org/proyectos/:id/postulaciones" element={<PostulacionesOrg />} />
-        </Routes>
-      </MemoryRouter>
-    </AuthProvider>
+    <MemoryRouter initialEntries={[`/org/proyectos/${PROYECTO_ID}/postulaciones`]}>
+      <Routes>
+        <Route path="/org/proyectos/:id/postulaciones" element={<PostulacionesOrg />} />
+      </Routes>
+    </MemoryRouter>
   );
 }
 
 describe('PostulacionesOrg: el colectivo resuelve postulaciones', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    sessionStorage.clear();
   });
 
   test('aceptar una postulación pendiente la manda al backend y la mueve a «Aceptadas»', async () => {
