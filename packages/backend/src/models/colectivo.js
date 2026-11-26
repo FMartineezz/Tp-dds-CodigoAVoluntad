@@ -46,7 +46,7 @@ class Colectivo {
    * @param {string} descripcion
    * @param {string | null} ubicacion Uno de UBICACION_VALIDA, o null.
    * @param {typeof TipoColectivo[keyof typeof TipoColectivo]} tipoDeColectivo
-   * @param {Array<Id | object>} [proyectos] Ids o proyectos (ver cargarProyecto).
+   * @param {string} [keycloackId] Id del usuario en Keycloak (sin login, undefined).
    * @param {import("./redSocial.js").RedSocial[]} [redesSociales]
    */
   constructor(
@@ -63,6 +63,8 @@ class Colectivo {
     this.descripcion = descripcion;
     this.ubicacion = ubicacion;
     this.tipoDeColectivo = tipoDeColectivo;
+    /** @type {Array<Id | object>} Arranca vacío; se llena con cargarProyecto. */
+    this.proyectos = [];
     this.activo = true;
     this.keycloackId = keycloackId;
     this.redesSociales = redesSociales;

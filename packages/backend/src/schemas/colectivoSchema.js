@@ -81,9 +81,11 @@ const colectivoSchema = new mongoose.Schema(
         message: "No se permiten tipos de redes sociales duplicados",
       },
     },
+    // sparse: las cuentas sin Keycloak (seed, tests) no tienen id y no chocan entre sí
     keycloackId: {
       type: String,
-      unique: true
+      unique: true,
+      sparse: true
     },
     denuncias: {
       type: [denunciaSchema],
