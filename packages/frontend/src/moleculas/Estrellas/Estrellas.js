@@ -10,7 +10,7 @@ import s from './Estrellas.module.css';
 export function Estrellas({ valor }) {
   return (
     <span className={s.estrellas} role="img" aria-label={`${valor} de 5`}>
-      {[1, 2, 3, 4, 5].map((n) => <Icon key={n} name="estrella" size={16} />).map((x, i) => <span key={i} className={i < valor ? s.on : s.off}>{x}</span>)}
+      {[1, 2, 3, 4, 5].map((n) => <Icon key={n} name="estrella" size={16} />).map((x, i) => <span key={i} className={i < valor ? s.llena : s.vacia}>{x}</span>)}
     </span>
   );
 }

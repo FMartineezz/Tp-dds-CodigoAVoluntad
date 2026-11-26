@@ -16,6 +16,15 @@ export const ModalidadColaboracion = Object.freeze({
 
 /** @typedef {typeof ModalidadColaboracion[keyof typeof ModalidadColaboracion]} ModalidadColaboracionValor */
 
+// No es un campo guardado: se deduce de finalizado, busquedaCerrada y fechaLimiteBusqueda.
+// Lo usa el filtro ?estado de GET /proyectos.
+/** Estado de un proyecto visto desde afuera. */
+export const EstadoDeProyecto = Object.freeze({
+  ABIERTO: "abierto", // todavía busca gente
+  EN_CURSO: "en_curso", // no terminó, pero ya no busca gente (cerró la búsqueda o venció la fecha)
+  FINALIZADO: "finalizado",
+});
+
 /** @typedef {import("../types.js").Id} Id */
 
 /**

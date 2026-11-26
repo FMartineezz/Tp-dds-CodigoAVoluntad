@@ -4,6 +4,7 @@
  *
  * USO (siempre con el id de la sesión: const { id } = useAuth()):
  *   const perfil = await obtenerPerfil(id);                → ver aPerfilDeLaVista
+ *   const contactos = await obtenerMisContactos(id);       → [[tipo, dato]] para el editor
  *   await guardarPerfil(id, perfil, { contactos });        → PATCH /colaboradoras/:id
  *   const postulaciones = await obtenerPostulaciones(id);  → [{ id, proyecto, perfil, estado, anonima }]
  *   const colaboraciones = await obtenerMisColaboraciones(id);
@@ -14,6 +15,7 @@
  * (los «adaptadores» de abajo). Si el backend cambia un nombre, se arregla solo acá.
  */
 import { api } from "./cliente.js";
+import { urlDeFotoSubida } from "./fotos.js";
 import { nombresDeHabilidades, obtenerHabilidades, titulos } from "./habilidades.js";
 import { aProyectoDeLaVista } from "./proyectos.js";
 
@@ -35,12 +37,14 @@ export function haceCuanto(fecha) {
 
 // Nombres que ve la persona en el editor de contactos ↔ tipos que entiende el backend.
 const TIPOS_DE_CONTACTO = { Correo: "email", WhatsApp: "whatsapp", SMS: "sms" };
+// Al revés: tipo del backend → nombre para mostrar (lo usa también api/organizacion.js).
+export const NOMBRES_DE_CONTACTO = { email: "Correo", whatsapp: "WhatsApp", sms: "SMS" };
 
 // ───── 1. Perfil ─────
 
 // ADAPTADOR: colaboradora del backend → datos del formulario «Mi perfil».
-// `nombres` es el Map id → título de habilidades. Los contactos NO vienen: el backend nunca
-// los devuelve en un GET (son privados).
+// `nombres` es el Map id → título de habilidades. Los contactos NO vienen acá (son privados):
+// se piden aparte con obtenerMisContactos.
 function aPerfilDeLaVista(c, nombres) {
   // Las redes llegan como lista [{ tipo, url }]; buscamos la de LinkedIn para su campo.
   const redes = c.redesSociales ?? [];
@@ -54,6 +58,11 @@ function aPerfilDeLaVista(c, nombres) {
     github: c.git ?? "",
     linkedin: linkedin?.url ?? "",
     bio: c.presentacion ?? "",
+    // Enlace a una foto publicada en otro lado (lo que se escribe en el campo)
+    foto: c.foto ?? "",
+    // URL de la foto subida, o null (se cambia aparte, con SubirFoto)
+    fotoSubida: urlDeFotoSubida("colaboradoras", c._id, c.fotoSubida),
+    sitioWeb: c.sitioWeb ?? "",
     // El backend pregunta lo contrario: «¿bloquear mensajes?». `!` lo da vuelta.
     mensajes: !c.bloquearMensajeInterno,
     habilidades: titulos(c.habilidades, nombres),
@@ -69,6 +78,16 @@ export async function obtenerPerfil(id) {
     nombresDeHabilidades(),
   ]);
   return aPerfilDeLaVista(data, nombres);
+}
+
+// GET /colaboradoras/:id/contactos → los contactos privados de la dueña, como pares
+// [tipo, dato] para el ContactosEditor: [['Correo', 'ana@mail.com']].
+// PENDIENTE (login): `colaboradoraId` dice quién pide; con el login sale del token.
+export async function obtenerMisContactos(id) {
+  const { data } = await api.get(`/colaboradoras/${id}/contactos`, {
+    params: { colaboradoraId: id },
+  });
+  return data.map((c) => [NOMBRES_DE_CONTACTO[c.tipo] ?? c.tipo, c.valor]);
 }
 
 // PATCH /colaboradoras/:id → guarda el formulario. `perfil` tiene la forma de
@@ -95,6 +114,9 @@ export async function guardarPerfil(id, perfil, { contactos } = {}) {
       .map((p) => p.trim())
       .filter(Boolean),
     presentacion: perfil.bio.trim(),
+    // Vacío = null: así el backend borra el dato si la persona lo sacó.
+    foto: perfil.foto.trim() || null,
+    sitioWeb: perfil.sitioWeb.trim() || null,
     bloquearMensajeInterno: !perfil.mensajes,
     habilidades: perfil.habilidades.map((titulo) => codigoDe.get(titulo)).filter(Boolean),
     redesSociales: redes,
@@ -219,13 +241,13 @@ export async function obtenerProyectosAcordes(id, { pagina = 1, limite = 20 } = 
 // Junta en un solo pedido todo lo que muestra /panel. Promise.all lanza los pedidos a la vez
 // y espera a que terminen todos (si uno falla, falla todo y la pantalla muestra el error).
 export async function obtenerPanel(id) {
-  const [perfil, postulaciones, colaboraciones, mensajes, notificaciones, acordes] =
+  // Las notificaciones no van acá: las pide «Última actividad» (hooks/useNotificaciones.js).
+  const [perfil, postulaciones, colaboraciones, mensajes, acordes] =
     await Promise.all([
       api.get(`/colaboradoras/${id}`).then(({ data }) => data),
       obtenerPostulaciones(id),
       obtenerMisColaboraciones(id),
       api.get(`/colaboradoras/${id}/mensajes`).then(({ data }) => data),
-      obtenerNotificaciones(id),
       obtenerProyectosAcordes(id, { pagina: 1, limite: 20 }),
     ]);
   return {
@@ -233,10 +255,8 @@ export async function obtenerPanel(id) {
     pendientes: postulaciones.filter((p) => p.estado === "pendiente").length,
     proyectosActivos: colaboraciones.filter((c) => c.activa && !c.proyecto.finalizado).length,
     mensajes: mensajes.filter((m) => m.emisor === "colectivo" && !m.leido).length,
-    // Las tres novedades más recientes (ya vienen ordenadas).
-    novedades: notificaciones.slice(0, 3),
-    // Como mucho dos. El backend ya manda solo los que aceptan postulaciones; el filtro es
-    // por las dudas (por ejemplo, si la fecha límite vence justo ahora).
-    sugeridos: acordes.resultados.filter((p) => p.estado === "abierto").slice(0, 2),
+    // Como mucho tres (una fila de tarjetas). El backend ya manda solo los que aceptan
+    // postulaciones; el filtro es por las dudas (ej. si la fecha límite vence justo ahora).
+    sugeridos: acordes.resultados.filter((p) => p.estado === "abierto").slice(0, 3),
   };
 }

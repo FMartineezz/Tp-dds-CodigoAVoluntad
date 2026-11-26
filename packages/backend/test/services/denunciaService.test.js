@@ -13,42 +13,31 @@ import { ColectivoModel } from "../../src/schemas/colectivoSchema.js";
 
 usarBaseDeDatos();
 
-// BUG (afecta a todo el alta de denuncias): ColaboracionRepository.obtenerPorIdParaAdmin solo
-// popula personaColaboradora, no el proyecto. En crearDenuncia `colaboracion.proyecto` es un
-// ObjectId, `proyecto.colectivo` es undefined y siempre se lanza DENUNCIA_PROYECTO_SIN_COLECTIVO
-// (400): hoy es imposible registrar una denuncia. Los tests del alta quedan como test.failing y
-// las consultas administrativas se prueban con denuncias insertadas con el modelo real.
-
 describe("DenunciaService", () => {
   describe("crearDenuncia", () => {
-    // BUG: ver comentario al inicio del archivo (proyecto sin popular → 400 siempre).
-    test.failing(
-      "registra la denuncia pendiente en el colectivo responsable del proyecto",
-      async () => {
-        // Preparación
-        const e = await armarEscenario();
-        const { colaboracionId } = await crearColaboracion(e);
+    test("registra la denuncia pendiente en el colectivo responsable del proyecto", async () => {
+      // Preparación
+      const e = await armarEscenario();
+      const { colaboracionId } = await crearColaboracion(e);
 
-        // Ejecución
-        const denuncia = await denunciaService.crearDenuncia(colaboracionId, {
-          descripcion: "  Trato inadecuado  ",
-        });
+      // Ejecución
+      const denuncia = await denunciaService.crearDenuncia(colaboracionId, {
+        descripcion: "  Trato inadecuado  ",
+      });
 
-        // Validación
-        expect(denuncia).toMatchObject({
-          descripcion: "Trato inadecuado",
-          estado: EstadoDenuncia.PENDIENTE,
-          colaboracionId,
-        });
-        expect(denuncia.id).toBeDefined();
-        const colectivo = await ColectivoModel.findById(e.colectivoId).select("+denuncias").lean();
-        expect(colectivo.denuncias).toHaveLength(1);
-        expect(colectivo.denuncias[0].colaboracionId.toString()).toBe(colaboracionId);
-      },
-    );
+      // Validación
+      expect(denuncia).toMatchObject({
+        descripcion: "Trato inadecuado",
+        estado: EstadoDenuncia.PENDIENTE,
+        colaboracionId,
+      });
+      expect(denuncia.id).toBeDefined();
+      const colectivo = await ColectivoModel.findById(e.colectivoId).select("+denuncias").lean();
+      expect(colectivo.denuncias).toHaveLength(1);
+      expect(colectivo.denuncias[0].colaboracionId.toString()).toBe(colaboracionId);
+    });
 
-    // BUG: ver comentario al inicio del archivo.
-    test.failing("una colaboración dada de baja también acredita participación", async () => {
+    test("una colaboración dada de baja también acredita participación", async () => {
       const e = await armarEscenario();
       const { colaboracionId } = await crearColaboracion(e);
       await colaboracionService.desactivarColaboracion(colaboracionId);
@@ -58,8 +47,7 @@ describe("DenunciaService", () => {
       expect(denuncia.estado).toBe(EstadoDenuncia.PENDIENTE);
     });
 
-    // BUG: ver comentario al inicio del archivo (falla antes de chequear el duplicado).
-    test.failing("no permite dos denuncias para la misma colaboración", async () => {
+    test("no permite dos denuncias para la misma colaboración", async () => {
       const e = await armarEscenario();
       const { colaboracionId } = await crearColaboracion(e);
       await sembrarDenuncia(e.colectivoId, colaboracionId);
@@ -119,9 +107,7 @@ describe("DenunciaService", () => {
       expect(resueltas[0].descripcion).toBe("Uno");
     });
 
-    // BUG: el controller arma el filtro con colectivoId, pero el repositorio
-    // (obtenerTodasLasDenuncias) solo aplica el filtro por estado e ignora el colectivo.
-    test.failing("obtenerDenunciasParaAdmin filtra por colectivo", async () => {
+    test("obtenerDenunciasParaAdmin filtra por colectivo", async () => {
       const e1 = await armarEscenario();
       const e2 = await armarEscenario();
       const { colaboracionId: c1 } = await crearColaboracion(e1);

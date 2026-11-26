@@ -27,6 +27,9 @@
 .row dt { min-width: 6rem; flex-shrink: 0; color: var(--color-text-muted); text-transform: uppercase; font-size: var(--text-label); letter-spacing: 0.06em; padding-top: 2px; }
 .row dd { margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .footer { margin-top: auto; padding-top: var(--space-5); display: flex; gap: var(--space-3); flex-wrap: wrap; }
+/* Una etiqueta al lado de un botón (ej. «Valoración enviada») queda del mismo alto que el
+   botón: el texto se centra en vez de quedar pegado arriba */
+.footer > span { display: inline-flex; align-items: center; justify-content: center; padding-inline: var(--space-4); }
 .stamp { position: absolute; right: -1.75rem; bottom: -2.25rem; }
 @media (max-width: 600px) { .stamp { right: var(--space-2); bottom: -2rem; } }
 @media (prefers-reduced-motion: reduce) { .tilt { transform: none; } }

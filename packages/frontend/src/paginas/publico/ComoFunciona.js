@@ -21,7 +21,7 @@ import s from './Como.module.css';
 // ═════ COMPONENTE AUXILIAR: Pregunta ═════
 // Una pregunta frecuente tipo acordeón: se ve la pregunta y, al tocarla, aparece la respuesta.
 // Props: `q` (texto de la pregunta) y `a` (texto de la respuesta). Las llaves { } de abajo
-// sacan esas dos piezas del objeto de props (ver docs/GLOSARIO.md → Props y Desestructurar).
+// sacan esas dos piezas del objeto de props (ver packages/frontend/docs/GLOSARIO.md → Props y Desestructurar).
 function Pregunta({ q, a }) {
   // ───── 1. DATOS Y ESTADO ─────
   // true = la respuesta está a la vista; false = está oculta. Empieza oculta
@@ -47,7 +47,7 @@ function Pregunta({ q, a }) {
         </button>
       </h3>
       {/* BLOQUE: Respuesta — se ve solo cuando `abierta` es true
-          (`&&`: si es verdadero se dibuja; ver docs/GLOSARIO.md → Renderizado condicional) */}
+          (`&&`: si es verdadero se dibuja; ver packages/frontend/docs/GLOSARIO.md → Renderizado condicional) */}
       {abierta && <Text variant="prose">{a}</Text>}
     </div>
   );
@@ -63,7 +63,7 @@ export default function ComoFunciona() {
       {/* BLOQUE: Dos columnas — qué hace una organización y qué hace una colaboradora */}
       <div className={s.split}>
         {/* Columna 1: para organizaciones, con botón que lleva a su registro */}
-        <section className={s.col} aria-labelledby="c-org">
+        <section className={s.column} aria-labelledby="c-org">
           <Heading level={2} size="h2" id="c-org">Si sos una organización</Heading>
           <Text variant="prose">
             Registrás a tu colectivo y publicás un proyecto con los perfiles que necesitás:
@@ -81,7 +81,7 @@ export default function ComoFunciona() {
         </section>
 
         {/* Columna 2: para colaboradoras, con botón que lleva a su registro */}
-        <section className={s.col} aria-labelledby="c-col">
+        <section className={s.column} aria-labelledby="c-col">
           <Heading level={2} size="h2" id="c-col">Si querés colaborar</Heading>
           <Text variant="prose">
             Armás tu perfil con tus habilidades y el tiempo que tenés. Tus datos de contacto
@@ -102,9 +102,9 @@ export default function ComoFunciona() {
       <section aria-labelledby="c-faq" className={s.faqs}>
         <Heading level={2} id="c-faq">Preguntas frecuentes</Heading>
         {/* Cada fila de FAQ es un par [pregunta, respuesta]; los corchetes del parámetro
-            lo separan en dos variables con nombre (ver docs/GLOSARIO.md → Desestructurar).
+            lo separan en dos variables con nombre (ver packages/frontend/docs/GLOSARIO.md → Desestructurar).
             `key` ayuda a React a distinguir cada pregunta
-            (ver docs/GLOSARIO.md → Listas con map y key). */}
+            (ver packages/frontend/docs/GLOSARIO.md → Listas con map y key). */}
         {FAQ.map(([pregunta, respuesta]) => (
           <Pregunta key={pregunta} q={pregunta} a={respuesta} />
         ))}

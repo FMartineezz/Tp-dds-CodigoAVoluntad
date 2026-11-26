@@ -5,7 +5,9 @@ import {
   armarEscenario,
   crearColaboracion,
   crearColaboradora,
+  crearProyecto,
   idInexistente,
+  sembrarDenuncia,
 } from "../utils/escenarios.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
 import { ColaboracionModel } from "../../src/schemas/colaboracionSchema.js";
@@ -203,6 +205,31 @@ describe("Colaboraciones (HTTP)", () => {
         proyecto: { _id: e.proyectoId, titulo: e.proyecto.titulo },
       });
       expect(respuesta.body[0].proyecto.colectivo).toMatchObject({ _id: e.colectivoId });
+    });
+
+    test("cada colaboración dice si ya fue denunciada", async () => {
+      // Preparación: la misma persona en dos proyectos del MISMO colectivo, y solo una
+      // denuncia (la denuncia es por colaboración, no por colectivo)
+      const e = await armarEscenario();
+      const { colaboracionId: denunciada } = await crearColaboracion(e);
+      const otroProyecto = await crearProyecto({
+        colectivo: e.colectivo,
+        perfiles: [{ habilidadesRequeridas: [e.habilidad.codigo] }],
+      });
+      const { colaboracionId: sinDenuncia } = await crearColaboracion({
+        ...e,
+        proyectoId: otroProyecto.id,
+        perfilId: otroProyecto.perfiles[0].id,
+      });
+      await sembrarDenuncia(e.colectivoId, denunciada);
+
+      // Ejecución
+      const respuesta = await request(app).get(`/colaboradoras/${e.personaId}/colaboraciones`);
+
+      // Validación
+      expect(respuesta.status).toBe(200);
+      const porId = Object.fromEntries(respuesta.body.map((c) => [c._id, c.denunciada]));
+      expect(porId).toEqual({ [denunciada]: true, [sinDenuncia]: false });
     });
 
     test("responde 404 si la colaboradora no existe", async () => {

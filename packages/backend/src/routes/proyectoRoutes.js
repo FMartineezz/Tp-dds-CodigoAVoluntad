@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { validarPaginacion } from "../middlewares/validations/paginacionValidation.js";
+import { validarFiltrosDeProyectos } from "../middlewares/validations/filtrosValidation.js";
 import { proyectoController } from "../container.js";
 import proyectoValidation, {
   validarActualizacionProyecto,
@@ -20,7 +21,13 @@ export default function proyectoRoutes() {
     colectivoId: ErrorCatalog.COLECTIVO_NO_ENCONTRADO,
   });
 
-  router.get("/proyectos", validarPaginacion, proyectoController.obtenerProyectos);
+  // Filtros opcionales: ?busqueda, ?estado, ?modalidad y ?habilidad (ver filtrosValidation.js)
+  router.get(
+    "/proyectos",
+    validarPaginacion,
+    validarFiltrosDeProyectos,
+    proyectoController.obtenerProyectos,
+  );
 
   router.get("/proyectos/:id", proyectoController.obtenerProyectoPorId);
 

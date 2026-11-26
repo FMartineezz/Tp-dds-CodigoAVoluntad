@@ -42,11 +42,13 @@ export class ProyectoService {
    * @param {import("../repositories/proyectoRepository.js").ProyectoRepository} deps.proyectoRepository
    * @param {import("./perfilService.js").PerfilService} deps.perfilService
    * @param {import("./colectivoService.js").ColectivoService} deps.colectivoService
+   * @param {import("./habilidadService.js").HabilidadService} deps.habilidadService
    */
-  constructor({ proyectoRepository, perfilService, colectivoService }) {
+  constructor({ proyectoRepository, perfilService, colectivoService, habilidadService }) {
     this.proyectoRepository = proyectoRepository;
     this.perfilService = perfilService;
     this.colectivoService = colectivoService;
+    this.habilidadService = habilidadService;
   }
 
   /**
@@ -137,13 +139,25 @@ export class ProyectoService {
     return proyectoGuardado;
   }
 
+  // La habilidad llega por CÓDIGO (como en el resto de la API) y se pasa a id para filtrar
   /**
-   * Página de proyectos.
+   * Página de proyectos, con filtros opcionales.
    * @param {Paginacion} paginacion
+   * @param {{ busqueda?: string, estado?: string, modalidad?: string, habilidad?: string }} [filtros]
    * @returns {Promise<import("../types.js").Pagina<ProyectoGuardado>>}
+   * @throws {AppError} 400 si no existe una habilidad con ese código.
    */
-  async obtenerProyectos(paginacion) {
-    return await this.proyectoRepository.obtenerPagina(paginacion);
+  async obtenerProyectos(paginacion, { busqueda, estado, modalidad, habilidad } = {}) {
+    const habilidadId = habilidad
+      ? (await this.habilidadService.obtenerHabilidadPorCodigo(habilidad))._id
+      : undefined;
+
+    return await this.proyectoRepository.obtenerPagina(paginacion, {
+      busqueda,
+      estado,
+      modalidad,
+      habilidadId,
+    });
   }
 
   // Lanza 404 si el colectivo no existe (o fue dado de baja)

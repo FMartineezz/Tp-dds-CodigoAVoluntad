@@ -12,16 +12,19 @@ export function MenuUsuario() {
   const { open, setOpen, ref } = useDisclosure();
   const id = useId();
   return (
-    <div className={s.wrap} ref={ref}>
-      <button type="button" className={`${s.btn} ${s.texto}`} aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
+    <div className={s.desplegable} ref={ref}>
+      <button type="button" className={`${s.boton} ${s.texto}`} aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
         <Icon name="usuario" size={16} /> Mi cuenta <Icon name="chevron-abajo" size={10} />
       </button>
       {open && (
         <ul id={id} className={`${s.panel} ${s.menu}`}>
-          <li><Link to={rol === 'org' ? '/org/perfil' : '/panel/perfil'} onClick={() => setOpen(false)}>Mi perfil</Link></li>
+          {/* El admin no tiene perfil: no es una cuenta del backend */}
+          {rol !== 'adm' && (
+            <li><Link to={rol === 'org' ? '/org/perfil' : '/panel/perfil'} onClick={() => setOpen(false)}>Mi perfil</Link></li>
+          )}
           <li>
             <button type="button" role="switch" aria-checked={dalt} onClick={toggleDalt}>
-              Modo daltónico <span className={`${s.sw} ${dalt ? s.on : ''}`} aria-hidden="true" />
+              Modo daltónico <span className={`${s.interruptor} ${dalt ? s.encendido : ''}`} aria-hidden="true" />
             </button>
           </li>
           <li><button type="button" onClick={() => { setOpen(false); salir(); nav('/'); }}>Salir</button></li>

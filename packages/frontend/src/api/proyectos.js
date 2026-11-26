@@ -11,7 +11,7 @@
  * Los proyectos salen con la forma que esperan ProyectoCard y las pantallas (ver aProyectoDeLaVista).
  * Otras áreas (panel de colaboradora, de organización) importan aProyectoDeLaVista de acá.
  */
-import { api } from './cliente.js';
+import { api, sinVacios } from './cliente.js';
 import { nombresDeHabilidades, titulos } from './habilidades.js';
 
 export const COMPROMISOS = { total: 'en total', semanal: 'por semana', mensual: 'por mes' };
@@ -79,9 +79,11 @@ export function aProyectoDeLaVista(p, nombres) {
 }
 
 // GET /proyectos?pagina=&limite= → una página de proyectos (del más nuevo al más viejo).
-export async function obtenerProyectos({ pagina = 1, limite = 20 } = {}) {
+// Filtros opcionales (ver docs/DocumentacionAPI.md → Filtros): busqueda, estado
+// ('abierto' | 'en_curso' | 'finalizado'), modalidad (clave de MODALIDADES) y habilidad (código).
+export async function obtenerProyectos({ pagina = 1, limite = 20, ...filtros } = {}) {
   const [{ data }, nombres] = await Promise.all([
-    api.get('/proyectos', { params: { pagina, limite } }),
+    api.get('/proyectos', { params: sinVacios({ pagina, limite, ...filtros }) }),
     nombresDeHabilidades(),
   ]);
   return { ...data, resultados: data.resultados.map((p) => aProyectoDeLaVista(p, nombres)) };

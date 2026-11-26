@@ -44,7 +44,7 @@ async function cargarProyectos(colectivoId) {
 
 export default function ProyectosOrg() {
   // ───── 1. DATOS Y ESTADO ─────
-  // (ver docs/GLOSARIO.md → Estado (useState))
+  // (ver packages/frontend/docs/GLOSARIO.md → Estado (useState))
 
   // Id del colectivo con sesión.
   const { id } = useAuth();
@@ -81,7 +81,7 @@ export default function ProyectosOrg() {
 
   // Proyectos que cumplen los dos filtros a la vez: el estado elegido y el texto buscado
   // dentro del título (sin importar mayúsculas ni espacios de los costados).
-  // (.filter, .includes y .trim → docs/GLOSARIO.md → Métodos de arrays)
+  // (.filter, .includes y .trim → packages/frontend/docs/GLOSARIO.md → Métodos de arrays)
   const textoBuscado = busqueda.trim().toLowerCase();
   const proyectosVisibles = proyectos.filter((proyecto) => {
     const cumpleEstado = filtroEstado === 'todos' || proyecto.estado === filtroEstado;
@@ -99,7 +99,7 @@ export default function ProyectosOrg() {
 
   // Se ejecuta al tocar «Sí, finalizar» en el diálogo: le pide al backend que finalice el
   // proyecto. Si sale bien avisa y vuelve a pedir la lista; si sale mal muestra el error.
-  // `async/await`: espera la respuesta del backend antes de seguir (ver docs/GLOSARIO.md).
+  // `async/await`: espera la respuesta del backend antes de seguir (ver packages/frontend/docs/GLOSARIO.md).
   async function alConfirmarFinalizar() {
     setEnviando(true);
     setErrorAccion('');
@@ -159,7 +159,7 @@ export default function ProyectosOrg() {
               <td data-l="Proyecto"><b>{proyecto.titulo}</b></td>
               <td data-l="Estado"><StatusBadge status={proyecto.estado} /></td>
               <td data-l="Postulaciones">{celdaDePostulaciones(proyecto)}</td>
-              <td className={sh.act}>
+              <td className={sh.actions}>
                 <div className={sh.row}>
                   <Button
                     as={Link}
@@ -193,7 +193,7 @@ export default function ProyectosOrg() {
   return (
     <div className={`container ${sh.page}`}>
       {/* BLOQUE: Encabezado — título y botón para crear un proyecto */}
-      <div className={`${sh.row} ${sh.sb}`}>
+      <div className={`${sh.row} ${sh.spaceBetween}`}>
         <Heading level={1}>Mis proyectos</Heading>
         <Button as={Link} to="/org/proyectos/nuevo" iconRight={<Icon name="mas" size={14} />}>
           Nuevo proyecto

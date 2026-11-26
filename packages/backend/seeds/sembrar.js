@@ -78,11 +78,22 @@ export async function sembrar(d = datos) {
   const idsHabilidades = (codigos) =>
     codigos.map((codigo) => buscar(habilidadesPorCodigo, codigo, "una habilidad")._id);
 
+  // Colectivos y colaboradoras de la semilla no tienen usuario en Keycloak: keycloackId queda
+  // undefined (no null) para que Mongo no lo guarde y el índice sparse no los haga chocar.
+  const sinKeycloak = undefined;
+
   // Colectivos
   const colectivos = await ColectivoModel.create(
     d.colectivos.map((c, i) =>
       Object.assign(
-        new Colectivo(c.nombre, c.descripcion, c.ubicacion, c.tipo, [], c.redesSociales ?? []),
+        new Colectivo(
+          c.nombre,
+          c.descripcion,
+          c.ubicacion,
+          c.tipo,
+          sinKeycloak,
+          c.redesSociales ?? [],
+        ),
         { _id: idFijo("c", i + 1) },
       ),
     ),
@@ -103,6 +114,7 @@ export async function sembrar(d = datos) {
           c.presentacion,
           c.contactos ?? [],
           c.bloquearMensajeInterno ?? false,
+          sinKeycloak,
           c.redesSociales ?? [],
         ),
         { _id: idFijo("a", i + 1) },

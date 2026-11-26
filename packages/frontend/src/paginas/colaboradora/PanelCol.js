@@ -1,7 +1,8 @@
 /* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA PanelCol
- * Ruta: /panel   ·   Quién la ve: Colaboradora
+ * Ruta: /panel
+ * Quién la ve: Colaboradora
  * Qué muestra: Saludo, cifras, últimas novedades y proyectos sugeridos.
  * De dónde salen los datos: del backend, con obtenerPanel (api/colaboradora.js), que junta
  *   el perfil, las postulaciones, las colaboraciones, los mensajes, las notificaciones y los
@@ -11,15 +12,15 @@
  * ANATOMÍA DE ESTE ARCHIVO:
  *   1. DATOS Y ESTADO: quién tiene la sesión y el pedido del panel al backend.
  *      ESPERA Y ERRORES: filas grises mientras llega; un aviso si falla.
- *   4. LO QUE SE DIBUJA: saludo, tres tarjetas de cifras (enlaces), las últimas novedades
- *      y los proyectos sugeridos. No hay acciones: es una pantalla para mirar.
+ *   4. LO QUE SE DIBUJA: una sola columna (sin huecos): saludo, cifras (enlaces), la
+ *      última actividad (solo si hay) y los proyectos sugeridos.
  */
 
 // ───── Imports ─────
 import { Link } from "react-router-dom";
 import { Button, Heading, Text } from "../../atomos";
-import { Alert, RowsSkeleton } from "../../moleculas";
-import { ProyectoCard } from "../../organismos"; // tarjeta que muestra un proyecto
+import { Alert, Grid, RowsSkeleton } from "../../moleculas";
+import { ProyectoCard, UltimaActividad } from "../../organismos"; // tarjeta que muestra un proyecto
 import { useAuth } from "../../contexto";
 import { usePedido } from "../../hooks";
 import { obtenerPanel } from "../../api/colaboradora.js";
@@ -64,7 +65,7 @@ export default function PanelCol() {
 
       {/* BLOQUE: cifras — tres tarjetas que son enlaces a las pantallas de detalle */}
       {/* `${sh.stat} ${s.link}` es una plantilla de texto: junta dos clases CSS (ver
-         docs/GLOSARIO.md → Plantillas de texto) */}
+         packages/frontend/docs/GLOSARIO.md → Plantillas de texto) */}
       <div className={sh.stats}>
         <Link to="/panel/postulaciones" className={`${sh.stat} ${s.link}`}>
           <b>{panel.pendientes}</b>
@@ -81,43 +82,33 @@ export default function PanelCol() {
         </Link>
       </div>
 
-      <div className={sh.split}>
-        {/* BLOQUE: novedades — las últimas notificaciones del sistema (aria-labelledby apunta
-           al título con id="ult") */}
-        <section className={sh.col} aria-labelledby="ult">
-          <Heading level={2} size="h3" id="ult">
-            Última actividad
-          </Heading>
-          {panel.novedades.length === 0 && <Text variant="small">Todavía no tenés novedades.</Text>}
-          {panel.novedades.map((novedad) => (
-            <Alert key={novedad.id} kind="info">
-              {novedad.texto} <small>({novedad.cuando})</small>
-            </Alert>
-          ))}
-        </section>
+      {/* BLOQUE: última actividad — componente compartido de la plantilla (organismos/) */}
+      <UltimaActividad />
 
-        {/* BLOQUE: proyectos para vos — los que buscan alguna de sus habilidades (título con
-           id="sug") */}
-        <section className={sh.col} aria-labelledby="sug">
-          <Heading level={2} size="h3" id="sug">
-            Proyectos para vos
-          </Heading>
-          {panel.sugeridos.length === 0 && (
-            <>
-              <Text variant="small">
-                No hay proyectos abiertos que busquen tus habilidades. Sumá habilidades en tu
-                perfil.
-              </Text>
+      {/* BLOQUE: proyectos para vos — los que buscan alguna de sus habilidades */}
+      <section className={sh.column} aria-labelledby="sug">
+        <Heading level={2} size="h3" id="sug">
+          Proyectos para vos
+        </Heading>
+        {panel.sugeridos.length === 0 && (
+          <>
+            <Text variant="small">
+              No hay proyectos abiertos que busquen tus habilidades. Sumá habilidades en tu
+              perfil.
+            </Text>
+            <div>
               <Button as={Link} to="/panel/perfil" variant="secondary">
                 Editar mi perfil
               </Button>
-            </>
-          )}
+            </div>
+          </>
+        )}
+        <Grid>
           {panel.sugeridos.map((proyecto) => (
             <ProyectoCard key={proyecto.id} p={proyecto} />
           ))}
-        </section>
-      </div>
+        </Grid>
+      </section>
     </div>
   );
 }

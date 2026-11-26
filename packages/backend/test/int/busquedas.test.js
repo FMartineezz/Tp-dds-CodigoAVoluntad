@@ -1,6 +1,7 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import { app } from "./utils/app.js";
+import { conToken } from "../utils/tokenDeTest.js";
 import { usarBaseDeDatos } from "../utils/db.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
 import { ProyectoModel } from "../../src/schemas/proyectoSchema.js";
@@ -32,7 +33,7 @@ const crearProyecto = async (titulo, perfiles) => {
 
 const crearColaboradora = async (nombreFantasia, habilidades) => {
   const respuesta = await request(app)
-    .post("/colaboradoras")
+    .post("/colaboradoras").set(conToken())
     .send({
       nombreFantasia,
       git: `github:${nombreFantasia}`,
@@ -49,7 +50,7 @@ describe("Búsquedas (HTTP)", () => {
     for (const titulo of ["Node", "React", "Python"]) {
       await request(app).post("/habilidades").send({ titulo, descripcion: "d" });
     }
-    await request(app).post("/colectivos").send({
+    await request(app).post("/colectivos").set(conToken()).send({
       nombre: "Asamblea Norte",
       descripcion: "Asamblea",
       ubicacion: "caba",

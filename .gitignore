@@ -4,3 +4,5 @@ node_modules/
 .idea/
 coverage/
 certbot/
+# Exports reales de LinkedIn para probar a mano: tienen datos personales, no se suben
+packages/frontend/TestData/

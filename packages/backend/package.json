@@ -5,10 +5,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js test/unit test/services test/validations",
-    "test:int": "node --experimental-vm-modules node_modules/jest/bin/jest.js test/int",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js",
+    "test:unit": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js test/unit test/services test/validations",
+    "test:int": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js test/int",
+    "test:coverage": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --coverage",
     "seed": "node seeds/seed.js",
     "seed:volumen": "node seeds/seed.js --volumen"
   },
@@ -47,6 +47,10 @@
     "setupFiles": [
       "<rootDir>/test/setup/env.js"
     ],
+    "moduleNameMapper": {
+      "^jwks-rsa$": "<rootDir>/test/setup/jwksRsaFalso.js",
+      "captchaValidation\\.js$": "<rootDir>/test/setup/captchaFalso.js"
+    },
     "testTimeout": 30000,
     "collectCoverageFrom": [
       "src/services/**/*.js",

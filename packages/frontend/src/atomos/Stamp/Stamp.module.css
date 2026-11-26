@@ -14,8 +14,8 @@
   font-stretch: 75%;
   text-transform: uppercase;
   transform: rotate(14deg);
-  mix-blend-mode: multiply;
-  background: color-mix(in srgb, var(--red-700) 6%, transparent);
+  /* Fondo de papel: así se lee aunque quede arriba del ticket o de la trama de puntos */
+  background: var(--color-surface);
 }
 .stamp::before {
   content: '';

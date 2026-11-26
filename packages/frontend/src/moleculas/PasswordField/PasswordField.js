@@ -11,7 +11,7 @@ import s from './PasswordField.module.css';
 export function PasswordField(props) {
   const [ver, setVer] = useState(false);
   return (
-    <div className={s.pass}>
+    <div className={s.field}>
       <Field {...props} type={ver ? 'text' : 'password'} />
       <Checkbox checked={ver} onChange={(e) => setVer(e.target.checked)}>Mostrar contraseña</Checkbox>
     </div>

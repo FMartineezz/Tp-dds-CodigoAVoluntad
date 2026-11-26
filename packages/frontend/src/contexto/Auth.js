@@ -1,22 +1,22 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/react-in-jsx-scope */
 /**
- * Sesión simulada (rol: null | 'col' | 'org') y modo daltónico.
+- Sesión con Keycloak (rol: null | 'col' | 'org' | 'adm') y modo daltónico.
  *
- * USO: useAuth() → { rol, entrar(rol), salir(), dalt, toggleDalt }.  <Privada rol="org"> protege una ruta.
- * SI LO CAMBIÁS O SACÁS: Cuando exista login real: reemplazá entrar/salir por la llamada a la API y guardá el token (Axios).
+- USO: useAuth() → { rol, id, entrar(), salir(), dalt, toggleDalt }.  <Privada rol="org"> protege una ruta.
  */
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import keycloak from "../api/keycloack.js"; // Asegurate de que esta ruta apunte a tu archivo keycloak.js
+import keycloak from "../api/keycloack.js";
 
 const Ctx = createContext(null);
 
-// Normaliza el rol que devuelve tu backend al formato que esperan tus rutas ('col' | 'org')
+// Normaliza el rol al formato que esperan tus rutas ('col' | 'org' | 'adm')
 export const normalizarRol = (rolBackend) => {
   if (!rolBackend) return null;
   const r = rolBackend.toLowerCase();
-  if (r === "col" || r === "org") return r;
+  if (r === "col" || r === "org" || r === "adm") return r;
+  if (r === "admin") return "adm";
   return null;
 };
 
@@ -53,6 +53,15 @@ export function AuthProvider({ children }) {
       setUsuario(null);
       setRol(null);
       return null;
+    }
+
+    // Si el token de Keycloak trae rol admin, entra directo sin tocar el backend
+    const rolesToken = keycloak.tokenParsed?.realm_access?.roles || [];
+    if (rolesToken.some((r) => ["admin", "adm"].includes(r.toLowerCase()))) {
+      setPerfilCompletado(true);
+      setRol("adm");
+      setUsuario(null);
+      return { perfilCompletado: true, rol: "adm", datos: null };
     }
 
     try {
@@ -137,7 +146,7 @@ export function AuthProvider({ children }) {
         perfilCompletado,
         usuario,
         recargarPerfil: cargarEstadoPerfil,
-        id: usuario?._id,
+        id: usuario?._id ?? null,
       }}
     >
       {children}

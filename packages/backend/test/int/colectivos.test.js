@@ -1,6 +1,7 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import { app } from "./utils/app.js";
+import { conToken } from "../utils/tokenDeTest.js";
 import { usarBaseDeDatos } from "../utils/db.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
 
@@ -16,10 +17,32 @@ const colectivoValido = (cambios = {}) => ({
   ...cambios,
 });
 
-const crearColectivo = (body = colectivoValido()) => request(app).post("/colectivos").send(body);
+const crearColectivo = (body = colectivoValido()) =>
+  request(app).post("/colectivos").set(conToken()).send(body);
 
 describe("Colectivos (HTTP)", () => {
   describe("POST /colectivos", () => {
+    test("sin token de Keycloak responde 401 y no crea nada", async () => {
+      // Ejecución
+      const respuesta = await request(app).post("/colectivos").send(colectivoValido());
+
+      // Validación
+      expect(respuesta.status).toBe(401);
+      const listado = await request(app).get("/colectivos");
+      expect(listado.body.resultados).toHaveLength(0);
+    });
+
+    test("con un token que no firmó Keycloak responde 403", async () => {
+      // Ejecución
+      const respuesta = await request(app)
+        .post("/colectivos")
+        .set("Authorization", "Bearer token-trucho")
+        .send(colectivoValido());
+
+      // Validación
+      expect(respuesta.status).toBe(403);
+    });
+
     test("crea el colectivo y responde 201 con Location", async () => {
       // Ejecución
       const respuesta = await crearColectivo(

@@ -16,12 +16,14 @@ export async function denunciarColaboracion(colaboracionId, descripcion) {
 
 // Colaboraciones de una persona (para saber si puede denunciar y sobre cuál).
 // GET /colaboradoras/:id/colaboraciones trae su historial completo: activas, dadas de baja y
-// también las anónimas propias. Devuelve [{ id, proyectoId, colectivoId }].
+// también las anónimas propias. Devuelve [{ id, proyectoId, colectivoId, denunciada }]
+// (`denunciada` = ya tiene una denuncia: el backend acepta una sola por colaboración).
 export async function obtenerColaboracionesDePersona(personaId) {
   const { data } = await api.get(`/colaboradoras/${personaId}/colaboraciones`);
   return data.map((c) => ({
     id: c._id,
     proyectoId: c.proyecto?._id ?? c.proyecto,
     colectivoId: c.proyecto?.colectivo?._id ?? c.proyecto?.colectivo ?? null,
+    denunciada: Boolean(c.denunciada),
   }));
 }

@@ -47,7 +47,6 @@ Rutas relativas a `packages/frontend/src/`.
 - **Navegación en el celular**: el menú pasa a una **barra inferior con íconos** (`ICONOS` y `ETIQUETA_MOVIL` en `menus.js`), al alcance del pulgar.
 - **Tablas que se apilan**: debajo de 800 px cada fila se convierte en una tarjeta, y cada celda muestra su título con `td::before { content: attr(data-l) }` (`plantillas/disposicion.module.css`). Así no hace falta scroll horizontal.
 - **Grillas fluidas** (`moleculas/Grid`) con `auto-fill` y `minmax`: la cantidad de columnas se adapta sola.
-- **Probado en**: Motorola G60s, Samsung Tab S9 FE, MacBook Pro (14").
 
 ## 5. Accesibilidad
 

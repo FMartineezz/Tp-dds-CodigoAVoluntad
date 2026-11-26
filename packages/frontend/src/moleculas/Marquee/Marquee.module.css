@@ -12,7 +12,7 @@
 .strip:hover .track { animation-play-state: paused; }
 .item { font: 800 1.4rem var(--font-display); font-stretch: 70%; text-transform: uppercase; }
 .item i { font-style: normal; margin: 0 var(--space-4); color: var(--sand-400); }
-.item i.red { color: var(--red-500); }
+.item i.accent { color: var(--red-500); }
 @keyframes scroll { to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) {
   .strip { overflow-x: auto; transform: none; }

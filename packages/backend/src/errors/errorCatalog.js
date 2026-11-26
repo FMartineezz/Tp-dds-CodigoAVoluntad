@@ -29,6 +29,33 @@ const ErrorCatalog = {
     message: (maximo) => `El parámetro limite debe ser un número entero entre 1 y ${maximo}`,
   },
 
+  // Filtros de los listados (?busqueda, ?estado, ?modalidad, ?habilidad, ?aceptaMensajes)
+  FILTRO_BUSQUEDA_INVALIDA: {
+    code: "ERR-VAL-004",
+    message: (maximo) => `El parámetro busqueda debe ser un texto de hasta ${maximo} caracteres`,
+  },
+
+  FILTRO_ESTADO_PROYECTO_INVALIDO: {
+    code: "ERR-VAL-005",
+    message: "El parámetro estado debe ser abierto, en_curso o finalizado",
+  },
+
+  FILTRO_MODALIDAD_INVALIDA: {
+    code: "ERR-VAL-006",
+    message:
+      "El parámetro modalidad debe ser gratuita, incentivo_economico o contratacion_eventual",
+  },
+
+  FILTRO_HABILIDAD_INVALIDA: {
+    code: "ERR-VAL-007",
+    message: "El parámetro habilidad debe ser un único código de habilidad",
+  },
+
+  FILTRO_ACEPTA_MENSAJES_INVALIDO: {
+    code: "ERR-VAL-008",
+    message: "El parámetro aceptaMensajes debe ser true o false",
+  },
+
   RECURSO_NO_ENCONTRADO: {
     code: "ERR-CSR-001",
     message: "El recurso solicitado no fue encontrado",
@@ -235,6 +262,23 @@ const ErrorCatalog = {
   COLABORADORA_BLOQUEAR_MENSAJE_INTERNO_INVALIDO: {
     code: "ERR-VAL-407",
     message: "El campo bloquear mensaje interno debe ser un booleano",
+  },
+
+  COLABORADORA_FOTO_INVALIDA: {
+    code: "ERR-VAL-409",
+    message: "La foto debe ser una URL válida con protocolo HTTP o HTTPS",
+  },
+
+  COLABORADORA_SITIO_WEB_INVALIDO: {
+    code: "ERR-VAL-410",
+    message: "El sitio web debe ser una URL válida con protocolo HTTP o HTTPS",
+  },
+
+  // PER = permiso: el pedido es válido pero quien lo hace no tiene acceso (403)
+  COLABORADORA_CONTACTOS_SIN_ACCESO: {
+    code: "ERR-PER-411",
+    message:
+      "Solo la dueña del perfil o un colectivo con el que colabora pueden ver sus contactos",
   },
 
   COLABORADORA_YA_DADA_DE_BAJA: {
@@ -646,6 +690,57 @@ const ErrorCatalog = {
   VALORACION_COLABORACION_NO_FINALIZADA: {
     code: "ERR-EST-1311",
     message: "No se puede valorar una colaboración que no ha finalizado",
+  },
+
+  // =========================
+  // Reportes de problemas (POST /reportes y /admin/reportes)
+  // =========================
+  REPORTE_TIPO_INVALIDO: {
+    code: "ERR-VAL-1501",
+    message: "El tipo de reporte debe ser error, sugerencia u otro",
+  },
+
+  REPORTE_DESCRIPCION_REQUERIDA: {
+    code: "ERR-VAL-1502",
+    message: "Contá qué pasó en la descripción del reporte",
+  },
+
+  REPORTE_DESCRIPCION_MUY_LARGA: {
+    code: "ERR-VAL-1503",
+    message: (maximo) => `La descripción del reporte puede tener hasta ${maximo} caracteres`,
+  },
+
+  REPORTE_CORREO_INVALIDO: {
+    code: "ERR-VAL-1504",
+    message: "El correo para avisarte no es válido",
+  },
+
+  REPORTE_ESTADO_INVALIDO: {
+    code: "ERR-VAL-1505",
+    message: "El estado del reporte debe ser: nuevo, en_revision o resuelto",
+  },
+
+  REPORTE_NO_ENCONTRADO: {
+    code: "ERR-NOT-1506",
+    message: (id) => `El reporte ${id} no fue encontrado`,
+  },
+
+  // =========================
+  // Fotos de perfil (PUT/GET/DELETE /colectivos/:id/foto y /colaboradoras/:id/foto)
+  // =========================
+  FOTO_TIPO_INVALIDO: {
+    code: "ERR-VAL-1601",
+    message: "La foto tiene que ser una imagen JPG, PNG o WebP",
+  },
+
+  FOTO_MUY_GRANDE: {
+    code: "ERR-VAL-1602",
+    message: (maximo) => `La foto puede pesar hasta ${maximo}`,
+  },
+
+  FOTO_NO_ENCONTRADA: {
+    code: "ERR-NOT-1603",
+    message: (id) => `La cuenta ${id} no tiene una foto subida`,
   },
 
   // =========================

@@ -114,6 +114,14 @@ export class ColectivoService {
   }
 
   /**
+   * Colectivos dados de baja (para el equipo administrativo).
+   * @returns {Promise<ColectivoGuardado[]>}
+   */
+  async obtenerDadosDeBaja() {
+    return await this.repository.obtenerDadosDeBaja();
+  }
+
+  /**
    * @param {Id} id
    * @returns {Promise<ColectivoGuardado>}
    * @throws {AppError} 404 si no existe.
@@ -153,6 +161,44 @@ export class ColectivoService {
     const colectivo = await this.repository.obtenerPorId(colectivoId);
     colectivo.proyectos.push(proyectoId);
     await this.repository.agregarProyecto(colectivoId, proyectoId);
+  }
+
+  // ───── Foto de perfil subida ─────
+
+  /**
+   * Guarda (o reemplaza) la foto subida.
+   * @param {Id} id
+   * @param {{ datos: Buffer, tipo: string }} foto
+   * @returns {Promise<{ fotoSubida: Date }>}
+   * @throws {AppError} 404 si el colectivo no existe o está dado/a de baja.
+   */
+  async subirFoto(id, foto) {
+    const resultado = await this.repository.guardarFoto(id, foto);
+    if (!resultado) throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
+    return { fotoSubida: resultado.fotoSubida };
+  }
+
+  /**
+   * @param {Id} id
+   * @returns {Promise<{ datos: Buffer, tipo: string }>}
+   * @throws {AppError} 404 si el colectivo no existe o si no subió ninguna foto.
+   */
+  async obtenerFoto(id) {
+    const cuenta = await this.repository.obtenerFoto(id);
+    if (!cuenta) throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
+    if (!cuenta.fotoArchivo) throw new AppError(ErrorCatalog.FOTO_NO_ENCONTRADA, 404, id);
+    return cuenta.fotoArchivo;
+  }
+
+  /**
+   * Borra la foto subida (si no tenía, no pasa nada).
+   * @param {Id} id
+   * @returns {Promise<void>}
+   * @throws {AppError} 404 si el colectivo no existe o está dado/a de baja.
+   */
+  async borrarFoto(id) {
+    const resultado = await this.repository.borrarFoto(id);
+    if (!resultado) throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
   }
 
   // Baja lógica: el colectivo deja de listarse pero su historial se conserva

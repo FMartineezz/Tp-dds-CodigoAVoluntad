@@ -250,7 +250,7 @@ export function generarVolumen(habilidades, opciones = {}) {
   const terminadas = [];
   const activas = [];
   for (const proyecto of proyectos) {
-    const candidatas = azar.algunos(colaboradoras, 0, 10);
+    const candidatas = azar.algunos(colaboradoras, 0, 16);
     for (const persona of candidatas) {
       // Una postulación por persona y proyecto, a un perfil que encaje con sus habilidades
       const perfil = proyecto.perfiles.find((p) =>

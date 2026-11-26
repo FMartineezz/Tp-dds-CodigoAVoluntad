@@ -6,9 +6,10 @@
  * De dónde salen los datos: GET /colaboradoras?pagina=&limite= o, si se elige un perfil,
  *   GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes (paginado).
  *   Los perfiles del filtro salen de mis proyectos (GET /colectivos/:id/proyectos).
- *   PENDIENTE (backend): buscar por nombre o habilidad y filtrar por «acepta mensajes»
- *   (por ejemplo GET /colaboradoras?q=&habilidad=&aceptaMensajes=). Como la paginación es
- *   del servidor, filtrar acá solo filtraría la página actual: por eso no están.
+ *   Filtros de «Todos los colaboradores»: nombre, habilidad y «solo quienes aceptan
+ *   mensajes» (GET /colaboradoras?busqueda=&habilidad=&aceptaMensajes=true). Los resuelve el
+ *   backend, así la paginación sigue contando bien. El endpoint de acordes no los acepta:
+ *   con un perfil elegido se deshabilitan.
  * Para modificarla: COLUMNA NUEVA: <th> + <td data-l="…">.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
@@ -19,10 +20,11 @@
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Avatar, Button, Field, Heading, Icon, Tag } from '../../atomos';
+import { Avatar, Button, Checkbox, Field, Heading, Icon, Tag } from '../../atomos';
 import { Alert, Pager, RowsSkeleton } from '../../moleculas';
 import { useAuth } from '../../contexto';
-import { usePedido } from '../../hooks';
+import { useDemorado, usePedido } from '../../hooks';
+import { obtenerHabilidades } from '../../api/habilidades.js';
 import { mensajeDeError } from '../../api/errores.js';
 import {
   obtenerColaboradoras,
@@ -31,21 +33,25 @@ import {
 } from '../../api/organizacion.js';
 import s from './Organizacion.module.css';
 import sh from '../../plantillas/disposicion.module.css';
+import { fotoDe } from '../../datos/fotos.js';
 
 // Cuántas colaboradoras se piden por página.
 const POR_PAGINA = 10;
 
-// Pide la página `pagina`: de todas las colaboradoras, o de las acordes al perfil elegido.
-// `perfilElegido` es 'todas' o un texto «idProyecto|idPerfil».
-function pedirPagina(perfilElegido, pagina) {
-  if (perfilElegido === 'todas') return obtenerColaboradoras({ pagina, limite: POR_PAGINA });
+// Filtros sin completar ('' o false = no filtrar por eso).
+const FILTROS_VACIOS = { busqueda: '', habilidad: '', aceptaMensajes: false };
+
+// Pide la página `pagina`: de todas las personas (con los filtros), o de las acordes al
+// perfil elegido. `perfilElegido` es 'todas' o un texto «idProyecto|idPerfil».
+function pedirPagina(perfilElegido, pagina, filtros) {
+  if (perfilElegido === 'todas') return obtenerColaboradoras({ pagina, limite: POR_PAGINA, ...filtros });
   const [proyectoId, perfilId] = perfilElegido.split('|');
   return obtenerColaboradorasAcordes(proyectoId, perfilId, { pagina, limite: POR_PAGINA });
 }
 
 export default function BuscarColaboradoras() {
   // ───── 1. DATOS Y ESTADO ─────
-  // (ver docs/GLOSARIO.md → Estado (useState))
+  // (ver packages/frontend/docs/GLOSARIO.md → Estado (useState))
   const { id } = useAuth();
 
   // Perfil elegido en el filtro: 'todas' o «idProyecto|idPerfil». Lo cambia el desplegable.
@@ -54,13 +60,25 @@ export default function BuscarColaboradoras() {
   // Número de página (empieza en 1). La cambia el paginador y vuelve a 1 al cambiar el filtro.
   const [pagina, setPagina] = useState(1);
 
+  // Nombre, habilidad y «acepta mensajes» (ver FILTROS_VACIOS).
+  const [filtros, setFiltros] = useState(FILTROS_VACIOS);
+  // El nombre viaja recién cuando deja de escribir, no en cada tecla.
+  const busquedaDemorada = useDemorado(filtros.busqueda);
+  // Catálogo de habilidades para el desplegable.
+  const { datos: habilidades } = usePedido(() => obtenerHabilidades(), []);
+
   // Mis proyectos (para armar las opciones del filtro). Se piden una sola vez.
   const { datos: misProyectos } = usePedido(() => obtenerProyectosDelColectivo(id), [id]);
 
   // La página de colaboradoras. Se vuelve a pedir cuando cambia el filtro o la página.
   const { cargando, datos: resultado, error } = usePedido(
-    () => pedirPagina(perfilElegido, pagina),
-    [perfilElegido, pagina]
+    () =>
+      pedirPagina(perfilElegido, pagina, {
+        busqueda: busquedaDemorada.trim(),
+        habilidad: filtros.habilidad,
+        aceptaMensajes: filtros.aceptaMensajes,
+      }),
+    [perfilElegido, pagina, busquedaDemorada, filtros.habilidad, filtros.aceptaMensajes]
   );
 
   // ───── 2. CÁLCULOS ─────
@@ -83,6 +101,15 @@ export default function BuscarColaboradoras() {
   const totalPaginas = resultado?.totalPaginas ?? 1;
 
   // ───── 3. ACCIONES ─────
+
+  // Guarda un filtro y vuelve a la página 1. `valor` ya viene listo (texto o true/false).
+  function cambiarFiltro(campo, valor) {
+    setFiltros({ ...filtros, [campo]: valor });
+    setPagina(1);
+  }
+
+  // Con un perfil elegido se usa el endpoint de acordes, que no acepta estos filtros.
+  const filtrosDeshabilitados = perfilElegido !== 'todas';
 
   // Se ejecuta al cambiar el perfil: guarda el valor y vuelve a la página 1.
   function alCambiarPerfil(e) {
@@ -118,13 +145,13 @@ export default function BuscarColaboradoras() {
   } else if (error) {
     // Caso 2: el pedido falló.
     contenidoDeLaLista = (
-      <Alert kind="error" title="No pudimos cargar las colaboradoras">{mensajeDeError(error)}</Alert>
+      <Alert kind="error" title="No pudimos cargar a los colaboradores">{mensajeDeError(error)}</Alert>
     );
   } else if (colaboradoras.length === 0) {
     // Caso 3: no hay resultados.
     contenidoDeLaLista = (
       <div className={sh.empty}>
-        <Heading level={2} size="h3">Ninguna colaboradora coincide</Heading>
+        <Heading level={2} size="h3">Ningún colaborador coincide</Heading>
         {perfilElegido !== 'todas' && (
           <Button variant="secondary" onClick={() => alCambiarPerfil({ target: { value: 'todas' } })}>
             Ver todas
@@ -144,7 +171,7 @@ export default function BuscarColaboradoras() {
             <tr key={colaboradora.id}>
               <td data-l="Persona">
                 <Link to={`/org/colaboradoras/${colaboradora.id}`} className={sh.person}>
-                  <Avatar nombre={colaboradora.nombre} size={36} />
+                  <Avatar nombre={colaboradora.nombre} size={36} foto={colaboradora.foto || fotoDe(colaboradora.id)} />
                   {colaboradora.nombre}
                 </Link>
               </td>
@@ -163,7 +190,7 @@ export default function BuscarColaboradoras() {
                   <span className={sh.muted}><Icon name="candado" />Deshabilitados</span>
                 )}
               </td>
-              <td className={sh.act}>
+              <td className={sh.actions}>
                 <div className={sh.row}>{accionDe(colaboradora)}</div>
               </td>
             </tr>
@@ -175,7 +202,7 @@ export default function BuscarColaboradoras() {
 
   return (
     <div className={`container ${sh.page}`}>
-      <Heading level={1}>Buscar colaboradoras</Heading>
+      <Heading level={1}>Buscar colaboradores</Heading>
 
       {/* BLOQUE: Filtro — todas o las acordes a un perfil de mis proyectos abiertos */}
       <div className={s.buscar}>
@@ -185,11 +212,43 @@ export default function BuscarColaboradoras() {
           value={perfilElegido}
           onChange={alCambiarPerfil}
         >
-          <option value="todas">Todas las colaboradoras</option>
+          <option value="todas">Todos los colaboradores</option>
           {opcionesDePerfil.map((opcion) => (
             <option key={opcion.valor} value={opcion.valor}>{opcion.texto}</option>
           ))}
         </Field>
+        <Field
+          label="Nombre"
+          type="search"
+          placeholder="Nombre o alias"
+          value={filtros.busqueda}
+          onChange={(e) => cambiarFiltro('busqueda', e.target.value)}
+          disabled={filtrosDeshabilitados}
+        />
+        <Field
+          as="select"
+          label="Habilidad"
+          value={filtros.habilidad}
+          onChange={(e) => cambiarFiltro('habilidad', e.target.value)}
+          disabled={filtrosDeshabilitados}
+        >
+          <option value="">Todas</option>
+          {(habilidades ?? []).map((habilidad) => (
+            <option key={habilidad.codigo} value={habilidad.codigo}>{habilidad.titulo}</option>
+          ))}
+        </Field>
+        <div className={s.buscarOpciones}>
+          <Checkbox
+            checked={filtros.aceptaMensajes}
+            onChange={(e) => cambiarFiltro('aceptaMensajes', e.target.checked)}
+            disabled={filtrosDeshabilitados}
+          >
+            Solo quienes aceptan mensajes
+          </Checkbox>
+          {filtrosDeshabilitados && (
+            <span className={s.nota}>Con un perfil elegido se muestran todas las personas acordes.</span>
+          )}
+        </div>
       </div>
 
       {/* BLOQUE: Resultados — relleno gris si carga, error, mensaje si no hay, o la tabla */}

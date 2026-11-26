@@ -9,6 +9,7 @@ export { TagPicker } from "./TagPicker/TagPicker.js";
 export { PasswordField } from "./PasswordField/PasswordField.js";
 export { Estrellas } from "./Estrellas/Estrellas.js";
 export { Barras } from "./Barras/Barras.js";
+export { BarrasApiladas } from "./BarrasApiladas/BarrasApiladas.js";
 export { ContactosEditor } from "./ContactosEditor/ContactosEditor.js";
 export { CaptchaMock } from "./CaptchaMock/CaptchaMock.js";
 export { SocialButtons } from "./SocialButtons/SocialButtons.js";

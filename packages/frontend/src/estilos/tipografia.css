@@ -1,15 +1,18 @@
 /* =====================================================================
    TIPOGRAFÍA  ·  familias y tamaños del TEXTO (los títulos están en titulos.css)
    =====================================================================
-   Dos voces:
-     --font-display  Archivo (grotesca): títulos y textos de lectura larga.
+   Tres voces:
+     --font-display  Archivo (grotesca): títulos.
      --font-mono     IBM Plex Mono: interfaz (botones, etiquetas, datos).
+     --font-lectura  IBM Plex Sans: textos de lectura larga (términos, bios, valoraciones).
+                     Es la misma familia que la mono, por eso combinan.
    Las fuentes se cargan en main.js con @fontsource (si cambiás una familia
    acá, instalá y cargá la nueva allá). */
 
 :root {
   --font-display: 'Archivo Variable', 'Archivo', Impact, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --font-lectura: 'IBM Plex Sans', system-ui, sans-serif;
 
   --text-lead: 1.25rem;      /* bajada que presenta una sección */
   --text-body: 1.0625rem;    /* cuerpo (17px). Nunca menos de 16px */

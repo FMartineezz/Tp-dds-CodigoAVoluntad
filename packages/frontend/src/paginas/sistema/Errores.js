@@ -23,20 +23,20 @@ import s from './Errores.module.css';
 // ───── 1. Pantalla (diseño común, no se exporta) ─────
 // Recibe por props lo que cambia entre un error y otro. `children` son los botones
 // que van entre la apertura y el cierre de <Pantalla>…</Pantalla>.
-// Las llaves { } en los parámetros «desestructuran» las props (ver docs/GLOSARIO.md →
+// Las llaves { } en los parámetros «desestructuran» las props (ver packages/frontend/docs/GLOSARIO.md →
 // Desestructurar).
 function Pantalla({ big, code, titulo, msg, children }) {
   return (
-    <div className={`container ${s.err}`}>
+    <div className={`container ${s.pantalla}`}>
       {/* BLOQUE: número gigante — decorativo, por eso aria-hidden (los lectores de pantalla
          lo saltean) */}
-      <div className={s.big} aria-hidden="true">{big}</div>
+      <div className={s.numero} aria-hidden="true">{big}</div>
       {/* BLOQUE: texto — código del error, título, mensaje y botones */}
       <div className={s.body}>
         <span className={s.code}>{code}</span>
         <Heading level={1} size="h1">{titulo}</Heading>
         <Text>{msg}</Text>
-        <div className={s.btns}>{children}</div>
+        <div className={s.botones}>{children}</div>
       </div>
       {/* BLOQUE: sello — adorno visual «Fuera de mapa» */}
       <Stamp className={s.stamp}>Fuera<br />de<br />mapa</Stamp>
@@ -63,7 +63,7 @@ export function NoEncontrado({
 // ───── 3. SinPermiso (403) ─────
 // Se muestra cuando alguien entra a una zona que su cuenta no puede ver.
 export function SinPermiso() {
-  // rol de la sesión: 'col' (colaboradora), 'org' (organización) o null (sin sesión)
+  // rol de la sesión: 'col' (colaboradora), 'org' (organización), 'adm' (admin) o null
   const { rol } = useAuth();
 
   // Elige a dónde lleva el botón principal según quién tenga la sesión.
@@ -72,6 +72,8 @@ export function SinPermiso() {
     rutaDelBotonPrincipal = '/org';
   } else if (rol === 'colaboradora') {
     rutaDelBotonPrincipal = '/panel';
+  } else if (rol === 'adm') {
+    rutaDelBotonPrincipal = '/admin';
   } else {
     rutaDelBotonPrincipal = '/ingresar';
   }

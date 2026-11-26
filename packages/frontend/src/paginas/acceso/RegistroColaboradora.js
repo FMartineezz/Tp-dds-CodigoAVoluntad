@@ -30,13 +30,7 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Checkbox, Field, Heading } from "../../atomos";
-import {
-  Alert,
-  CaptchaMock,
-  ContactosEditor,
-  TagPicker,
-  Captcha,
-} from "../../moleculas";
+import { Alert, CaptchaMock, ContactosEditor, TagPicker, Captcha } from "../../moleculas";
 import { useAuth } from "../../contexto";
 import { usePedido } from "../../hooks";
 import { obtenerHabilidades } from "../../api/habilidades.js";
@@ -57,7 +51,7 @@ export default function RegistroColaboradora() {
   // Todos los campos simples del formulario juntos en un objeto: texto para los
   // campos, true/false para las casillas (mensajes, terminos, captcha).
   // Empiezan vacíos (mensajes empieza tildado); los cambia alCambiarCampo y el captcha.
-  // (ver docs/GLOSARIO.md → useState)
+  // (ver packages/frontend/docs/GLOSARIO.md → useState)
   const [datos, setDatos] = useState({
     fantasia: "",
     nombre: "",
@@ -96,8 +90,6 @@ export default function RegistroColaboradora() {
   // Para abrir la sesión con la cuenta creada y para ir al panel después.
   const { entrar } = useAuth();
   const navegar = useNavigate();
-
-
 
   // ───── 2. CÁLCULOS ─────
 
@@ -139,7 +131,7 @@ export default function RegistroColaboradora() {
       const esCasilla = evento.target.type === "checkbox";
       const nuevoValor = esCasilla ? evento.target.checked : evento.target.value;
       // `...datos` copia todo lo que había y `[campo]: nuevoValor` cambia solo ese campo
-      // (ver docs/GLOSARIO.md → Copiar con cambios).
+      // (ver packages/frontend/docs/GLOSARIO.md → Copiar con cambios).
       setDatos({ ...datos, [campo]: nuevoValor });
     };
   }
@@ -248,7 +240,7 @@ export default function RegistroColaboradora() {
       {/* BLOQUE: resumen de errores — aparece solo después de intentar enviar y si hay errores */}
       <Resumen errores={errores} mostrar={formulario.intento} />
 
-      {/* BLOQUE: campos — grilla del formulario; sh.r2 / sh.mid / sh.full controlan cuánto
+      {/* BLOQUE: campos — grilla del formulario; sh.twoRows / sh.centered / sh.fullWidth controlan cuánto
          ocupa cada uno */}
       <div className={sh.form}>
         {/* onBlur = al salir del campo (activa su validación); `optional` = campo no
@@ -280,7 +272,7 @@ export default function RegistroColaboradora() {
         />
         <Field
           as="textarea"
-          className={sh.r2}
+          className={sh.twoRows}
           label="Sobre vos"
           placeholder="Contá en pocas líneas quién sos y qué te gusta hacer…"
           value={datos.bio}
@@ -324,33 +316,32 @@ export default function RegistroColaboradora() {
           options={(catalogo ?? []).map((habilidad) => habilidad.titulo)}
           onChange={setHabilidadesElegidas}
         />
-        <div className={sh.mid}>
+        <div className={sh.centered}>
           <Checkbox checked={datos.mensajes} onChange={alCambiarCampo("mensajes")}>
             Permitir mensajes de organizaciones
           </Checkbox>
         </div>
-        <div className={sh.full}>
+        <div className={sh.fullWidth}>
           <ContactosEditor value={contactos} onChange={setContactos} />
         </div>
-        <div className={sh.full}>
+        <div className={sh.fullWidth}>
           <Captcha ok={datos.captcha} onChange={alCambiarCaptcha} error={errores.captcha} />
         </div>
-        <div className={sh.full}>
+        <div className={sh.fullWidth}>
           <Checkbox checked={datos.terminos} onChange={alCambiarCampo("terminos")}>
             Acepto los <Link to="/terminos">términos y condiciones</Link>
           </Checkbox>
           {/* Aparece solo si hay error en términos (no se tildó y ya se tocó o se intentó enviar) */}
-          {errores.terminos && <p className={s.err}>{errores.terminos}</p>}
+          {errores.terminos && <p className={s.error}>{errores.terminos}</p>}
         </div>
       </div>
 
       {/* BLOQUE: botón de envío — muestra «cargando» mientras espera al backend */}
-      <div className={sh.formActs}>
+      <div className={sh.formActions}>
         <Button type="submit" loading={formulario.cargando}>
           Crear cuenta
         </Button>
       </div>
-
     </form>
   );
 }

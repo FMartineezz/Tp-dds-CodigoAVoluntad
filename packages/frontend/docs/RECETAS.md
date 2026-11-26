@@ -89,7 +89,7 @@ Ejemplo: columna «Zona» en `paginas/organizacion/ProyectosOrg.js`. Son **dos**
       <td data-l="Proyecto">…</td>
       <td data-l="Estado">…</td>
       <td data-l="Zona">{p.zona}</td>    {/* 2) la celda, con data-l */}
-      <td className={sh.act}>…</td>
+      <td className={sh.actions}>…</td>
     </tr>
   ))}
 </tbody>
@@ -98,10 +98,10 @@ Ejemplo: columna «Zona» en `paginas/organizacion/ProyectosOrg.js`. Son **dos**
 Para el ancho/estilo de columnas: `plantillas/disposicion.module.css` (`.table`).
 
 ### Agregar una acción (botón) a una fila
-Dentro de `<td className={sh.act}><div className={sh.row}> … </div></td>` sumá otro `<Button>`.
+Dentro de `<td className={sh.actions}><div className={sh.row}> … </div></td>` sumá otro `<Button>`.
 
 ### La tabla de «Mis postulaciones» (celdas con acciones afuera)
-Es distinta: usa `.cells` (ver `paginas/colaboradora/Colaboradora.module.css`). Una columna nueva es un `<div>` más en la fila de encabezado **y** en cada fila.
+Es distinta: usa `.celdas` (ver `paginas/colaboradora/Colaboradora.module.css`). Una columna nueva es un `<div>` más en la fila de encabezado **y** en cada fila.
 
 ---
 
@@ -113,7 +113,7 @@ Dentro de la grilla `<div className={sh.form}>` de la pantalla, un `<Field/>` m�
 <Field label="Teléfono" optional placeholder="+54 11…" value={v.tel} onChange={set('tel')} />
 ```
 - La grilla tiene 2 columnas y rellena fila por fila: el orden en el código es el orden en pantalla.
-- `className={sh.r2}` → el campo ocupa 2 filas (ideal para textareas). `className={sh.full}` → ocupa todo el ancho. `sh.mid` → centrado vertical.
+- `className={sh.twoRows}` → el campo ocupa 2 filas (ideal para textareas). `className={sh.fullWidth}` → ocupa todo el ancho. `sh.centered` → centrado vertical.
 - Si es obligatorio, agregá su regla en la función de validación de esa pantalla (ej. `useForm` en `paginas/acceso/auxiliares.js`).
 
 ### Agregar opciones a un selector de etiquetas
