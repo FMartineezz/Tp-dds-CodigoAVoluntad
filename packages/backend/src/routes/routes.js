@@ -14,6 +14,7 @@ import authRoutes from "./authRoutes.js";
 import denunciaRoutes from "./denunciaRoutes.js";
 import notificacionRoute from "./notificacionRoutes.js";
 import mensajeRoutes from "./mensajeRoutes.js";
+import reporteRoutes from "./reporteRoutes.js";
 
 /**
  * Todos los routers de la API, en el orden en que se montan en la app (ver buildApp).
@@ -36,6 +37,7 @@ const routes = [
   denunciaRoutes(),
   notificacionRoute(),
   mensajeRoutes(),
+  reporteRoutes(),
 ];
 
 export default routes;

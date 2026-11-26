@@ -15,16 +15,16 @@ export function CardsSkeleton({ n = 6 }) {
   return (
     <div aria-busy="true">
       <span className="sr-only" role="status">Cargando…</span>
-      <Grid>{Array.from({ length: n }, (_, i) => <div key={i} className={s.skCard}><Skeleton height="1.2rem" /><Skeleton height="2.2rem" /><Skeleton lines={3} /><Skeleton height="2.75rem" /></div>)}</Grid>
+      <Grid>{Array.from({ length: n }, (_, i) => <div key={i} className={s.card}><Skeleton height="1.2rem" /><Skeleton height="2.2rem" /><Skeleton lines={3} /><Skeleton height="2.75rem" /></div>)}</Grid>
     </div>
   );
 }
 
 export function RowsSkeleton({ n = 4 }) {
   return (
-    <div aria-busy="true" className={s.skRows}>
+    <div aria-busy="true" className={s.rows}>
       <span className="sr-only" role="status">Cargando…</span>
-      {Array.from({ length: n }, (_, i) => <div key={i} className={s.skRow}><Skeleton height="3.2rem" /></div>)}
+      {Array.from({ length: n }, (_, i) => <div key={i} className={s.row}><Skeleton height="3.2rem" /></div>)}
     </div>
   );
 }

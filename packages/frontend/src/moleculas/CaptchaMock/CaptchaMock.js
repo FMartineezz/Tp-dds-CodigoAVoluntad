@@ -14,7 +14,7 @@ export function CaptchaMock({ ok, onChange, error }) {
         No soy un robot
       </Checkbox>
       <small>Verificación hCaptcha (simulada)</small>
-      {error && <p className={s.cerr}>{error}</p>}
+      {error && <p className={s.error}>{error}</p>}
     </div>
   );
 }

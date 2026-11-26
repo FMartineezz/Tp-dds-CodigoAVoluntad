@@ -16,31 +16,25 @@ const denunciar = (colaboracionId, body = { descripcion: "Trato inadecuado" }) =
 
 describe("Denuncias (HTTP)", () => {
   describe("POST /colaboraciones/:id/denuncia", () => {
-    // BUG: ColaboracionRepository.obtenerPorIdParaAdmin no popula el proyecto, así que
-    // crearDenuncia no encuentra el colectivo y responde siempre 400 DENUNCIA_PROYECTO_SIN_COLECTIVO.
-    test.failing(
-      "responde 201 con la denuncia pendiente y el Location administrativo",
-      async () => {
-        // Preparación
-        const e = await armarEscenario();
-        const { colaboracionId } = await crearColaboracion(e);
+    test("responde 201 con la denuncia pendiente y el Location administrativo", async () => {
+      // Preparación
+      const e = await armarEscenario();
+      const { colaboracionId } = await crearColaboracion(e);
 
-        // Ejecución
-        const respuesta = await denunciar(colaboracionId);
+      // Ejecución
+      const respuesta = await denunciar(colaboracionId);
 
-        // Validación
-        expect(respuesta.status).toBe(201);
-        expect(respuesta.body).toMatchObject({
-          descripcion: "Trato inadecuado",
-          estado: "pendiente",
-          colaboracionId,
-        });
-        expect(respuesta.headers.location).toBe(`/admin/denuncias/${respuesta.body.id}`);
-      },
-    );
+      // Validación
+      expect(respuesta.status).toBe(201);
+      expect(respuesta.body).toMatchObject({
+        descripcion: "Trato inadecuado",
+        estado: "pendiente",
+        colaboracionId,
+      });
+      expect(respuesta.headers.location).toBe(`/admin/denuncias/${respuesta.body.id}`);
+    });
 
-    // BUG: mismo problema que arriba; el chequeo de duplicado nunca se alcanza.
-    test.failing("responde 409 si la colaboración ya fue denunciada", async () => {
+    test("responde 409 si la colaboración ya fue denunciada", async () => {
       const e = await armarEscenario();
       const { colaboracionId } = await crearColaboracion(e);
       await sembrarDenuncia(e.colectivoId, colaboracionId);
@@ -97,9 +91,7 @@ describe("Denuncias (HTTP)", () => {
       expect(resueltas.body).toHaveLength(0);
     });
 
-    // BUG: el query param colectivoId llega al service pero el repositorio lo ignora,
-    // así que devuelve las denuncias de todos los colectivos.
-    test.failing("GET /admin/denuncias?colectivoId filtra por colectivo", async () => {
+    test("GET /admin/denuncias?colectivoId filtra por colectivo", async () => {
       const e1 = await armarEscenario();
       const e2 = await armarEscenario();
       await sembrarDenuncia(e1.colectivoId, (await crearColaboracion(e1)).colaboracionId);
@@ -124,6 +116,19 @@ describe("Denuncias (HTTP)", () => {
       expect(respuesta.status).toBe(200);
       expect(respuesta.body.descripcion).toBe("Trato inadecuado");
       expect(respuesta.body.colaboracion._id).toBe(colaboracionId);
+      expect(respuesta.body.colectivoActivo).toBe(true);
+    });
+
+    test("GET /admin/denuncias/:id avisa si el colectivo ya está dado de baja", async () => {
+      const e = await armarEscenario();
+      const { colaboracionId } = await crearColaboracion(e);
+      const denunciaId = await sembrarDenuncia(e.colectivoId, colaboracionId);
+      await request(app).delete(`/colectivos/${e.colectivoId}`).expect(204);
+
+      const respuesta = await request(app).get(`/admin/denuncias/${denunciaId}`);
+
+      expect(respuesta.status).toBe(200);
+      expect(respuesta.body.colectivoActivo).toBe(false);
     });
 
     test("GET /admin/denuncias/:id responde 404 si no existe", async () => {

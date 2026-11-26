@@ -15,6 +15,12 @@ export function LayoutPrincipal() {
   const menu = MENUS[rol];
   console.log(menu)
 
+  // Cada pantalla nueva arranca arriba de todo. Si no, al tocar un enlace del pie la
+  // pantalla siguiente aparece scrolleada hasta abajo y parece vacía.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   useEffect(() => {
     if (!rol || !id) {
       setNoLeidos(0);
@@ -37,7 +43,7 @@ export function LayoutPrincipal() {
   }, [rol, id, pathname]);
 
   return (
-    <div className={rol ? s.conBottom : undefined}>
+    <div className={rol ? s.conBarraInferior : undefined}>
       <a className="skip-link" href="#contenido">
         Saltar al contenido
       </a>
@@ -47,7 +53,8 @@ export function LayoutPrincipal() {
         actions={
           rol ? (
             <>
-              <Campana />
+              {/* El admin no tiene notificaciones: sin campana */}
+              {rol !== "adm" && <Campana />}
               <MenuUsuario />
             </>
           ) : (

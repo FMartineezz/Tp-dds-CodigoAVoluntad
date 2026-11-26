@@ -1,16 +1,19 @@
 /**
  * PANTALLA PerfilCol
- * Ruta: /panel/perfil   ·   Quién la ve: Colaboradora
- * Qué muestra: Edición del perfil: datos, habilidades, LinkedIn, mensajes y contactos.
+ * Ruta: /panel/perfil
+ * Quién la ve: Colaboradora
+ * Qué muestra: Edición del perfil: datos, foto, habilidades, redes, sitio web, mensajes y
+ *   contactos.
  * De dónde salen los datos: del backend (api/colaboradora.js):
- *   · obtenerPerfil → GET /colaboradoras/:id; las habilidades posibles salen del catálogo
+ *   - obtenerPerfil → GET /colaboradoras/:id; las habilidades posibles salen del catálogo
  *     real (GET /habilidades, api/habilidades.js).
- *   · guardarPerfil → PATCH /colaboradoras/:id.
+ *   - obtenerMisContactos → GET /colaboradoras/:id/contactos (privados, solo para la dueña).
+ *   - guardarPerfil → PATCH /colaboradoras/:id.
  * Para modificarla: un campo nuevo = un <Field> en la grilla .form (y su traducción en
  *   aPerfilDeLaVista / guardarPerfil de api/colaboradora.js).
  *
  * ANATOMÍA DE ESTE ARCHIVO: son DOS componentes.
- *   PerfilCol (el de la ruta): pide el perfil y el catálogo, y dibuja cargando / error. Cuando
+ *   PerfilCol (el de la ruta): pide el perfil, los contactos y el catálogo, y dibuja cargando / error. Cuando
  *     llegan los datos, dibuja el formulario pasándole esos datos como punto de partida.
  *   FormularioDePerfil:
  *     1. DATOS Y ESTADO: los campos (arrancan con lo que vino del backend), contactos y el
@@ -23,32 +26,41 @@
  * Aviso de éxito: cualquier cambio en un campo borra el mensaje de éxito anterior
  * (así no queda un «Cambios guardados» que ya no es cierto).
  *
- * PENDIENTE (backend): no hay foto de perfil (se dibuja un avatar con la inicial), ni
- *   importación desde LinkedIn, ni campo «Sitio web», ni correo de la cuenta (vendrá con el
- *   login). Esos campos de la maqueta se sacaron.
- * PENDIENTE (backend): los contactos nunca vuelven en el GET (son privados), así que el editor
- *   arranca vacío. Si la persona agrega alguno, al guardar REEMPLAZAN a los que tenía. Haría
- *   falta un GET /colaboradoras/:id/contactos solo para la dueña del perfil.
+ * Foto: se sube apenas se elige (PUT /colaboradoras/:id/foto, ver organismos/SubirFoto), sin
+ *   esperar a «Guardar». También se puede pegar el enlace a una foto publicada en otro lado.
+ *   Se ve la subida; si no hay, la del enlace; si no, la del seed (datos/fotos.js) o la inicial.
+ * PENDIENTE (backend): no hay importación desde LinkedIn ni correo de la cuenta (vendrá con
+ *   el login).
  */
 
 // ───── Imports ─────
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Avatar, Button, Checkbox, Field, Heading, Text } from '../../atomos';
+import { Button, Checkbox, Field, Heading, Text } from '../../atomos';
 import { Alert, ContactosEditor, RowsSkeleton, TagPicker } from '../../moleculas';
+import { SubirFoto } from '../../organismos';
 import { useAuth } from '../../contexto';
 import { usePedido } from '../../hooks';
-import { guardarPerfil, obtenerPerfil } from '../../api/colaboradora.js';
+import { guardarPerfil, obtenerMisContactos, obtenerPerfil } from '../../api/colaboradora.js';
 import { obtenerHabilidades } from '../../api/habilidades.js';
 import { mensajeDeError } from '../../api/errores.js';
+import { llevarAlPrimerError } from '../../utilidades/llevarAlPrimerError.js';
 import s from './Colaboradora.module.css';
 import sh from '../../plantillas/disposicion.module.css'; // sh = layout común (.page, .form…)
+import { fotoDe } from '../../datos/fotos.js';
 
-// Pide a la vez el perfil y el catálogo de habilidades (para las opciones del TagPicker).
+// Pide a la vez el perfil, sus contactos y el catálogo de habilidades (para el TagPicker).
 async function pedirPerfilYCatalogo(id) {
-  const [perfil, catalogo] = await Promise.all([obtenerPerfil(id), obtenerHabilidades()]);
-  return { perfil, opciones: catalogo.map((habilidad) => habilidad.titulo) };
+  const [perfil, contactos, catalogo] = await Promise.all([
+    obtenerPerfil(id),
+    obtenerMisContactos(id),
+    obtenerHabilidades(),
+  ]);
+  return { perfil, contactos, opciones: catalogo.map((habilidad) => habilidad.titulo) };
 }
+
+// true si el texto está vacío (es opcional) o empieza con http:// o https://
+const esUrlOVacio = (texto) => !texto.trim() || /^https?:\/\//.test(texto.trim());
 
 export default function PerfilCol() {
   // `id` es el _id de la colaboradora con la sesión (ver contexto/Auth.js).
@@ -76,24 +88,30 @@ export default function PerfilCol() {
   }
 
   // Caso 3: llegó todo → el formulario, que arranca con esos datos.
-  return <FormularioDePerfil id={id} inicial={datos.perfil} opciones={datos.opciones} />;
+  return (
+    <FormularioDePerfil
+      id={id}
+      inicial={datos.perfil}
+      contactosIniciales={datos.contactos}
+      opciones={datos.opciones}
+    />
+  );
 }
 
-function FormularioDePerfil({ id, inicial, opciones }) {
+function FormularioDePerfil({ id, inicial, contactosIniciales, opciones }) {
   // ───── 1. DATOS Y ESTADO ─────
 
   // Todos los campos del perfil juntos en un objeto: texto para los campos, true/false para
   // la casilla `mensajes` y una lista de títulos en `habilidades`. Empiezan con lo que mandó
-  // el backend. (ver docs/GLOSARIO.md → useState)
+  // el backend. (ver packages/frontend/docs/GLOSARIO.md → useState)
   const [datos, setDatos] = useState(inicial);
 
-  // Contactos internos: array de pares [tipo, dato]. Empieza vacío porque el backend no los
-  // devuelve (ver PENDIENTE en la cabecera); lo cambia el ContactosEditor.
-  const [contactos, setContactos] = useState([]);
+  // Contactos privados: array de pares [tipo, dato]. Arrancan con los que ya tenía guardados;
+  // los cambia el ContactosEditor. Al guardar se manda la lista entera.
+  const [contactos, setContactos] = useState(contactosIniciales);
 
-  // true si la persona tocó los contactos: solo en ese caso se mandan al guardar
-  // (si no, se reemplazarían los que ya tenía por una lista vacía).
-  const [contactosTocados, setContactosTocados] = useState(false);
+  // URL de la foto subida (null = no subió). Va aparte de `datos`: se guarda sola al elegirla.
+  const [fotoSubida, setFotoSubida] = useState(inicial.fotoSubida);
 
   // true mientras se espera la respuesta del backend (el botón muestra «cargando»).
   const [guardando, setGuardando] = useState(false);
@@ -120,7 +138,7 @@ function FormularioDePerfil({ id, inicial, opciones }) {
       const esCasilla = evento.target.type === 'checkbox';
       const nuevoValor = esCasilla ? evento.target.checked : evento.target.value;
       // `...datos` copia todo lo que había y `[campo]: nuevoValor` cambia solo ese campo
-      // (ver docs/GLOSARIO.md → Copiar con cambios)
+      // (ver packages/frontend/docs/GLOSARIO.md → Copiar con cambios)
       setDatos({ ...datos, [campo]: nuevoValor });
     };
   }
@@ -135,7 +153,6 @@ function FormularioDePerfil({ id, inicial, opciones }) {
   function alCambiarContactos(contactosNuevos) {
     setMensajeOk('');
     setContactos(contactosNuevos);
-    setContactosTocados(true);
   }
 
   // Se ejecuta al apretar «Guardar cambios». Primero valida; si hay errores corta acá y
@@ -158,28 +175,25 @@ function FormularioDePerfil({ id, inicial, opciones }) {
     if (datos.habilidades.length === 0) {
       erroresNuevos.habilidades = 'Elegí al menos una habilidad.';
     }
-    if (datos.linkedin.trim() && !/^https?:\/\//.test(datos.linkedin.trim())) {
-      // la expresión regular pide que empiece con http:// o https://
-      erroresNuevos.linkedin = 'Pegá la dirección completa, empezando con https://';
-    }
+    const pedirUrlCompleta = 'Pegá la dirección completa, empezando con https://';
+    if (!esUrlOVacio(datos.linkedin)) erroresNuevos.linkedin = pedirUrlCompleta;
+    if (!esUrlOVacio(datos.sitioWeb)) erroresNuevos.sitioWeb = pedirUrlCompleta;
+    if (!esUrlOVacio(datos.foto)) erroresNuevos.foto = pedirUrlCompleta;
     setErrores(erroresNuevos);
     setMensajeOk('');
     setErrorAlGuardar(null);
 
     const hayErrores = Object.keys(erroresNuevos).length > 0;
     if (hayErrores) {
+      llevarAlPrimerError(evento.currentTarget);
       return;
     }
 
     setGuardando(true);
     try {
-      // Los contactos se mandan solo si se tocaron (ver contactosTocados).
-      const guardado = await guardarPerfil(id, datos, {
-        contactos: contactosTocados ? contactos : undefined,
-      });
+      const guardado = await guardarPerfil(id, datos, { contactos });
       // Lo que devuelve el backend pasa a ser el nuevo punto de partida del formulario.
       setDatos(guardado);
-      setContactosTocados(false);
       setMensajeOk('Cambios guardados.');
     } catch (e) {
       setErrorAlGuardar(e);
@@ -204,20 +218,35 @@ function FormularioDePerfil({ id, inicial, opciones }) {
         </Alert>
       )}
 
-      {/* BLOQUE: campos — grilla; sh.r2 / sh.mid / sh.full controlan cuánto ocupa cada uno */}
-      {/* `optional` = campo no obligatorio; error={errores.x} muestra el mensaje solo si existe */}
+      {/* BLOQUE: datos personales — a la izquierda foto (con el enlace al lado), nombre de
+          fantasía, nombre, apellido y pronombres; a la derecha «Sobre vos» y habilidades (que
+          ocupa el alto de las 4 filas) */}
       <div className={sh.form}>
-        {/* Avatar con la inicial del nombre de fantasía (o «?» si está vacío; `||` = «o, si no,
-           usá»). No hay foto: el backend todavía no guarda imágenes. */}
-        <div className={sh.r2}>
-          <span className={s.lab}>Foto</span>
-          <div className={sh.foto}>
-            <Avatar nombre={datos.fantasia || '?'} size={96} />
+        <div>
+          <span className={s.etiqueta}>Foto</span>
+          <div className={s.foto}>
+            {/* Si no subió foto, se ve al momento el enlace que pega (o la del seed, o la inicial) */}
+            <SubirFoto
+              recurso="colaboradoras"
+              id={id}
+              nombre={datos.fantasia}
+              foto={fotoSubida}
+              fotoDeRespaldo={datos.foto.trim() || fotoDe(id)}
+              alCambiar={setFotoSubida}
+            />
+            <Field
+              label="O pegá el enlace a una foto"
+              optional
+              hint={fotoSubida ? 'Mientras tengas una foto subida, se muestra esa.' : undefined}
+              placeholder="https://…/foto.jpg"
+              value={datos.foto}
+              onChange={alCambiarCampo('foto')}
+              error={errores.foto}
+            />
           </div>
         </div>
         <Field
           as="textarea"
-          className={sh.r2}
           label="Sobre vos"
           placeholder="Contá en pocas líneas quién sos y qué te gusta hacer…"
           value={datos.bio}
@@ -230,15 +259,14 @@ function FormularioDePerfil({ id, inicial, opciones }) {
           onChange={alCambiarCampo('fantasia')}
           error={errores.fantasia}
         />
-        <div>
+        <div className={s.habilidades}>
           <TagPicker
             label="Habilidades"
             value={datos.habilidades}
             options={opciones}
             onChange={alCambiarHabilidades}
+            error={errores.habilidades}
           />
-          {/* El TagPicker no muestra errores: el mensaje va debajo, solo si existe */}
-          {errores.habilidades && <Text variant="small" role="alert">{errores.habilidades}</Text>}
         </div>
         <Field
           label="Nombre"
@@ -259,13 +287,12 @@ function FormularioDePerfil({ id, inicial, opciones }) {
           value={datos.pronombres}
           onChange={alCambiarCampo('pronombres')}
         />
-        <Field
-          label="Cuenta de GitHub o GitLab"
-          placeholder="https://github.com/usuario"
-          value={datos.github}
-          onChange={alCambiarCampo('github')}
-          error={errores.github}
-        />
+      </div>
+
+      <hr className={s.separador} />
+
+      {/* BLOQUE: redes — LinkedIn, la cuenta de código y el sitio web */}
+      <div className={sh.form}>
         <Field
           label="LinkedIn"
           optional
@@ -274,23 +301,45 @@ function FormularioDePerfil({ id, inicial, opciones }) {
           onChange={alCambiarCampo('linkedin')}
           error={errores.linkedin}
         />
-        <div className={sh.mid}>
-          <Checkbox checked={datos.mensajes} onChange={alCambiarCampo('mensajes')}>
-            Permitir mensajes de organizaciones
-          </Checkbox>
-        </div>
-        <div className={sh.full}>
-          <ContactosEditor value={contactos} onChange={alCambiarContactos} />
-          <Text variant="small">
-            Por privacidad no mostramos los contactos que ya guardaste. Si agregás alguno acá,
-            al guardar reemplaza a los anteriores. Teléfonos: 10 dígitos, sin 0 ni 15
-            (ej. 1127891234).
-          </Text>
-        </div>
+        <Field
+          label="Cuenta de GitHub o GitLab"
+          placeholder="https://github.com/usuario"
+          value={datos.github}
+          onChange={alCambiarCampo('github')}
+          error={errores.github}
+        />
+        <Field
+          label="Sitio web"
+          optional
+          placeholder="https://tu-portfolio.dev"
+          value={datos.sitioWeb}
+          onChange={alCambiarCampo('sitioWeb')}
+          error={errores.sitioWeb}
+        />
       </div>
 
+      <hr className={s.separador} />
+
+      {/* BLOQUE: contacto — medios privados y, en la misma fila del título, si acepta mensajes */}
+      <div>
+        <ContactosEditor
+          value={contactos}
+          onChange={alCambiarContactos}
+          accion={
+            <Checkbox checked={datos.mensajes} onChange={alCambiarCampo('mensajes')}>
+              Permitir mensajes de organizaciones
+            </Checkbox>
+          }
+        />
+        <Text variant="small">
+          Solo los ven los colectivos de los proyectos en los que colaborás.
+        </Text>
+      </div>
+
+      <hr className={s.separador} />
+
       {/* BLOQUE: botones finales — guardar (con «cargando» mientras guarda) o cancelar */}
-      <div className={sh.formActs}>
+      <div className={sh.formActions}>
         <Button type="submit" loading={guardando}>Guardar cambios</Button>
         <Button as={Link} to="/panel" variant="secondary">Cancelar</Button>
       </div>

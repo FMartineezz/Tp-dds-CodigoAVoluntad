@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Colectivo, TipoColectivo, UBICACION_VALIDA } from "../models/colectivo.js";
 import { TipoRedSocial } from "../models/redSocial.js";
 import { denunciaSchema } from "./denunciaSchema.js";
+import { fotoSchema } from "./fotoSchema.js";
 
 const colectivoSchema = new mongoose.Schema(
   {
@@ -95,6 +96,10 @@ const colectivoSchema = new mongoose.Schema(
       default: true,
       select: false,
     },
+    // Foto subida (los bytes). No se lee por defecto: solo la pide GET …/foto
+    fotoArchivo: { type: fotoSchema, select: false },
+    // Cuándo se subió la foto (null = no tiene). El front la usa para armar la URL de la imagen
+    fotoSubida: { type: Date, default: null },
     createdAt: { type: Date, select: false },
     updatedAt: { type: Date, select: false },
     __v: { type: Number, select: false },

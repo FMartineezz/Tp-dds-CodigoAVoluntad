@@ -58,9 +58,9 @@ Cada carpeta tiene un `LEEME.md` corto, y cada archivo empieza con un comentario
 | El tamaño o aspecto de h1–h6 | `src/estilos/titulos.css` |
 | Qué ítems tiene el menú | `src/plantillas/menus.js` |
 
-Más recetas (nueva columna de tabla, nuevo botón en la navbar, nuevo campo, nueva pantalla…): **`docs/RECETAS.md`**.
+Más recetas (nueva columna de tabla, nuevo botón en la navbar, nuevo campo, nueva pantalla…): **`packages/frontend/docs/RECETAS.md`**.
 
-**¿Primera vez con React?** Leé primero **`docs/GLOSARIO.md`**: explica con ejemplos del propio proyecto qué es un componente, props, estado,
+**¿Primera vez con React?** Leé primero **`packages/frontend/docs/GLOSARIO.md`**: explica con ejemplos del propio proyecto qué es un componente, props, estado,
 `map`, `filter`, `&&`, etc. Las pantallas (`src/paginas/`) están escritas para leerse de arriba hacia abajo:
 cada una tiene un bloque *ANATOMÍA DE ESTE ARCHIVO* y cuatro secciones con el mismo orden
 (1 datos y estado · 2 cálculos · 3 acciones · 4 lo que se dibuja), con un comentario en cada parte.

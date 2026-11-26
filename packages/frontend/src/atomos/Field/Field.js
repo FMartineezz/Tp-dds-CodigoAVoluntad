@@ -21,8 +21,8 @@ export default function Field({ as: Control = 'input', label, hint, error, requi
     <div className={cx(s.field, className)}>
       <label htmlFor={id} className={s.label}>
         {label}
-        {required && <span className={s.req}> (obligatorio)</span>}
-        {optional && <span className={s.req}> (opcional)</span>}
+        {required && <span className={s.required}> (obligatorio)</span>}
+        {optional && <span className={s.required}> (opcional)</span>}
       </label>
       {hint && (
         <p id={hintId} className={s.hint}>

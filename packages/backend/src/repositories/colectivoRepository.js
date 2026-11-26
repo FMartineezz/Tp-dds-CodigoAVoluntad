@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { ColectivoModel } from "../schemas/colectivoSchema.js";
 import { paginar } from "./paginar.js";
 
@@ -44,6 +45,15 @@ export class ColectivoRepository {
    */
   async obtenerPagina(paginacion) {
     return await paginar(this.model, { activo: true }, paginacion);
+  }
+
+  /**
+   * Colectivos dados de baja, los últimos primero. `updatedAt` dice cuándo fue la baja
+   * (después de la baja ya no se modifican).
+   * @returns {Promise<ColectivoGuardado[]>}
+   */
+  async obtenerDadosDeBaja() {
+    return await this.model.find({ activo: false }).select("+updatedAt").sort({ updatedAt: -1, _id: -1 }).lean();
   }
 
   /**
@@ -100,15 +110,59 @@ export class ColectivoRepository {
     });
   }
 
+  // ───── Foto de perfil subida ─────
+
   /**
-   * Da de baja (lógica) un colectivo.
+   * Guarda la foto subida de un colectivo activo/a y anota cuándo se subió.
+   * @param {Id} id
+   * @param {{ datos: Buffer, tipo: string }} foto
+   * @returns {Promise<{ fotoSubida: Date } | null>} null si no existe o está dado/a de baja.
+   */
+  async guardarFoto(id, foto) {
+    return await this.model
+      .findOneAndUpdate(
+        { _id: id, activo: true },
+        { $set: { fotoArchivo: foto, fotoSubida: new Date() } },
+        { returnDocument: "after", projection: { fotoSubida: 1 } },
+      )
+      .lean();
+  }
+
+  /**
+   * Trae la foto subida (sin lean, para que `datos` llegue como Buffer).
+   * @param {Id} id
+   * @returns {Promise<{ fotoArchivo?: { datos: Buffer, tipo: string } } | null>} null si no existe
+   *   o está dado/a de baja; sin `fotoArchivo` si nunca subió una.
+   */
+  async obtenerFoto(id) {
+    return await this.model.findOne({ _id: id, activo: true }, { fotoArchivo: 1 }).select("+fotoArchivo");
+  }
+
+  /**
+   * Borra la foto subida.
+   * @param {Id} id
+   * @returns {Promise<object | null>} null si no existe o está dado/a de baja.
+   */
+  async borrarFoto(id) {
+    return await this.model
+      .findOneAndUpdate(
+        { _id: id, activo: true },
+        { $unset: { fotoArchivo: 1 }, $set: { fotoSubida: null } },
+        { projection: { _id: 1 } },
+      )
+      .lean();
+  }
+
+  /**
+   * Da de baja (lógica) un colectivo. También se borra su foto subida.
    * @param {Id} id
    * @returns {Promise<(import("mongoose").Document & ColectivoGuardado) | null>} El documento
    *   ANTES del cambio (sin `new: true` ni lean), o null si no existe.
    */
   async eliminarColectivo(id) {
     return await this.model.findByIdAndUpdate(id, {
-      activo: false,
+      $set: { activo: false, fotoSubida: null },
+      $unset: { fotoArchivo: 1 },
     });
   }
 
@@ -144,6 +198,24 @@ export class ColectivoRepository {
    * @param {Id} colaboracionId
    * @returns {Promise<boolean>}
    */
+  // Una sola consulta para varias colaboraciones (en vez de preguntar una por una)
+  /**
+   * Ids (como texto) de las colaboraciones de la lista que ya tienen una denuncia.
+   * @param {Id[]} colaboracionIds
+   * @returns {Promise<Set<string>>}
+   */
+  async colaboracionesDenunciadas(colaboracionIds) {
+    const colectivos = await this.model
+      .find({ "denuncias.colaboracionId": { $in: colaboracionIds } })
+      .select("denuncias.colaboracionId")
+      .lean();
+    return new Set(
+      colectivos.flatMap((colectivo) =>
+        colectivo.denuncias.map((denuncia) => String(denuncia.colaboracionId)),
+      ),
+    );
+  }
+
   async existeDenunciaParaColaboracion(colaboracionId) {
     const count = await this.model.countDocuments({
       "denuncias.colaboracionId": colaboracionId,
@@ -152,13 +224,20 @@ export class ColectivoRepository {
   }
 
   /**
-   * Todas las denuncias de todos los colectivos, opcionalmente filtradas por estado.
-   * @param {{ estado?: EstadoDenunciaValor }} [filtro]
+   * Todas las denuncias de todos los colectivos (las más nuevas primero), opcionalmente
+   * filtradas por estado y/o por colectivo.
+   * @param {{ estado?: EstadoDenunciaValor, colectivoId?: Id }} [filtro]
    * @returns {Promise<DenunciaConColectivo[]>}
    */
   async obtenerTodasLasDenuncias(filtro = {}) {
     /** @type {import("mongoose").PipelineStage[]} */
-    const pipeline = [{ $unwind: "$denuncias" }];
+    const pipeline = [];
+    if (filtro.colectivoId) {
+      // Un id con formato inválido no puede ser de ningún colectivo: lista vacía
+      if (!mongoose.isValidObjectId(filtro.colectivoId)) return [];
+      pipeline.push({ $match: { _id: new mongoose.Types.ObjectId(String(filtro.colectivoId)) } });
+    }
+    pipeline.push({ $unwind: "$denuncias" });
     if (filtro.estado) {
       pipeline.push({ $match: { "denuncias.estado": filtro.estado } });
     }
@@ -173,17 +252,18 @@ export class ColectivoRepository {
         colectivoNombre: "$nombre",
       },
     });
+    pipeline.push({ $sort: { fecha: -1 } });
     return await this.model.aggregate(pipeline);
   }
 
   /**
-   * Busca una denuncia por id, con los datos de su colectivo.
+   * Busca una denuncia por id, con los datos de su colectivo (y si sigue activo).
    * @param {Id} denunciaId
-   * @returns {Promise<DenunciaConColectivo | null>}
+   * @returns {Promise<(DenunciaConColectivo & { colectivoActivo: boolean }) | null>}
    */
   async obtenerDenunciaPorId(denunciaId) {
     const colectivo = await this.model
-      .findOne({ "denuncias._id": denunciaId }, { "denuncias.$": 1, nombre: 1, _id: 1 })
+      .findOne({ "denuncias._id": denunciaId }, { "denuncias.$": 1, nombre: 1, activo: 1, _id: 1 })
       .lean();
     if (!colectivo || !colectivo.denuncias || colectivo.denuncias.length === 0) {
       return null;
@@ -193,6 +273,8 @@ export class ColectivoRepository {
       ...denuncia,
       colectivoId: colectivo._id,
       colectivoNombre: colectivo.nombre,
+      // El admin lo usa para saber si todavía puede dar de baja al colectivo
+      colectivoActivo: colectivo.activo !== false,
     };
   }
 

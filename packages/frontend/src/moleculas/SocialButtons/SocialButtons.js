@@ -13,7 +13,7 @@ import s from './SocialButtons.module.css';
 export function SocialButtons({ onEntrar, verbo = 'Continuar' }) {
   return (
     <div className={s.social}>
-      <span className={s.sep}>o</span>
+      <span className={s.separator}>o</span>
       <Button type="button" variant="secondary" fullWidth onClick={() => onEntrar('Google')}>{verbo} con Google</Button>
       <Button type="button" variant="secondary" fullWidth onClick={() => onEntrar('LinkedIn')}>{verbo} con LinkedIn</Button>
     </div>

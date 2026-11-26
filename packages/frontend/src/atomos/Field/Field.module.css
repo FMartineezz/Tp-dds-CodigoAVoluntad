@@ -1,7 +1,7 @@
 /* Campo de formulario accesible: etiqueta, ayuda y error ya conectados con aria. */
 .field { display: grid; gap: var(--space-2); }
 .label { font-size: var(--text-small); font-weight: 600; }
-.req { color: var(--color-text-muted); font-weight: 400; }
+.required { color: var(--color-text-muted); font-weight: 400; }
 .hint { font-size: var(--text-small); color: var(--color-text-muted); }
 .control {
   width: 100%;

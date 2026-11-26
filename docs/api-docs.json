@@ -68,6 +68,10 @@
     {
       "name": "Estadísticas",
       "description": "Métricas agregadas de la plataforma."
+    },
+    {
+      "name": "Reportes",
+      "description": "Reportes de problemas en la plataforma"
     }
   ],
   "components": {
@@ -382,6 +386,12 @@
                 "url": "https://instagram.com/colectivoambiental"
               }
             ]
+          },
+          "fotoSubida": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Cuándo subió su foto (null = no tiene). La imagen está en GET …/:id/foto"
           }
         }
       },
@@ -464,12 +474,24 @@
                 "url": "https://linkedin.com/in/devneko"
               }
             ]
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de la foto de perfil. `null` la borra.",
+            "example": "https://imagenes.test/devneko.jpg"
+          },
+          "sitioWeb": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de su sitio personal o portfolio. `null` lo borra.",
+            "example": "https://devneko.dev"
           }
         }
       },
       "PersonaColaboradora": {
         "type": "object",
-        "description": "Vista pública: nunca incluye `contactos`.",
+        "description": "Vista pública: nunca incluye `contactos` (ver `GET /colaboradoras/{id}/contactos`).",
         "properties": {
           "_id": {
             "type": "string",
@@ -533,6 +555,24 @@
                 "url": "https://github.com/devneko"
               }
             ]
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de la foto de perfil. `null` la borra.",
+            "example": "https://imagenes.test/devneko.jpg"
+          },
+          "sitioWeb": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de su sitio personal o portfolio. `null` lo borra.",
+            "example": "https://devneko.dev"
+          },
+          "fotoSubida": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Cuándo subió su foto (null = no tiene). La imagen está en GET …/:id/foto"
           }
         }
       },
@@ -579,6 +619,18 @@
                 "url": "https://github.com/devneko"
               }
             ]
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de la foto de perfil. `null` la borra.",
+            "example": "https://imagenes.test/devneko.jpg"
+          },
+          "sitioWeb": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de su sitio personal o portfolio. `null` lo borra.",
+            "example": "https://devneko.dev"
           }
         }
       },
@@ -1121,6 +1173,18 @@
                 "url": "https://x.com/devneko"
               }
             ]
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de la foto de perfil. `null` la borra.",
+            "example": "https://imagenes.test/devneko.jpg"
+          },
+          "sitioWeb": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL (http/https) de su sitio personal o portfolio. `null` lo borra.",
+            "example": "https://devneko.dev"
           }
         }
       },
@@ -1816,6 +1880,60 @@
           }
         },
         "required": ["resultados", "pagina", "limite", "total", "totalPaginas"]
+      },
+      "ReporteInput": {
+        "type": "object",
+        "required": ["tipo", "descripcion"],
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": ["error", "sugerencia", "otro"]
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 2000,
+            "example": "El botón Guardar no hace nada"
+          },
+          "pantalla": {
+            "type": "string",
+            "example": "/org/proyectos/nuevo"
+          },
+          "correo": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "Reporte": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": ["error", "sugerencia", "otro"]
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "pantalla": {
+            "type": "string",
+            "nullable": true
+          },
+          "correo": {
+            "type": "string",
+            "nullable": true
+          },
+          "estado": {
+            "type": "string",
+            "enum": ["nuevo", "en_revision", "resuelto"]
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     },
     "securitySchemes": {
@@ -2306,6 +2424,161 @@
         }
       }
     },
+    "/colectivos/{id}/foto": {
+      "put": {
+        "tags": ["Colectivos"],
+        "summary": "Subir la foto de perfil de un colectivo",
+        "description": "El cuerpo son los bytes de la imagen (no JSON). Hasta 300 KB. Reemplaza la anterior. Sin autenticación por ahora.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Foto guardada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fotoSubida": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ERR-VAL-1601: no es JPG, PNG o WebP, o viene vacía"
+          },
+          "404": {
+            "description": "La cuenta no existe o está dada de baja"
+          },
+          "413": {
+            "description": "ERR-VAL-1602: pesa más de 300 KB"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Colectivos"],
+        "summary": "Ver la foto de perfil de un colectivo",
+        "description": "Devuelve la imagen. El front la pide con ?v=<fotoSubida> para no ver una vieja guardada en caché.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La imagen",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ERR-NOT-1603: no subió ninguna foto; o la cuenta no existe"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Colectivos"],
+        "summary": "Borrar la foto de perfil de un colectivo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Foto borrada"
+          },
+          "404": {
+            "description": "La cuenta no existe o está dada de baja"
+          }
+        }
+      }
+    },
+    "/admin/colectivos/bajas": {
+      "get": {
+        "tags": ["Colectivos"],
+        "summary": "Colectivos dados de baja",
+        "description": "Para el equipo administrativo. Del último dado de baja al primero; updatedAt indica cuándo fue la baja. Todavía sin autenticación, igual que el resto de /admin.",
+        "responses": {
+          "200": {
+            "description": "Lista de colectivos dados de baja (vacía si no hay)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Colectivo"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/colectivos/{colectivoId}/proyectos": {
       "get": {
         "tags": ["Proyectos"],
@@ -2335,8 +2608,8 @@
               }
             }
           },
-          "500": {
-            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+          "404": {
+            "description": "No existe un colectivo con ese id (ERR-NOT-305)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2345,8 +2618,8 @@
               }
             }
           },
-          "404": {
-            "description": "No existe un colectivo con ese id (ERR-NOT-305)",
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2549,6 +2822,34 @@
               "maximum": 100,
               "default": 20
             }
+          },
+          {
+            "name": "busqueda",
+            "in": "query",
+            "required": false,
+            "description": "Texto en el nombre, el apellido o el nombre de fantasía.",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "habilidad",
+            "in": "query",
+            "required": false,
+            "description": "Código de habilidad que la persona tiene.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aceptaMensajes",
+            "in": "query",
+            "required": false,
+            "description": "true: solo quienes reciben mensajes; false: solo quienes los bloquean.",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ]
       },
@@ -2577,7 +2878,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-401`, `ERR-VAL-402`, `ERR-VAL-403`, `ERR-VAL-404`, `ERR-VAL-406`, `ERR-VAL-407`, `ERR-VAL-701`, `ERR-VAL-702`, `ERR-VAL-703`, `ERR-VAL-704`, `ERR-VAL-705`, `ERR-VAL-706`, `ERR-VAL-707`, `ERR-VAL-207`, `ERR-VAL-001`, `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`",
+            "description": "Datos inválidos o habilidad inexistente. Códigos posibles: `ERR-VAL-401`, `ERR-VAL-402`, `ERR-VAL-403`, `ERR-VAL-404`, `ERR-VAL-406`, `ERR-VAL-407`, `ERR-VAL-701`, `ERR-VAL-702`, `ERR-VAL-703`, `ERR-VAL-704`, `ERR-VAL-705`, `ERR-VAL-706`, `ERR-VAL-707`, `ERR-VAL-207`, `ERR-VAL-001`, `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-409` (foto no es URL), `ERR-VAL-410` (sitio web no es URL)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2724,7 +3025,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-001`",
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1101`, `ERR-VAL-1102`, `ERR-VAL-1103`, `ERR-VAL-1104`, `ERR-VAL-1105`, `ERR-VAL-1106`, `ERR-VAL-001`, `ERR-VAL-409` (foto no es URL), `ERR-VAL-410` (sitio web no es URL)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2757,6 +3058,212 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/colaboradoras/{id}/foto": {
+      "put": {
+        "tags": ["Colaboradoras"],
+        "summary": "Subir la foto de perfil de una persona colaboradora",
+        "description": "El cuerpo son los bytes de la imagen (no JSON). Hasta 300 KB. Reemplaza la anterior. Sin autenticación por ahora.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Foto guardada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fotoSubida": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ERR-VAL-1601: no es JPG, PNG o WebP, o viene vacía"
+          },
+          "404": {
+            "description": "La cuenta no existe o está dada de baja"
+          },
+          "413": {
+            "description": "ERR-VAL-1602: pesa más de 300 KB"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Colaboradoras"],
+        "summary": "Ver la foto de perfil de una persona colaboradora",
+        "description": "Devuelve la imagen. El front la pide con ?v=<fotoSubida> para no ver una vieja guardada en caché.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La imagen",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ERR-NOT-1603: no subió ninguna foto; o la cuenta no existe"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Colaboradoras"],
+        "summary": "Borrar la foto de perfil de una persona colaboradora",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Foto borrada"
+          },
+          "404": {
+            "description": "La cuenta no existe o está dada de baja"
+          }
+        }
+      }
+    },
+    "/colaboradoras/{id}/contactos": {
+      "get": {
+        "tags": ["Colaboradoras"],
+        "summary": "Obtener los contactos privados de una colaboradora",
+        "description": "Solo los ven la dueña del perfil (`colaboradoraId` igual al `id`) o un colectivo con el que tiene una colaboración activa (`colectivoId`). Para cualquier otra persona responde 403.\n\nPENDIENTE (login): quién pide viaja por query porque todavía no hay sesión; cuando se integre el login saldrá del token.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Id de la colaboradora",
+            "schema": {
+              "type": "string",
+              "example": "6acfd66264d02459ba8dc6a2"
+            }
+          },
+          {
+            "name": "colaboradoraId",
+            "in": "query",
+            "required": false,
+            "description": "Id de la colaboradora que pide (debe ser la dueña).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "colectivoId",
+            "in": "query",
+            "required": false,
+            "description": "Id del colectivo que pide.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de medios de contacto (puede ser vacía)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MedioDeContacto"
+                  }
+                },
+                "example": [
+                  {
+                    "tipo": "email",
+                    "valor": "ana@mail.com"
+                  }
+                ]
+              }
+            }
+          },
+          "403": {
+            "description": "Quien pide no tiene acceso. Códigos posibles: `ERR-PER-411`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-PER-411",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No existe. Códigos posibles: `ERR-NOT-405`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-NOT-405",
+                  "message": "Descripción del error"
                 }
               }
             }
@@ -3092,6 +3599,45 @@
               "minimum": 1,
               "maximum": 100,
               "default": 20
+            }
+          },
+          {
+            "name": "busqueda",
+            "in": "query",
+            "required": false,
+            "description": "Texto en el título o la descripción (sin importar mayúsculas).",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "description": "abierto: busca gente; en_curso: no terminó pero ya no busca; finalizado.",
+            "schema": {
+              "type": "string",
+              "enum": ["abierto", "en_curso", "finalizado"]
+            }
+          },
+          {
+            "name": "modalidad",
+            "in": "query",
+            "required": false,
+            "description": "Algún perfil ofrece esta modalidad.",
+            "schema": {
+              "type": "string",
+              "enum": ["gratuita", "incentivo_economico", "contratacion_eventual"]
+            }
+          },
+          {
+            "name": "habilidad",
+            "in": "query",
+            "required": false,
+            "description": "Código de habilidad que algún perfil pide (requerida u opcional).",
+            "schema": {
+              "type": "string"
             }
           }
         ]
@@ -4007,6 +4553,9 @@
               }
             }
           },
+          "400": {
+            "description": "`por` no es persona ni colectivo (ERR-VAL-509)"
+          },
           "404": {
             "description": "No existe la colaboración. Códigos posibles: `ERR-NOT-506`",
             "content": {
@@ -4044,9 +4593,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "`por` no es persona ni colectivo (ERR-VAL-509)"
           }
         }
       }
@@ -4070,6 +4616,9 @@
               }
             }
           },
+          "404": {
+            "description": "No existe una colaboradora con ese id (ERR-NOT-405)"
+          },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
             "content": {
@@ -4079,9 +4628,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "No existe una colaboradora con ese id (ERR-NOT-405)"
           }
         },
         "parameters": [
@@ -4115,6 +4661,9 @@
               }
             }
           },
+          "404": {
+            "description": "No existe un proyecto con ese id (ERR-NOT-108)"
+          },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
             "content": {
@@ -4124,9 +4673,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "No existe un proyecto con ese id (ERR-NOT-108)"
           }
         },
         "parameters": [
@@ -4773,6 +5319,15 @@
             "schema": {
               "$ref": "#/components/schemas/EstadoDenuncia"
             }
+          },
+          {
+            "name": "colectivoId",
+            "in": "query",
+            "required": false,
+            "description": "Solo las denuncias a ese colectivo",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -4796,7 +5351,7 @@
       "get": {
         "tags": ["Denuncias"],
         "summary": "Detalle administrativo de una denuncia",
-        "description": "Devuelve la denuncia y la colaboración asociada completa para que la administración pueda contactar a la persona.",
+        "description": "Devuelve la denuncia y la colaboración asociada completa para que la administración pueda contactar a la persona. `colectivoActivo` es false si el colectivo denunciado ya fue dado de baja.",
         "parameters": [
           {
             "name": "id",
@@ -4810,7 +5365,31 @@
         ],
         "responses": {
           "200": {
-            "description": "Detalle de la denuncia con su colaboración asociada."
+            "description": "Detalle de la denuncia con su colaboración asociada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/DenunciaAdmin"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "colectivoActivo": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "colaboracion": {
+                          "type": "object",
+                          "nullable": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
             "description": "Denuncia no encontrada."
@@ -5051,6 +5630,209 @@
           },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reportes": {
+      "post": {
+        "tags": ["Reportes"],
+        "summary": "Reportar un problema de la plataforma (público)",
+        "description": "Lo puede mandar cualquiera, sin cuenta. Límite: 5 pedidos cada 20 minutos por IP.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReporteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reporte guardado con estado nuevo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reporte"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos. Códigos posibles: `ERR-VAL-1501`, `ERR-VAL-1502`, `ERR-VAL-1503`, `ERR-VAL-1504`, `ERR-VAL-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-VAL-1502",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Demasiados reportes desde esta IP. Código: `ERR-LIM-001`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "code": "ERR-LIM-001",
+                  "message": "Descripción del error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/reportes": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Lista de reportes (Administración)",
+        "description": "Del más nuevo al más viejo. Todavía sin protección (falta la autenticación).",
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["nuevo", "en_revision", "resuelto"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de reportes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reporte"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ERR-VAL-1505 estado inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/reportes/{id}": {
+      "get": {
+        "tags": ["Reportes"],
+        "summary": "Detalle de un reporte (Administración)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "El reporte",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reporte"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ERR-NOT-1506 no existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/reportes/{id}/estado": {
+      "patch": {
+        "tags": ["Reportes"],
+        "summary": "Cambiar el estado de un reporte (Administración)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["estado"],
+                "properties": {
+                  "estado": {
+                    "type": "string",
+                    "enum": ["nuevo", "en_revision", "resuelto"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "El reporte actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reporte"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ERR-VAL-1505 estado inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ERR-NOT-1506 no existe",
             "content": {
               "application/json": {
                 "schema": {

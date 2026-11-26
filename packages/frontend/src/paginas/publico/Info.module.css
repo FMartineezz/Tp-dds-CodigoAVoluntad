@@ -1,0 +1,29 @@
+/* Estilos de las páginas informativas (términos, API). Los comunes están en plantillas/disposicion.module.css. */
+
+/* ---------- Términos: índice al costado y cláusulas numeradas ---------- */
+.documento { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--space-7); align-items: start; }
+/* El índice acompaña mientras scrolleás */
+.indice { position: sticky; top: var(--space-5); padding-right: var(--space-5); border-right: var(--border); }
+.indice ol { margin: 0; padding-left: var(--space-5); display: grid; gap: var(--space-2); font-size: var(--text-small); }
+.indice a { color: var(--color-text); }
+.indice a:hover { color: var(--color-accent); }
+.clausulas { display: grid; gap: var(--space-6); max-width: 46rem; }
+.clausula { display: grid; grid-template-columns: 3rem minmax(0, 1fr); gap: var(--space-3); scroll-margin-top: var(--space-6); }
+.clausula > div { display: grid; gap: var(--space-2); }
+.numero { font: 900 2.5rem / 1 var(--font-display); font-stretch: 70%; color: var(--color-accent); }
+@media (max-width: 800px) {
+  .documento { grid-template-columns: 1fr; gap: var(--space-5); }
+  .indice { position: static; padding: 0 0 var(--space-4); border-right: 0; border-bottom: var(--border); }
+}
+
+/* ---------- API: intro, referencia y ejemplos ---------- */
+.intro, .referencia { display: grid; gap: var(--space-4); }
+.usos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: var(--space-4); }
+.usos li { display: grid; grid-template-columns: auto 1fr; gap: var(--space-3); align-items: start; padding: var(--space-4); background: var(--color-surface); border: var(--border); border-radius: var(--radius); }
+.usoIcono { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border: var(--border); border-radius: 50%; background: var(--color-fill); }
+.endpoint { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin: 0; font-weight: 600; font-size: 1.125rem; }
+.metodo { padding: var(--space-1) var(--space-3); background: var(--color-success); color: var(--paper-100); border-radius: var(--radius-sm); font-size: var(--text-label); }
+.limite { padding: var(--space-1) var(--space-2); background: var(--color-warning); border: var(--border); border-radius: var(--radius-sm); font-size: var(--text-label); }
+.tablaConScroll { overflow-x: auto; }
+.campo { font-weight: 600; overflow-wrap: anywhere; }
+.codigo { margin: 0; padding: var(--space-5); background: var(--color-inverse-bg); color: var(--color-inverse-text); border-radius: var(--radius); overflow: auto; font-size: var(--text-small); line-height: 1.6; }

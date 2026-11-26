@@ -43,10 +43,12 @@ export class PersonaColaboradoraService {
    * @param {object} deps
    * @param {import("../repositories/personaColaboradoraRepository.js").PersonaColaboradoraRepository} deps.personaColaboradoraRepository
    * @param {import("./habilidadService.js").HabilidadService} deps.habilidadService
+   * @param {import("../repositories/colaboracionRepository.js").ColaboracionRepository} deps.colaboracionRepository
    */
-  constructor({ personaColaboradoraRepository, habilidadService }) {
+  constructor({ personaColaboradoraRepository, habilidadService, colaboracionRepository }) {
     this.personaColaboradoraRepository = personaColaboradoraRepository;
     this.habilidadService = habilidadService;
+    this.colaboracionRepository = colaboracionRepository;
   }
 
   /**
@@ -61,6 +63,8 @@ export class PersonaColaboradoraService {
    * @param {MedioDeContacto[]} contactos
    * @param {boolean} bloquearMensajeInterno
    * @param {unknown} [redesSociales] Lista de `{ tipo, url }` a validar.
+   * @param {string | null} [foto] URL de la foto de perfil.
+   * @param {string | null} [sitioWeb]
    * @returns {Promise<PersonaColaboradora>} La persona con el `id` asignado.
    * @throws {AppError} 400 si algún código de habilidad no existe o las redes son inválidas.
    */
@@ -75,7 +79,9 @@ export class PersonaColaboradoraService {
     contactos,
     bloquearMensajeInterno,
     keycloackId,
-    redesSociales = []
+    redesSociales = [],
+    foto = null,
+    sitioWeb = null,
   ) {
     const redesValidadas = validarYNormalizarRedesSociales(redesSociales) ?? [];
 
@@ -94,7 +100,9 @@ export class PersonaColaboradoraService {
       contactos,
       bloquearMensajeInterno,
       keycloackId,
-      redesValidadas
+      redesValidadas,
+      foto,
+      sitioWeb,
     );
     const personaColaboradoraGuardada =
       await this.personaColaboradoraRepository.guardar(personaColaboradora);
@@ -129,8 +137,12 @@ export class PersonaColaboradoraService {
     }
 
     if (cambios.habilidades !== undefined) {
-      const mapaHabilidades = await this.habilidadService.obtenerMapaPorCodigos(cambios.habilidades);
-      cambiosPreparados.habilidades = cambios.habilidades.map((codigo) => mapaHabilidades.get(codigo));
+      const mapaHabilidades = await this.habilidadService.obtenerMapaPorCodigos(
+        cambios.habilidades,
+      );
+      cambiosPreparados.habilidades = cambios.habilidades.map((codigo) =>
+        mapaHabilidades.get(codigo),
+      );
     }
 
     return await this.personaColaboradoraRepository.actualizar(id, cambiosPreparados);
@@ -147,14 +159,24 @@ export class PersonaColaboradoraService {
     return await this.actualizarPersonaColaboradora(id, cambios);
   }
 
-  // Vista expuesta (sin contactos)
+  // Vista expuesta (sin contactos). La habilidad llega por CÓDIGO y se pasa a id para filtrar
   /**
-   * Página de personas colaboradoras (sin contactos).
+   * Página de personas colaboradoras (sin contactos), con filtros opcionales.
    * @param {Paginacion} paginacion
+   * @param {{ busqueda?: string, habilidad?: string, aceptaMensajes?: boolean }} [filtros]
    * @returns {Promise<import("../types.js").Pagina<PersonaColaboradoraGuardada>>}
+   * @throws {AppError} 400 si no existe una habilidad con ese código.
    */
-  async obtenerPersonasColaboradoras(paginacion) {
-    return await this.personaColaboradoraRepository.obtenerPagina(paginacion);
+  async obtenerPersonasColaboradoras(paginacion, { busqueda, habilidad, aceptaMensajes } = {}) {
+    const habilidadId = habilidad
+      ? (await this.habilidadService.obtenerHabilidadPorCodigo(habilidad))._id
+      : undefined;
+
+    return await this.personaColaboradoraRepository.obtenerPagina(paginacion, {
+      busqueda,
+      habilidadId,
+      aceptaMensajes,
+    });
   }
 
   /**
@@ -212,6 +234,29 @@ export class PersonaColaboradoraService {
     return personaColaboradora;
   }
 
+  /**
+   * Contactos privados de una persona. Según el enunciado solo los ven la dueña del perfil y
+   * los colectivos con los que colabora; para cualquier otra persona el pedido falla.
+   * @param {Id} id La persona dueña de los contactos.
+   * @param {{ colaboradoraId?: Id, colectivoId?: Id }} solicitante Quién los pide.
+   * @returns {Promise<MedioDeContacto[]>}
+   * @throws {AppError} 404 si la persona no existe; 403 si quien pide no tiene acceso.
+   */
+  async obtenerContactos(id, { colaboradoraId, colectivoId } = {}) {
+    const persona = await this.obtenerPersonaColaboradoraPorIdConContactos(id);
+
+    const esLaDuena = colaboradoraId != null && String(colaboradoraId) === String(id);
+    const esSuColectivo =
+      colectivoId != null &&
+      (await this.colaboracionRepository.existeActivaConColectivo(id, colectivoId));
+
+    if (!esLaDuena && !esSuColectivo) {
+      throw new AppError(ErrorCatalog.COLABORADORA_CONTACTOS_SIN_ACCESO, 403, id);
+    }
+
+    return persona.contactos ?? [];
+  }
+
   //agregar en la query de la db?
   /**
    * Devuelve una copia de la persona sin el campo `contactos`.
@@ -239,6 +284,44 @@ export class PersonaColaboradoraService {
       throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
     }
     throw new AppError(ErrorCatalog.COLABORADORA_YA_DADA_DE_BAJA, 409, id);
+  }
+
+  // ───── Foto de perfil subida ─────
+
+  /**
+   * Guarda (o reemplaza) la foto subida.
+   * @param {Id} id
+   * @param {{ datos: Buffer, tipo: string }} foto
+   * @returns {Promise<{ fotoSubida: Date }>}
+   * @throws {AppError} 404 si la persona no existe o está dado/a de baja.
+   */
+  async subirFoto(id, foto) {
+    const resultado = await this.personaColaboradoraRepository.guardarFoto(id, foto);
+    if (!resultado) throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+    return { fotoSubida: resultado.fotoSubida };
+  }
+
+  /**
+   * @param {Id} id
+   * @returns {Promise<{ datos: Buffer, tipo: string }>}
+   * @throws {AppError} 404 si la persona no existe o si no subió ninguna foto.
+   */
+  async obtenerFoto(id) {
+    const cuenta = await this.personaColaboradoraRepository.obtenerFoto(id);
+    if (!cuenta) throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+    if (!cuenta.fotoArchivo) throw new AppError(ErrorCatalog.FOTO_NO_ENCONTRADA, 404, id);
+    return cuenta.fotoArchivo;
+  }
+
+  /**
+   * Borra la foto subida (si no tenía, no pasa nada).
+   * @param {Id} id
+   * @returns {Promise<void>}
+   * @throws {AppError} 404 si la persona no existe o está dado/a de baja.
+   */
+  async borrarFoto(id) {
+    const resultado = await this.personaColaboradoraRepository.borrarFoto(id);
+    if (!resultado) throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
   }
 
   //Estadisticas

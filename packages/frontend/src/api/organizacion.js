@@ -12,10 +12,13 @@
  * backend; si falla, Axios lanza el error y la pantalla lo muestra con mensajeDeError(error).
  * SI EL BACKEND CAMBIA UN NOMBRE: se arregla solo acá, en el adaptador correspondiente.
  */
-import { api } from "./cliente.js";
+import { api, sinVacios } from "./cliente.js";
+import { urlDeFotoSubida } from "./fotos.js";
 import { aProyectoDeLaVista } from "./proyectos.js";
 import { nombresDeHabilidades, obtenerHabilidades, titulos } from "./habilidades.js";
 import { textoDeCuando } from "./mensajes.js";
+import { NOMBRES_DE_CONTACTO } from "./colaboradora.js";
+import { esError } from "./errores.js";
 
 // ───── VALORES QUE ACEPTA EL BACKEND ─────
 // El backend guarda tipos y ubicaciones en minúsculas y sin tildes; la pantalla los muestra
@@ -75,6 +78,8 @@ function aMiColectivo(c) {
   return {
     id: c._id,
     nombre: c.nombre,
+    // URL del logo que subió, o null.
+    foto: urlDeFotoSubida("colectivos", c._id, c.fotoSubida),
     descripcion: c.descripcion ?? "",
     tipo: c.tipoDeColectivo ?? "",
     ubicacion: c.ubicacion ?? "",
@@ -185,6 +190,7 @@ function aPostulacionDeLaVista(p) {
     persona: {
       id: persona.id ?? persona._id,
       nombre: persona.nombreFantasia ?? "Colaboradora",
+      foto: urlDeFotoSubida("colaboradoras", persona.id ?? persona._id, persona.fotoSubida) ?? persona.foto ?? null,
       habilidades: (persona.habilidades ?? []).map((h) => h.titulo),
       presentacion: persona.presentacion ?? "",
     },
@@ -282,6 +288,9 @@ export function aColaboradoraDeLaVista(p, nombres) {
     bio: p.presentacion ?? "",
     git: p.git ?? "",
     redes: p.redesSociales ?? [],
+    // La foto subida; si no subió, el enlace que haya pegado; si no, null.
+    foto: urlDeFotoSubida("colaboradoras", p._id ?? p.id, p.fotoSubida) ?? p.foto ?? null,
+    sitioWeb: p.sitioWeb ?? null,
     habilidades: habilidades.filter(Boolean),
     // true = acepta mensajes internos de los colectivos.
     mensajes: !p.bloquearMensajeInterno,
@@ -289,17 +298,18 @@ export function aColaboradoraDeLaVista(p, nombres) {
 }
 
 // Una página de colaboradoras ya adaptadas: { resultados, pagina, totalPaginas, total }.
-async function paginaDeColaboradoras(ruta, { pagina, limite }) {
+async function paginaDeColaboradoras(ruta, { pagina, limite, ...filtros }) {
   const [{ data }, nombres] = await Promise.all([
-    api.get(ruta, { params: { pagina, limite } }),
+    api.get(ruta, { params: sinVacios({ pagina, limite, ...filtros }) }),
     nombresDeHabilidades(),
   ]);
   return { ...data, resultados: data.resultados.map((p) => aColaboradoraDeLaVista(p, nombres)) };
 }
 
-// GET /colaboradoras?pagina=&limite=
-export function obtenerColaboradoras({ pagina = 1, limite = 10 } = {}) {
-  return paginaDeColaboradoras("/colaboradoras", { pagina, limite });
+// GET /colaboradoras?pagina=&limite= y filtros opcionales: busqueda (nombre o alias),
+// habilidad (código) y aceptaMensajes (true = solo quienes reciben mensajes).
+export function obtenerColaboradoras({ pagina = 1, limite = 10, ...filtros } = {}) {
+  return paginaDeColaboradoras("/colaboradoras", { pagina, limite, ...filtros });
 }
 
 // GET /proyectos/:idProyecto/perfiles/:idPerfil/colaboradoras-acordes?pagina=&limite=
@@ -321,6 +331,22 @@ export async function obtenerColaboradora(personaId) {
     nombresDeHabilidades(),
   ]);
   return aColaboradoraDeLaVista(data, nombres);
+}
+
+// GET /colaboradoras/:id/contactos?colectivoId= → [{ tipo, valor }] con el tipo ya para
+// mostrar ('Correo', 'WhatsApp'…). Devuelve null si el colectivo no tiene acceso (403): solo
+// los ven los colectivos con los que la persona colabora.
+// PENDIENTE (login): `colectivoId` dice quién pide; con el login sale del token.
+export async function obtenerContactosDeColaboradora(personaId, colectivoId) {
+  try {
+    const { data } = await api.get(`/colaboradoras/${personaId}/contactos`, {
+      params: { colectivoId },
+    });
+    return data.map((c) => ({ tipo: NOMBRES_DE_CONTACTO[c.tipo] ?? c.tipo, valor: c.valor }));
+  } catch (error) {
+    if (esError(error, 403)) return null;
+    throw error;
+  }
 }
 
 // ───── NOTIFICACIONES ─────

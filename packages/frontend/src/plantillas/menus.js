@@ -13,8 +13,16 @@ export const MENUS = {
   org: [
     ["/org", "Panel", true],
     ["/org/proyectos", "Mis proyectos"],
-    ["/org/colaboradoras", "Colaboradoras"],
+    ["/org/colaboradoras", "Colaboradores"],
     ["/org/mensajes", "Mensajes"],
+  ],
+  adm: [
+    ["/admin", "Panel", true],
+    ["/admin/denuncias", "Denuncias"],
+    ["/admin/problemas", "Problemas"],
+    ["/admin/colectivos", "Colectivos"],
+    ["/admin/proyectos", "Proyectos"],
+    ["/admin/colaboradoras", "Personas"],
   ],
 };
 
@@ -22,10 +30,11 @@ export const MENUS = {
 export const ICONOS = {
   col: ["panel", "proyectos", "postulaciones", "mensajes"],
   org: ["panel", "proyectos", "colaboradoras", "mensajes"],
+  adm: ["panel", "megafono", "x", "colectivos", "proyectos", "colaboradoras"],
 };
 
 // Etiquetas más cortas para la barra inferior del móvil (opcional).
-export const ETIQUETA_MOVIL = { "Mis proyectos": "Proyectos", Colaboradoras: "Personas" };
+export const ETIQUETA_MOVIL = { "Mis proyectos": "Proyectos", Colaboradores: "Personas" };
 
 // Enlaces del pie de página.
 export const ENLACES_PIE = [
@@ -33,6 +42,8 @@ export const ENLACES_PIE = [
   { to: "/accesibilidad", label: "Accesibilidad" },
   { to: "/api-estadisticas", label: "API de estadísticas" },
   { to: "/contacto", label: "Contacto" },
+  // conPantallaActual: el enlace lleva ?desde=/pantalla/actual (para saber dónde pasó)
+  { to: "/reportar", label: "Reportar un problema", conPantallaActual: true },
 ];
 
 /** Convierte el menú de un rol en los destinos de la barra inferior (móvil). */

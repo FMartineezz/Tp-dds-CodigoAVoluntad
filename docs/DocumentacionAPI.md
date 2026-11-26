@@ -36,14 +36,19 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 
   Una página posterior a la última devuelve `resultados` vacío (con `200`). Un `pagina` que no sea un entero mayor o igual a 1 responde `400` con `ERR-VAL-002`; un `limite` fuera de rango, `400` con `ERR-VAL-003`. Ejemplo: `GET /proyectos?pagina=2&limite=6`.
 
+- **Filtros:** los filtros son opcionales, se combinan entre sí y con la paginación (el `total` cuenta solo lo que pasa los filtros). Un filtro vacío (`?estado=`) se ignora.
+  - `GET /proyectos`: `busqueda` (texto en título o descripción, sin importar mayúsculas, hasta 100 caracteres), `estado` (`abierto`: busca gente; `en_curso`: no terminó pero cerró la búsqueda o venció la fecha límite; `finalizado`), `modalidad` (`gratuita`, `incentivo_economico` o `contratacion_eventual`: algún perfil la ofrece) y `habilidad` (código de habilidad: algún perfil la pide, requerida u opcional). Ejemplo: `GET /proyectos?estado=abierto&modalidad=gratuita&habilidad=desarrollo_web_react`.
+  - `GET /colaboradoras`: `busqueda` (en nombre, apellido o nombre de fantasía), `habilidad` (código) y `aceptaMensajes` (`true` o `false`).
+  - Errores `400`: `ERR-VAL-004` búsqueda demasiado larga, `ERR-VAL-005` estado inválido, `ERR-VAL-006` modalidad inválida, `ERR-VAL-007` habilidad repetida (`?habilidad=a&habilidad=b`), `ERR-VAL-008` aceptaMensajes que no es `true`/`false`, y `ERR-VAL-207` si no existe una habilidad con ese código.
+
 ### Índice
 
 | Recurso                           | Endpoints                                                                                                                                                                                   |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Health Check](#health-check)     | `GET /healthCheck`                                                                                                                                                                          |
 | [Habilidades](#habilidades)       | `GET /habilidades`, `GET /habilidades/:id`, `POST /habilidades`                                                                                                                             |
-| [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`, `PATCH /colectivos/:id`                                                                                                       |
-| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `POST /colaboradoras`, `PATCH /colaboradoras/:id`                                                                                           |
+| [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`, `PATCH /colectivos/:id`, `GET /admin/colectivos/bajas`, `PUT/GET/DELETE /colectivos/:id/foto`                                                                                                     |
+| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `GET /colaboradoras/:id/contactos`, `POST /colaboradoras`, `PATCH /colaboradoras/:id`, `PUT/GET/DELETE /colaboradoras/:id/foto`                                                     |
 | [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `GET /colectivos/:colectivoId/proyectos`, `POST /proyectos`, `PATCH /proyectos/:id`                                                                 |
 | [Perfiles](#perfiles)             | `GET`, `POST /proyectos/:idProyecto/perfiles`; `GET`, `PATCH`, `DELETE /proyectos/:idProyecto/perfiles/:idPerfil`                                                                           |
 | [Logros](#logros)                 | `GET`, `POST /proyectos/:proyectoId/logros`; `GET`, `PATCH`, `DELETE /proyectos/:proyectoId/logros/:logroId`                                                                                |
@@ -54,6 +59,7 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | [Notificaciones](#notificaciones) | `GET /colaboradoras/:colaboradoraId/notificaciones`, `GET /colectivos/:colectivoId/notificaciones`                                                                                          |
 | [Denuncias](#denuncias)           | `POST /colaboraciones/:id/denuncia`, `GET /admin/denuncias`, `GET /admin/denuncias/:id`, `PATCH /admin/denuncias/:id/estado`                                                                |
 | [Valoraciones](#valoraciones)     | `POST /valoraciones`, `GET /personaColaboradora/:personaColaboradoraId/valoraciones`, `GET /colectivo/:colectivoId/valoraciones`                                                            |
+| [Reportes](#reportes)             | `POST /reportes`, `GET /admin/reportes`, `GET /admin/reportes/:id`, `PATCH /admin/reportes/:id/estado`                                                                                     |
 | [Estadísticas](#estadísticas)     | `GET /estadisticas`                                                                                                                                                                         |
 
 ---
@@ -234,16 +240,66 @@ Actualización parcial de un colectivo. Si `redesSociales` se omite, se conserva
 
 ---
 
+### GET `/admin/colectivos/bajas`
+
+Lista los colectivos dados de baja (`DELETE /colectivos/:id`), del último al primero. Lo usa el equipo administrativo. `updatedAt` indica cuándo fue la baja: después de la baja el colectivo ya no se modifica.
+
+> Igual que el resto de `/admin/*`, todavía no está protegido (falta autenticación).
+
+**Respuesta 200:** un array (vacío si no hay bajas).
+
+```json
+[
+  {
+    "_id": "6acfd66064d02459ba8dc695",
+    "nombre": "Fundación Ejemplo",
+    "descripcion": "Organización sin fines de lucro",
+    "ubicacion": "caba",
+    "tipoDeColectivo": "ong",
+    "proyectos": [],
+    "redesSociales": [],
+    "updatedAt": "2026-11-25T15:10:00.000Z"
+  }
+]
+```
+
+### Foto de perfil: PUT / GET / DELETE `/colectivos/:id/foto` y `/colaboradoras/:id/foto`
+
+Colectivos y colaboradoras pueden subir una foto de perfil, que se guarda en MongoDB. Los cuatro casos funcionan igual para los dos recursos.
+
+- **`PUT …/:id/foto`**: sube o reemplaza la foto. El cuerpo son **los bytes de la imagen**, no JSON, con `Content-Type: image/jpeg`, `image/png` o `image/webp`. Pesa hasta 300 KB (el front la achica a 256×256 antes de mandarla). Responde `200` con `{ "fotoSubida": "2026-11-25T15:10:00.000Z" }`.
+- **`GET …/:id/foto`**: devuelve la imagen con su `Content-Type` y `Cache-Control: public, max-age=86400`.
+- **`DELETE …/:id/foto`**: borra la foto. Responde `204`.
+- **`GET /colectivos/:id`, `GET /colaboradoras/:id` y los listados** traen `fotoSubida` (fecha de la última foto, o `null`), nunca los bytes. El front arma la URL `…/:id/foto?v=<fotoSubida>`: cuando cambia la foto, cambia la URL y no se ve la vieja guardada en caché.
+- La baja de la cuenta (`DELETE /colectivos/:id` o `DELETE /colaboradoras/:id`) también borra la foto.
+
+> Igual que el resto de los `PATCH`, todavía no se controla quién cambia la foto (falta autenticación).
+
+```bash
+curl -X PUT http://localhost:8000/colectivos/6acfd66064d02459ba8dc695/foto \
+  -H "Content-Type: image/jpeg" --data-binary @logo.jpg
+```
+
+**Errores:**
+
+| Status | code                                         | Cuándo                                                        |
+| ------ | -------------------------------------------- | ------------------------------------------------------------- |
+| 400    | `ERR-VAL-1601`                               | El `Content-Type` no es JPG, PNG o WebP, o la foto viene vacía |
+| 413    | `ERR-VAL-1602`                               | La foto pesa más de 300 KB                                    |
+| 404    | `ERR-NOT-1603`                               | `GET`: la cuenta nunca subió una foto                         |
+| 404    | El de colectivo o colaboradora no encontrada | La cuenta no existe o está dada de baja                       |
+
 ## Colaboradoras
 
-| Método | Path                 | Descripción                             |
-| ------ | -------------------- | --------------------------------------- |
-| GET    | `/colaboradoras`     | Lista todas las personas colaboradoras  |
-| GET    | `/colaboradoras/:id` | Obtiene una persona colaboradora por id |
-| POST   | `/colaboradoras`     | Registra una persona colaboradora       |
-| PATCH  | `/colaboradoras/:id` | Actualiza parcialmente una colaboradora |
+| Método | Path                           | Descripción                              |
+| ------ | ------------------------------ | ---------------------------------------- |
+| GET    | `/colaboradoras`               | Lista todas las personas colaboradoras   |
+| GET    | `/colaboradoras/:id`           | Obtiene una persona colaboradora por id  |
+| GET    | `/colaboradoras/:id/contactos` | Sus contactos privados (solo con acceso) |
+| POST   | `/colaboradoras`               | Registra una persona colaboradora        |
+| PATCH  | `/colaboradoras/:id`           | Actualiza parcialmente una colaboradora  |
 
-Los medios de contacto (`contactos`) quedan registrados internamente y **nunca** aparecen en los `GET`.
+Los medios de contacto (`contactos`) quedan registrados internamente y **nunca** aparecen en los `GET` del perfil. Solo se consultan con [`GET /colaboradoras/:id/contactos`](#get-colaboradorasidcontactos).
 
 ### GET `/colaboradoras`
 
@@ -262,6 +318,8 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
       "pronombres": "ella",
       "presentacion": "Desarrolladora front interesada en proyectos comunitarios.",
       "bloquearMensajeInterno": false,
+      "foto": "https://imagenes.test/ana.jpg",
+      "sitioWeb": "https://ana.dev",
       "createdAt": "2026-10-14T19:22:10.011Z",
       "updatedAt": "2026-10-14T19:22:10.011Z",
       "__v": 0
@@ -287,6 +345,33 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-VAL-002` / `ERR-VAL-003` | Parámetros de paginación inválidos            |
 | 404    | `ERR-NOT-405`                 | No existe una persona colaboradora con ese id |
 
+### GET `/colaboradoras/:id/contactos`
+
+Devuelve los medios de contacto privados de la persona. Según el enunciado, solo pueden verlos:
+
+- **la dueña del perfil:** `?colaboradoraId=<su id>` (igual al `:id`);
+- **un colectivo con el que colabora:** `?colectivoId=<id>`, si la persona tiene una colaboración **activa** en algún proyecto de ese colectivo.
+
+Para cualquier otra persona el pedido falla con 403.
+
+> **PENDIENTE (login):** quién pide viaja por query porque todavía no hay sesión. Cuando se integre el login, sale del token y estos parámetros se sacan.
+
+**Respuesta 200:** lista de contactos (vacía si no cargó ninguno).
+
+```json
+[
+  { "tipo": "email", "valor": "ana@mail.com" },
+  { "tipo": "whatsapp", "valor": "1127891234" }
+]
+```
+
+**Errores:**
+
+| Status | code          | Cuándo                                                        |
+| ------ | ------------- | ------------------------------------------------------------- |
+| 403    | `ERR-PER-411` | Quien pide no es la dueña ni un colectivo con el que colabora |
+| 404    | `ERR-NOT-405` | No existe una persona colaboradora con ese id                 |
+
 ### POST `/colaboradoras`
 
 **Body:**
@@ -303,6 +388,8 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | `contactos`              | object[] | no        | cero o más medios de contacto: `{ "tipo": "email", "valor": "ana@mail.com" }`               |
 | `bloquearMensajeInterno` | boolean  | no        | `true` si no quiere recibir mensajes internos de los colectivos. Default `false`            |
 | `redesSociales`          | object[] | no        | enlaces a redes sociales: `{ "tipo": "github", "url": "https://..." }` (enum TipoRedSocial) |
+| `foto`                   | string   | no        | URL (http/https) de la foto de perfil. El backend guarda el enlace, no sube archivos        |
+| `sitioWeb`               | string   | no        | URL (http/https) de su sitio personal o portfolio                                           |
 
 **Medios de contacto:** `tipo` es uno de `email`, `whatsapp` o `sms` (en mayúsculas o minúsculas). Para `email`, `valor` debe ser un email válido; para `whatsapp` y `sms`, 10 dígitos juntos sin espacios ni símbolos (ej. `1127891234`).
 
@@ -326,11 +413,13 @@ Los medios de contacto (`contactos`) quedan registrados internamente y **nunca**
 | 400    | `ERR-VAL-706` | El email no tiene formato válido                 |
 | 400    | `ERR-VAL-707` | El teléfono no tiene 10 dígitos                  |
 | 400    | `ERR-VAL-207` | Alguno de los códigos en `habilidades` no existe |
+| 400    | `ERR-VAL-409` | `foto` no es una URL http/https                  |
+| 400    | `ERR-VAL-410` | `sitioWeb` no es una URL http/https              |
 | 400    | `ERR-VAL-001` | Algún campo de texto no es de tipo string        |
 
 ### PATCH `/colaboradoras/:id`
 
-Actualización parcial de una colaboradora. Si `redesSociales` se omite, se conservan las existentes. Si se envía un array, se reemplaza la lista completa (un array vacío `[]` las elimina todas).
+Actualización parcial de una colaboradora. Si `redesSociales` se omite, se conservan las existentes. Si se envía un array, se reemplaza la lista completa (un array vacío `[]` las elimina todas). Lo mismo con `contactos`. Para borrar `foto` o `sitioWeb`, mandarlos en `null`.
 
 **Body:** campos a modificar (al menos uno requerido).
 
@@ -345,6 +434,8 @@ Actualización parcial de una colaboradora. Si `redesSociales` se omite, se cons
 | 400    | `ERR-VAL-1104` | `url` de red social vacía                            |
 | 400    | `ERR-VAL-1105` | `url` inválida o no utiliza protocolo HTTP/HTTPS     |
 | 400    | `ERR-VAL-1106` | Tipos de redes sociales duplicados dentro del perfil |
+| 400    | `ERR-VAL-409`  | `foto` no es una URL http/https                      |
+| 400    | `ERR-VAL-410`  | `sitioWeb` no es una URL http/https                  |
 | 404    | `ERR-NOT-405`  | No existe una persona colaboradora con ese id        |
 
 ---
@@ -1279,8 +1370,9 @@ Consulta global de denuncias embebidas en los distintos colectivos, optimizada m
 **Query params opcionales:**
 
 - `estado`: filtra por estado (`pendiente`, `en_revision`, `resuelta`, `descartada`).
+- `colectivoId`: solo las denuncias a ese colectivo (un id con formato inválido devuelve `[]`).
 
-**Respuesta 200:** array de denuncias con información de su colectivo.
+**Respuesta 200:** array de denuncias con información de su colectivo, de la más nueva a la más vieja.
 
 ```json
 [
@@ -1298,7 +1390,7 @@ Consulta global de denuncias embebidas en los distintos colectivos, optimizada m
 
 ### GET `/admin/denuncias/:id`
 
-Obtiene el detalle administrativo de una denuncia, permitiendo al equipo de la plataforma recomponer la colaboración asociada y los datos de contacto de la persona si fuera necesario contactarla.
+Obtiene el detalle administrativo de una denuncia, permitiendo al equipo de la plataforma recomponer la colaboración asociada y los datos de contacto de la persona si fuera necesario contactarla. `colectivoActivo` es `false` si el colectivo denunciado ya fue dado de baja.
 
 **Respuesta 200:**
 
@@ -1311,6 +1403,7 @@ Obtiene el detalle administrativo de una denuncia, permitiendo al equipo de la p
   "colaboracionId": "6acfd66a64d02459ba8dc6a7",
   "colectivoId": "6acfd66064d02459ba8dc695",
   "colectivoNombre": "Fundación Ejemplo",
+  "colectivoActivo": true,
   "colaboracion": {
     "_id": "6acfd66a64d02459ba8dc6a7",
     "personaColaboradora": {
@@ -1469,6 +1562,67 @@ Obtiene el historial público de valoraciones recibidas por el colectivo (califi
 | 404    | `ERR-NOT-305` | No existe un colectivo con ese id |
 
 ---
+
+## Reportes
+
+Cualquier persona, con o sin cuenta, puede reportar un problema de la plataforma desde el formulario «Reportar un problema» del pie del sitio. Los reportes quedan guardados con estado `nuevo` para que los revise el equipo administrativo.
+
+### POST `/reportes`
+
+Público, con límite de **5 pedidos cada 20 minutos por IP** (aparte del límite de `/estadisticas`). Si se pasa, responde `429` con `ERR-LIM-001`.
+
+**Body:**
+
+| Campo         | Tipo   | Obligatorio | Descripción                                                |
+| ------------- | ------ | ----------- | ---------------------------------------------------------- |
+| `tipo`        | string | Sí          | `error`, `sugerencia` u `otro`                             |
+| `descripcion` | string | Sí          | Qué pasó (hasta 2000 caracteres)                           |
+| `pantalla`    | string | No          | Dirección de la pantalla donde pasó (ej. `/org/proyectos`) |
+| `correo`      | string | No          | Para avisarle a la persona cuando se resuelva              |
+
+Los campos opcionales vacíos cuentan como que no vinieron. Cualquier otro campo (por ejemplo `estado`) se ignora.
+
+**Respuesta 201:**
+
+```json
+{
+  "id": "6b0…",
+  "tipo": "error",
+  "descripcion": "El botón Guardar no hace nada",
+  "pantalla": "/org/proyectos/nuevo",
+  "correo": null,
+  "estado": "nuevo",
+  "fecha": "2026-11-26T15:00:00.000Z"
+}
+```
+
+**Errores 400:** `ERR-VAL-1501` tipo inválido, `ERR-VAL-1502` falta la descripción, `ERR-VAL-1503` descripción demasiado larga, `ERR-VAL-1504` correo inválido, `ERR-VAL-001` pantalla que no es texto.
+
+La respuesta trae el header `Location: /admin/reportes/:id`.
+
+> Las rutas `/admin/reportes` son del equipo administrativo y, como `/admin/denuncias`, todavía no están protegidas (falta la autenticación).
+
+### GET `/admin/reportes`
+
+Todos los reportes, del más nuevo al más viejo.
+
+**Query params opcionales:** `estado` (`nuevo`, `en_revision` o `resuelto`). Vacío cuenta como que no vino.
+
+**Respuesta 200:** array de reportes (cada uno con `_id`, `tipo`, `descripcion`, `pantalla`, `correo`, `estado` y `fecha`).
+
+**Error 400:** `ERR-VAL-1505` estado inválido.
+
+### GET `/admin/reportes/:id`
+
+**Respuesta 200:** el reporte. **Error 404:** `ERR-NOT-1506` no existe (también si el id tiene formato inválido).
+
+### PATCH `/admin/reportes/:id/estado`
+
+Pasa el reporte a otro estado. Se puede volver a `nuevo` (por ejemplo, para reabrir uno resuelto).
+
+**Body:** `{ "estado": "resuelto" }` (`nuevo`, `en_revision` o `resuelto`).
+
+**Respuesta 200:** el reporte actualizado. **Errores:** `400` `ERR-VAL-1505` estado inválido, `404` `ERR-NOT-1506` no existe.
 
 ## Estadísticas
 

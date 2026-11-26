@@ -5,9 +5,7 @@
 .small { font-size: var(--text-small); line-height: 1.55; }
 .muted { font-size: var(--text-small); color: var(--color-text-muted); }
 .prose {
-  font-family: var(--font-display);
-  font-stretch: 100%;
-  font-weight: 450;
-  font-size: 1.1875rem;
+  font-family: var(--font-lectura);
+  font-size: 1.0625rem;
   line-height: 1.7;
 }

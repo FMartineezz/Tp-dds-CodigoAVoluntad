@@ -30,12 +30,13 @@ export class ProyectoController {
   };
 
   /**
-   * GET /proyectos?pagina&limite → 200 con una RespuestaPaginada de proyectos.
-   * @param {import("../types.js").RequestPaginado} req
+   * GET /proyectos?pagina&limite&busqueda&estado&modalidad&habilidad → 200 con una
+   * RespuestaPaginada de los proyectos que cumplen los filtros (validados en req.filtros).
+   * @param {import("../types.js").RequestPaginado & { filtros: object }} req
    * @param {import("express").Response} res
    */
   obtenerProyectos = async (req, res) => {
-    const pagina = await this.proyectoService.obtenerProyectos(req.paginacion);
+    const pagina = await this.proyectoService.obtenerProyectos(req.paginacion, req.filtros);
 
     res.status(200).json(respuestaPaginada(pagina, req.paginacion));
   };

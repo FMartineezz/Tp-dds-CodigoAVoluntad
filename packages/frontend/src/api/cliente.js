@@ -6,8 +6,8 @@
  * SI LO CAMBIÁS: todo lo que deba viajar en TODOS los pedidos (por ejemplo, el token de
  * Keycloak) se agrega acá una sola vez, con un interceptor, y lo heredan todas las pantallas.
  */
-import axios from 'axios';
-import keycloak from './keycloack.js';
+import axios from "axios";
+import keycloak from "./keycloack.js";
 
 export const api = axios.create({
   // Se pega adelante de cada ruta: api.get('/colectivos') → http://localhost:8000/colectivos
@@ -25,5 +25,15 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
+// Saca de los parámetros los que no se completaron ('' , null, undefined o false), así un
+// filtro vacío no viaja como ?estado= y la URL queda limpia.
+// Ej: sinVacios({ pagina: 1, estado: '', busqueda: 'huerta' }) → { pagina: 1, busqueda: 'huerta' }
+export function sinVacios(parametros) {
+  return Object.fromEntries(
+    Object.entries(parametros).filter(
+      ([, valor]) => valor !== "" && valor != null && valor !== false,
+    ),
+  );
+}

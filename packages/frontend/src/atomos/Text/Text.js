@@ -1,7 +1,7 @@
 /**
  * Párrafo de texto con variantes de lectura.
  *
- * USO: variant: body (mono, interfaz) | lead (bajada) | prose (lectura larga, grotesca) | small | muted.
+ * USO: variant: body (mono, interfaz) | lead (bajada) | prose (lectura larga, IBM Plex Sans) | small | muted.
  *      as="span" para cambiar la etiqueta sin cambiar el aspecto.
  * SI LO CAMBIÁS O SACÁS: Los <p> sueltos pierden el ancho máximo (62ch) y los tamaños.
  *

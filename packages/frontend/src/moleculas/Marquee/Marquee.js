@@ -10,7 +10,7 @@ export default function Marquee({ items, label = 'Habilidades que buscamos' }) {
   const lista = items.map((t, i) => (
     <span key={t} className={s.item}>
       {t}
-      <i aria-hidden="true" className={i % 3 === 2 ? s.red : undefined}>✺</i>
+      <i aria-hidden="true" className={i % 3 === 2 ? s.accent : undefined}>✺</i>
     </span>
   ));
   return (

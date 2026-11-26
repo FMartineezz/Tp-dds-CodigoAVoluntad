@@ -27,15 +27,16 @@
  *
  * Una idea clave del archivo: React exige NO modificar listas ni objetos que ya están
  * en el estado. Para cambiar algo se arma una copia con el cambio y se la entrega al
- * `set…` correspondiente (ver docs/GLOSARIO.md → Copiar con cambios).
+ * `set…` correspondiente (ver packages/frontend/docs/GLOSARIO.md → Copiar con cambios).
  */
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Field, Heading, Icon, Progress, Text } from '../../atomos';
 import { Alert, Crumbs, RowsSkeleton, TagPicker } from '../../moleculas';
 import { useAuth } from '../../contexto';
 import { usePedido } from '../../hooks';
 import { mensajeDeError } from '../../api/errores.js';
+import { llevarAlPrimerError } from '../../utilidades/llevarAlPrimerError.js';
 import { obtenerHabilidades } from '../../api/habilidades.js';
 import { MODALIDADES } from '../../api/proyectos.js';
 import {
@@ -124,10 +125,11 @@ const cambio = (a, b) => JSON.stringify(a) !== JSON.stringify(b);
 // Dibuja y edita la lista de perfiles buscados.
 // Props: `value` = lista actual de perfiles, `onChange(nuevaLista)` = avisa que cambió,
 // `errores` = texto de error (o undefined), `habilidades` = títulos que se pueden elegir.
+// Si hay `errores`, además se marca en rojo cada campo que falta completar.
 function PerfilesEditor({ value, onChange, errores, habilidades }) {
   // Cambia UNO O VARIOS campos de UN perfil sin tocar los demás.
   function cambiarPerfil(indice, cambios) {
-    // (.map y `...` → docs/GLOSARIO.md → Métodos de arrays / Copiar con cambios)
+    // (.map y `...` → packages/frontend/docs/GLOSARIO.md → Métodos de arrays / Copiar con cambios)
     onChange(value.map((perfil, posicion) => (posicion === indice ? { ...perfil, ...cambios } : perfil)));
   }
 
@@ -143,18 +145,7 @@ function PerfilesEditor({ value, onChange, errores, habilidades }) {
 
   return (
     <section className={s.perfiles} aria-labelledby="h-perfiles">
-      {/* BLOQUE: Encabezado — título y botón para agregar un perfil */}
-      <div className={`${sh.row} ${sh.sb}`}>
-        <Heading level={2} size="h3" id="h-perfiles">Perfiles buscados</Heading>
-        <Button
-          type="button"
-          variant="secondary"
-          iconRight={<Icon name="mas" size={14} />}
-          onClick={agregarPerfilVacio}
-        >
-          Agregar perfil
-        </Button>
-      </div>
+      <Heading level={2} size="h3" id="h-perfiles">Perfiles buscados</Heading>
 
       {value.length === 0 && (
         <Text variant="small">
@@ -166,16 +157,18 @@ function PerfilesEditor({ value, onChange, errores, habilidades }) {
 
       {/* BLOQUE: Un recuadro por perfil — todos sus campos editables */}
       {value.map((perfil, indice) => (
-        <fieldset key={perfil.id ?? `nuevo-${indice}`} className={s.perfil}>
+        <fieldset key={perfil.id ?? `nuevo-${indice}`} className={s.perfilBuscado}>
           <legend>Perfil {indice + 1}</legend>
+          {/* Filas: descripción | requeridas · compromiso | opcionales · modalidad | cupo */}
           <div className={sh.form}>
             <Field
               as="textarea"
-              className={sh.r2}
+              className={s.descripcionDelPerfil}
               label="Descripción del perfil"
-              placeholder="Ej: Desarrollo frontend. Qué tendría que hacer esta persona…"
+              placeholder="Ej: Desarrollo frontend. Vas a armar las pantallas de inscripción en React junto a otra persona del equipo."
               value={perfil.descripcion}
               onChange={(e) => cambiarPerfil(indice, { descripcion: e.target.value })}
+              error={errores && !perfil.descripcion.trim() ? 'Contá qué va a hacer esta persona.' : undefined}
             />
             {/* Una habilidad no puede ser a la vez requerida y opcional: cada selector
                 ofrece solo las que NO están elegidas en el otro. */}
@@ -184,12 +177,7 @@ function PerfilesEditor({ value, onChange, errores, habilidades }) {
               value={perfil.requeridas}
               options={habilidades.filter((h) => !perfil.opcionales.includes(h))}
               onChange={(elegidas) => cambiarPerfil(indice, { requeridas: elegidas })}
-            />
-            <TagPicker
-              label="Habilidades opcionales"
-              value={perfil.opcionales}
-              options={habilidades.filter((h) => !perfil.requeridas.includes(h))}
-              onChange={(elegidas) => cambiarPerfil(indice, { opcionales: elegidas })}
+              error={errores && !perfil.requeridas.length ? 'Elegí al menos una habilidad.' : undefined}
             />
             <div className={s.compromiso}>
               <Field
@@ -209,17 +197,14 @@ function PerfilesEditor({ value, onChange, errores, habilidades }) {
                 placeholder="Ej: 5"
                 value={perfil.horas}
                 onChange={(e) => cambiarPerfil(indice, { horas: e.target.value })}
+                error={errores && !(Number(perfil.horas) > 0) ? 'Poné cuántas horas.' : undefined}
               />
             </div>
-            <Field
-              label="Cupo de colaboraciones"
-              optional
-              type="number"
-              min="1"
-              placeholder="Sin límite"
-              hint="Al llegar al cupo no se pueden aceptar más postulaciones."
-              value={perfil.cupo}
-              onChange={(e) => cambiarPerfil(indice, { cupo: e.target.value })}
+            <TagPicker
+              label="Habilidades opcionales"
+              value={perfil.opcionales}
+              options={habilidades.filter((h) => !perfil.requeridas.includes(h))}
+              onChange={(elegidas) => cambiarPerfil(indice, { opcionales: elegidas })}
             />
             {/* El backend guarda UNA modalidad por perfil. */}
             <Field
@@ -233,14 +218,43 @@ function PerfilesEditor({ value, onChange, errores, habilidades }) {
                 <option key={valor} value={valor}>{texto}</option>
               ))}
             </Field>
+            <Field
+              label="Cupo de colaboraciones"
+              optional
+              type="number"
+              min="1"
+              placeholder="Sin límite"
+              hint="Al llegar al cupo no se pueden aceptar más postulaciones."
+              value={perfil.cupo}
+              onChange={(e) => cambiarPerfil(indice, { cupo: e.target.value })}
+            />
           </div>
           <div>
-            <Button type="button" variant="danger" onClick={() => quitarPerfil(indice)}>
+            {/* Un proyecto necesita al menos un perfil: con uno solo no se puede quitar */}
+            <Button
+              type="button"
+              variant="danger"
+              disabled={value.length === 1}
+              title={value.length === 1 ? 'El proyecto necesita al menos un perfil' : undefined}
+              onClick={() => quitarPerfil(indice)}
+            >
               Quitar perfil
             </Button>
           </div>
         </fieldset>
       ))}
+
+      {/* Agregar va debajo del último perfil, centrado */}
+      <div className={s.agregarPerfil}>
+        <Button
+          type="button"
+          variant="secondary"
+          iconRight={<Icon name="mas" size={14} />}
+          onClick={agregarPerfilVacio}
+        >
+          Agregar perfil
+        </Button>
+      </div>
     </section>
   );
 }
@@ -372,6 +386,8 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
 
   // true mientras se espera al backend (el botón muestra que está cargando).
   const [guardando, setGuardando] = useState(false);
+  // El <form>, para poder llevar a la persona hasta el primer error.
+  const formulario = useRef(null);
 
   // Un proyecto finalizado ya no acepta cambios en sus logros (ERR-EST-109).
   const finalizado = Boolean(proyecto?.finalizado);
@@ -380,7 +396,7 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
 
   // Avance del proyecto: suma de los porcentajes de los logros. No puede pasar de 100
   // (ERR-EST-113). `Number(...) || 0` toma 0 si el campo está vacío.
-  // (.reduce → docs/GLOSARIO.md → Métodos de arrays)
+  // (.reduce → packages/frontend/docs/GLOSARIO.md → Métodos de arrays)
   const avance = logros.reduce((suma, logro) => suma + (Number(logro.porcentaje) || 0), 0);
 
   // ───── 3. ACCIONES ─────
@@ -415,13 +431,13 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
   // Revisa el formulario y devuelve los errores encontrados (objeto vacío = todo bien).
   function validar() {
     const erroresNuevos = {};
-    if (!datos.nombre.trim()) erroresNuevos.nombre = 'Ingresá el nombre del proyecto. (ERR-VAL-101)';
-    if (!datos.desc.trim()) erroresNuevos.desc = 'Ingresá una descripción. (ERR-VAL-102)';
+    if (!datos.nombre.trim()) erroresNuevos.nombre = 'Ingresá el nombre del proyecto.';
+    if (!datos.desc.trim()) erroresNuevos.desc = 'Ingresá una descripción.';
     if (!/^https?:\/\/\S+/.test(datos.urlSistema.trim())) {
-      erroresNuevos.urlSistema = 'Ingresá el enlace al sistema, empezando con https://. (ERR-VAL-115)';
+      erroresNuevos.urlSistema = 'Ingresá el enlace al sistema, empezando con https://.';
     }
     if (datos.urlDonaciones.trim() && !/^https?:\/\/\S+/.test(datos.urlDonaciones.trim())) {
-      erroresNuevos.urlDonaciones = 'El enlace debe empezar con https://. (ERR-VAL-116)';
+      erroresNuevos.urlDonaciones = 'El enlace debe empezar con https://.';
     }
     if (!perfiles.length || perfiles.some(perfilIncompleto)) {
       erroresNuevos.perfiles =
@@ -431,7 +447,7 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
       erroresNuevos.logros =
         'Cada logro necesita descripción, un porcentaje entre 1 y 100 y el enlace al código fuente.';
     } else if (avance > 100) {
-      erroresNuevos.logros = 'Los logros suman más de 100 %. (ERR-EST-113)';
+      erroresNuevos.logros = 'Los logros suman más de 100 %.';
     }
     return erroresNuevos;
   }
@@ -508,7 +524,10 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
     setErrores(erroresNuevos);
     setAviso(false);
     setErrorGuardado('');
-    if (Object.keys(erroresNuevos).length) return;
+    if (Object.keys(erroresNuevos).length) {
+      llevarAlPrimerError(formulario.current);
+      return;
+    }
 
     setGuardando(true);
     try {
@@ -526,6 +545,7 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
           : mensajeDeError(error)
       );
       setGuardando(false);
+      // (No hace falta scrollear: el aviso de error sube solo hasta donde se vea, ver Alert)
     }
   }
 
@@ -534,7 +554,7 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
 
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
-    <form className={`container ${sh.page}`} onSubmit={alGuardar} noValidate>
+    <form ref={formulario} className={`container ${sh.page}`} onSubmit={alGuardar} noValidate>
       {/* BLOQUE: Migas de pan y título — cambian según sea alta o edición */}
       <Crumbs
         items={[
@@ -566,9 +586,9 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
         />
         <Field
           as="textarea"
-          className={sh.r2}
+          className={s.descripcionDelProyecto}
           label="Descripción"
-          placeholder="Contá qué problema resuelve y qué necesitan construir…"
+          placeholder="Ej: Hoy anotamos los turnos del comedor en papel y se pierden. Queremos una web simple para que las familias reserven y sepamos cuántas viandas preparar."
           value={datos.desc}
           onChange={alCambiarCampo('desc')}
           error={errores.desc}
@@ -619,7 +639,6 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
             label="Cierre automático del proyecto"
             optional
             type="date"
-            hint="Ese día el proyecto se finaliza solo."
             value={datos.cierre}
             onChange={alCambiarCampo('cierre')}
           />
@@ -681,7 +700,7 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
                         onChange={(e) => cambiarLogro(indice, 'url', e.target.value)}
                       />
                     </td>
-                    <td className={sh.act}>
+                    <td className={sh.actions}>
                       <Button
                         type="button"
                         variant="danger"
@@ -710,10 +729,10 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
           )}
 
           {/* BLOQUE: Resumen — avance calculado y barra de progreso */}
-          <div className={s.sum}>
-            <div className={`${sh.row} ${sh.sb}`}>
-              {/* El número se pinta en rojo (s.mal) si pasa de 100. */}
-              <span className={avance > 100 ? s.mal : undefined}>
+          <div className={s.resumen}>
+            <div className={`${sh.row} ${sh.spaceBetween}`}>
+              {/* El número se pinta en rojo (s.error) si pasa de 100. */}
+              <span className={avance > 100 ? s.error : undefined}>
                 Avance: <b>{avance} %</b>
               </span>
             </div>
@@ -723,7 +742,7 @@ function Formulario({ edit, habilidades, proyecto, colectivo, aviso, setAviso, a
       )}
 
       {/* BLOQUE: Botones — guardar (con indicador de carga) o cancelar */}
-      <div className={sh.formActs}>
+      <div className={sh.formActions}>
         <Button type="submit" loading={guardando}>Guardar</Button>
         <Button as={Link} to="/org/proyectos" variant="secondary">Cancelar</Button>
       </div>
