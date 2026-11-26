@@ -1,41 +1,25 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/react-in-jsx-scope */
 /**
-<<<<<<< HEAD
- * Sesión simulada (rol: null | 'col' | 'org') y modo daltónico.
+- Sesión con Keycloak (rol: null | 'col' | 'org' | 'adm') y modo daltónico.
  *
- * USO: useAuth() → { rol, entrar(rol), salir(), dalt, toggleDalt }.  <Privada rol="org"> protege una ruta.
- * SI LO CAMBIÁS O SACÁS: Cuando exista login real: reemplazá entrar/salir por la llamada a la API y guardá el token (Axios).
-=======
- * Sesión simulada (rol: null | 'col' | 'org' | 'adm' + id de la cuenta) y modo daltónico.
- *
- * USO: useAuth() → { rol, id, entrar(rol, id?), salir(), dalt, toggleDalt }.
- *      <Privada rol="org"> protege una ruta.
- *   · id → el _id real en el backend del colectivo (rol 'org') o de la colaboradora (rol 'col')
- *          que tiene la sesión. Las pantallas lo usan para pedir «lo mío» (mis proyectos,
- *          mis postulaciones…).
- *   · entrar(rol) sin id usa la cuenta de demo del .env.local (VITE_DEMO_COLECTIVO_ID o
- *     VITE_DEMO_COLABORADORA_ID). Esos ids existen porque el seed del backend les da ids fijos.
- *   · 'adm' (equipo administrativo) no tiene id: el admin no es una cuenta del backend.
- * SI LO CAMBIÁS O SACÁS: Cuando exista login real (Keycloak): reemplazá entrar/salir por el
- * login real, el id sale del token, y el token se agrega a los pedidos en api/cliente.js.
->>>>>>> fix/pantallas-front
+- USO: useAuth() → { rol, id, entrar(), salir(), dalt, toggleDalt }.  <Privada rol="org"> protege una ruta.
  */
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import keycloak from "../api/keycloack.js"; // Asegurate de que esta ruta apunte a tu archivo keycloak.js
+import keycloak from "../api/keycloack.js";
 
 const Ctx = createContext(null);
 
-// Normaliza el rol que devuelve tu backend al formato que esperan tus rutas ('col' | 'org')
+// Normaliza el rol al formato que esperan tus rutas ('col' | 'org' | 'adm')
 export const normalizarRol = (rolBackend) => {
   if (!rolBackend) return null;
   const r = rolBackend.toLowerCase();
-  if (r === "col" || r === "org") return r;
+  if (r === "col" || r === "org" || r === "adm") return r;
+  if (r === "admin") return "adm";
   return null;
 };
 
-<<<<<<< HEAD
 export function AuthProvider({ children }) {
   const [isReady, setIsReady] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -45,33 +29,6 @@ export function AuthProvider({ children }) {
   const isRun = useRef(false);
 
   // Conservamos intacto el modo daltónico de tu aplicación
-=======
-/** Sesión simulada: rol = null | 'col' | 'org' | 'adm'. Se reemplaza cuando se integre Keycloak. */
-export function AuthProvider({ children }) {
-  const [rol, setRol] = useState(() => {
-    try { return sessionStorage.getItem('cav-rol') || null; } catch { return null; }
-  });
-  const [id, setId] = useState(() => {
-    try { return sessionStorage.getItem('cav-id') || null; } catch { return null; }
-  });
-  // Abre (o cierra, con r = null) la sesión y la recuerda mientras la pestaña siga abierta.
-  const set = (r, idCuenta) => {
-    const nuevoId = r ? idCuenta || CUENTAS_DEMO[r] || null : null;
-    setRol(r);
-    setId(nuevoId);
-    try {
-      if (r) {
-        sessionStorage.setItem('cav-rol', r);
-        // Sin id (el admin) se borra el de la sesión anterior: si no, al recargar volvía
-        if (nuevoId) sessionStorage.setItem('cav-id', nuevoId);
-        else sessionStorage.removeItem('cav-id');
-      } else {
-        sessionStorage.removeItem('cav-rol');
-        sessionStorage.removeItem('cav-id');
-      }
-    } catch { /* sin storage */ }
-  };
->>>>>>> fix/pantallas-front
   const [dalt, setDalt] = useState(() => {
     try {
       return localStorage.getItem("cav-daltonico") === "1";
@@ -96,6 +53,15 @@ export function AuthProvider({ children }) {
       setUsuario(null);
       setRol(null);
       return null;
+    }
+
+    // Si el token de Keycloak trae rol admin, entra directo sin tocar el backend
+    const rolesToken = keycloak.tokenParsed?.realm_access?.roles || [];
+    if (rolesToken.some((r) => ["admin", "adm"].includes(r.toLowerCase()))) {
+      setPerfilCompletado(true);
+      setRol("adm");
+      setUsuario(null);
+      return { perfilCompletado: true, rol: "adm", datos: null };
     }
 
     try {
@@ -180,7 +146,7 @@ export function AuthProvider({ children }) {
         perfilCompletado,
         usuario,
         recargarPerfil: cargarEstadoPerfil,
-        id: usuario?._id,
+        id: usuario?._id ?? null,
       }}
     >
       {children}
