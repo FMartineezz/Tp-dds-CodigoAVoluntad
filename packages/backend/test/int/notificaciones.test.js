@@ -1,5 +1,6 @@
 import request from "supertest";
 import { app } from "./utils/app.js";
+import { conToken } from "../utils/tokenDeTest.js";
 import { usarBaseDeDatos } from "../utils/db.js";
 import {
   crearColectivo,
@@ -19,7 +20,7 @@ const esperarListeners = () => pausa(200);
 
 const crearColaboradoraHttp = (habilidades) =>
   request(app)
-    .post("/colaboradoras")
+    .post("/colaboradoras").set(conToken())
     .send({
       nombreFantasia: `Colaboradora ${Math.random().toString(36).slice(2, 8)}`,
       nombre: "Ana",

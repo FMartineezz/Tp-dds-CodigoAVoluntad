@@ -47,6 +47,10 @@
     "setupFiles": [
       "<rootDir>/test/setup/env.js"
     ],
+    "moduleNameMapper": {
+      "^jwks-rsa$": "<rootDir>/test/setup/jwksRsaFalso.js",
+      "captchaValidation\\.js$": "<rootDir>/test/setup/captchaFalso.js"
+    },
     "testTimeout": 30000,
     "collectCoverageFrom": [
       "src/services/**/*.js",

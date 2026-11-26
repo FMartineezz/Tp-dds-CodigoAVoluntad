@@ -35,6 +35,7 @@ const crearPersona = ({
     "Programadora",
     contactos,
     bloquearMensajeInterno,
+    undefined, // keycloackId: en los tests no hay usuario de Keycloak
     redesSociales,
   );
 

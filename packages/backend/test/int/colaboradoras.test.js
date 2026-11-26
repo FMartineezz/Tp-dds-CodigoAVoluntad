@@ -1,6 +1,7 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import { app } from "./utils/app.js";
+import { conToken } from "../utils/tokenDeTest.js";
 import { usarBaseDeDatos } from "../utils/db.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
 
@@ -21,7 +22,7 @@ const colaboradoraValida = (cambios = {}) => ({
 });
 
 const crearColaboradora = (body = colaboradoraValida()) =>
-  request(app).post("/colaboradoras").send(body);
+  request(app).post("/colaboradoras").set(conToken()).send(body);
 
 describe("Colaboradoras (HTTP)", () => {
   beforeEach(async () => {

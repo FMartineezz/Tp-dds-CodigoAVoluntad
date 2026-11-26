@@ -15,7 +15,7 @@ const crearColectivo = (nombre = "Asamblea Norte", redesSociales = []) =>
     "Asamblea barrial",
     "caba",
     "asamblea",
-    [],
+    undefined, // keycloackId: en los tests no hay usuario de Keycloak
     redesSociales,
   );
 
