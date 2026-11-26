@@ -91,9 +91,9 @@ export default function RegistroOrganizacion() {
     if (!valores.terminos) {
       erroresDelFormulario.terminos = "Tenés que aceptar los términos.";
     }
-    /*     if (!valores.captcha) {
+    if (!valores.captcha) {
       erroresDelFormulario.captcha = "Confirmá que no sos un robot.";
-    } */
+    }
     return erroresDelFormulario;
   }
 
@@ -131,7 +131,7 @@ export default function RegistroOrganizacion() {
         descripcion: valores.desc.trim(),
         tipoDeColectivo: valores.tipo,
         ubicacion: valores.ubicacion,
-        captchaToken: valores.captcha,
+        captcha: valores.captcha,
       });
       // Salió bien: sesión abierta con el colectivo nuevo y a su panel.
       entrar("org", creado.id);
