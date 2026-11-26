@@ -15,7 +15,7 @@
 import { api } from "./cliente.js";
 
 // Quién escribe cada mensaje, como lo nombra el backend (campo `emisor`).
-const EMISOR = { colectivo: "colectivo", colaboradora: "persona" };
+const EMISOR = { org: "colectivo", col: "persona" };
 
 // Relaciones para el filtro de la pantalla: la primera es «sin filtro».
 // «Se postuló / Me postulé» = la persona tiene una postulación a ese proyecto;
