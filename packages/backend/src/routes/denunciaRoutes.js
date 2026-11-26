@@ -24,7 +24,9 @@ export default function denunciaRoutes() {
     denunciaController.crearDenuncia,
   );
 
-  // Rutas administrativas (gestión y consulta de denuncias)
+  // Rutas administrativas (gestión y consulta de denuncias).
+  // DEUDA TÉCNICA: no están protegidas. Cualquiera puede llamarlas sin token (ver
+  // docs/DeudaTecnica.md). Con el login: router.use("/admin", verifyToken, checkRole(["admin"])).
   router.get("/admin/denuncias", denunciaController.obtenerDenuncias);
   router.get("/admin/denuncias/:id", denunciaController.obtenerDenunciaPorId);
   router.patch(
