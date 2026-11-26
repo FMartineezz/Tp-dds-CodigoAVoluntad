@@ -16,7 +16,7 @@ const Ctx = createContext(null);
 export const normalizarRol = (rolBackend) => {
   if (!rolBackend) return null;
   const r = rolBackend.toLowerCase();
-  if (r === 'colaboradora' || r === 'colectivo') return r;
+  if (r === 'col' || r === 'org') return r;
   return null;
 };
 
@@ -129,6 +129,7 @@ export function AuthProvider({ children }) {
         perfilCompletado,
         usuario,
         recargarPerfil: cargarEstadoPerfil,
+        id: usuario?._id
       }}
     >
       {children}

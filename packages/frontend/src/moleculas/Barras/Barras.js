@@ -7,10 +7,10 @@
  * CÓMO AGREGAR UN HERMANO / EXTENDERLO:
  *   Una barra más: una fila más en el array datos.
  */
-import s from './Barras.module.css';
+import s from "./Barras.module.css";
 
 export function Barras({ titulo, datos, unidad }) {
-  const max = Math.max(...datos.map((d) => d[1]));
+  const max = Math.max(1, ...datos.map((d) => d[1]));
   return (
     <figure className={s.fig}>
       <figcaption>{titulo}</figcaption>
@@ -18,8 +18,13 @@ export function Barras({ titulo, datos, unidad }) {
         {datos.map(([k, v]) => (
           <li key={k}>
             <span className={s.bk}>{k}</span>
-            <span className={s.bt} aria-hidden="true"><span style={{ width: `${(v / max) * 100}%` }} /></span>
-            <b>{v}<span className="sr-only"> {unidad}</span></b>
+            <span className={s.bt} aria-hidden="true">
+              <span style={{ width: `${(v / max) * 100}%` }} />
+            </span>
+            <b>
+              {v}
+              <span className="sr-only"> {unidad}</span>
+            </b>
           </li>
         ))}
       </ul>

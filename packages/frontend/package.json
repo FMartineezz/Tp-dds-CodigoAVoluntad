@@ -14,6 +14,10 @@
     "@fontsource/ibm-plex-mono": "^5.1.0",
     "keycloak-js": "^26.2.5",
     "lodash": "^4.18.1",
+    "@hcaptcha/react-hcaptcha": "^2.2.0",
+    "axios": "^1.21.1",
+    "jszip": "^3.10.2",
+    "papaparse": "^5.7.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.0.0"

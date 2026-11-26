@@ -2,34 +2,63 @@
  * PANTALLA PanelOrg
  * Ruta: /org   ·   Quién la ve: Organización
  * Qué muestra: Cifras, aviso de postulaciones pendientes y proyectos abiertos.
+ * De dónde salen los datos: del backend, con el id del colectivo que tiene la sesión
+ *   (ver cargarPanel en auxiliares.js): el colectivo, sus proyectos, sus postulaciones
+ *   pendientes y las conversaciones con mensajes sin leer.
  * Para modificarla: el aviso es .sh.bar; para otro aviso copiá ese bloque.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: esta pantalla no recuerda nada; solo pregunta si está cargando.
- *   2. CÁLCULOS: de «mis proyectos» se separan los que están abiertos.
+ *   1. DATOS Y ESTADO: se pide todo al backend con usePedido.
+ *      ESPERA Y ERRORES: si falló el pedido, un aviso de error.
+ *   2. CÁLCULOS: proyectos abiertos y a qué proyecto lleva «Revisar».
  *   3. ACCIONES: no hay (los botones son enlaces a otras pantallas).
  *   4. LO QUE SE DIBUJA: título, cifras, aviso, proyectos abiertos y botón de alta.
  */
 import { Link } from 'react-router-dom';
 import { Button, Heading, Icon } from '../../atomos';
-import { CardsSkeleton, Grid } from '../../moleculas';
+import { Alert, CardsSkeleton, Grid } from '../../moleculas';
 import { ProyectoCard } from '../../organismos';
-import { useLoading } from '../../hooks';
-import { MIS } from './auxiliares.js';
+import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { mensajeDeError } from '../../api/errores.js';
+import { cargarPanel } from './auxiliares.js';
 import sh from '../../plantillas/disposicion.module.css';
 
 export default function PanelOrg() {
   // ───── 1. DATOS Y ESTADO ─────
 
-  // `cargando` es true un instante (simula la espera de datos) y después false.
-  // Mientras es true se muestran bloques grises en lugar de las tarjetas.
-  const cargando = useLoading();
+  // `id` es el id (del backend) del colectivo que tiene la sesión.
+  const { id } = useAuth();
+
+  // Pide todo lo del panel. Mientras espera, `cargando` es true y `panel` es null.
+  // `datos: panel` = «lo que viene en `datos` guardalo con el nombre `panel`».
+  const { cargando, datos: panel, error } = usePedido(() => cargarPanel(id), [id]);
+
+  // ───── ESPERA Y ERRORES ─────
+  if (error) {
+    return (
+      <div className={`container ${sh.page}`}>
+        <Alert kind="error" title="No pudimos cargar el panel">{mensajeDeError(error)}</Alert>
+      </div>
+    );
+  }
 
   // ───── 2. CÁLCULOS ─────
 
-  // Se queda solo con los proyectos de la organización cuyo estado es 'abierto'.
+  // Mientras carga se usan listas vacías para que el resto del código no falle.
+  // (`?.` corta sin romper si `panel` todavía es null; `??` pone el valor de la derecha.)
+  const proyectos = panel?.proyectos ?? [];
+  const pendientes = panel?.pendientes ?? [];
+
+  // Se queda solo con los proyectos cuyo estado es 'abierto'.
   // (.filter → docs/GLOSARIO.md → Métodos de arrays)
-  const abiertos = MIS.filter((proyecto) => proyecto.estado === 'abierto');
+  const abiertos = proyectos.filter((proyecto) => proyecto.estado === 'abierto');
+
+  // «Revisar» lleva al primer proyecto que tenga postulaciones pendientes. Las postulaciones
+  // traen el TÍTULO del proyecto (no su id), y el título no se repite dentro del colectivo.
+  const proyectoARevisar = proyectos.find((proyecto) =>
+    pendientes.some((postulacion) => postulacion.proyecto === proyecto.titulo)
+  );
 
   // ───── 4. LO QUE SE DIBUJA ─────
 
@@ -58,36 +87,45 @@ export default function PanelOrg() {
       </Grid>
     );
   } else {
-    // Caso 3: no hay proyectos abiertos, se invita a crear el primero.
+    // Caso 3: no hay proyectos abiertos, se invita a crear uno.
     proyectosAbiertos = (
       <div className={sh.empty}>
-        <Heading level={2} size="h3">Todavía no publicaste proyectos</Heading>
-        <Button as={Link} to="/org/proyectos/nuevo">Crear el primero</Button>
+        <Heading level={2} size="h3">No tenés proyectos abiertos</Heading>
+        <Button as={Link} to="/org/proyectos/nuevo">Crear un proyecto</Button>
       </div>
     );
   }
 
   return (
     <div className={`container ${sh.page}`}>
-      <Heading level={1}>Panel de Asamblea Barrial Norte</Heading>
+      <Heading level={1}>{cargando ? 'Panel' : `Panel de ${panel.colectivo.nombre}`}</Heading>
 
-      {/* BLOQUE: Cifras — tres recuadros con proyectos, postulaciones y mensajes */}
-      {/* Las cifras de postulaciones (5) y mensajes (2) son fijas: es un prototipo. */}
+      {/* BLOQUE: Cifras — proyectos, postulaciones pendientes y mensajes sin leer */}
+      {/* Mientras carga se ve «…» en lugar del número. */}
       <div className={sh.stats}>
-        <div className={sh.stat}><b>{MIS.length}</b><span>proyectos</span></div>
-        <div className={sh.stat}><b>5</b><span>postulaciones</span></div>
-        <div className={sh.stat}><b>2</b><span>mensajes</span></div>
+        <div className={sh.stat}><b>{cargando ? '…' : proyectos.length}</b><span>proyectos</span></div>
+        <div className={sh.stat}><b>{cargando ? '…' : pendientes.length}</b><span>postulaciones pendientes</span></div>
+        <div className={sh.stat}><b>{cargando ? '…' : panel.sinLeer}</b><span>mensajes sin leer</span></div>
       </div>
 
-      {/* BLOQUE: Aviso — franja que avisa que hay postulaciones esperando respuesta */}
-      <div className={sh.bar}>
-        <span>5 postulaciones esperan respuesta</span>
-        <Button as={Link} to="/org/proyectos/48/postulaciones">Revisar</Button>
-      </div>
+      {/* BLOQUE: Aviso — aparece solo si hay postulaciones esperando respuesta */}
+      {!cargando && pendientes.length > 0 && (
+        <div className={sh.bar}>
+          <span>
+            {pendientes.length === 1
+              ? '1 postulación espera respuesta'
+              : `${pendientes.length} postulaciones esperan respuesta`}
+          </span>
+          {proyectoARevisar && (
+            <Button as={Link} to={`/org/proyectos/${proyectoARevisar.id}/postulaciones`}>
+              Revisar
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* BLOQUE: Mis proyectos — tarjetas de los proyectos abiertos */}
-      {/* Muestra relleno gris si carga; las tarjetas si hay abiertos; si no, el aviso vacío. */}
-      <Heading level={2}>Mis proyectos</Heading>
+      <Heading level={2}>Mis proyectos abiertos</Heading>
       {proyectosAbiertos}
 
       {/* BLOQUE: Alta — botón para crear un proyecto nuevo */}

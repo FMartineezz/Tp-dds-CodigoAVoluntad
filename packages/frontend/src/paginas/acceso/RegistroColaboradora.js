@@ -4,14 +4,21 @@
  * Ruta: /registro/colaboradora   ·   Quién la ve: Sin sesión
  * Qué muestra: Alta de colaboradora: nombre de fantasía, habilidades, contactos
  *   internos, captcha y términos.
+ * Adónde van los datos: POST /colaboradoras (ver api/colaboradoras.js). Las habilidades
+ *   salen del catálogo real (GET /habilidades) y viajan como CÓDIGOS. Si el backend rechaza
+ *   algo, su mensaje se ve arriba del formulario. Si sale bien, se abre la sesión con la
+ *   cuenta recién creada y se va al panel.
+ *   PENDIENTE (backend): correo y contraseña todavía no se guardan en ningún lado (no hay
+ *   login real / Keycloak); se piden y validan para que el formulario quede listo.
  * Para modificarla: un campo nuevo = un <Field> más dentro de la grilla .form
  *   (y su regla en useForm si es obligatorio).
  *
  * ANATOMÍA DE ESTE ARCHIVO:
  *   1. DATOS Y ESTADO: lo que la pantalla recuerda (campos de texto, habilidades,
- *      contactos) y el manejo de validación que viene de auxiliares.js.
+ *      contactos), el catálogo de habilidades (pedido al backend) y el manejo de
+ *      validación y envío que viene de auxiliares.js.
  *   2. CÁLCULOS: las reglas de validación y los errores que se ven en este momento.
- *   3. ACCIONES: cómo se guarda cada cambio de un campo.
+ *   3. ACCIONES: cómo se guarda cada cambio de un campo y cómo se arma y envía el alta.
  *   4. LO QUE SE DIBUJA: el formulario completo.
  *
  * Cómo se validan los campos: al salir de un campo (onBlur) se muestra su error; al
@@ -20,15 +27,29 @@
  */
 
 // ───── Imports ─────
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, Checkbox, Field, Heading } from "../../atomos";
-import { Alert, CaptchaMock, ContactosEditor, TagPicker } from "../../moleculas";
-import { HABILIDADES } from "../../datos"; // lista de habilidades que se pueden elegir
+import {
+  Alert,
+  CaptchaMock,
+  ContactosEditor,
+  TagPicker,
+  Captcha,
+} from "../../moleculas";
+import { useAuth } from "../../contexto";
+import { usePedido } from "../../hooks";
+import { obtenerHabilidades } from "../../api/habilidades.js";
+import { crearColaboradora } from "../../api/colaboradoras.js";
+import { mensajeDeError } from "../../api/errores.js";
+import { leerExportDeLinkedin } from "../../utilidades/linkedin.js";
 // piezas compartidas con el otro registro
 import { useForm, Resumen } from "./auxiliares.js";
 import s from "./Ingresar.module.css";
 import sh from "../../plantillas/disposicion.module.css"; // sh = layout común (.page, .form…)
+
+// Tipo de contacto como lo muestra ContactosEditor → como lo acepta el backend.
+const TIPOS_DE_CONTACTO = { Correo: "email", WhatsApp: "whatsapp", SMS: "sms" };
 
 export default function RegistroColaboradora() {
   // ───── 1. DATOS Y ESTADO ─────
@@ -46,17 +67,37 @@ export default function RegistroColaboradora() {
     bio: "",
     mensajes: true,
     terminos: false,
-    captcha: false,
-    habilidades: [],
-    contactos: [],
+    captcha: "",
   });
 
-  const [habilidadesDisponibles, setHabilidadesDisponibles] = useState([]);
+  const captchaRef = useRef(null);
+  const inputLinkedinRef = useRef(null);
+
+  // Catálogo de habilidades del backend: [{ id, titulo, codigo, descripcion }].
+  // `[]` = se pide una sola vez, al entrar.
+  const { datos: catalogo, error: errorDelCatalogo } = usePedido(() => obtenerHabilidades(), []);
+
+  // Habilidades elegidas, como array de TÍTULOS, ej. ['Desarrollo Web React'].
+  // Empieza vacío; lo cambia el TagPicker.
+  const [habilidadesElegidas, setHabilidadesElegidas] = useState([]);
+
+  // Contactos internos: array de pares [tipo, dato], ej. ['WhatsApp', '1155550000'].
+  // Empieza vacío; lo cambia el ContactosEditor.
+  const [contactos, setContactos] = useState([]);
+
+  const [avisoLinkedin, setAvisoLinkedin] = useState("");
 
   // Manejo de validación (ver auxiliares.js → useForm). Devuelve funciones y banderas:
   // formulario.blur / .enviar / .errores y .cargando / .listo / .intento.
   // Se le pasa la función con las reglas (validarDatos, más abajo).
-  const formulario = useForm(validarDatos);
+  // El segundo parámetro es la función que manda el alta al backend (enviarAlBackend, abajo).
+  const formulario = useForm(validarDatos, enviarAlBackend);
+
+  // Para abrir la sesión con la cuenta creada y para ir al panel después.
+  const { entrar } = useAuth();
+  const navegar = useNavigate();
+
+
 
   // ───── 2. CÁLCULOS ─────
 
@@ -68,17 +109,15 @@ export default function RegistroColaboradora() {
     if (!valores.fantasia.trim()) {
       erroresDelFormulario.fantasia = "Ingresá un nombre de fantasía.";
     }
+    // El backend exige la cuenta de git y la presentación.
     if (!valores.github.trim()) {
-      erroresDelFormulario.github = "Ingresá un usuario de github.";
+      erroresDelFormulario.github = "Ingresá tu cuenta de GitHub o GitLab.";
     }
     if (!valores.bio.trim()) {
-      erroresDelFormulario.bio = "Debes completar tu presentación.";
-    }
-    if (valores.habilidades == []) {
-      erroresDelFormulario.habilidades = "Debes agregar tus habilidades.";
+      erroresDelFormulario.bio = "Contá algo sobre vos.";
     }
     if (!valores.terminos) {
-      erroresDelFormulario.terminos = "Debes que aceptar los términos.";
+      erroresDelFormulario.terminos = "Tenés que aceptar los términos.";
     }
     if (!valores.captcha) {
       erroresDelFormulario.captcha = "Confirmá que no sos un robot.";
@@ -95,64 +134,114 @@ export default function RegistroColaboradora() {
   // Devuelve el manejador onChange de un campo: `alCambiarCampo('mail')` se ejecuta
   // cuando la persona escribe en «mail» (o tilda/destilda una casilla).
   // Casillas: se guarda `checked` (true/false); campos de texto: se guarda `value`.
-
   function alCambiarCampo(campo) {
-    return function (eventoOValor) {
-      const nuevoValor =
-        eventoOValor && eventoOValor.target !== undefined
-          ? eventoOValor.target.type === "checkbox"
-            ? eventoOValor.target.checked
-            : eventoOValor.target.value
-          : eventoOValor;
-
-      setDatos((prev) => ({
-        ...prev,
-        [campo]: nuevoValor,
-      }));
+    return function (evento) {
+      const esCasilla = evento.target.type === "checkbox";
+      const nuevoValor = esCasilla ? evento.target.checked : evento.target.value;
+      // `...datos` copia todo lo que había y `[campo]: nuevoValor` cambia solo ese campo
+      // (ver docs/GLOSARIO.md → Copiar con cambios).
+      setDatos({ ...datos, [campo]: nuevoValor });
     };
   }
 
   // Se ejecuta cuando la persona tilda el captcha de prueba (recibe true o false).
-  function alCambiarCaptcha(resuelto) {
-    setDatos({ ...datos, captcha: resuelto });
+  function alCambiarCaptcha(token) {
+    setDatos((previos) => ({ ...previos, captcha: token }));
   }
 
-  useEffect(() => {
-    const controlador = new AbortController();
+  async function alImportarLinkedin(evento) {
+    const archivo = evento.target.files[0];
+    evento.target.value = ""; // permite volver a elegir el mismo archivo
+    if (!archivo) return;
+    try {
+      const d = await leerExportDeLinkedin(archivo);
 
-    async function cargarHabilidades() {
-      try {
-        const response = await fetch("http://localhost:3000/habilidades", {
-          signal: controlador.signal,
-        });
-        if (!response.ok) throw new Error("Error al cargar habilidades");
-        const data = await response.json();
-        setHabilidadesDisponibles(data);
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          setErrorHabilidades(error.message);
-        }
-      }
+      // Solo completa lo que está vacío, para no pisar lo que la persona ya escribió.
+      setDatos((previos) => ({
+        ...previos,
+        nombre: previos.nombre || d.nombre || "",
+        apellido: previos.apellido || d.apellido || "",
+        bio: previos.bio || d.bio || "",
+        github: previos.github || d.github || "",
+        mail: previos.mail || d.mail || "",
+      }));
+
+      // Habilidades: solo las que existen en TU catálogo (comparando sin mayúsculas).
+      const titulos = (catalogo ?? []).map((h) => h.titulo);
+      const coinciden = titulos.filter((t) =>
+        d.habilidades.some((x) => x.trim().toLowerCase() === t.toLowerCase()),
+      );
+      setHabilidadesElegidas((previas) => [...new Set([...previas, ...coinciden])]);
+
+      setAvisoLinkedin(
+        `Importamos tus datos. Habilidades reconocidas: ${coinciden.length} de ${d.habilidades.length}. Revisá todo antes de crear la cuenta.`,
+      );
+    } catch (error) {
+      setAvisoLinkedin(error.message);
     }
+  }
 
-    cargarHabilidades();
-    return () => controlador.abort();
-  }, []);
+  // Arma el cuerpo que pide POST /colaboradoras y lo envía. useForm la llama solo si no hay
+  // errores; si el backend responde con error, useForm muestra su mensaje.
+  async function enviarAlBackend(valores) {
+    try {
+      // Título elegido → código (el backend recibe códigos, no títulos ni ids).
+      const codigos = habilidadesElegidas
+        .map((titulo) => catalogo.find((habilidad) => habilidad.titulo === titulo)?.codigo)
+        .filter(Boolean);
+      // ['WhatsApp', '11 5555-0000'] → { tipo: 'whatsapp', valor: '1155550000' }.
+      // Para teléfonos se sacan espacios, guiones y paréntesis: el backend pide 10 dígitos juntos.
+      const contactosParaElBackend = contactos.map(([tipo, dato]) => {
+        const tipoDelBackend = TIPOS_DE_CONTACTO[tipo] ?? tipo.toLowerCase();
+        const valor = tipoDelBackend === "email" ? dato : dato.replace(/[\s\-()]/g, "");
+        return { tipo: tipoDelBackend, valor };
+      });
+      // Pronombres: «ella, elle» → ['ella', 'elle'] (el backend guarda una lista).
+      const pronombres = valores.pronombres
+        .split(",")
+        .map((pronombre) => pronombre.trim())
+        .filter(Boolean);
+
+      const creada = await crearColaboradora({
+        nombreFantasia: valores.fantasia.trim(),
+        git: valores.github.trim(),
+        presentacion: valores.bio.trim(),
+        habilidades: codigos,
+        contactos: contactosParaElBackend,
+        // La casilla dice «permitir mensajes»; el backend guarda lo contrario: «bloquear».
+        bloquearMensajeInterno: !valores.mensajes,
+        // Los opcionales se mandan solo si se completaron (`...(cond && {…})` agrega o no la clave).
+        ...(valores.nombre.trim() && { nombre: valores.nombre.trim() }),
+        ...(valores.apellido.trim() && { apellido: valores.apellido.trim() }),
+        ...(pronombres.length > 0 && { pronombres }),
+        captcha: valores.captcha,
+      });
+      // Salió bien: sesión abierta con la cuenta nueva y al panel.
+      entrar("col", creada.id);
+      navegar("/panel");
+    } catch (error) {
+      captchaRef.current?.resetCaptcha();
+      setDatos((previos) => ({ ...previos, captcha: "" }));
+      throw error;
+    }
+  }
 
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     // onSubmit: al enviar, formulario.enviar(datos) valida y simula el envío
-    <form
-      className={`container ${sh.page}`}
-      onSubmit={formulario.enviarColaboradora(datos)}
-      noValidate
-    >
+    <form className={`container ${sh.page}`} onSubmit={formulario.enviar(datos)} noValidate>
       <Heading level={1}>Crear cuenta · Colaboradora</Heading>
 
-      {/* Aparece solo cuando el envío simulado terminó (listo = true) */}
-      {formulario.listo && (
-        <Alert kind="success" title="Cuenta creada">
-          Ya podés <Link to="/ingresar">ingresar</Link>.
+      {/* Aparece si el backend rechazó el alta: su mensaje explica por qué */}
+      {formulario.errorDelBackend && (
+        <Alert kind="error" title="No pudimos crear la cuenta">
+          {formulario.errorDelBackend}
+        </Alert>
+      )}
+      {/* Aparece si no se pudo traer el catálogo de habilidades */}
+      {errorDelCatalogo && (
+        <Alert kind="error" title="No pudimos cargar las habilidades">
+          {mensajeDeError(errorDelCatalogo)}
         </Alert>
       )}
 
@@ -164,6 +253,22 @@ export default function RegistroColaboradora() {
       <div className={sh.form}>
         {/* onBlur = al salir del campo (activa su validación); `optional` = campo no
            obligatorio */}
+        <div className={sh.full}>
+          <input
+            ref={inputLinkedinRef}
+            type="file"
+            accept=".zip,.csv"
+            onChange={alImportarLinkedin}
+            hidden
+          />
+          <Button type="button" onClick={() => inputLinkedinRef.current.click()}>
+            Importar desde LinkedIn
+          </Button>
+          <small style={{ marginLeft: 8 }}>
+            Subí el ZIP o el CSV que exporta Linkedin. Revisá los datos antes de crear la cuenta.
+          </small>
+          {avisoLinkedin && <p>{avisoLinkedin}</p>}
+        </div>
         <Field
           label="Nombre de fantasía"
           hint="Podés mantenerte anónima."
@@ -200,13 +305,14 @@ export default function RegistroColaboradora() {
         <Field
           label="Pronombres"
           optional
+          hint="Si son varios, separalos con comas."
           placeholder="Ej: ella, él, elle"
           value={datos.pronombres}
           onChange={alCambiarCampo("pronombres")}
         />
         <Field
           label="Cuenta de GitHub o GitLab"
-          placeholder="usuario"
+          placeholder="https://github.com/usuario"
           value={datos.github}
           onChange={alCambiarCampo("github")}
           onBlur={formulario.blur("github")}
@@ -214,9 +320,9 @@ export default function RegistroColaboradora() {
         />
         <TagPicker
           label="Habilidades"
-          value={datos.habilidades}
-          options={habilidadesDisponibles.map((h) => h.titulo)}
-         onChange={alCambiarCampo("habilidades")}
+          value={habilidadesElegidas}
+          options={(catalogo ?? []).map((habilidad) => habilidad.titulo)}
+          onChange={setHabilidadesElegidas}
         />
         <div className={sh.mid}>
           <Checkbox checked={datos.mensajes} onChange={alCambiarCampo("mensajes")}>
@@ -224,10 +330,10 @@ export default function RegistroColaboradora() {
           </Checkbox>
         </div>
         <div className={sh.full}>
-          <ContactosEditor value={datos.contactos} onChange={alCambiarCampo("contactos")} />
+          <ContactosEditor value={contactos} onChange={setContactos} />
         </div>
         <div className={sh.full}>
-          <CaptchaMock ok={datos.captcha} onChange={alCambiarCaptcha} error={errores.captcha} />
+          <Captcha ok={datos.captcha} onChange={alCambiarCaptcha} error={errores.captcha} />
         </div>
         <div className={sh.full}>
           <Checkbox checked={datos.terminos} onChange={alCambiarCampo("terminos")}>
@@ -238,12 +344,13 @@ export default function RegistroColaboradora() {
         </div>
       </div>
 
-      {/* BLOQUE: botón de envío — muestra «cargando» durante la espera simulada */}
+      {/* BLOQUE: botón de envío — muestra «cargando» mientras espera al backend */}
       <div className={sh.formActs}>
         <Button type="submit" loading={formulario.cargando}>
           Crear cuenta
         </Button>
       </div>
+
     </form>
   );
 }

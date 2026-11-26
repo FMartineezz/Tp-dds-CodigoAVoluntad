@@ -1,103 +1,195 @@
-import { jest } from "@jest/globals";
-import ErrorCatalog from "../../src/errors/errorCatalog.js";
+import mongoose from "mongoose";
 import {
-  crearContexto,
-  cargarEscenarioBase,
-  perfilDeEjemplo,
-  expectAppError,
-} from "../helpers/crearContexto.js";
+  busquedaService,
+  colectivoService,
+  habilidadService,
+  personaColaboradoraService,
+  proyectoService,
+} from "../../src/container.js";
+import ErrorCatalog from "../../src/errors/errorCatalog.js";
+import { usarBaseDeDatos } from "../utils/db.js";
+import { esperarAppError } from "../utils/esperarAppError.js";
+
+usarBaseDeDatos();
+
+const idInexistente = () => new mongoose.Types.ObjectId().toString();
+
+const perfil = (habilidadesRequeridas, habilidadesOpcionales = [], descripcion = "Perfil") => ({
+  descripcion,
+  habilidadesRequeridas,
+  habilidadesOpcionales,
+  horas: 10,
+  tipoDeCompromiso: "semanal",
+  modalidadDeColaboracion: "gratuita",
+});
+
+const crearProyecto = (titulo, perfiles) =>
+  proyectoService.crearProyecto(
+    titulo,
+    "Descripción",
+    perfiles,
+    "Asamblea Norte",
+    "https://sistema.org",
+  );
+
+const crearPersona = (nombreFantasia, habilidades) =>
+  personaColaboradoraService.crearPersonaColaboradora(
+    nombreFantasia,
+    `github:${nombreFantasia}`,
+    undefined,
+    undefined,
+    habilidades,
+    undefined,
+    "Presentación",
+    [],
+    false,
+  );
+
+const nombres = (personas) => personas.map((p) => p.nombreFantasia).sort();
+const titulos = (proyectos) => proyectos.map((p) => p.titulo).sort();
 
 describe("BusquedaService", () => {
-  let ctx;
-  let escenario;
-  let ana;
-  let beto;
-
   beforeEach(async () => {
-    jest.spyOn(console, "log").mockImplementation(() => {});
-    ctx = crearContexto();
-    escenario = await cargarEscenarioBase(ctx);
-    ana = await ctx.personaColaboradoraService.crearPersonaColaboradora(
-      "Ana",
-      "github.com/ana",
-      null,
-      null,
-      ["desarrollo_web_react"],
-      null,
-      "Hola",
-      [{ tipo: "email", valor: "ana@mail.com" }],
-    );
-    beto = await ctx.personaColaboradoraService.crearPersonaColaboradora(
-      "Beto",
-      "github.com/beto",
-      null,
-      null,
-      ["testing_e_2_e"],
-    );
+    await habilidadService.crearHabilidad("Node", "Backend");
+    await habilidadService.crearHabilidad("React", "Frontend");
+    await habilidadService.crearHabilidad("Python", "Datos");
+    await habilidadService.crearHabilidad("Diseño", "UX/UI");
+    await colectivoService.crearColectivo("Asamblea Norte", "Asamblea", "caba", "asamblea");
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
+  describe("obtenerPersonasColaboradorasAcordesAPerfil", () => {
+    test("devuelve las personas con alguna habilidad requerida del perfil", async () => {
+      // Preparación
+      const proyecto = await crearProyecto("Web", [
+        perfil(["node", "react"], ["diseno"], "Fullstack"),
+        perfil(["python"], [], "Datos"),
+      ]);
+      await crearPersona("ada", ["node"]);
+      await crearPersona("grace", ["react", "python"]);
+      await crearPersona("guido", ["python"]);
+      await crearPersona("disenadora", ["diseno"]);
+      const fullstack = proyecto.perfiles[0];
 
-  describe("colaboradoras acordes a un perfil", () => {
-    test("devuelve quienes tienen alguna habilidad requerida, sin contactos", async () => {
-      const [perfil] = await ctx.proyectoService.obtenerPerfiles(escenario.proyecto.id);
-
-      const personas = await ctx.busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(
-        escenario.proyecto.id,
-        perfil._id,
+      // Ejecución
+      const personas = await busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(
+        proyecto.id,
+        fullstack._id.toString(),
       );
 
-      // Beto solo tiene una habilidad opcional del perfil, así que no aparece
-      expect(personas.map((p) => p.nombreFantasia)).toEqual(["Ana"]);
-      expect(personas[0]).not.toHaveProperty("contactos");
+      // Validación
+      // "disenadora" solo tiene una habilidad opcional y "guido" solo la del otro perfil
+      expect(nombres(personas)).toEqual(["ada", "grace"]);
     });
 
-    test("falla con 404 si el perfil no existe", async () => {
-      await expectAppError(
-        ctx.busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(
-          escenario.proyecto.id,
-          "inexistente",
+    test("devuelve una lista vacía si nadie tiene las habilidades requeridas", async () => {
+      // Preparación
+      const proyecto = await crearProyecto("Web", [perfil(["python"])]);
+      await crearPersona("ada", ["node"]);
+
+      // Ejecución
+      const personas = await busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(
+        proyecto.id,
+        proyecto.perfiles[0]._id.toString(),
+      );
+
+      // Validación
+      expect(personas).toEqual([]);
+    });
+
+    test("falla con 404 si el proyecto no existe", async () => {
+      // Ejecución y Validación
+      await esperarAppError(
+        busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(
+          idInexistente(),
+          idInexistente(),
         ),
+        ErrorCatalog.PROYECTO_NO_ENCONTRADO,
+        404,
+      );
+    });
+
+    test("falla con 404 si el perfil no pertenece al proyecto", async () => {
+      // Preparación
+      const proyecto = await crearProyecto("Web", [perfil(["node"])]);
+
+      // Ejecución y Validación
+      await esperarAppError(
+        busquedaService.obtenerPersonasColaboradorasAcordesAPerfil(proyecto.id, idInexistente()),
         ErrorCatalog.PERFIL_NO_ENCONTRADO,
         404,
       );
     });
   });
 
-  describe("proyectos acordes a una colaboradora", () => {
-    test("devuelve los proyectos con algún perfil que requiera sus habilidades", async () => {
-      await ctx.proyectoService.crearProyecto(
-        "App de testing",
-        "d",
-        [perfilDeEjemplo({ habilidadesRequeridas: ["testing_e_2_e"] })],
-        "Fundación Ejemplo",
-        "https://app.org",
+  describe("obtenerPersonasColaboradorasAcordesAProyecto", () => {
+    test("une las habilidades requeridas de todos los perfiles sin repetir personas", async () => {
+      // Preparación
+      const proyecto = await crearProyecto("Web", [perfil(["node"]), perfil(["node", "python"])]);
+      await crearPersona("ada", ["node"]);
+      await crearPersona("guido", ["python"]);
+      await crearPersona("linus", ["node", "python"]);
+      await crearPersona("dan", ["react"]);
+
+      // Ejecución
+      const personas = await busquedaService.obtenerPersonasColaboradorasAcordesAProyecto(proyecto);
+
+      // Validación
+      expect(nombres(personas)).toEqual(["ada", "guido", "linus"]);
+    });
+  });
+
+  describe("obtenerProyectosAcordesALaPersonaColaboradora", () => {
+    test("devuelve los proyectos con algún perfil que requiere sus habilidades, con el colectivo", async () => {
+      // Preparación
+      await crearProyecto("Backend", [perfil(["node"])]);
+      await crearProyecto("Datos", [perfil(["react"]), perfil(["python"])]);
+      await crearProyecto("Solo opcional", [perfil(["diseno"], ["node"])]);
+      const persona = await crearPersona("linus", ["node", "python"]);
+
+      // Ejecución
+      const proyectos = await busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(
+        persona.id,
       );
 
-      const paraAna = await ctx.busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(
-        ana.id,
-      );
-      const paraBeto = await ctx.busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(
-        beto.id,
-      );
-
-      expect(paraAna.map((p) => p.titulo)).toEqual(["Web institucional"]);
-      expect(paraBeto.map((p) => p.titulo)).toEqual(["App de testing"]);
+      // Validación
+      expect(titulos(proyectos)).toEqual(["Backend", "Datos"]);
+      proyectos.forEach((proyecto) => expect(proyecto.colectivo.nombre).toBe("Asamblea Norte"));
     });
 
     test("no incluye proyectos finalizados", async () => {
-      await ctx.proyectoService.finalizarProyecto(escenario.proyecto.id);
+      // Preparación
+      const finalizado = await crearProyecto("Viejo", [perfil(["node"])]);
+      await crearProyecto("Nuevo", [perfil(["node"])]);
+      await proyectoService.finalizarProyecto(finalizado.id);
+      const persona = await crearPersona("ada", ["node"]);
 
-      expect(
-        await ctx.busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(ana.id),
-      ).toEqual([]);
+      // Ejecución
+      const proyectos = await busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(
+        persona.id,
+      );
+
+      // Validación
+      expect(titulos(proyectos)).toEqual(["Nuevo"]);
     });
 
-    test("falla con 404 si la colaboradora no existe", async () => {
-      await expectAppError(
-        ctx.busquedaService.obtenerProyectosAcordesALaPersonaColaboradora("inexistente"),
+    test("devuelve una lista vacía si ningún proyecto requiere sus habilidades", async () => {
+      // Preparación
+      await crearProyecto("Backend", [perfil(["node"])]);
+      const persona = await crearPersona("dan", ["react"]);
+
+      // Ejecución
+      const proyectos = await busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(
+        persona.id,
+      );
+
+      // Validación
+      expect(proyectos).toEqual([]);
+    });
+
+    test("falla con 404 si la persona no existe", async () => {
+      // Ejecución y Validación
+      await esperarAppError(
+        busquedaService.obtenerProyectosAcordesALaPersonaColaboradora(idInexistente()),
         ErrorCatalog.COLABORADORA_NO_ENCONTRADA,
         404,
       );

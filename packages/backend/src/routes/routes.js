@@ -12,7 +12,13 @@ import estadisticasRoutes from "./estadisticasRoutes.js";
 import postulacionRoutes from "./postulacionRoutes.js";
 import authRoutes from "./authRoutes.js";
 import denunciaRoutes from "./denunciaRoutes.js";
+import notificacionRoute from "./notificacionRoutes.js";
+import mensajeRoutes from "./mensajeRoutes.js";
 
+/**
+ * Todos los routers de la API, en el orden en que se montan en la app (ver buildApp).
+ * @type {import("express").Router[]}
+ */
 const routes = [
   habilidadRoutes(),
   proyectoRoutes(),
@@ -27,7 +33,9 @@ const routes = [
   swaggerRoutes(),
   postulacionRoutes(),
   authRoutes(),
-  denunciaRoutes()
+  denunciaRoutes(),
+  notificacionRoute(),
+  mensajeRoutes(),
 ];
 
 export default routes;

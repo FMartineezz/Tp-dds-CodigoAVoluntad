@@ -2,14 +2,20 @@
 /**
  * PANTALLA RegistroOrganizacion
  * Ruta: /registro/organizacion   ·   Quién la ve: Sin sesión
- * Qué muestra: Alta de colectivo: tipo, ubicación, causas, captcha y términos.
+ * Qué muestra: Alta de colectivo: nombre, descripción, tipo, ubicación, captcha y términos.
+ * Adónde van los datos: POST /colectivos (ver api/colectivos.js). Tipo y ubicación se
+ *   eligen de las listas que acepta el backend (en api/colectivos.js: TIPOS y UBICACIONES).
+ *   Si el backend rechaza algo (por ejemplo, nombre repetido), su mensaje se ve arriba.
+ *   Si sale bien, se abre la sesión con el colectivo recién creado y se va a su panel.
+ *   PENDIENTE (backend): correo y contraseña todavía no se guardan (no hay login real /
+ *   Keycloak). «Causas» y «Ciudad o barrio» se sacaron: el colectivo no tiene esos campos.
  * Para modificarla: igual que el registro de colaboradora.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: lo que la pantalla recuerda (campos de texto, causas) y el
- *      manejo de validación que viene de auxiliares.js.
+ *   1. DATOS Y ESTADO: lo que la pantalla recuerda (campos de texto) y el manejo de
+ *      validación y envío que viene de auxiliares.js.
  *   2. CÁLCULOS: las reglas de validación y los errores que se ven en este momento.
- *   3. ACCIONES: cómo se guarda cada cambio de un campo.
+ *   3. ACCIONES: cómo se guarda cada cambio de un campo y cómo se envía el alta.
  *   4. LO QUE SE DIBUJA: el formulario completo.
  *
  * Cómo se validan los campos: al salir de un campo (onBlur) se muestra su error; al
@@ -18,15 +24,17 @@
  */
 
 // ───── Imports ─────
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button, Checkbox, Field, Heading } from '../../atomos';
-import { Alert, CaptchaMock, TagPicker } from '../../moleculas';
-import { CAUSAS, TIPOS, UBICACIONES } from '../../datos'; // listas para el selector y las etiquetas
+import { useState, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button, Checkbox, Field, Heading } from "../../atomos";
+import { Alert, CaptchaMock, Captcha } from "../../moleculas";
+import { useAuth } from "../../contexto";
+// Listas que acepta el backend: { valorDelBackend: 'Texto lindo' }.
+import { TIPOS, UBICACIONES, crearColectivo } from "../../api/colectivos.js";
 // piezas compartidas con el otro registro
-import { useForm, Resumen } from './auxiliares.js';
-import s from './Ingresar.module.css';
-import sh from '../../plantillas/disposicion.module.css'; // sh = layout común (.page, .form…)
+import { useForm, Resumen } from "./auxiliares.js";
+import s from "./Ingresar.module.css";
+import sh from "../../plantillas/disposicion.module.css"; // sh = layout común (.page, .form…)
 
 export default function RegistroOrganizacion() {
   // ───── 1. DATOS Y ESTADO ─────
@@ -36,19 +44,27 @@ export default function RegistroOrganizacion() {
   // Empiezan vacíos; los cambia alCambiarCampo y el captcha.
   // (ver docs/GLOSARIO.md → useState)
   const [datos, setDatos] = useState({
-    nombre: '',
-    desc: '',
-    tipo: '',
-    ubicacion: '',
-    lugar: '',
+    nombre: "",
+    desc: "",
+    tipo: "",
+    ubicacion: "",
+    mail: "",
+    pass: "",
     terminos: false,
-    captcha: false,
+    captcha: "",
   });
+
+  const captchaRef = useRef(null);
 
   // Manejo de validación (ver auxiliares.js → useForm). Devuelve funciones y banderas:
   // formulario.blur / .enviar / .errores y .cargando / .listo / .intento.
-  // Se le pasa la función con las reglas (validarDatos, más abajo).
-  const formulario = useForm(validarDatos);
+  // Se le pasa la función con las reglas (validarDatos) y la que manda el alta al backend
+  // (enviarAlBackend), las dos más abajo.
+  const formulario = useForm(validarDatos, enviarAlBackend);
+
+  // Para abrir la sesión con el colectivo creado y para ir a su panel después.
+  const { entrar } = useAuth();
+  const navegar = useNavigate();
 
   // ───── 2. CÁLCULOS ─────
 
@@ -58,23 +74,26 @@ export default function RegistroOrganizacion() {
   function validarDatos(valores) {
     const erroresDelFormulario = {};
     if (!valores.nombre.trim()) {
-      erroresDelFormulario.nombre = 'Ingresá el nombre del colectivo.';
+      erroresDelFormulario.nombre = "Ingresá el nombre del colectivo.";
     }
+    // El backend exige la descripción.
     if (!valores.desc.trim()) {
-      erroresDelFormulario.desc = 'Debes completar tu presentación.';
+      erroresDelFormulario.desc = "Contá qué hace la organización.";
     }
     if (!valores.tipo) {
-      erroresDelFormulario.tipo = 'Elegí el tipo de colectivo.';
+      erroresDelFormulario.tipo = "Elegí el tipo de colectivo.";
     }
+    // La documentación la da como opcional, pero hoy la base de datos la exige: sin ubicación
+    // el backend responde 500. Por eso acá se pide sí o sí.
     if (!valores.ubicacion) {
-      erroresDelFormulario.ubicacion = 'Elegí la ubicación del colectivo.';
+      erroresDelFormulario.ubicacion = "Elegí la ubicación.";
     }
     if (!valores.terminos) {
-      erroresDelFormulario.terminos = 'Debes que aceptar los términos.';
+      erroresDelFormulario.terminos = "Tenés que aceptar los términos.";
     }
-    if (!valores.captcha) {
-      erroresDelFormulario.captcha = 'Confirmá que no sos un robot.';
-    }
+/*     if (!valores.captcha) {
+      erroresDelFormulario.captcha = "Confirmá que no sos un robot.";
+    } */
     return erroresDelFormulario;
   }
 
@@ -89,7 +108,7 @@ export default function RegistroOrganizacion() {
   // Casillas: se guarda `checked` (true/false); el resto: se guarda `value`.
   function alCambiarCampo(campo) {
     return function (evento) {
-      const esCasilla = evento.target.type === 'checkbox';
+      const esCasilla = evento.target.type === "checkbox";
       const nuevoValor = esCasilla ? evento.target.checked : evento.target.value;
       // `...datos` copia todo lo que había y `[campo]: nuevoValor` cambia solo ese campo
       // (ver docs/GLOSARIO.md → Copiar con cambios).
@@ -98,20 +117,42 @@ export default function RegistroOrganizacion() {
   }
 
   // Se ejecuta cuando la persona tilda el captcha de prueba (recibe true o false).
-  function alCambiarCaptcha(resuelto) {
-    setDatos({ ...datos, captcha: resuelto });
+  function alCambiarCaptcha(token) {
+    setDatos((previos) => ({ ...previos, captcha: token }));
+  }
+
+  // Manda el alta a POST /colectivos. useForm la llama solo si no hay errores; si el backend
+  // responde con error, useForm muestra su mensaje. Tipo y ubicación ya son los valores
+  // del backend (los `value` de las <option>).
+  async function enviarAlBackend(valores) {
+    try {
+      const creado = await crearColectivo({
+        nombre: valores.nombre.trim(),
+        descripcion: valores.desc.trim(),
+        tipoDeColectivo: valores.tipo,
+        ubicacion: valores.ubicacion,
+        captchaToken: valores.captcha,
+      });
+      // Salió bien: sesión abierta con el colectivo nuevo y a su panel.
+      entrar("org", creado.id);
+      navegar("/org");
+    } catch (error) {
+      captchaRef.current?.resetCaptcha();
+      setDatos((previos) => ({ ...previos, captcha: "" }));
+      throw error;
+    }
   }
 
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     // onSubmit: al enviar, formulario.enviar(datos) valida y simula el envío
-    <form className={`container ${sh.page}`} onSubmit={formulario.enviarColectivo(datos)} noValidate>
+    <form className={`container ${sh.page}`} onSubmit={formulario.enviar(datos)} noValidate>
       <Heading level={1}>Crear cuenta · Organización</Heading>
 
-      {/* Aparece solo cuando el envío simulado terminó (listo = true) */}
-      {formulario.listo && (
-        <Alert kind="success" title="Cuenta creada">
-          Ya podés <Link to="/ingresar">ingresar</Link>.
+      {/* Aparece si el backend rechazó el alta: su mensaje explica por qué */}
+      {formulario.errorDelBackend && (
+        <Alert kind="error" title="No pudimos crear la cuenta">
+          {formulario.errorDelBackend}
         </Alert>
       )}
 
@@ -127,8 +168,8 @@ export default function RegistroOrganizacion() {
           label="Nombre del colectivo"
           placeholder="Nombre del colectivo"
           value={datos.nombre}
-          onChange={alCambiarCampo('nombre')}
-          onBlur={formulario.blur('nombre')}
+          onChange={alCambiarCampo("nombre")}
+          onBlur={formulario.blur("nombre")}
           error={errores.nombre}
         />
         <Field
@@ -137,45 +178,49 @@ export default function RegistroOrganizacion() {
           label="Descripción"
           placeholder="Qué hace la organización y a quién ayuda…"
           value={datos.desc}
-          onChange={alCambiarCampo('desc')}
-          onBlur={formulario.blur('desc')}
+          onChange={alCambiarCampo("desc")}
+          onBlur={formulario.blur("desc")}
           error={errores.desc}
         />
         <Field
           as="select"
           label="Tipo de colectivo"
           value={datos.tipo}
-          onChange={alCambiarCampo('tipo')}
-          onBlur={formulario.blur('tipo')}
+          onChange={alCambiarCampo("tipo")}
+          onBlur={formulario.blur("tipo")}
           error={errores.tipo}
         >
           <option value="">Elegí una opción</option>
-          {/* .map: una <option> por cada tipo de la lista TIPOS (key = identificador para React) */}
-          {TIPOS.map((tipo) => <option key={tipo}>{tipo}</option>)}
+          {/* Una <option> por cada tipo. Object.entries convierte { fundacion: 'Fundación' } en
+              [['fundacion', 'Fundación'], …]: `value` es lo que viaja al backend y el texto
+              de adentro es lo que se ve. */}
+          {Object.entries(TIPOS).map(([valor, texto]) => (
+            <option key={valor} value={valor}>
+              {texto}
+            </option>
+          ))}
         </Field>
         <Field
           as="select"
           label="Ubicación"
           value={datos.ubicacion}
-          onChange={alCambiarCampo('ubicacion')}
-          onBlur={formulario.blur('ubicacion')}
+          onChange={alCambiarCampo("ubicacion")}
+          onBlur={formulario.blur("ubicacion")}
           error={errores.ubicacion}
         >
-          <option value="">Sin indicar</option>
-          {UBICACIONES.map((ubicacion) => <option key={ubicacion}>{ubicacion}</option>)}
+          <option value="">Elegí una opción</option>
+          {/* Igual que con los tipos: valor del backend ('entre rios') y texto lindo ('Entre Ríos') */}
+          {Object.entries(UBICACIONES).map(([valor, texto]) => (
+            <option key={valor} value={valor}>
+              {texto}
+            </option>
+          ))}
         </Field>
-        <Field
-          label="Ciudad o barrio"
-          optional
-          placeholder="Texto libre"
-          value={datos.lugar}
-          onChange={alCambiarCampo('lugar')}
-        />
         <div className={sh.full}>
-          <CaptchaMock ok={datos.captcha} onChange={alCambiarCaptcha} error={errores.captcha} />
+          <Captcha ref={captchaRef} onChange={alCambiarCaptcha} error={errores.captcha} />
         </div>
         <div className={sh.full}>
-          <Checkbox checked={datos.terminos} onChange={alCambiarCampo('terminos')}>
+          <Checkbox checked={datos.terminos} onChange={alCambiarCampo("terminos")}>
             Acepto los <Link to="/terminos">términos y condiciones</Link>
           </Checkbox>
           {/* Aparece solo si hay error en términos (no se tildó y ya se tocó o se intentó enviar) */}
@@ -183,11 +228,12 @@ export default function RegistroOrganizacion() {
         </div>
       </div>
 
-      {/* BLOQUE: botón de envío — muestra «cargando» durante la espera simulada */}
+      {/* BLOQUE: botón de envío — muestra «cargando» mientras espera al backend */}
       <div className={sh.formActs}>
-        <Button type="submit" loading={formulario.cargando}>Crear cuenta</Button>
+        <Button type="submit" loading={formulario.cargando}>
+          Crear cuenta
+        </Button>
       </div>
-
     </form>
   );
 }

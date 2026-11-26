@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 /**
  * APP · mapa de rutas del sitio.
  * Cada <Route> une una dirección con una pantalla.
@@ -42,7 +43,6 @@ import BuscarColaboradoras from './paginas/organizacion/BuscarColaboradoras.js';
 import PerfilColaboradora from './paginas/organizacion/PerfilColaboradora.js';
 import PerfilOrg from './paginas/organizacion/PerfilOrg.js';
 import ComprobarPerfil from './paginas/acceso/ComprobarPerfil.js';
-import React from 'react';
 
 export default function App() {
   return (
@@ -74,23 +74,23 @@ export default function App() {
           <Route path="pronto" element={<Pronto />} />
 
           {/* Colaboradora (privadas) */}
-          <Route path="panel" element={<Privada rol="colaboradora"><PanelCol /></Privada>} />
-          <Route path="panel/postulaciones" element={<Privada rol="colaboradora"><PostulacionesCol /></Privada>} />
-          <Route path="panel/proyectos" element={<Privada rol="colaboradora"><ProyectosCol /></Privada>} />
-          <Route path="panel/mensajes" element={<Privada rol="colaboradora"><Mensajes rol="colaboradora" /></Privada>} />
-          <Route path="panel/perfil" element={<Privada rol="colaboradora"><PerfilCol /></Privada>} />
+          <Route path="panel" element={<Privada rol="col"><PanelCol /></Privada>} />
+          <Route path="panel/postulaciones" element={<Privada rol="col"><PostulacionesCol /></Privada>} />
+          <Route path="panel/proyectos" element={<Privada rol="col"><ProyectosCol /></Privada>} />
+          <Route path="panel/mensajes" element={<Privada rol="col"><Mensajes rol="col" /></Privada>} />
+          <Route path="panel/perfil" element={<Privada rol="col"><PerfilCol /></Privada>} />
 
           {/* Organización (privadas) */}
-          <Route path="org" element={<Privada rol="colectivo"><PanelOrg /></Privada>} />
-          <Route path="org/proyectos" element={<Privada rol="colectivo"><ProyectosOrg /></Privada>} />
-          <Route path="org/proyectos/nuevo" element={<Privada rol="colectivo"><FormProyecto /></Privada>} />
-          <Route path="org/proyectos/:id/editar" element={<Privada rol="colectivo"><FormProyecto edit /></Privada>} />
-          <Route path="org/proyectos/:id/postulaciones" element={<Privada rol="colectivo"><PostulacionesOrg /></Privada>} />
-          <Route path="org/proyectos/:id/equipo" element={<Privada rol="colectivo"><EquipoOrg /></Privada>} />
-          <Route path="org/colaboradoras" element={<Privada rol="colectivo"><BuscarColaboradoras /></Privada>} />
-          <Route path="org/colaboradoras/:id" element={<Privada rol="colectivo"><PerfilColaboradora /></Privada>} />
-          <Route path="org/mensajes" element={<Privada rol="colectivo"><Mensajes rol="colectivo" /></Privada>} />
-          <Route path="org/perfil" element={<Privada rol="colectivo"><PerfilOrg /></Privada>} />
+          <Route path="org" element={<Privada rol="org"><PanelOrg /></Privada>} />
+          <Route path="org/proyectos" element={<Privada rol="org"><ProyectosOrg /></Privada>} />
+          <Route path="org/proyectos/nuevo" element={<Privada rol="org"><FormProyecto /></Privada>} />
+          <Route path="org/proyectos/:id/editar" element={<Privada rol="org"><FormProyecto edit /></Privada>} />
+          <Route path="org/proyectos/:id/postulaciones" element={<Privada rol="org"><PostulacionesOrg /></Privada>} />
+          <Route path="org/proyectos/:id/equipo" element={<Privada rol="org"><EquipoOrg /></Privada>} />
+          <Route path="org/colaboradoras" element={<Privada rol="org"><BuscarColaboradoras /></Privada>} />
+          <Route path="org/colaboradoras/:id" element={<Privada rol="org"><PerfilColaboradora /></Privada>} />
+          <Route path="org/mensajes" element={<Privada rol="org"><Mensajes rol="org" /></Privada>} />
+          <Route path="org/perfil" element={<Privada rol="org"><PerfilOrg /></Privada>} />
 
           {/* Cualquier otra dirección */}
           <Route path="*" element={<NoEncontrado />} />

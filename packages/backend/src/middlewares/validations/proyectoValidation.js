@@ -102,6 +102,7 @@ export const proyectoActualizacionSchema = zod
         errorMap: () => ({ message: "ARGUMENTO_INVALIDO" }),
       })
       .optional(),
+    fechaCierre: zod.coerce.date().nullable().optional(),
     urlDonaciones: urlDonacionesSchema,
   })
   .strict({ message: "ARGUMENTO_INVALIDO" })
@@ -109,6 +110,13 @@ export const proyectoActualizacionSchema = zod
     message: "ARGUMENTO_INVALIDO",
   });
 
+/**
+ * Valida el body de POST /proyectos: datos del proyecto y al menos un perfil.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 const validarProyecto = (req, res, next) => {
   const resultado = proyectoSchema.safeParse(req.body);
 
@@ -120,6 +128,14 @@ const validarProyecto = (req, res, next) => {
   next();
 };
 
+/**
+ * Valida el body de PATCH /proyectos/:id (solo finalizado, fechaCierre y urlDonaciones; al menos
+ * uno) y reemplaza req.body por los datos parseados.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarActualizacionProyecto = (req, res, next) => {
   const resultado = proyectoActualizacionSchema.safeParse(req.body);
 

@@ -1,86 +1,81 @@
-/* eslint-disable react/react-in-jsx-scope */
 /**
  * PANTALLA PostulacionesCol
  * Ruta: /panel/postulaciones   ·   Quién la ve: Colaboradora
- * Qué muestra: Mis postulaciones por estado, con acciones fuera de la tabla
- *   (Retirar / Ver proyecto).
+ * Qué muestra: Mis postulaciones por estado (pendiente / aceptada / rechazada).
+ * De dónde salen los datos: del backend, GET /colaboradoras/:id/postulaciones
+ *   (obtenerPostulaciones en api/colaboradora.js).
  * Para modificarla: una columna nueva = un div más en .cells (y en la fila de encabezado).
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: las postulaciones, la pestaña elegida y lo necesario para
- *      confirmar un «retiro».
+ *   1. DATOS Y ESTADO: quién tiene la sesión, el pedido al backend y la pestaña elegida.
  *   2. CÁLCULOS: filtra las postulaciones según la pestaña y decide qué se muestra
- *      dentro de las pestañas (cargando / vacío / tabla).
- *   3. ACCIONES: retirar una postulación.
- *   4. LO QUE SE DIBUJA: título, aviso, pestañas con su contenido y el diálogo de confirmación.
+ *      dentro de las pestañas (cargando / error / vacío / tabla).
+ *   4. LO QUE SE DIBUJA: título y pestañas con su contenido.
  *
  * Cómo se decide qué se ve dentro de las pestañas (en este orden):
  *   - mientras `cargando` es true: filas grises de relleno;
+ *   - si el pedido falló: aviso de error;
  *   - si ya cargó pero la lista filtrada está vacía: mensaje «No hay postulaciones acá»;
- *   - si no: la tabla. Cada fila muestra «Retirar» solo si está pendiente y «Ver proyecto»
- *     solo si fue aceptada; las rechazadas no tienen acciones.
+ *   - si no: la tabla. Las aceptadas llevan a «Mis proyectos».
+ *
+ * PENDIENTE (backend): no existe DELETE /postulaciones/:id, así que la colaboradora todavía
+ *   no puede retirar una postulación pendiente (antes había un botón «Retirar» simulado).
+ * PENDIENTE (front): el backend ya manda `proyectoId` (y el adaptador lo expone), así que el
+ *   título del proyecto se podría enlazar a /proyectos/:id; hoy se muestra como texto.
  */
 
 // ───── Imports ─────
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button, Heading, StatusBadge, Text } from "../../atomos";
-import { Alert, ConfirmDialog, RowsSkeleton, Tabs } from "../../moleculas";
-import { POSTULACIONES_COL } from "../../datos"; // postulaciones de ejemplo
-import { useLoading } from "../../hooks"; // simula la espera de datos
-import { proyecto } from "./auxiliares.js"; // busca un proyecto por id
-import s from "./Colaboradora.module.css";
-import sh from "../../plantillas/disposicion.module.css";
-import { useAuth } from "../../contexto/Auth.js";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button, Heading, StatusBadge, Tag } from '../../atomos';
+import { Alert, RowsSkeleton, Tabs } from '../../moleculas';
+import { useAuth } from '../../contexto';
+import { usePedido } from '../../hooks';
+import { obtenerPostulaciones } from '../../api/colaboradora.js';
+import { mensajeDeError } from '../../api/errores.js';
+import s from './Colaboradora.module.css';
+import sh from '../../plantillas/disposicion.module.css';
+
+// Pestañas que dibuja <Tabs>: `id` es el valor que se guarda en pestanaActiva
+// y `label` el texto visible. Están afuera del componente porque nunca cambian.
+const PESTANAS = [
+  { id: 'todas', label: 'Todas' },
+  { id: 'pendientes', label: 'Pendientes' },
+  { id: 'aceptadas', label: 'Aceptadas' },
+  { id: 'rechazadas', label: 'Rechazadas' },
+];
+
+// Qué estado de postulación corresponde a cada pestaña. null en «todas» = sin filtro.
+const ESTADO_DE_CADA_PESTANA = {
+  todas: null,
+  pendientes: 'pendiente',
+  aceptadas: 'aceptada',
+  rechazadas: 'rechazada',
+};
 
 export default function PostulacionesCol() {
-  const { usuario, cargando } = useAuth();
-
-  // Mientras carga o si todavía no se hidrató el usuario, evitamos errores de renderizado
-  if (cargando || !usuario) {
-    return <p>Cargando datos del perfil...</p>;
-  }
   // ───── 1. DATOS Y ESTADO ─────
+
+  // `id` es el _id de la colaboradora con la sesión (ver contexto/Auth.js).
+  const { id } = useAuth();
+
+  // Pide las postulaciones al backend. Se vuelve a pedir si cambia la sesión (por eso [id]).
+  // `datos: postulaciones` = «lo que viene en `datos` guardalo con el nombre `postulaciones`».
+  const { cargando, datos: postulaciones, error } = usePedido(() => obtenerPostulaciones(id), [id]);
 
   // Pestaña activa: 'todas', 'pendientes', 'aceptadas' o 'rechazadas'.
   // Empieza en 'todas'; la cambia el componente Tabs al tocar una pestaña.
   // (ver docs/GLOSARIO.md → useState)
-  const [pestanaActiva, setPestanaActiva] = useState("todas");
-
-  // Lista de postulaciones. Empieza con las de ejemplo; se le saca una al retirarla.
-  const [postulaciones, setPostulaciones] = useState(usuario.postulaciones);
-
-  // Id de la postulación que se está por retirar (null = ninguna, el diálogo está cerrado).
-  // Lo pone el botón «Retirar» y lo borra «Cancelar» o confirmar.
-  const [idARetirar, setIdARetirar] = useState(null);
-
-  // true muestra el aviso verde «Postulación retirada». Lo activa retirar y lo cierra la «x».
-  const [avisoVisible, setAvisoVisible] = useState(false);
+  const [pestanaActiva, setPestanaActiva] = useState('todas');
 
   // ───── 2. CÁLCULOS ─────
 
-  // Pestañas que dibuja <Tabs>: `id` es el valor que se guarda en pestanaActiva
-  // y `label` el texto visible.
-  const pestanas = [
-    { id: "todas", label: "Todas" },
-    { id: "pendientes", label: "Pendientes" },
-    { id: "aceptadas", label: "Aceptadas" },
-    { id: "rechazadas", label: "Rechazadas" },
-  ];
-
-  // Qué estado de postulación corresponde a cada pestaña. null en «todas» = sin filtro.
-  const estadoDeCadaPestana = {
-    todas: null,
-    pendientes: "pendiente",
-    aceptadas: "aceptada",
-    rechazadas: "rechazada",
-  };
-
   // Postulaciones de la pestaña activa. .filter se queda con las que cumplen la condición
   // (ver docs/GLOSARIO.md → Métodos de arrays). Si la pestaña no tiene estado (null)
-  // pasan todas; si no, solo las que tienen ese estado.
-  const estadoBuscado = estadoDeCadaPestana[pestanaActiva];
-  const postulacionesVisibles = postulaciones.filter((postulacion) => {
+  // pasan todas; si no, solo las que tienen ese estado. Mientras carga, `postulaciones` es
+  // null: `?? []` usa una lista vacía para no romper.
+  const estadoBuscado = ESTADO_DE_CADA_PESTANA[pestanaActiva];
+  const postulacionesVisibles = (postulaciones ?? []).filter((postulacion) => {
     return !estadoBuscado || postulacion.estado === estadoBuscado;
   });
 
@@ -89,15 +84,17 @@ export default function PostulacionesCol() {
   let contenidoDeLaPestana;
   if (cargando) {
     contenidoDeLaPestana = <RowsSkeleton />;
+  } else if (error) {
+    contenidoDeLaPestana = (
+      <Alert kind="error" title="No pudimos cargar tus postulaciones">
+        {mensajeDeError(error)}
+      </Alert>
+    );
   } else if (postulacionesVisibles.length === 0) {
     contenidoDeLaPestana = (
       <div className={sh.empty}>
-        <Heading level={2} size="h3">
-          No hay postulaciones acá
-        </Heading>
-        <Button as={Link} to="/proyectos">
-          Ir a Proyectos
-        </Button>
+        <Heading level={2} size="h3">No hay postulaciones acá</Heading>
+        <Button as={Link} to="/proyectos">Ir a Proyectos</Button>
       </div>
     );
   } else {
@@ -115,31 +112,21 @@ export default function PostulacionesCol() {
 
         {/* Una fila por postulación */}
         {postulacionesVisibles.map((postulacion) => (
-          <div key={postulacion._id} className={s.r} role="row">
+          <div key={postulacion.id} className={s.r} role="row">
             <div className={s.cells}>
-              <div className={s.hl} role="cell">
-                {postulacion.proyecto.titulo}
-              </div>
+              <div className={s.hl} role="cell">{postulacion.proyecto}</div>
               <div role="cell" data-l="Perfil">
                 {postulacion.perfil}
+                {/* Si se postuló en forma anónima, se marca con una etiqueta */}
+                {postulacion.anonima && <> <Tag tone="outline">Anónima</Tag></>}
               </div>
-              <div role="cell" data-l="Estado">
-                <StatusBadge status={postulacion.estado} />
-              </div>
+              <div role="cell" data-l="Estado"><StatusBadge status={postulacion.estado} /></div>
             </div>
-            {/* Acciones fuera de la tabla: dependen del estado de la postulación */}
+            {/* Acciones fuera de la tabla: solo las aceptadas tienen una (ir a Mis proyectos) */}
             <div className={s.act}>
-              {/* Solo si está pendiente: se puede retirar (abre el diálogo de confirmación) */}
-              {postulacion.estado === "pendiente" && (
-                <Button variant="danger" onClick={() => setIdARetirar(postulacion.id)}>
-                  Retirar
-                </Button>
-              )}
-              {/* Solo si fue aceptada: enlace al proyecto (`/proyectos/${…}` es una plantilla de
-                 texto) */}
-              {postulacion.estado === "aceptada" && (
-                <Button as={Link} to={`/proyectos/${postulacion.proyecto}`} variant="secondary">
-                  Ver proyecto
+              {postulacion.estado === 'aceptada' && (
+                <Button as={Link} to="/panel/proyectos" variant="secondary">
+                  Ver en Mis proyectos
                 </Button>
               )}
             </div>
@@ -149,49 +136,15 @@ export default function PostulacionesCol() {
     );
   }
 
-  // ───── 3. ACCIONES ─────
-
-  // Se ejecuta al confirmar «Sí, retirar» en el diálogo: saca la postulación de la lista,
-  // cierra el diálogo y muestra el aviso verde. (En producción: llamada a la API que la borra.)
-  function retirarPostulacion() {
-    // .filter devuelve una copia sin la postulación retirada (React exige copiar, no modificar)
-    setPostulaciones((listaPrevia) => {
-      return listaPrevia.filter((postulacion) => postulacion.id !== idARetirar);
-    });
-    setIdARetirar(null);
-    setAvisoVisible(true);
-  }
-
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     <div className={`container ${sh.page}`}>
       <Heading level={1}>Mis postulaciones</Heading>
 
-      {/* Aparece solo después de retirar una postulación (avisoVisible = true) */}
-      {avisoVisible && (
-        <Alert kind="success" onClose={() => setAvisoVisible(false)}>
-          Postulación retirada.
-        </Alert>
-      )}
-
       {/* BLOQUE: pestañas — filtran por estado; adentro va el contenido elegido arriba */}
-      <Tabs tabs={pestanas} value={pestanaActiva} onChange={setPestanaActiva}>
+      <Tabs tabs={PESTANAS} value={pestanaActiva} onChange={setPestanaActiva}>
         {contenidoDeLaPestana}
       </Tabs>
-
-      {/* BLOQUE: diálogo de confirmación — abierto solo si hay una postulación elegida para
-         retirar */}
-      {/* `!!idARetirar` convierte el id (o null) en true/false */}
-      <ConfirmDialog
-        open={!!idARetirar}
-        title="¿Retirar tu postulación?"
-        danger
-        confirmLabel="Sí, retirar"
-        onCancel={() => setIdARetirar(null)}
-        onConfirm={retirarPostulacion}
-      >
-        <Text>Vas a poder volver a postularte mientras el proyecto siga abierto.</Text>
-      </ConfirmDialog>
     </div>
   );
 }

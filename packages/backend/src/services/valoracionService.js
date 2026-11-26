@@ -2,7 +2,26 @@ import { Valoracion, TipoEvaluador } from "../models/valoracion.js";
 import { AppError } from "../errors/appError.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
+/** @typedef {import("../types.js").Id} Id */
+/** @typedef {import("../types.js").ValoracionGuardada} ValoracionGuardada */
+/** @typedef {typeof TipoEvaluador[keyof typeof TipoEvaluador]} TipoEvaluadorValor */
+/** @typedef {import("../repositories/valoracionRepository.js").ValoracionResumida} ValoracionResumida */
+/** @typedef {import("../repositories/valoracionRepository.js").DireccionValoracion} DireccionValoracion */
+
+/**
+ * Valoraciones mutuas entre persona y colectivo al terminar una colaboración.
+ */
 export class ValoracionService {
+  /**
+   * Los repositorios de proyecto, colectivo y persona son opcionales: sin ellos se saltean
+   * los chequeos de existencia (lo aprovechan los tests).
+   * @param {object} [deps]
+   * @param {import("../repositories/valoracionRepository.js").ValoracionRepository} [deps.valoracionRepository] Requerido en la práctica.
+   * @param {import("../repositories/colaboracionRepository.js").ColaboracionRepository} [deps.colaboracionRepository] Requerido en la práctica.
+   * @param {import("../repositories/proyectoRepository.js").ProyectoRepository} [deps.proyectoRepository]
+   * @param {import("../repositories/colectivoRepository.js").ColectivoRepository} [deps.colectivoRepository]
+   * @param {import("../repositories/personaColaboradoraRepository.js").PersonaColaboradoraRepository} [deps.personaColaboradoraRepository]
+   */
   constructor({
     valoracionRepository,
     colaboracionRepository,
@@ -17,6 +36,17 @@ export class ValoracionService {
     this.personaColaboradoraRepository = personaColaboradoraRepository;
   }
 
+  /**
+   * Crea la valoración de una colaboración finalizada. El autor y el destinatario se deducen
+   * del evaluador (colectivo → persona o persona → colectivo).
+   * @param {Id} colaboracionId
+   * @param {TipoEvaluadorValor} evaluador
+   * @param {number} puntaje
+   * @param {string | null} [comentario]
+   * @returns {Promise<ValoracionGuardada>}
+   * @throws {AppError} 404 si no existe la colaboración (o le falta persona o colectivo); 400 si
+   *   la colaboración no terminó, el evaluador es inválido o ya hay una valoración suya.
+   */
   async crearValoracion(colaboracionId, evaluador, puntaje, comentario = null) {
     const colaboracion = this.colaboracionRepository.obtenerPorIdCompleto
       ? await this.colaboracionRepository.obtenerPorIdCompleto(colaboracionId)
@@ -92,6 +122,13 @@ export class ValoracionService {
     }
   }
 
+  /**
+   * Valoraciones de una persona: "recibidas" (de colectivos), "emitidas" (suyas) o "todas".
+   * @param {Id} personaColaboradoraId
+   * @param {{ direccion?: DireccionValoracion }} [opciones]
+   * @returns {Promise<ValoracionResumida[]>}
+   * @throws {AppError} 404 si la persona no existe.
+   */
   async obtenerValoracionesPersona(personaColaboradoraId, { direccion = "recibidas" } = {}) {
     if (this.personaColaboradoraRepository) {
       const persona = await this.personaColaboradoraRepository.obtenerPorId(personaColaboradoraId);
@@ -118,6 +155,13 @@ export class ValoracionService {
     );
   }
 
+  /**
+   * Valoraciones de un colectivo: "recibidas" (de personas), "emitidas" (suyas) o "todas".
+   * @param {Id} colectivoId
+   * @param {{ direccion?: DireccionValoracion }} [opciones]
+   * @returns {Promise<ValoracionResumida[]>}
+   * @throws {AppError} 404 si el colectivo no existe.
+   */
   async obtenerValoracionesColectivo(colectivoId, { direccion = "recibidas" } = {}) {
     if (this.colectivoRepository) {
       const colectivo = await this.colectivoRepository.obtenerPorId(colectivoId);
@@ -144,4 +188,4 @@ export class ValoracionService {
       { evaluador: evaluadorFiltro },
     );
   }
-}
+}

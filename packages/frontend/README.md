@@ -1,21 +1,23 @@
-# Plantillas · Código a Voluntad
+# Frontend · Código a Voluntad
 
-Prototipo de alta fidelidad del front (26 pantallas) **escrito para leerlo y reutilizarlo**: cada pieza está en
-su carpeta, comentada y con indicaciones de cómo extenderla. La idea es usarlo como guía para rearmar o ampliar el sitio a mano.
+El front de la plataforma (26 pantallas, React + Vite + Axios) **escrito para leerlo y extenderlo**: cada pieza está en
+su carpeta, comentada y con indicaciones de cómo extenderla.
 
 Estética: «serigrafía de barrio» (papel crema, tintas planas, títulos condensados, esquinas redondeadas, sombra de impresión).
-Los datos son de prueba (`src/datos`) y la sesión es simulada: no hay backend.
+Todos los datos vienen del backend (`src/api/`). La sesión todavía es simulada, hasta integrar Keycloak.
 
 ## Cómo verlo
 
+Necesita el backend levantado (ver el README de la raíz). Desde la raíz del repo:
+
 ```bash
-cd packages/frontend/Plantillas
 npm install
-npm run dev        # http://localhost:5173
-npm test           # tests de los átomos
+cp packages/frontend/.env.example packages/frontend/.env.local   # VITE_API_URL=http://localhost:8000
+npm run start:frontend    # http://localhost:5173
+npm run test:frontend     # tests (átomos + integración de PostulacionesOrg)
 ```
 
-Para entrar con sesión (en `/ingresar`):
+Para entrar con sesión (en `/ingresar`). Las cuentas de demo son ids fijos que crea el seed del backend:
 
 | Rol | Correo | Contraseña |
 |---|---|---|
@@ -32,9 +34,10 @@ src/
 ├─ organismos/    ← bloques completos: Navbar, Footer, ProyectoCard, Dialogos…
 ├─ plantillas/    ← estructura de página: LayoutPrincipal, menus.js, disposicion.module.css
 ├─ paginas/       ← las 26 pantallas, agrupadas por área (publico, acceso, colaboradora, organizacion…)
-├─ hooks/         ← lógica reutilizable (useLoading, useDisclosure)
+├─ api/           ← cliente HTTP (Axios) y adaptadores: lo único que conoce los nombres del backend
+├─ hooks/         ← lógica reutilizable (usePedido, useDisclosure)
 ├─ contexto/      ← sesión (Auth) y modo daltónico
-├─ datos/         ← datos de prueba
+├─ datos/         ← textos fijos (preguntas frecuentes, motivos de denuncia)
 ├─ utilidades/    ← funciones chicas (cx)
 ├─ App.js         ← mapa de rutas
 └─ main.js        ← entrada (fuentes + estilos + render)
@@ -62,18 +65,15 @@ Más recetas (nueva columna de tabla, nuevo botón en la navbar, nuevo campo, nu
 cada una tiene un bloque *ANATOMÍA DE ESTE ARCHIVO* y cuatro secciones con el mismo orden
 (1 datos y estado · 2 cálculos · 3 acciones · 4 lo que se dibuja), con un comentario en cada parte.
 
-## Llevarlo al proyecto real (Create React App)
+## Cómo habla con el backend
 
-1. Copiá el contenido de `src/` dentro de `packages/frontend/src/` (o dejá la carpeta `Plantillas` como referencia y copiá por piezas).
-2. Renombrá `main.js` a `index.js` (la entrada de CRA). Se llama `index.js` y debe cargar las fuentes y `./estilos/index.css`.
-3. Instalá las dependencias: `npm install react-router-dom @fontsource-variable/archivo @fontsource/ibm-plex-mono --workspace=frontend` (y `axios`).
-4. Los tests: en CRA se usa `jest.fn()` (acá `vi.fn()`) y no hace falta importar `describe/test`.
-5. Reemplazá `src/datos` y `useLoading` por llamadas a la API con Axios; reemplazá `contexto/Auth.js` por el login real.
+- `src/api/cliente.js` es la única instancia de Axios (URL base de `VITE_API_URL`, timeout de 10 s). El token del login real se va a agregar ahí, con un interceptor.
+- Cada `src/api/*.js` pide algo al backend y lo **adapta** a lo que muestra la pantalla. Si el backend cambia un nombre, se arregla solo ahí.
+- Las pantallas piden datos con `usePedido` (`src/hooks/usePedido.js`): `cargando` muestra los esqueletos y `error` el aviso rojo con el mensaje del backend (`api/errores.js`).
+- En producción el front se compila con `VITE_API_URL=/api` y lo sirve nginx (ver `deploy/nginx/Dockerfile` en la raíz).
 
-> `vite.config.js`, `index.html` y `package.json` de esta carpeta existen solo para poder correr las plantillas por separado.
+## Lo que sigue simulado
 
-## Lo que es simulado (y hay que conectar)
-
-- Sesión y roles (`contexto/Auth.js`) · datos (`datos/`) · esperas de carga (`hooks/useLoading.js`).
+- Sesión y roles (`contexto/Auth.js`): falta integrar Keycloak.
 - hCaptcha (`moleculas/CaptchaMock`) y login social (`moleculas/SocialButtons`).
 - Los íconos son provisorios (`atomos/Icon`): se reemplazan por la biblioteca que se elija, tocando solo ese archivo.

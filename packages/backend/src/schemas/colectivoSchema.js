@@ -79,29 +79,27 @@ const colectivoSchema = new mongoose.Schema(
         },
         message: "No se permiten tipos de redes sociales duplicados",
       },
-      denuncias: {
-        type: [denunciaSchema],
-        default: [],
-        select: false,
-      },
-      activo: {
-        type: Boolean,
-        required: false,
-        default: true,
-        select: false,
-      },
-      createdAt: { type: Date, select: false },
-      updatedAt: { type: Date, select: false },
-      __v: { type: Number, select: false },
     },
     keycloackId: {
       type: String,
       unique: true
     },
+    denuncias: {
+      type: [denunciaSchema],
+      default: [],
+      select: false,
+    },
+    activo: {
+      type: Boolean,
+      required: false,
+      default: true,
+      select: false,
+    },
     createdAt: { type: Date, select: false },
     updatedAt: { type: Date, select: false },
-    __v: { type: Number, select: false }
-},{
+    __v: { type: Number, select: false },
+  },
+  {
     timestamps: true,
     collection: "colectivos",
   },

@@ -1,3 +1,14 @@
+/**
+ * Entrada del catálogo de errores. `message` es un texto fijo o una función que arma el texto
+ * con los argumentos que recibe AppError.
+ * @typedef {object} EntradaErrorCatalog
+ * @property {string} code Código estable (ej. "ERR-VAL-001").
+ * @property {string | ((...args: any[]) => string)} message
+ */
+
+/**
+ * Catálogo de errores de la API, por nombre. Se congela al final del archivo.
+ */
 const ErrorCatalog = {
   // =========================
   // GENERALES
@@ -6,6 +17,16 @@ const ErrorCatalog = {
   ARGUMENTO_INVALIDO: {
     code: "ERR-VAL-001",
     message: (stringDelArgumento) => `El argumento ${stringDelArgumento} es inválido`,
+  },
+
+  PAGINACION_PAGINA_INVALIDA: {
+    code: "ERR-VAL-002",
+    message: "El parámetro pagina debe ser un número entero mayor o igual a 1",
+  },
+
+  PAGINACION_LIMITE_INVALIDO: {
+    code: "ERR-VAL-003",
+    message: (maximo) => `El parámetro limite debe ser un número entero entre 1 y ${maximo}`,
   },
 
   RECURSO_NO_ENCONTRADO: {
@@ -118,8 +139,6 @@ const ErrorCatalog = {
 
   HABILIDADES_INEXISTENTES_GENERICO: {
     code: "ERR-VAL-207",
-    message: (codigos) => `Las habilidades de codigo: ${codigos.join(", ")} no existen`,
-
     message: (codigo) =>
       Array.isArray(codigo)
         ? `Las habilidades de codigo: ${codigo.join(", ")} no existen`
@@ -186,6 +205,11 @@ const ErrorCatalog = {
   COLABORADORA_GIT_REQUERIDO: {
     code: "ERR-VAL-402",
     message: "El Git de la colaboradora es requerido",
+  },
+
+  COLABORADORA_PRONOMBRES_FORMATO: {
+    code: "ERR-VAL-408",
+    message: "Los pronombres deben ser un texto o una lista de textos, sin valores vacíos",
   },
 
   COLABORADORA_HABILIDADES_REQUERIDAS: {
@@ -261,6 +285,11 @@ const ErrorCatalog = {
   COLABORACION_YA_DADA_DE_BAJA: {
     code: "ERR-EST-508",
     message: (id) => `La colaboración ${id} ya fue dada de baja`,
+  },
+
+  COLABORACION_ORIGEN_BAJA_INVALIDO: {
+    code: "ERR-VAL-509",
+    message: "El parámetro por debe ser 'persona' o 'colectivo'",
   },
 
   // =========================
@@ -366,19 +395,59 @@ const ErrorCatalog = {
     message: (nombre) => `La colaboradora ${nombre} no acepta mensajes internos`,
   },
 
-  MENSAJE_PERSONA_COLABORADORA_REQUERIDO: {
+  MENSAJE_COLECTIVO_REQUERIDO: {
     code: "ERR-VAL-802",
+    message: "El colectivo es requerido",
+  },
+
+  MENSAJE_PERSONA_COLABORADORA_REQUERIDO: {
+    code: "ERR-VAL-803",
     message: "La persona colaboradora destinataria es requerida",
   },
 
   MENSAJE_TEXTO_REQUERIDO: {
-    code: "ERR-VAL-803",
+    code: "ERR-VAL-804",
     message: "El texto del mensaje es requerido",
   },
 
+  MENSAJE_PROYECTO_REQUERIDO: {
+    code: "ERR-VAL-805",
+    message: "El proyecto es requerido",
+  },
+
+  MENSAJE_EMISOR_REQUERIDO: {
+    code: "ERR-VAL-806",
+    message: "El emisor es requerido",
+  },
+
+  MENSAJE_EMISOR_INVALIDO: {
+    code: "ERR-VAL-807",
+    message: "EL emisor debe ser un colectivo o una persona",
+  },
+
   MENSAJE_TEXTO_FORMATO: {
-    code: "ERR-VAL-804",
+    code: "ERR-VAL-811",
     message: "El texto del mensaje debe ser un texto",
+  },
+
+  MENSAJE_SIN_CONVERSACION_PREVIA: {
+    code: "ERR-VAL-812",
+    message: "Espere a ser contactado por el colectivo",
+  },
+
+  MENSAJE_COLECTIVO_NO_COINCIDE_CON_PROYECTO: {
+    code: "ERR-VAL-808",
+    message: "El proyecto debe pertenecer al colectivo",
+  },
+
+  MENSAJE_LECTOR_REQUERIDO: {
+    code: "ERR-VAL-809",
+    message: "El lector es requerido",
+  },
+
+  MENSAJE_LECTOR_INVALIDO: {
+    code: "ERR-VAL-810",
+    message: "El lector del mensaje debe ser un colectivo o una persona",
   },
 
   // =========================
@@ -398,58 +467,6 @@ const ErrorCatalog = {
   LOGRO_URL_INVALIDA: {
     code: "ERR-VAL-903",
     message: "La URL del código fuente debe ser una URL válida",
-  },
-
-  // =========================
-  // VALORACIONES
-  // =========================
-
-  VALORACION_COLABORACION_ID_INVALIDO: {
-    code: "ERR-VAL-1101",
-    message: "El id de la colaboración es requerido",
-  },
-  VALORACION_EVALUADOR_TIPO_FORMATO: {
-    code: "ERR-VAL-1102",
-    message: "El tipo de evaluador no es válido",
-  },
-  VALORACION_PUNTAJE_REQUERIDO: {
-    code: "ERR-VAL-1104",
-    message: "El puntaje es requerido",
-  },
-  VALORACION_COMENTARIO_REQUERIDO: {
-    code: "ERR-VAL-1105",
-    message: "El comentario es requerido",
-  },
-
-  VALORACION_PUNTAJE_FORMATO: {
-    code: "ERR-VAL-1106",
-    message: "El puntaje debe ser un número entero entre 1 y 5",
-  },
-
-  VALORACION_PUNTAJE_RANGO: {
-    code: "ERR-VAL-1107",
-    message: "El puntaje debe estar entre 1 y 5",
-  },
-
-  VALORACION_COMENTARIO_FORMATO: {
-    code: "ERR-VAL-1108",
-    message: "El comentario debe ser un texto de entre 1 y 500 caracteres",
-  },
-
-  VALORACION_COMENTARIO_LARGO: {
-    code: "ERR-VAL-1109",
-    message: "El comentario debe tener un máximo de 500 caracteres",
-  },
-
-  VALORACION_EXISTENTE: {
-    code: "ERR-EST-1110",
-    message: (colaboracionId, evaluador) =>
-      `Ya existe una valoración para la colaboración con id ${colaboracionId} y el evaluador ${evaluador}`,
-  },
-
-  VALORACION_COLABORACION_NO_FINALIZADA: {
-    code: "ERR-EST-1111",
-    message: "No se puede valorar una colaboración que no ha finalizado",
   },
 
   // POSTULACION
@@ -490,8 +507,8 @@ const ErrorCatalog = {
   },
   POSTULACION_DUPLICADA: {
     code: "ERR-EST-1008",
-    message: (nombreFantasia, perfilDescripcion) =>
-      `Ya existe una postulación pendiente de ${nombreFantasia} para el perfil: ${perfilDescripcion}`,
+    message: (nombreFantasia, perfilDescripcion, estado) =>
+      `Ya existe una postulación ${estado} de ${nombreFantasia} para el perfil: ${perfilDescripcion}`,
   },
   POSTULACION_NO_ENCONTRADA: {
     code: "ERR-NOT-1009",
@@ -501,6 +518,10 @@ const ErrorCatalog = {
     code: "ERR-EST-1010",
     message:
       "La Postulacion ya fue resuelta, asegurese de resolver postuaciones con estado PENDIENTE",
+  },
+  POSTULACION_NO_PERTENECE_A_COLECTIVO: {
+    code: "ERR-EST-1011",
+    message: "La Postulacion no pertenece al colectivo que la esta queriendo modificar",
   },
 
   // =========================
@@ -574,10 +595,75 @@ const ErrorCatalog = {
     code: "ERR-VAL-1207",
     message: "El estado de la denuncia es requerido",
   },
+
+  // =========================
+  // VALORACIONES
+  // =========================
+
+  VALORACION_COLABORACION_ID_INVALIDO: {
+    code: "ERR-VAL-1301",
+    message: "El id de la colaboración es requerido",
+  },
+  VALORACION_EVALUADOR_TIPO_FORMATO: {
+    code: "ERR-VAL-1302",
+    message: "El tipo de evaluador no es válido",
+  },
+  VALORACION_PUNTAJE_REQUERIDO: {
+    code: "ERR-VAL-1304",
+    message: "El puntaje es requerido",
+  },
+  VALORACION_COMENTARIO_REQUERIDO: {
+    code: "ERR-VAL-1305",
+    message: "El comentario es requerido",
+  },
+
+  VALORACION_PUNTAJE_FORMATO: {
+    code: "ERR-VAL-1306",
+    message: "El puntaje debe ser un número entero entre 1 y 5",
+  },
+
+  VALORACION_PUNTAJE_RANGO: {
+    code: "ERR-VAL-1307",
+    message: "El puntaje debe estar entre 1 y 5",
+  },
+
+  VALORACION_COMENTARIO_FORMATO: {
+    code: "ERR-VAL-1308",
+    message: "El comentario debe ser un texto de entre 1 y 500 caracteres",
+  },
+
+  VALORACION_COMENTARIO_LARGO: {
+    code: "ERR-VAL-1309",
+    message: "El comentario debe tener un máximo de 500 caracteres",
+  },
+
+  VALORACION_EXISTENTE: {
+    code: "ERR-EST-1310",
+    message: (colaboracionId, evaluador) =>
+      `Ya existe una valoración para la colaboración con id ${colaboracionId} y el evaluador ${evaluador}`,
+  },
+
+  VALORACION_COLABORACION_NO_FINALIZADA: {
+    code: "ERR-EST-1311",
+    message: "No se puede valorar una colaboración que no ha finalizado",
+  },
+
+  // =========================
+  // CAPTCHA
+  // =========================
+  CAPTCHA_REQUERIDO: {
+    code: "ERR-VAL-1400",
+    message: "La validacion Captcha es necesaria",
+  },
+
+  CAPTCHA_INVALIDO: {
+    code: "ERR-VAL-1401",
+    message: "La validacion Captcha es invalida",
+  },
 };
 
 Object.defineProperty(ErrorCatalog, "HABILIDADES_INEXISTENTES_GENERICO", {
-  value: ErrorCatalog.HABILIDAD_INEXISTENTE_GENERICO,
+  value: ErrorCatalog.HABILIDADES_INEXISTENTES_GENERICO,
   enumerable: false,
   writable: false,
   configurable: false,

@@ -7,16 +7,18 @@
  * ANATOMÍA DE ESTE ARCHIVO:
  *   1. MAIL: la regla para decidir si un correo «parece» válido.
  *   2. useForm: manejo de validación de un formulario (errores al salir del campo,
- *      resumen al enviar y espera simulada).
+ *      resumen al enviar y envío al backend con el error que devuelva).
  *   3. Resumen: el aviso rojo con la lista de errores al enviar.
  *   4. useSocial: qué pasa al registrarse con un botón de red social.
  */
 
 // ───── Imports ─────
-import { useRef, useState } from "react";
-import { Alert } from "../../moleculas";
-import { useAuth } from "../../contexto";
-import Lodash from "lodash";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Alert } from '../../moleculas';
+import { useAuth } from '../../contexto';
+import { mensajeDeError } from '../../api/errores.js';
+
 // ───── 1. MAIL ─────
 // Expresión regular que acepta «algo@algo.algo» sin espacios. No comprueba que el correo
 // exista, solo que tenga forma de correo.
@@ -47,10 +49,14 @@ const normalizarTexto = (texto) => {
 // Parámetro `validar`: función que recibe los valores del formulario y devuelve un
 // objeto con un mensaje por campo inválido, ej. { mail: 'Ingresá un correo válido.' }.
 // Un objeto vacío {} significa «todo bien».
+// Parámetro `alEnviar` (opcional): función `async` que recibe los valores y hace el pedido
+// al backend. Si el backend responde con error (por ejemplo 400 «La habilidad … no existe»
+// o 409 «Ya existe un colectivo con ese nombre»), su mensaje queda en `errorDelBackend`.
+// Sin `alEnviar` se simula la espera, como en el prototipo.
 //
-// Devuelve: { blur, enviar, errores, cargando, listo, intento, todos }.
+// Devuelve: { blur, enviar, errores, cargando, listo, intento, errorDelBackend, todos }.
 // Si se cambia: cambia el comportamiento de ambos formularios de registro.
-export function useForm(validar) {
+export function useForm(validar, alEnviar) {
   // ───── 1. DATOS Y ESTADO ─────
 
   // Campos que la persona ya «tocó» (entró y salió), ej. { mail: true }.
@@ -70,9 +76,9 @@ export function useForm(validar) {
   // Lo cambia `enviar`.
   const [listo, setListo] = useState(false);
 
-  const { keycloak, token, recargarPerfil } = useAuth();
+  // Mensaje de error que devolvió el backend al enviar ('' = ninguno). Lo cambia `enviar`.
+  const [errorDelBackend, setErrorDelBackend] = useState('');
 
-  const bloqueoEnvioRef = useRef(false);
   // ───── 2. CÁLCULOS ─────
 
   // Devuelve solo los errores que corresponde MOSTRAR ahora: todos si ya se intentó
@@ -103,30 +109,9 @@ export function useForm(validar) {
   }
   // Se usa como onSubmit del formulario: `enviar(valores)` devuelve el manejador
   // que corre al apretar «Crear cuenta». Si hay errores corta y no «llama a la API».
-  function alEnviarFormularioColaboradora(valores) {
-    console.log(valores);
-    const payload = {
-      nombreFantasia: valores.fantasia,
-      git: valores.github,
-      nombre: valores.nombre,
-      apellido: valores.apellido,
-      habilidades: (valores.habilidades || []).map(habilidad => Lodash.snakeCase(habilidad)),
-      pronombres: valores.pronombres == '' ? [] : valores.pronombres,
-      presentacion: valores.bio,
-      contactos: (valores.contactos || []).map(([tipo, valor]) => ({
-        tipo,
-        valor,
-      })),
-      bloquearMensajeInterno: valores.mensajes,
-    };
-    
-    return async function (evento) {
+  function alEnviarFormulario(valores) {
+    return function (evento) {
       evento.preventDefault(); // evita que el navegador recargue la página
-
-      // 1. Corte inmediato si ya se está enviando o si la cuenta ya fue creada
-      if (bloqueoEnvioRef.current || cargando || listo) {
-        return;
-      }
       setIntento(true); // desde ahora se muestran todos los errores
       setListo(false); // oculta un «Cuenta creada» anterior
 
@@ -135,130 +120,37 @@ export function useForm(validar) {
         return;
       }
 
-      bloqueoEnvioRef.current = true;
       setCargando(true);
+      setErrorDelBackend('');
 
-      try {
-        // 1. Nos aseguramos de que el token no esté vencido antes de enviarlo
-        await keycloak.updateToken(30);
-
-        // 2. Enviamos los datos del formulario al backend
-        const response = await fetch("http://localhost:3000/colaboradoras", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${keycloak.token || token}`,
-          },
-          body: JSON.stringify(payload),
-        });
-
-        const data = await response.json();
-        console.log(data);
-
-        if (!response.ok) {
-          throw new Error(data.message || "Ocurrió un error al crear la cuenta");
-        }
-
-        // 3. Refrescamos el token para que traiga el nuevo rol 'colaboradora' asignado por el backend
-        await keycloak.updateToken(-1);
-
-        // 4. Actualizamos el AuthContext (perfilCompletado = true, rol = 'colaboradora')
-        await recargarPerfil();
-
-        setListo(true);
-
-        window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-        });
-
-      } catch (error) {
-        console.error("Error al registrar colaboradora:", error);
-        bloqueoEnvioRef.current = false;
-      } finally {
-        setCargando(false);
-      }
-    };
-  }
-
-  function alEnviarFormularioColectivo(valores) {
-    console.log(valores);
-    const payload = {
-    nombre: valores.nombre,
-    descripcion: valores.desc,
-    ubicacion: normalizarTexto(valores.ubicacion),
-    tipoDeColectivo: normalizarTexto(valores.tipo),
-    };
-    
-    return async function (evento) {
-      evento.preventDefault(); // evita que el navegador recargue la página
-
-      // 1. Corte inmediato si ya se está enviando o si la cuenta ya fue creada
-      if (bloqueoEnvioRef.current || cargando || listo) {
-        return;
-      }
-      setIntento(true); // desde ahora se muestran todos los errores
-      setListo(false); // oculta un «Cuenta creada» anterior
-
-      const hayErrores = Object.keys(validar(valores)).length > 0;
-      if (hayErrores) {
+      // Sin función de envío: se simula la espera con setTimeout (ejecuta la función de
+      // adentro a los 800 ms) para poder ver el estado «cargando».
+      if (!alEnviar) {
+        setTimeout(() => {
+          setCargando(false);
+          setListo(true);
+        }, 800);
         return;
       }
 
-      bloqueoEnvioRef.current = true;
-      setCargando(true);
-
-      try {
-        // 1. Nos aseguramos de que el token no esté vencido antes de enviarlo
-        await keycloak.updateToken(30);
-
-        // 2. Enviamos los datos del formulario al backend
-        const response = await fetch("http://localhost:3000/colectivos", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${keycloak.token || token}`,
-          },
-          body: JSON.stringify(payload),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Ocurrió un error al crear la cuenta");
-        }
-
-        // 3. Refrescamos el token para que traiga el nuevo rol 'colaboradora' asignado por el backend
-        await keycloak.updateToken(-1);
-
-        // 4. Actualizamos el AuthContext (perfilCompletado = true, rol = 'colaboradora')
-        await recargarPerfil();
-
-        setListo(true);
-
-        window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-        });
-
-      } catch (error) {
-        console.error("Error al registrar colectivo:", error);
-        bloqueoEnvioRef.current = false;
-      } finally {
-        setCargando(false);
-      }
+      // Con función de envío: se espera la respuesta del backend. `.then` corre si salió bien,
+      // `.catch` si respondió con error y `.finally` siempre, al terminar.
+      alEnviar(valores)
+        .then(() => setListo(true))
+        .catch((error) => setErrorDelBackend(mensajeDeError(error)))
+        .finally(() => setCargando(false));
     };
   }
 
   // Lo que el hook le entrega a la pantalla. `todos` es la función de validación completa.
   return {
     blur: alSalirDelCampo,
-    enviarColaboradora: alEnviarFormularioColaboradora,
-    enviarColectivo: alEnviarFormularioColectivo,
+    enviar: alEnviarFormulario,
     errores: erroresVisibles,
     cargando,
     listo,
     intento,
+    errorDelBackend,
     todos: validar,
   };
 }

@@ -1,319 +1,282 @@
+import mongoose from "mongoose";
+import { colectivoService } from "../../src/container.js";
 import ErrorCatalog from "../../src/errors/errorCatalog.js";
-import { TipoRedSocial } from "../../src/models/redSocial.js";
-import { crearContexto, expectAppError } from "../helpers/crearContexto.js";
+import { ColectivoModel } from "../../src/schemas/colectivoSchema.js";
+import { usarBaseDeDatos } from "../utils/db.js";
+import { esperarAppError } from "../utils/esperarAppError.js";
+
+usarBaseDeDatos();
+
+const idInexistente = () => new mongoose.Types.ObjectId().toString();
+
+const crearColectivo = (nombre = "Asamblea Norte", redesSociales = []) =>
+  colectivoService.crearColectivo(
+    nombre,
+    "Asamblea barrial",
+    "caba",
+    "asamblea",
+    [],
+    redesSociales,
+  );
 
 describe("ColectivoService", () => {
-  let ctx;
+  describe("crearColectivo", () => {
+    test("persiste el colectivo activo y devuelve el id sin denuncias", async () => {
+      // Ejecución
+      const colectivo = await crearColectivo();
 
-  beforeEach(() => {
-    ctx = crearContexto();
-  });
-
-  test("crearColectivo guarda el colectivo sin proyectos y devuelve su id", async () => {
-    const colectivo = await ctx.colectivoService.crearColectivo(
-      "Fundación",
-      "d",
-      "caba",
-      "fundacion",
-    );
-
-    expect(colectivo).toMatchObject({ nombre: "Fundación", proyectos: [] });
-    expect(colectivo).not.toHaveProperty("denuncias");
-    expect(await ctx.colectivoService.obtenerColectivoPorId(colectivo.id)).toMatchObject({
-      nombre: "Fundación",
-    });
-  });
-
-  test("crearColectivo guarda el colectivo con proyectos y redes sociales explícitos", async () => {
-    const redes = [{ tipo: TipoRedSocial.INSTAGRAM, url: "https://instagram.com/eco" }];
-    const colectivo = await ctx.colectivoService.crearColectivo(
-      "Fundación Verde",
-      "d",
-      "caba",
-      "fundacion",
-      ["proyecto-1", "proyecto-2"],
-      redes,
-    );
-
-    expect(colectivo.proyectos).toEqual(["proyecto-1", "proyecto-2"]);
-    expect(colectivo.redesSociales).toHaveLength(1);
-    expect(colectivo.redesSociales[0].tipo).toBe("instagram");
-
-    const persistido = await ctx.colectivoService.obtenerColectivoPorId(colectivo.id);
-    expect(persistido.proyectos).toEqual(["proyecto-1", "proyecto-2"]);
-    expect(persistido.redesSociales).toHaveLength(1);
-  });
-
-  test("no permite dos colectivos con el mismo nombre", async () => {
-    await ctx.colectivoService.crearColectivo("Fundación", "d", "caba", "fundacion");
-
-    await expectAppError(
-      ctx.colectivoService.crearColectivo("Fundación", "otra", "salta", "ong"),
-      ErrorCatalog.COLECTIVO_YA_EXISTE,
-      409,
-    );
-  });
-
-  test("obtenerColectivos lista todos", async () => {
-    await ctx.colectivoService.crearColectivo("A", "d", "caba", "ong");
-    await ctx.colectivoService.crearColectivo("B", "d", "caba", "ong");
-
-    expect(await ctx.colectivoService.obtenerColectivos()).toHaveLength(2);
-  });
-
-  test("obtenerColectivoPorId falla con 404 si no existe", async () => {
-    await expectAppError(
-      ctx.colectivoService.obtenerColectivoPorId("inexistente"),
-      ErrorCatalog.COLECTIVO_NO_ENCONTRADO,
-      404,
-    );
-  });
-
-  test("obtenerColectivoPorNombre falla con 400 si no existe", async () => {
-    await expectAppError(
-      ctx.colectivoService.obtenerColectivoPorNombre("Nadie"),
-      ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE,
-      400,
-    );
-  });
-
-  test("agregarProyecto vincula el proyecto al colectivo", async () => {
-    const colectivo = await ctx.colectivoService.crearColectivo("A", "d", "caba", "ong");
-
-    await ctx.colectivoService.agregarProyecto(colectivo.id, "proyecto-1");
-
-    expect((await ctx.colectivoService.obtenerColectivoPorId(colectivo.id)).proyectos).toEqual([
-      "proyecto-1",
-    ]);
-  });
-
-  describe("redes sociales", () => {
-    test("crear un perfil sin redes sociales", async () => {
-      const colectivo = await ctx.colectivoService.crearColectivo(
-        "Eco",
-        "d",
-        "caba",
-        "ong",
-        [],
-        [],
-      );
-
-      expect(colectivo.redesSociales).toEqual([]);
-      const recuperado = await ctx.colectivoService.obtenerColectivoPorId(colectivo.id);
-      expect(recuperado.redesSociales).toEqual([]);
-    });
-
-    test("crear un perfil con varias redes sociales", async () => {
-      const redes = [
-        { tipo: TipoRedSocial.INSTAGRAM, url: "https://instagram.com/eco" },
-        { tipo: TipoRedSocial.LINKEDIN, url: "https://linkedin.com/company/eco" },
-      ];
-      const colectivo = await ctx.colectivoService.crearColectivo(
-        "Eco",
-        "d",
-        "caba",
-        "ong",
-        [],
-        redes,
-      );
-
-      expect(colectivo.redesSociales).toHaveLength(2);
-      expect(colectivo.redesSociales[0].tipo).toBe("instagram");
-      expect(colectivo.redesSociales[1].tipo).toBe("linkedin");
-    });
-
-    test("actualizar las redes sociales existentes", async () => {
-      const iniciales = [
-        { tipo: TipoRedSocial.INSTAGRAM, url: "https://instagram.com/eco" },
-        { tipo: TipoRedSocial.LINKEDIN, url: "https://linkedin.com/company/eco" },
-      ];
-      const colectivo = await ctx.colectivoService.crearColectivo(
-        "Eco",
-        "d",
-        "caba",
-        "ong",
-        [],
-        iniciales,
-      );
-
-      await ctx.colectivoService.actualizarColectivo(colectivo.id, {
-        redesSociales: [
-          { tipo: TipoRedSocial.INSTAGRAM, url: "https://instagram.com/eco_oficial" },
-          { tipo: TipoRedSocial.LINKEDIN, url: "https://linkedin.com/company/eco" },
-        ],
+      // Validación
+      expect(colectivo).toMatchObject({
+        nombre: "Asamblea Norte",
+        ubicacion: "caba",
+        tipoDeColectivo: "asamblea",
+        proyectos: [],
+        activo: true,
       });
-
-      const actualizado = await ctx.colectivoService.obtenerColectivoPorId(colectivo.id);
-      expect(actualizado.redesSociales).toHaveLength(2);
-      expect(actualizado.redesSociales[0].url).toBe("https://instagram.com/eco_oficial");
+      expect(colectivo).not.toHaveProperty("denuncias");
+      const guardado = await ColectivoModel.findById(colectivo.id).select("+activo").lean();
+      expect(guardado).toMatchObject({ nombre: "Asamblea Norte", activo: true });
     });
 
-    test("agregar una red nueva", async () => {
-      const iniciales = [{ tipo: TipoRedSocial.INSTAGRAM, url: "https://instagram.com/eco" }];
-      const colectivo = await ctx.colectivoService.crearColectivo(
-        "Eco",
-        "d",
-        "caba",
-        "ong",
-        [],
-        iniciales,
-      );
+    test("normaliza las redes sociales (tipo en minúsculas y url sin espacios)", async () => {
+      // Ejecución
+      const colectivo = await crearColectivo("Asamblea Norte", [
+        { tipo: " Instagram ", url: " https://instagram.com/asamblea " },
+      ]);
 
-      await ctx.colectivoService.actualizarColectivo(colectivo.id, {
-        redesSociales: [
-          { tipo: TipoRedSocial.INSTAGRAM, url: "https://instagram.com/eco" },
-          { tipo: TipoRedSocial.YOUTUBE, url: "https://youtube.com/@eco" },
-        ],
-      });
-
-      const actualizado = await ctx.colectivoService.obtenerColectivoPorId(colectivo.id);
-      expect(actualizado.redesSociales).toHaveLength(2);
-      expect(actualizado.redesSociales.map((r) => r.tipo)).toEqual(["instagram", "youtube"]);
-    });
-
-    test("reemplazar la URL de una red existente", async () => {
-      const iniciales = [{ tipo: TipoRedSocial.GITHUB, url: "https://github.com/eco-old" }];
-      const colectivo = await ctx.colectivoService.crearColectivo(
-        "Eco",
-        "d",
-        "caba",
-        "ong",
-        [],
-        iniciales,
-      );
-
-      await ctx.colectivoService.actualizarColectivo(colectivo.id, {
-        redesSociales: [{ tipo: TipoRedSocial.GITHUB, url: "https://github.com/eco-new" }],
-      });
-
-      const actualizado = await ctx.colectivoService.obtenerColectivoPorId(colectivo.id);
-      expect(actualizado.redesSociales).toEqual([
-        expect.objectContaining({ tipo: "github", url: "https://github.com/eco-new" }),
+      // Validación
+      const guardado = await ColectivoModel.findById(colectivo.id).lean();
+      expect(guardado.redesSociales).toEqual([
+        { tipo: "instagram", url: "https://instagram.com/asamblea" },
       ]);
     });
 
-    test("eliminar una red mediante una actualización", async () => {
-      const iniciales = [
-        { tipo: TipoRedSocial.GITHUB, url: "https://github.com/eco" },
-        { tipo: TipoRedSocial.FACEBOOK, url: "https://facebook.com/eco" },
-      ];
-      const colectivo = await ctx.colectivoService.crearColectivo(
-        "Eco",
-        "d",
-        "caba",
-        "ong",
-        [],
-        iniciales,
+    test("rechaza con 400 redes sociales con tipo duplicado (sin importar mayúsculas)", async () => {
+      // Ejecución y Validación
+      await esperarAppError(
+        crearColectivo("Asamblea Norte", [
+          { tipo: "github", url: "https://github.com/a" },
+          { tipo: "GitHub", url: "https://github.com/b" },
+        ]),
+        ErrorCatalog.RED_SOCIAL_TIPO_DUPLICADO,
+        400,
       );
-
-      // Enviamos solo github, se elimina facebook
-      await ctx.colectivoService.actualizarColectivo(colectivo.id, {
-        redesSociales: [{ tipo: TipoRedSocial.GITHUB, url: "https://github.com/eco" }],
-      });
-
-      let actualizado = await ctx.colectivoService.obtenerColectivoPorId(colectivo.id);
-      expect(actualizado.redesSociales).toHaveLength(1);
-      expect(actualizado.redesSociales[0].tipo).toBe("github");
-
-      // Enviamos array vacío, se eliminan todas
-      await ctx.colectivoService.actualizarColectivo(colectivo.id, {
-        redesSociales: [],
-      });
-
-      actualizado = await ctx.colectivoService.obtenerColectivoPorId(colectivo.id);
-      expect(actualizado.redesSociales).toEqual([]);
+      expect(await ColectivoModel.countDocuments()).toBe(0);
     });
 
-    test("conservar las redes cuando la propiedad no se envía", async () => {
-      const iniciales = [
-        { tipo: TipoRedSocial.GITHUB, url: "https://github.com/eco" },
-        { tipo: TipoRedSocial.TIKTOK, url: "https://tiktok.com/@eco" },
-      ];
-      const colectivo = await ctx.colectivoService.crearColectivo(
-        "Eco",
-        "d",
-        "caba",
-        "ong",
-        [],
-        iniciales,
+    test("rechaza con 400 una red social con url inválida", async () => {
+      // Ejecución y Validación
+      await esperarAppError(
+        crearColectivo("Asamblea Norte", [{ tipo: "github", url: "ftp://github.com/a" }]),
+        ErrorCatalog.RED_SOCIAL_URL_INVALIDA,
+        400,
       );
-
-      await ctx.colectivoService.actualizarColectivo(colectivo.id, {
-        descripcion: "Nueva descripción para la organización",
-      });
-
-      const actualizado = await ctx.colectivoService.obtenerColectivoPorId(colectivo.id);
-      expect(actualizado.descripcion).toBe("Nueva descripción para la organización");
-      expect(actualizado.redesSociales).toHaveLength(2);
-      expect(actualizado.redesSociales.map((r) => r.tipo)).toEqual(["github", "tiktok"]);
     });
 
-    test("rechazar tipos duplicados", async () => {
-      const colectivo = await ctx.colectivoService.crearColectivo("Eco", "d", "caba", "ong");
+    test("rechaza con 409 un nombre ya usado", async () => {
+      // Preparación
+      await crearColectivo();
 
-      // En actualización
-      await expectAppError(
-        ctx.colectivoService.actualizarColectivo(colectivo.id, {
+      // Ejecución y Validación
+      await esperarAppError(crearColectivo(), ErrorCatalog.COLECTIVO_YA_EXISTE, 409);
+      expect(await ColectivoModel.countDocuments()).toBe(1);
+    });
+  });
+
+  describe("obtener", () => {
+    test("obtenerColectivos lista solo los activos", async () => {
+      // Preparación
+      const activo = await crearColectivo("Activo");
+      const inactivo = await crearColectivo("Inactivo");
+      await ColectivoModel.findByIdAndUpdate(inactivo.id, { activo: false });
+
+      // Ejecución
+      const { resultados: colectivos, total } = await colectivoService.obtenerColectivos({
+        pagina: 1,
+        limite: 20,
+      });
+
+      // Validación
+      expect(colectivos.map((c) => String(c._id))).toEqual([activo.id]);
+      expect(total).toBe(1);
+    });
+
+    test("obtenerColectivoPorId devuelve el colectivo", async () => {
+      // Preparación
+      const creado = await crearColectivo();
+
+      // Ejecución
+      const colectivo = await colectivoService.obtenerColectivoPorId(creado.id);
+
+      // Validación
+      expect(colectivo).toMatchObject({
+        nombre: "Asamblea Norte",
+        descripcion: "Asamblea barrial",
+      });
+    });
+
+    test("obtenerColectivoPorId falla con 404 si no existe", async () => {
+      // Ejecución y Validación
+      await esperarAppError(
+        colectivoService.obtenerColectivoPorId(idInexistente()),
+        ErrorCatalog.COLECTIVO_NO_ENCONTRADO,
+        404,
+      );
+    });
+
+    test("obtenerColectivoPorNombre devuelve el colectivo", async () => {
+      // Preparación
+      await crearColectivo();
+
+      // Ejecución
+      const colectivo = await colectivoService.obtenerColectivoPorNombre("Asamblea Norte");
+
+      // Validación
+      expect(colectivo.tipoDeColectivo).toBe("asamblea");
+    });
+
+    test("obtenerColectivoPorNombre falla con 400 si no existe", async () => {
+      // Ejecución y Validación
+      await esperarAppError(
+        colectivoService.obtenerColectivoPorNombre("No existe"),
+        ErrorCatalog.COLECTIVO_NO_ENCONTRADO_POR_NOMBRE,
+        400,
+      );
+    });
+  });
+
+  describe("actualizarColectivo", () => {
+    test("actualiza los campos y devuelve el colectivo actualizado", async () => {
+      // Preparación
+      const creado = await crearColectivo();
+
+      // Ejecución
+      const actualizado = await colectivoService.actualizarColectivo(creado.id, {
+        descripcion: "Nueva descripción",
+        ubicacion: "cordoba",
+      });
+
+      // Validación
+      expect(actualizado).toMatchObject({
+        nombre: "Asamblea Norte",
+        descripcion: "Nueva descripción",
+        ubicacion: "cordoba",
+      });
+      const guardado = await ColectivoModel.findById(creado.id).lean();
+      expect(guardado.descripcion).toBe("Nueva descripción");
+    });
+
+    test("reemplaza las redes sociales normalizándolas", async () => {
+      // Preparación
+      const creado = await crearColectivo("Asamblea Norte", [
+        { tipo: "github", url: "https://github.com/a" },
+      ]);
+
+      // Ejecución
+      const actualizado = await colectivoService.actualizarColectivo(creado.id, {
+        redesSociales: [{ tipo: "LinkedIn", url: "https://linkedin.com/a" }],
+      });
+
+      // Validación
+      expect(actualizado.redesSociales).toEqual([
+        { tipo: "linkedin", url: "https://linkedin.com/a" },
+      ]);
+    });
+
+    test("rechaza con 400 redes sociales duplicadas sin modificar el colectivo", async () => {
+      // Preparación
+      const creado = await crearColectivo("Asamblea Norte", [
+        { tipo: "github", url: "https://github.com/a" },
+      ]);
+
+      // Ejecución y Validación
+      await esperarAppError(
+        colectivoService.actualizarColectivo(creado.id, {
           redesSociales: [
-            { tipo: "x", url: "https://x.com/eco1" },
-            { tipo: "X", url: "https://x.com/eco2" },
+            { tipo: "x", url: "https://x.com/a" },
+            { tipo: "X", url: "https://x.com/b" },
           ],
         }),
         ErrorCatalog.RED_SOCIAL_TIPO_DUPLICADO,
         400,
       );
+      const guardado = await ColectivoModel.findById(creado.id).lean();
+      expect(guardado.redesSociales).toEqual([{ tipo: "github", url: "https://github.com/a" }]);
+    });
 
-      // En creación
-      await expectAppError(
-        ctx.colectivoService.crearColectivo("Eco2", "d", "caba", "ong", [], [
-          { tipo: TipoRedSocial.GITHUB, url: "https://github.com/eco1" },
-          { tipo: TipoRedSocial.GITHUB, url: "https://github.com/eco2" },
-        ]),
-        ErrorCatalog.RED_SOCIAL_TIPO_DUPLICADO,
+    test.each([[{}], [null]])("rechaza con 400 cambios vacíos (%j)", async (cambios) => {
+      // Preparación
+      const creado = await crearColectivo();
+
+      // Ejecución y Validación
+      await esperarAppError(
+        colectivoService.actualizarColectivo(creado.id, cambios),
+        ErrorCatalog.ARGUMENTO_INVALIDO,
         400,
       );
     });
 
-    test("rechazar tipos inválidos", async () => {
-      const colectivo = await ctx.colectivoService.crearColectivo("Eco", "d", "caba", "ong");
+    test("falla con 404 si el colectivo no existe", async () => {
+      // Ejecución y Validación
+      await esperarAppError(
+        colectivoService.actualizarColectivo(idInexistente(), { descripcion: "x" }),
+        ErrorCatalog.COLECTIVO_NO_ENCONTRADO,
+        404,
+      );
+    });
+  });
 
-      await expectAppError(
-        ctx.colectivoService.actualizarColectivo(colectivo.id, {
-          redesSociales: [{ tipo: "snapchat", url: "https://snapchat.com/eco" }],
-        }),
-        ErrorCatalog.RED_SOCIAL_TIPO_INVALIDO,
-        400,
+  describe("agregarProyecto", () => {
+    test("agrega el id del proyecto al colectivo", async () => {
+      // Preparación
+      const creado = await crearColectivo();
+      const proyectoId = new mongoose.Types.ObjectId();
+
+      // Ejecución
+      await colectivoService.agregarProyecto(creado.id, proyectoId);
+
+      // Validación
+      const guardado = await ColectivoModel.findById(creado.id).lean();
+      expect(guardado.proyectos.map(String)).toEqual([proyectoId.toString()]);
+    });
+  });
+
+  describe("eliminarColectivo", () => {
+    test("falla con 404 si el colectivo no existe", async () => {
+      // Ejecución y Validación
+      await esperarAppError(
+        colectivoService.eliminarColectivo(idInexistente()),
+        ErrorCatalog.COLECTIVO_NO_ENCONTRADO,
+        404,
       );
     });
 
-    test("rechazar URLs inválidas", async () => {
-      const colectivo = await ctx.colectivoService.crearColectivo("Eco", "d", "caba", "ong");
+    test("da de baja (lógica) el colectivo", async () => {
+      // Preparación
+      const creado = await crearColectivo();
 
-      // Protocolo ftp
-      await expectAppError(
-        ctx.colectivoService.actualizarColectivo(colectivo.id, {
-          redesSociales: [{ tipo: TipoRedSocial.GITHUB, url: "ftp://github.com/eco" }],
-        }),
-        ErrorCatalog.RED_SOCIAL_URL_INVALIDA,
-        400,
-      );
+      // Ejecución
+      await colectivoService.eliminarColectivo(creado.id);
 
-      // URL vacía
-      await expectAppError(
-        ctx.colectivoService.actualizarColectivo(colectivo.id, {
-          redesSociales: [{ tipo: TipoRedSocial.GITHUB, url: "   " }],
-        }),
-        ErrorCatalog.RED_SOCIAL_URL_REQUERIDA,
-        400,
-      );
+      // Validación
+      const guardado = await ColectivoModel.findById(creado.id).select("+activo").lean();
+      expect(guardado.activo).toBe(false);
+      expect(await colectivoService.obtenerColectivos({ pagina: 1, limite: 20 })).toEqual({
+        resultados: [],
+        total: 0,
+      });
+    });
 
-      // URL con formato no válido
-      await expectAppError(
-        ctx.colectivoService.actualizarColectivo(colectivo.id, {
-          redesSociales: [{ tipo: TipoRedSocial.GITHUB, url: "no-es-una-url" }],
-        }),
-        ErrorCatalog.RED_SOCIAL_URL_INVALIDA,
-        400,
+    test("falla con 409 si el colectivo ya estaba dado de baja", async () => {
+      // Preparación
+      const creado = await crearColectivo();
+      await ColectivoModel.findByIdAndUpdate(creado.id, { activo: false });
+
+      // Ejecución y Validación
+      await esperarAppError(
+        colectivoService.eliminarColectivo(creado.id),
+        ErrorCatalog.COLECTIVO_YA_DADO_DE_BAJA,
+        409,
       );
     });
   });

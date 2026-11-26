@@ -16,7 +16,7 @@ export class AuthService {
       const mensajes = await this.mensajeRepository.obtenerPorColaboradoraId(colaboradora._id);
       return {
         perfilCompletado: true,
-        rol: "colaboradora",
+        rol: "col",
         datos: {
           ...colaboradora,
           postulaciones,
@@ -29,7 +29,7 @@ export class AuthService {
     if (colectivo) {
       return {
         perfilCompletado: true,
-        rol: "colectivo",
+        rol: "org",
         datos: colectivo,
       };
     }

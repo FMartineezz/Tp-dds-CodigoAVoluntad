@@ -1,13 +1,29 @@
 import { Router } from "express";
+import { validarPaginacion } from "../middlewares/validations/paginacionValidation.js";
 import { personaColaboradoraController } from "../container.js";
 import { mensajeController } from "../container.js";
 import { verifyToken } from "../middlewares/auth.js";
 import validarPersonaColaboradora, { validarActualizacionColaboradora} from "../middlewares/validations/personaColaboradoraValidation.js";
+import { validarCaptcha } from "../middlewares/validations/captchaValidation.js";
+import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
+import ErrorCatalog from "../errors/errorCatalog.js";
 
+/**
+ * Rutas de personas colaboradoras (ABM, listado paginado, proyectos acordes y mensajes).
+ * @returns {import("express").Router}
+ */
 export default function personaColaboradoraRoutes() {
   const router = Router();
+  exigirIdsValidos(router, {
+    id: ErrorCatalog.COLABORADORA_NO_ENCONTRADA,
+    personaColaboradoraId: ErrorCatalog.COLABORADORA_NO_ENCONTRADA,
+  });
 
-  router.get("/colaboradoras", personaColaboradoraController.obtenerPersonasColaboradoras);
+  router.get(
+    "/colaboradoras",
+    validarPaginacion,
+    personaColaboradoraController.obtenerPersonasColaboradoras,
+  );
 
   router.get("/colaboradoras/:id", personaColaboradoraController.obtenerPersonaColaboradoraPorId);
 
@@ -17,24 +33,25 @@ export default function personaColaboradoraRoutes() {
     personaColaboradoraController.actualizarPersonaColaboradora,
   );
 
-  
   router.get(
     "/colaboradoras/:personaColaboradoraId/mensajes",
-    mensajeController.verBandejaDeEntradaColaboradora,
+    mensajeController.verMensajesColaboradora,
   );
-  
+
   router.post(
     "/colaboradoras", 
     verifyToken,
+    validarCaptcha,
     validarPersonaColaboradora,
     personaColaboradoraController.crearPersonaColaboradora,
   );
-  
+
   router.get(
     "/colaboradoras/:id/proyectos-acordes",
+    validarPaginacion,
     personaColaboradoraController.obtenerProyectosAcordes,
   );
-  
+
   router.delete("/colaboradoras/:id", personaColaboradoraController.eliminarPersonaColaboradora);
 
   return router;

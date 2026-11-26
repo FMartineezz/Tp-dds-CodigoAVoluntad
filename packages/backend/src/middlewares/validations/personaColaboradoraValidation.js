@@ -48,10 +48,12 @@ export const colaboradoraSchema = zod.object({
       invalid_type_error: "ARGUMENTO_INVALIDO",
     })
     .min(1, "COLABORADORA_GIT_REQUERIDO"),
-  habilidades: zod.array(zod.string({ invalid_type_error: "COLABORADORA_HABILIDADES_FORMATO" }), {
-    required_error: "COLABORADORA_HABILIDADES_REQUERIDAS",
-    invalid_type_error: "COLABORADORA_HABILIDADES_FORMATO",
-  }),
+  habilidades: zod
+    .array(zod.string({ invalid_type_error: "COLABORADORA_HABILIDADES_FORMATO" }), {
+      required_error: "COLABORADORA_HABILIDADES_REQUERIDAS",
+      invalid_type_error: "COLABORADORA_HABILIDADES_FORMATO",
+    })
+    .min(1, "COLABORADORA_HABILIDADES_REQUERIDAS"),
   presentacion: zod
     .string({
       required_error: "COLABORADORA_PRESENTACION_REQUERIDA",
@@ -66,10 +68,27 @@ export const colaboradoraSchema = zod.object({
     .optional(),
   nombre: zod.string().optional(),
   apellido: zod.string().optional(),
-  pronombres: zod.any().optional(),
+  // Texto ("ella/la") o lista de textos (["ella", "la"]); sin textos vacíos
+  pronombres: zod
+    .union(
+      [
+        zod.string().trim().min(1, "COLABORADORA_PRONOMBRES_FORMATO"),
+        zod.array(zod.string().trim().min(1, "COLABORADORA_PRONOMBRES_FORMATO")),
+      ],
+      { errorMap: () => ({ message: "COLABORADORA_PRONOMBRES_FORMATO" }) },
+    )
+    .optional(),
   redesSociales: redesSocialesArraySchema.optional(),
 });
 
+/**
+ * Valida el body de POST /colaboradoras y deja en req.body los contactos y redes sociales
+ * ya normalizados.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 const validarColaboradora = (req, res, next) => {
   const resultado = colaboradoraSchema.safeParse(req.body);
 
@@ -89,6 +108,14 @@ const validarColaboradora = (req, res, next) => {
   next();
 };
 
+/**
+ * Valida el body de PATCH /colaboradoras/:id (campos opcionales, pero al menos uno) y
+ * reemplaza req.body por los datos parseados.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ * @throws {import("../../errors/appError.js").AppError} 400 con el error del catálogo que indique zod.
+ */
 export const validarActualizacionColaboradora = (req, res, next) => {
   const schemaActualizacion = colaboradoraSchema.partial();
   const resultado = schemaActualizacion.safeParse(req.body);

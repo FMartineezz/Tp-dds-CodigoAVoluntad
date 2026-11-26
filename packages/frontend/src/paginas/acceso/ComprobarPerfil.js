@@ -37,11 +37,11 @@ const ComprobarPerfil = () => {
           return
         }
         // Ya tiene cuenta activa -> va directo a su panel    
-        if (normalizarRol(data.rol) == "colaboradora") {
+        if (normalizarRol(data.rol) == "col") {
           navigate('/panel', { replace: true });   
           return;
         }
-        if (normalizarRol(data.rol) == "colectivo") {
+        if (normalizarRol(data.rol) == "org") {
           navigate('/org', { replace: true });
           return;
         }

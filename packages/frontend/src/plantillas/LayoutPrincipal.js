@@ -1,30 +1,49 @@
 /* eslint-disable react/react-in-jsx-scope */
-/**
- * Estructura de todas las páginas: Navbar + contenido + Footer (+ barra inferior móvil con sesión).
- *
- * USO: Las páginas se dibujan dentro de <Outlet/>.
- * SI LO CAMBIÁS O SACÁS: Ninguna pantalla tiene menú ni pie.
- *
- * CÓMO AGREGAR UN HERMANO / EXTENDERLO:
- *   Botón nuevo en la navbar: agregalo dentro de actions={…}. Enlace nuevo en el pie: ENLACES_PIE en menus.js.
- */
-import { Link, NavLink, Outlet } from 'react-router-dom';
-import { Button, Logo, NavItem } from '../atomos';
-import { BottomNav, Campana, Footer, MenuUsuario, Navbar } from '../organismos';
-import { useAuth } from '../contexto';
-import { ENLACES_PIE, MENUS, NO_LEIDOS, destinosMovil } from './menus.js';
-import s from './LayoutPrincipal.module.css';
+import { useEffect, useState } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Button, Logo, NavItem } from "../atomos";
+import { BottomNav, Campana, Footer, MenuUsuario, Navbar } from "../organismos";
+import { useAuth } from "../contexto";
+import { obtenerCantidadNoLeidos } from "../api/mensajes.js";
+import { ENLACES_PIE, MENUS, destinosMovil } from "./menus.js";
+import s from "./LayoutPrincipal.module.css";
 
 export function LayoutPrincipal() {
-  const { rol, dalt, toggleDalt } = useAuth();
+  const { rol, id, dalt, toggleDalt } = useAuth();
+  const { pathname } = useLocation();
+  const [noLeidos, setNoLeidos] = useState(0);
   const menu = MENUS[rol];
+  console.log(menu)
+
+  useEffect(() => {
+    if (!rol || !id) {
+      setNoLeidos(0);
+      return undefined;
+    }
+
+    let activo = true;
+    const actualizar = () => {
+      obtenerCantidadNoLeidos(rol, id)
+        .then((cantidad) => activo && setNoLeidos(cantidad))
+        .catch(() => {});
+    };
+
+    actualizar();
+    window.addEventListener("cav-mensajes-actualizados", actualizar);
+    return () => {
+      activo = false;
+      window.removeEventListener("cav-mensajes-actualizados", actualizar);
+    };
+  }, [rol, id, pathname]);
+
   return (
     <div className={rol ? s.conBottom : undefined}>
-      <a className="skip-link" href="#contenido">Saltar al contenido</a>
+      <a className="skip-link" href="#contenido">
+        Saltar al contenido
+      </a>
 
       <Navbar
         logo={<Logo as={Link} to="/" />}
-        /* actions = lo que va a la DERECHA. Para sumar un botón: agregalo en cualquiera de los dos grupos. */
         actions={
           rol ? (
             <>
@@ -33,26 +52,34 @@ export function LayoutPrincipal() {
             </>
           ) : (
             <>
-              <Button as={Link} to="/ingresar" variant="secondary">Ingresar</Button>
+              <Button as={Link} to="/ingresar" variant="secondary">
+                Ingresar
+              </Button>
             </>
           )
         }
       >
-        {/* Ítems del centro: salen de plantillas/menus.js */}
         {menu.map(([to, label, end]) => (
           <NavItem key={to} as={NavLink} to={to} end={end}>
             {label}
-            {label === 'Mensajes' && rol && <span className={s.badge} aria-hidden="true">{NO_LEIDOS[rol]}</span>}
-            {label === 'Mensajes' && rol && <span className="sr-only"> ({NO_LEIDOS[rol]} sin leer)</span>}
+            {label === "Mensajes" && rol && noLeidos > 0 && (
+              <>
+                <span className={s.badge} aria-hidden="true">
+                  {noLeidos}
+                </span>
+                <span className="sr-only"> ({noLeidos} sin leer)</span>
+              </>
+            )}
           </NavItem>
         ))}
       </Navbar>
 
-      {/* data-area="app" activa los estilos del área de trabajo (ver estilos/base.css) */}
-      <main id="contenido" data-area={rol ? 'app' : undefined}><Outlet /></main>
+      <main id="contenido" data-area={rol ? "app" : undefined}>
+        <Outlet />
+      </main>
 
       <Footer enlaces={ENLACES_PIE} dalt={dalt} onToggleDalt={toggleDalt} />
-      {rol && <BottomNav items={destinosMovil(rol)} />}
+      {rol && <BottomNav items={destinosMovil(rol, noLeidos)} />}
     </div>
   );
 }
