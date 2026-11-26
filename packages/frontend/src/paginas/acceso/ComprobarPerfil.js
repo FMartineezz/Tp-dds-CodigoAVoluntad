@@ -7,7 +7,7 @@ import { normalizarRol, useAuth } from "../../contexto/Auth.js";
 const ComprobarPerfil = () => {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
-  const { rol } = useAuth()
+  const { rol } = useAuth();
   useEffect(() => {
     const verificarUsuario = async () => {
       // Si por alguna razón llegó sin sesión activa, lo mandamos a ingresar
@@ -17,7 +17,7 @@ const ComprobarPerfil = () => {
       }
 
       try {
-        const response = await fetch("http://localhost:3000/auth/estado", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/estado`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${keycloak.token}`,
@@ -33,21 +33,21 @@ const ComprobarPerfil = () => {
 
         // Primer ingreso -> va a elegir si es Colaboradora o Colectivo
         if (!data.perfilCompletado) {
-          navigate('/registro', { replace: true });
-          return
+          navigate("/registro", { replace: true });
+          return;
         }
-        // Ya tiene cuenta activa -> va directo a su panel    
+        // Ya tiene cuenta activa -> va directo a su panel
         if (normalizarRol(data.rol) == "col") {
-          navigate('/panel', { replace: true });   
+          navigate("/panel", { replace: true });
           return;
         }
         if (normalizarRol(data.rol) == "org") {
-          navigate('/org', { replace: true });
+          navigate("/org", { replace: true });
           return;
         }
         // Si perfilCompletado es true pero rol vino null, hubo un desajuste en el nombre del campo
         console.error("Perfil completado pero rol no reconocido:", rol);
-        navigate('/sin-permiso', { replace: true });   
+        navigate("/sin-permiso", { replace: true });
       } catch (err) {
         console.error(err);
         setError("Hubo un problema al verificar tu cuenta. Intentá nuevamente.");

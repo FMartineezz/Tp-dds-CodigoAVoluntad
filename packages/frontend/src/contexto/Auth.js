@@ -6,9 +6,9 @@
  * USO: useAuth() → { rol, entrar(rol), salir(), dalt, toggleDalt }.  <Privada rol="org"> protege una ruta.
  * SI LO CAMBIÁS O SACÁS: Cuando exista login real: reemplazá entrar/salir por la llamada a la API y guardá el token (Axios).
  */
-import { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import keycloak from '../api/keycloack.js'; // Asegurate de que esta ruta apunte a tu archivo keycloak.js
+import { createContext, useContext, useEffect, useState, useRef } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import keycloak from "../api/keycloack.js"; // Asegurate de que esta ruta apunte a tu archivo keycloak.js
 
 const Ctx = createContext(null);
 
@@ -16,7 +16,7 @@ const Ctx = createContext(null);
 export const normalizarRol = (rolBackend) => {
   if (!rolBackend) return null;
   const r = rolBackend.toLowerCase();
-  if (r === 'col' || r === 'org') return r;
+  if (r === "col" || r === "org") return r;
   return null;
 };
 
@@ -30,12 +30,20 @@ export function AuthProvider({ children }) {
 
   // Conservamos intacto el modo daltónico de tu aplicación
   const [dalt, setDalt] = useState(() => {
-    try { return localStorage.getItem('cav-daltonico') === '1'; } catch { return false; }
+    try {
+      return localStorage.getItem("cav-daltonico") === "1";
+    } catch {
+      return false;
+    }
   });
 
   useEffect(() => {
-    document.documentElement.dataset.theme = dalt ? 'daltonico' : 'estandar';
-    try { localStorage.setItem('cav-daltonico', dalt ? '1' : '0'); } catch { /* sin storage */ }
+    document.documentElement.dataset.theme = dalt ? "daltonico" : "estandar";
+    try {
+      localStorage.setItem("cav-daltonico", dalt ? "1" : "0");
+    } catch {
+      /* sin storage */
+    }
   }, [dalt]);
 
   // Consulta tu endpoint GET /auth/estado en Express
@@ -48,7 +56,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/auth/estado', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/estado`, {
         headers: {
           Authorization: `Bearer ${keycloak.token}`,
         },
@@ -68,7 +76,7 @@ export function AuthProvider({ children }) {
         return data;
       }
     } catch (error) {
-      console.error('Error al verificar perfil en el backend:', error);
+      console.error("Error al verificar perfil en el backend:", error);
     }
     return null;
   };
@@ -79,8 +87,8 @@ export function AuthProvider({ children }) {
 
     keycloak
       .init({
-        onLoad: 'check-sso',
-        pkceMethod: 'S256',
+        onLoad: "check-sso",
+        pkceMethod: "S256",
         checkLoginIframe: false,
       })
       .then(async (auth) => {
@@ -91,14 +99,14 @@ export function AuthProvider({ children }) {
         setIsReady(true);
       })
       .catch((err) => {
-        console.error('Error inicializando Keycloak:', err);
+        console.error("Error inicializando Keycloak:", err);
         setIsReady(true);
       });
   }, []);
 
   const entrar = () => {
     keycloak.login({
-      redirectUri: window.location.origin + '/comprobar-perfil',
+      redirectUri: window.location.origin + "/comprobar-perfil",
     });
   };
 
@@ -129,7 +137,7 @@ export function AuthProvider({ children }) {
         perfilCompletado,
         usuario,
         recargarPerfil: cargarEstadoPerfil,
-        id: usuario?._id
+        id: usuario?._id,
       }}
     >
       {children}
