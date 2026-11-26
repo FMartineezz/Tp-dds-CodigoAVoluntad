@@ -4,3 +4,4 @@ export { Footer } from './Footer/Footer.js';
 export { ProyectoCard } from './ProyectoCard/ProyectoCard.js';
 export { UltimaActividad } from './UltimaActividad/UltimaActividad.js';
 export { PostularDialog, DenunciaDialog, ValoracionDialog } from './Dialogos/index.js';
+export { SubirFoto } from './SubirFoto/SubirFoto.js';

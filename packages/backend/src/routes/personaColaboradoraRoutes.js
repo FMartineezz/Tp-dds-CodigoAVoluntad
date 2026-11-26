@@ -7,6 +7,7 @@ import validarPersonaColaboradora, {
   validarActualizacionColaboradora,
 } from "../middlewares/validations/personaColaboradoraValidation.js";
 import { validarCaptcha } from "../middlewares/validations/captchaValidation.js";
+import { recibirFoto } from "../middlewares/validations/fotoValidation.js";
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
@@ -59,6 +60,11 @@ export default function personaColaboradoraRoutes() {
   );
 
   router.delete("/colaboradoras/:id", personaColaboradoraController.eliminarPersonaColaboradora);
+
+  // Foto de perfil subida: el PUT manda los bytes de la imagen, no JSON (ver fotoValidation.js)
+  router.put("/colaboradoras/:id/foto", recibirFoto, personaColaboradoraController.subirFoto);
+  router.get("/colaboradoras/:id/foto", personaColaboradoraController.obtenerFoto);
+  router.delete("/colaboradoras/:id/foto", personaColaboradoraController.borrarFoto);
 
   return router;
 }

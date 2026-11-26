@@ -57,7 +57,9 @@
   background: var(--color-hover);
   border-radius: var(--radius);
 }
+/* La respuesta ocupa todo el ancho de la tarjeta (Text la corta en 62ch por defecto) */
 .faq > p {
+  max-width: none;
   padding: 0 var(--space-5) var(--space-5);
 }
 @media (max-width: 800px) {

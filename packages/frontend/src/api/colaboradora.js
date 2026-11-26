@@ -15,6 +15,7 @@
  * (los «adaptadores» de abajo). Si el backend cambia un nombre, se arregla solo acá.
  */
 import { api } from "./cliente.js";
+import { urlDeFotoSubida } from "./fotos.js";
 import { nombresDeHabilidades, obtenerHabilidades, titulos } from "./habilidades.js";
 import { aProyectoDeLaVista } from "./proyectos.js";
 
@@ -57,7 +58,10 @@ function aPerfilDeLaVista(c, nombres) {
     github: c.git ?? "",
     linkedin: linkedin?.url ?? "",
     bio: c.presentacion ?? "",
+    // Enlace a una foto publicada en otro lado (lo que se escribe en el campo)
     foto: c.foto ?? "",
+    // URL de la foto subida, o null (se cambia aparte, con SubirFoto)
+    fotoSubida: urlDeFotoSubida("colaboradoras", c._id, c.fotoSubida),
     sitioWeb: c.sitioWeb ?? "",
     // El backend pregunta lo contrario: «¿bloquear mensajes?». `!` lo da vuelta.
     mensajes: !c.bloquearMensajeInterno,

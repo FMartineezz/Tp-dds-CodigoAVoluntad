@@ -13,6 +13,7 @@
  * SI EL BACKEND CAMBIA UN NOMBRE: se arregla solo acá, en el adaptador correspondiente.
  */
 import { api, sinVacios } from "./cliente.js";
+import { urlDeFotoSubida } from "./fotos.js";
 import { aProyectoDeLaVista } from "./proyectos.js";
 import { nombresDeHabilidades, obtenerHabilidades, titulos } from "./habilidades.js";
 import { textoDeCuando } from "./mensajes.js";
@@ -77,6 +78,8 @@ function aMiColectivo(c) {
   return {
     id: c._id,
     nombre: c.nombre,
+    // URL del logo que subió, o null.
+    foto: urlDeFotoSubida("colectivos", c._id, c.fotoSubida),
     descripcion: c.descripcion ?? "",
     tipo: c.tipoDeColectivo ?? "",
     ubicacion: c.ubicacion ?? "",
@@ -187,6 +190,7 @@ function aPostulacionDeLaVista(p) {
     persona: {
       id: persona.id ?? persona._id,
       nombre: persona.nombreFantasia ?? "Colaboradora",
+      foto: urlDeFotoSubida("colaboradoras", persona.id ?? persona._id, persona.fotoSubida) ?? persona.foto ?? null,
       habilidades: (persona.habilidades ?? []).map((h) => h.titulo),
       presentacion: persona.presentacion ?? "",
     },
@@ -284,7 +288,8 @@ export function aColaboradoraDeLaVista(p, nombres) {
     bio: p.presentacion ?? "",
     git: p.git ?? "",
     redes: p.redesSociales ?? [],
-    foto: p.foto ?? null,
+    // La foto subida; si no subió, el enlace que haya pegado; si no, null.
+    foto: urlDeFotoSubida("colaboradoras", p._id ?? p.id, p.fotoSubida) ?? p.foto ?? null,
     sitioWeb: p.sitioWeb ?? null,
     habilidades: habilidades.filter(Boolean),
     // true = acepta mensajes internos de los colectivos.

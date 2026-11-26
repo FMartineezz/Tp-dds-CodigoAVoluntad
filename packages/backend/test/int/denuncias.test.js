@@ -116,6 +116,19 @@ describe("Denuncias (HTTP)", () => {
       expect(respuesta.status).toBe(200);
       expect(respuesta.body.descripcion).toBe("Trato inadecuado");
       expect(respuesta.body.colaboracion._id).toBe(colaboracionId);
+      expect(respuesta.body.colectivoActivo).toBe(true);
+    });
+
+    test("GET /admin/denuncias/:id avisa si el colectivo ya está dado de baja", async () => {
+      const e = await armarEscenario();
+      const { colaboracionId } = await crearColaboracion(e);
+      const denunciaId = await sembrarDenuncia(e.colectivoId, colaboracionId);
+      await request(app).delete(`/colectivos/${e.colectivoId}`).expect(204);
+
+      const respuesta = await request(app).get(`/admin/denuncias/${denunciaId}`);
+
+      expect(respuesta.status).toBe(200);
+      expect(respuesta.body.colectivoActivo).toBe(false);
     });
 
     test("GET /admin/denuncias/:id responde 404 si no existe", async () => {

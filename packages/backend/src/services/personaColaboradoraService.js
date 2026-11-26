@@ -280,6 +280,44 @@ export class PersonaColaboradoraService {
     throw new AppError(ErrorCatalog.COLABORADORA_YA_DADA_DE_BAJA, 409, id);
   }
 
+  // ───── Foto de perfil subida ─────
+
+  /**
+   * Guarda (o reemplaza) la foto subida.
+   * @param {Id} id
+   * @param {{ datos: Buffer, tipo: string }} foto
+   * @returns {Promise<{ fotoSubida: Date }>}
+   * @throws {AppError} 404 si la persona no existe o está dado/a de baja.
+   */
+  async subirFoto(id, foto) {
+    const resultado = await this.personaColaboradoraRepository.guardarFoto(id, foto);
+    if (!resultado) throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+    return { fotoSubida: resultado.fotoSubida };
+  }
+
+  /**
+   * @param {Id} id
+   * @returns {Promise<{ datos: Buffer, tipo: string }>}
+   * @throws {AppError} 404 si la persona no existe o si no subió ninguna foto.
+   */
+  async obtenerFoto(id) {
+    const cuenta = await this.personaColaboradoraRepository.obtenerFoto(id);
+    if (!cuenta) throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+    if (!cuenta.fotoArchivo) throw new AppError(ErrorCatalog.FOTO_NO_ENCONTRADA, 404, id);
+    return cuenta.fotoArchivo;
+  }
+
+  /**
+   * Borra la foto subida (si no tenía, no pasa nada).
+   * @param {Id} id
+   * @returns {Promise<void>}
+   * @throws {AppError} 404 si la persona no existe o está dado/a de baja.
+   */
+  async borrarFoto(id) {
+    const resultado = await this.personaColaboradoraRepository.borrarFoto(id);
+    if (!resultado) throw new AppError(ErrorCatalog.COLABORADORA_NO_ENCONTRADA, 404, id);
+  }
+
   //Estadisticas
   /**
    * Totales y promedios de las personas colaboradoras (todo en 0 si no hay ninguna).

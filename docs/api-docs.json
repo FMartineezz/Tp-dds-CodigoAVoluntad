@@ -386,6 +386,12 @@
                 "url": "https://instagram.com/colectivoambiental"
               }
             ]
+          },
+          "fotoSubida": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Cuándo subió su foto (null = no tiene). La imagen está en GET …/:id/foto"
           }
         }
       },
@@ -561,6 +567,12 @@
             "nullable": true,
             "description": "URL (http/https) de su sitio personal o portfolio. `null` lo borra.",
             "example": "https://devneko.dev"
+          },
+          "fotoSubida": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Cuándo subió su foto (null = no tiene). La imagen está en GET …/:id/foto"
           }
         }
       },
@@ -2412,6 +2424,161 @@
         }
       }
     },
+    "/colectivos/{id}/foto": {
+      "put": {
+        "tags": ["Colectivos"],
+        "summary": "Subir la foto de perfil de un colectivo",
+        "description": "El cuerpo son los bytes de la imagen (no JSON). Hasta 300 KB. Reemplaza la anterior. Sin autenticación por ahora.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Foto guardada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fotoSubida": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ERR-VAL-1601: no es JPG, PNG o WebP, o viene vacía"
+          },
+          "404": {
+            "description": "La cuenta no existe o está dada de baja"
+          },
+          "413": {
+            "description": "ERR-VAL-1602: pesa más de 300 KB"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Colectivos"],
+        "summary": "Ver la foto de perfil de un colectivo",
+        "description": "Devuelve la imagen. El front la pide con ?v=<fotoSubida> para no ver una vieja guardada en caché.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La imagen",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ERR-NOT-1603: no subió ninguna foto; o la cuenta no existe"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Colectivos"],
+        "summary": "Borrar la foto de perfil de un colectivo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Foto borrada"
+          },
+          "404": {
+            "description": "La cuenta no existe o está dada de baja"
+          }
+        }
+      }
+    },
+    "/admin/colectivos/bajas": {
+      "get": {
+        "tags": ["Colectivos"],
+        "summary": "Colectivos dados de baja",
+        "description": "Para el equipo administrativo. Del último dado de baja al primero; updatedAt indica cuándo fue la baja. Todavía sin autenticación, igual que el resto de /admin.",
+        "responses": {
+          "200": {
+            "description": "Lista de colectivos dados de baja (vacía si no hay)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Colectivo"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/colectivos/{colectivoId}/proyectos": {
       "get": {
         "tags": ["Proyectos"],
@@ -2441,8 +2608,8 @@
               }
             }
           },
-          "500": {
-            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
+          "404": {
+            "description": "No existe un colectivo con ese id (ERR-NOT-305)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2451,8 +2618,8 @@
               }
             }
           },
-          "404": {
-            "description": "No existe un colectivo con ese id (ERR-NOT-305)",
+          "500": {
+            "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2894,6 +3061,126 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/colaboradoras/{id}/foto": {
+      "put": {
+        "tags": ["Colaboradoras"],
+        "summary": "Subir la foto de perfil de una persona colaboradora",
+        "description": "El cuerpo son los bytes de la imagen (no JSON). Hasta 300 KB. Reemplaza la anterior. Sin autenticación por ahora.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Foto guardada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fotoSubida": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ERR-VAL-1601: no es JPG, PNG o WebP, o viene vacía"
+          },
+          "404": {
+            "description": "La cuenta no existe o está dada de baja"
+          },
+          "413": {
+            "description": "ERR-VAL-1602: pesa más de 300 KB"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Colaboradoras"],
+        "summary": "Ver la foto de perfil de una persona colaboradora",
+        "description": "Devuelve la imagen. El front la pide con ?v=<fotoSubida> para no ver una vieja guardada en caché.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La imagen",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ERR-NOT-1603: no subió ninguna foto; o la cuenta no existe"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Colaboradoras"],
+        "summary": "Borrar la foto de perfil de una persona colaboradora",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Foto borrada"
+          },
+          "404": {
+            "description": "La cuenta no existe o está dada de baja"
           }
         }
       }
@@ -4266,6 +4553,9 @@
               }
             }
           },
+          "400": {
+            "description": "`por` no es persona ni colectivo (ERR-VAL-509)"
+          },
           "404": {
             "description": "No existe la colaboración. Códigos posibles: `ERR-NOT-506`",
             "content": {
@@ -4303,9 +4593,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "`por` no es persona ni colectivo (ERR-VAL-509)"
           }
         }
       }
@@ -4329,6 +4616,9 @@
               }
             }
           },
+          "404": {
+            "description": "No existe una colaboradora con ese id (ERR-NOT-405)"
+          },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
             "content": {
@@ -4338,9 +4628,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "No existe una colaboradora con ese id (ERR-NOT-405)"
           }
         },
         "parameters": [
@@ -4374,6 +4661,9 @@
               }
             }
           },
+          "404": {
+            "description": "No existe un proyecto con ese id (ERR-NOT-108)"
+          },
           "500": {
             "description": "Error interno no controlado (`ERR-CSR-500`). También ocurre si un id de la ruta no tiene formato de ObjectId.",
             "content": {
@@ -4383,9 +4673,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "No existe un proyecto con ese id (ERR-NOT-108)"
           }
         },
         "parameters": [
@@ -5064,7 +5351,7 @@
       "get": {
         "tags": ["Denuncias"],
         "summary": "Detalle administrativo de una denuncia",
-        "description": "Devuelve la denuncia y la colaboración asociada completa para que la administración pueda contactar a la persona.",
+        "description": "Devuelve la denuncia y la colaboración asociada completa para que la administración pueda contactar a la persona. `colectivoActivo` es false si el colectivo denunciado ya fue dado de baja.",
         "parameters": [
           {
             "name": "id",
@@ -5078,7 +5365,31 @@
         ],
         "responses": {
           "200": {
-            "description": "Detalle de la denuncia con su colaboración asociada."
+            "description": "Detalle de la denuncia con su colaboración asociada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/DenunciaAdmin"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "colectivoActivo": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "colaboracion": {
+                          "type": "object",
+                          "nullable": true
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
             "description": "Denuncia no encontrada."

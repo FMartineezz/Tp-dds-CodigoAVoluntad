@@ -47,8 +47,8 @@ Documentación de los endpoints implementados en `packages/backend`. La misma in
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Health Check](#health-check)     | `GET /healthCheck`                                                                                                                                                                          |
 | [Habilidades](#habilidades)       | `GET /habilidades`, `GET /habilidades/:id`, `POST /habilidades`                                                                                                                             |
-| [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`, `PATCH /colectivos/:id`                                                                                                       |
-| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `GET /colaboradoras/:id/contactos`, `POST /colaboradoras`, `PATCH /colaboradoras/:id`                                                       |
+| [Colectivos](#colectivos)         | `GET /colectivos`, `GET /colectivos/:id`, `POST /colectivos`, `PATCH /colectivos/:id`, `GET /admin/colectivos/bajas`, `PUT/GET/DELETE /colectivos/:id/foto`                                                                                                     |
+| [Colaboradoras](#colaboradoras)   | `GET /colaboradoras`, `GET /colaboradoras/:id`, `GET /colaboradoras/:id/contactos`, `POST /colaboradoras`, `PATCH /colaboradoras/:id`, `PUT/GET/DELETE /colaboradoras/:id/foto`                                                     |
 | [Proyectos](#proyectos)           | `GET /proyectos`, `GET /proyectos/:id`, `GET /colectivos/:colectivoId/proyectos`, `POST /proyectos`, `PATCH /proyectos/:id`                                                                 |
 | [Perfiles](#perfiles)             | `GET`, `POST /proyectos/:idProyecto/perfiles`; `GET`, `PATCH`, `DELETE /proyectos/:idProyecto/perfiles/:idPerfil`                                                                           |
 | [Logros](#logros)                 | `GET`, `POST /proyectos/:proyectoId/logros`; `GET`, `PATCH`, `DELETE /proyectos/:proyectoId/logros/:logroId`                                                                                |
@@ -239,6 +239,55 @@ Actualización parcial de un colectivo. Si `redesSociales` se omite, se conserva
 | 404    | `ERR-NOT-305`  | No existe un colectivo con ese id                       |
 
 ---
+
+### GET `/admin/colectivos/bajas`
+
+Lista los colectivos dados de baja (`DELETE /colectivos/:id`), del último al primero. Lo usa el equipo administrativo. `updatedAt` indica cuándo fue la baja: después de la baja el colectivo ya no se modifica.
+
+> Igual que el resto de `/admin/*`, todavía no está protegido (falta autenticación).
+
+**Respuesta 200:** un array (vacío si no hay bajas).
+
+```json
+[
+  {
+    "_id": "6acfd66064d02459ba8dc695",
+    "nombre": "Fundación Ejemplo",
+    "descripcion": "Organización sin fines de lucro",
+    "ubicacion": "caba",
+    "tipoDeColectivo": "ong",
+    "proyectos": [],
+    "redesSociales": [],
+    "updatedAt": "2026-11-25T15:10:00.000Z"
+  }
+]
+```
+
+### Foto de perfil: PUT / GET / DELETE `/colectivos/:id/foto` y `/colaboradoras/:id/foto`
+
+Colectivos y colaboradoras pueden subir una foto de perfil, que se guarda en MongoDB. Los cuatro casos funcionan igual para los dos recursos.
+
+- **`PUT …/:id/foto`**: sube o reemplaza la foto. El cuerpo son **los bytes de la imagen**, no JSON, con `Content-Type: image/jpeg`, `image/png` o `image/webp`. Pesa hasta 300 KB (el front la achica a 256×256 antes de mandarla). Responde `200` con `{ "fotoSubida": "2026-11-25T15:10:00.000Z" }`.
+- **`GET …/:id/foto`**: devuelve la imagen con su `Content-Type` y `Cache-Control: public, max-age=86400`.
+- **`DELETE …/:id/foto`**: borra la foto. Responde `204`.
+- **`GET /colectivos/:id`, `GET /colaboradoras/:id` y los listados** traen `fotoSubida` (fecha de la última foto, o `null`), nunca los bytes. El front arma la URL `…/:id/foto?v=<fotoSubida>`: cuando cambia la foto, cambia la URL y no se ve la vieja guardada en caché.
+- La baja de la cuenta (`DELETE /colectivos/:id` o `DELETE /colaboradoras/:id`) también borra la foto.
+
+> Igual que el resto de los `PATCH`, todavía no se controla quién cambia la foto (falta autenticación).
+
+```bash
+curl -X PUT http://localhost:8000/colectivos/6acfd66064d02459ba8dc695/foto \
+  -H "Content-Type: image/jpeg" --data-binary @logo.jpg
+```
+
+**Errores:**
+
+| Status | code                                         | Cuándo                                                        |
+| ------ | -------------------------------------------- | ------------------------------------------------------------- |
+| 400    | `ERR-VAL-1601`                               | El `Content-Type` no es JPG, PNG o WebP, o la foto viene vacía |
+| 413    | `ERR-VAL-1602`                               | La foto pesa más de 300 KB                                    |
+| 404    | `ERR-NOT-1603`                               | `GET`: la cuenta nunca subió una foto                         |
+| 404    | El de colectivo o colaboradora no encontrada | La cuenta no existe o está dada de baja                       |
 
 ## Colaboradoras
 
@@ -1341,7 +1390,7 @@ Consulta global de denuncias embebidas en los distintos colectivos, optimizada m
 
 ### GET `/admin/denuncias/:id`
 
-Obtiene el detalle administrativo de una denuncia, permitiendo al equipo de la plataforma recomponer la colaboración asociada y los datos de contacto de la persona si fuera necesario contactarla.
+Obtiene el detalle administrativo de una denuncia, permitiendo al equipo de la plataforma recomponer la colaboración asociada y los datos de contacto de la persona si fuera necesario contactarla. `colectivoActivo` es `false` si el colectivo denunciado ya fue dado de baja.
 
 **Respuesta 200:**
 
@@ -1354,6 +1403,7 @@ Obtiene el detalle administrativo de una denuncia, permitiendo al equipo de la p
   "colaboracionId": "6acfd66a64d02459ba8dc6a7",
   "colectivoId": "6acfd66064d02459ba8dc695",
   "colectivoNombre": "Fundación Ejemplo",
+  "colectivoActivo": true,
   "colaboracion": {
     "_id": "6acfd66a64d02459ba8dc6a7",
     "personaColaboradora": {

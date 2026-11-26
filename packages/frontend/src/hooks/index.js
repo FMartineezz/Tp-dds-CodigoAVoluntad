@@ -4,3 +4,4 @@ export { usePedido } from './usePedido.js';
 export { useConteo } from './useConteo.js';
 export { useDemorado } from './useDemorado.js';
 export { useNotificaciones } from './useNotificaciones.js';
+export { useFichaPegajosa } from './useFichaPegajosa.js';

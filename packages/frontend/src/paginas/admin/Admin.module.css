@@ -21,3 +21,6 @@
   .datos { grid-template-columns: 1fr; gap: var(--space-1); }
   .datos dd + dt { margin-top: var(--space-3); }
 }
+
+/* medida sobre el colectivo denunciado: separada de los botones de estado */
+.medidas { display: grid; gap: var(--space-3); padding-top: var(--space-5); border-top: 1px dashed var(--color-border); }

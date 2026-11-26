@@ -3,9 +3,10 @@
  * Ruta: /org/perfil   ·   Quién la ve: Organización
  * Qué muestra: Edición de la organización y «Zona de riesgo» para eliminar la cuenta.
  * De dónde salen los datos: GET /colectivos/:id para cargar y PATCH /colectivos/:id para
- *   guardar (ver api/organizacion.js). Tipos, ubicaciones y redes usan los valores que acepta
+ *   guardar (ver api/organizacion.js). El logo se sube aparte, apenas se elige, con
+ *   PUT /colectivos/:id/foto (ver organismos/SubirFoto). Tipos, ubicaciones y redes usan los valores que acepta
  *   el backend (TIPOS_DE_COLECTIVO, UBICACIONES, REDES_SOCIALES).
- *   PENDIENTE (backend): logo, causas, ciudad/barrio, correo y sitio web no existen en el
+ *   PENDIENTE (backend): causas, ciudad/barrio, correo y sitio web no existen en el
  *   colectivo, por eso no están en el formulario.
  * Para modificarla: un campo nuevo = un <Field> en la grilla .form (y su nombre del backend
  * en alGuardar).
@@ -22,8 +23,9 @@
  */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Avatar, Button, Field, Heading, Text } from '../../atomos';
+import { Button, Field, Heading, Text } from '../../atomos';
 import { Alert, ConfirmDialog, RowsSkeleton } from '../../moleculas';
+import { SubirFoto } from '../../organismos';
 import { useAuth } from '../../contexto';
 import { usePedido } from '../../hooks';
 import { mensajeDeError } from '../../api/errores.js';
@@ -93,6 +95,8 @@ function FormularioOrg({ colectivo }) {
     ubicacion: colectivo.ubicacion,
   });
   const [nombreGuardado, setNombreGuardado] = useState(colectivo.nombre);
+  // URL del logo subido (null = no subió). Lo cambia SubirFoto.
+  const [logo, setLogo] = useState(colectivo.foto);
 
   // URL de cada red social ('' = no tiene). Lo cambia alCambiarRed.
   const [redes, setRedes] = useState(() => redesComoObjeto(colectivo.redes));
@@ -221,12 +225,18 @@ function FormularioOrg({ colectivo }) {
         )}
 
         <div className={sh.form}>
-          {/* Logo: la inicial del nombre (el backend no guarda imágenes). */}
+          {/* Logo: el que subió; si no, el del seed o la inicial del nombre */}
           <div className={sh.twoRows}>
             <span className={s.etiqueta}>Logo</span>
-            <div className={sh.photo}>
-              <Avatar nombre={datos.nombre || 'O'} size={96} square foto={fotoDe(id)} />
-            </div>
+            <SubirFoto
+              recurso="colectivos"
+              id={id}
+              nombre={datos.nombre || 'O'}
+              square
+              foto={logo}
+              fotoDeRespaldo={fotoDe(id)}
+              alCambiar={setLogo}
+            />
           </div>
           <Field
             as="textarea"

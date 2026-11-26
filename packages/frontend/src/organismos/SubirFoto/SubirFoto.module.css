@@ -1,0 +1,6 @@
+/* Foto a la izquierda; botones, ayuda y error a la derecha */
+.subirFoto { display: flex; align-items: center; gap: var(--space-4); }
+.acciones { display: grid; gap: var(--space-2); justify-items: start; }
+.botones { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.ayuda { font-size: var(--text-label); color: var(--color-text-muted); }
+.error { font-size: var(--text-small); color: var(--color-danger); }

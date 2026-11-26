@@ -104,7 +104,14 @@ export default function ReportarProblema() {
       )}
 
       <div className={sh.form}>
-        <Field as="select" label="¿Qué querés contarnos?" value={datos.tipo} onChange={alCambiarCampo('tipo')}>
+        {/* La ayuda tiene más o menos el largo de la de «¿Dónde pasó?»: así las dos cajas quedan a la misma altura */}
+        <Field
+          as="select"
+          label="¿Qué querés contarnos?"
+          hint="Elegí lo que más se parezca. Si no encaja en ninguna, marcá «Otra cosa»."
+          value={datos.tipo}
+          onChange={alCambiarCampo('tipo')}
+        >
           {Object.entries(TIPOS_DE_REPORTE).map(([valor, texto]) => (
             <option key={valor} value={valor}>{texto}</option>
           ))}

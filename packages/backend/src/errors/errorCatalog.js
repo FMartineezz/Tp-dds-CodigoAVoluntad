@@ -726,6 +726,24 @@ const ErrorCatalog = {
   },
 
   // =========================
+  // Fotos de perfil (PUT/GET/DELETE /colectivos/:id/foto y /colaboradoras/:id/foto)
+  // =========================
+  FOTO_TIPO_INVALIDO: {
+    code: "ERR-VAL-1601",
+    message: "La foto tiene que ser una imagen JPG, PNG o WebP",
+  },
+
+  FOTO_MUY_GRANDE: {
+    code: "ERR-VAL-1602",
+    message: (maximo) => `La foto puede pesar hasta ${maximo}`,
+  },
+
+  FOTO_NO_ENCONTRADA: {
+    code: "ERR-NOT-1603",
+    message: (id) => `La cuenta ${id} no tiene una foto subida`,
+  },
+
+  // =========================
   // CAPTCHA
   // =========================
   CAPTCHA_REQUERIDO: {

@@ -32,8 +32,8 @@ details.perfil:not([open]) { gap: 0; }
 .datos { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-2) var(--space-4); margin: 0; }
 .datos dt { font-size: var(--text-label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 0.15em; }
 .datos dd { margin: 0; }
-/* La ficha acompaña al scrollear */
-.ficha { position: sticky; top: var(--space-5); display: grid; gap: var(--space-5); padding: var(--space-5); background: var(--color-surface); border: var(--border); border-radius: var(--radius); }
+/* La ficha acompaña al scrollear y termina alineada con la última tarjeta (--ficha-top lo calcula hooks/useFichaPegajosa.js) */
+.ficha { position: sticky; top: max(var(--space-5), var(--ficha-top, 0px)); display: grid; gap: var(--space-5); padding: var(--space-5); background: var(--color-surface); border: var(--border); border-radius: var(--radius); }
 .ficha section { display: grid; gap: var(--space-2); }
 .ficha section + section { padding-top: var(--space-4); border-top: 1px dashed var(--color-border); }
 /* Filas de «Creado»: el texto a la izquierda y la fecha a la derecha */

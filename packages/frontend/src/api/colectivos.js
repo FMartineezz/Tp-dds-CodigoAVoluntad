@@ -11,6 +11,7 @@
  * Cada función devuelve los datos YA TRADUCIDOS a la forma que usan los componentes
  * (ver aColectivoDeLaVista). Si el backend cambia un nombre, se arregla solo acá.
  */
+import { urlDeFotoSubida } from './fotos.js';
 import { api } from './cliente.js';
 
 // El backend guarda el tipo en minúsculas y sin tildes; la pantalla lo muestra lindo.
@@ -59,11 +60,13 @@ export function textoDeUbicacion(ubicacion) {
 
 // ADAPTADOR: colectivo como lo manda el backend → colectivo como lo esperan los componentes.
 // `??` significa «lo de la izquierda, y si es null o undefined, lo de la derecha».
-function aColectivoDeLaVista(c) {
+export function aColectivoDeLaVista(c) {
   return {
     // El GET trae `_id`; la respuesta del POST trae `id`.
     id: c._id ?? c.id,
     nombre: c.nombre,
+    // URL de la foto que subió (null si no subió: se usa la del seed o la inicial).
+    foto: urlDeFotoSubida('colectivos', c._id ?? c.id, c.fotoSubida),
     descripcion: c.descripcion,
     tipo: TIPOS[c.tipoDeColectivo] ?? c.tipoDeColectivo,
     // Valor del backend ('entre rios'), por si una pantalla lo necesita para editar.

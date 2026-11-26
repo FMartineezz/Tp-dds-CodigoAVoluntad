@@ -26,8 +26,9 @@
  * Aviso de éxito: cualquier cambio en un campo borra el mensaje de éxito anterior
  * (así no queda un «Cambios guardados» que ya no es cierto).
  *
- * Foto: es una URL (el backend no sube archivos). Si no cargó ninguna, se usa la del seed
- *   (datos/fotos.js) o, si tampoco hay, la inicial.
+ * Foto: se sube apenas se elige (PUT /colaboradoras/:id/foto, ver organismos/SubirFoto), sin
+ *   esperar a «Guardar». También se puede pegar el enlace a una foto publicada en otro lado.
+ *   Se ve la subida; si no hay, la del enlace; si no, la del seed (datos/fotos.js) o la inicial.
  * PENDIENTE (backend): no hay importación desde LinkedIn ni correo de la cuenta (vendrá con
  *   el login).
  */
@@ -35,8 +36,9 @@
 // ───── Imports ─────
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Avatar, Button, Checkbox, Field, Heading, Text } from '../../atomos';
+import { Button, Checkbox, Field, Heading, Text } from '../../atomos';
 import { Alert, ContactosEditor, RowsSkeleton, TagPicker } from '../../moleculas';
+import { SubirFoto } from '../../organismos';
 import { useAuth } from '../../contexto';
 import { usePedido } from '../../hooks';
 import { guardarPerfil, obtenerMisContactos, obtenerPerfil } from '../../api/colaboradora.js';
@@ -107,6 +109,9 @@ function FormularioDePerfil({ id, inicial, contactosIniciales, opciones }) {
   // Contactos privados: array de pares [tipo, dato]. Arrancan con los que ya tenía guardados;
   // los cambia el ContactosEditor. Al guardar se manda la lista entera.
   const [contactos, setContactos] = useState(contactosIniciales);
+
+  // URL de la foto subida (null = no subió). Va aparte de `datos`: se guarda sola al elegirla.
+  const [fotoSubida, setFotoSubida] = useState(inicial.fotoSubida);
 
   // true mientras se espera la respuesta del backend (el botón muestra «cargando»).
   const [guardando, setGuardando] = useState(false);
@@ -219,12 +224,20 @@ function FormularioDePerfil({ id, inicial, contactosIniciales, opciones }) {
       <div className={sh.form}>
         <div>
           <span className={s.etiqueta}>Foto</span>
-          <div className={sh.photo}>
-            {/* Se ve al momento lo que pega; si no hay enlace, la del seed o la inicial */}
-            <Avatar nombre={datos.fantasia || '?'} size={96} foto={datos.foto.trim() || fotoDe(id)} />
+          <div className={s.foto}>
+            {/* Si no subió foto, se ve al momento el enlace que pega (o la del seed, o la inicial) */}
+            <SubirFoto
+              recurso="colaboradoras"
+              id={id}
+              nombre={datos.fantasia}
+              foto={fotoSubida}
+              fotoDeRespaldo={datos.foto.trim() || fotoDe(id)}
+              alCambiar={setFotoSubida}
+            />
             <Field
-              label="Enlace a tu foto"
+              label="O pegá el enlace a una foto"
               optional
+              hint={fotoSubida ? 'Mientras tengas una foto subida, se muestra esa.' : undefined}
               placeholder="https://…/foto.jpg"
               value={datos.foto}
               onChange={alCambiarCampo('foto')}

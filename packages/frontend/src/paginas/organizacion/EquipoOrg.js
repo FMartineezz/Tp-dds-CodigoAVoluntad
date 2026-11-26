@@ -207,7 +207,7 @@ export default function EquipoOrg() {
         {equipo.map((integrante) => (
           <div key={integrante.id} className={s.miembro}>
             <div className={s.identidad}>
-              <Avatar nombre={nombreDe(integrante)} size={56} foto={fotoDe(integrante.persona?.id)} />
+              <Avatar nombre={nombreDe(integrante)} size={56} foto={integrante.persona?.foto || fotoDe(integrante.persona?.id)} />
               <div>
                 {/* Si no es anónima, el nombre lleva a su perfil. */}
                 {integrante.persona ? (

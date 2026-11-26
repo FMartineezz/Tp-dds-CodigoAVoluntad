@@ -1,6 +1,8 @@
 /* Estilos propios de las pantallas Colaboradora. Los comunes están en plantillas/disposicion.module.css. */
 .link { color: var(--color-text); text-decoration: none; transition: background-color var(--dur-fast); }
 .link:hover { background: var(--color-hover); }
+/* Foto: los botones para subirla y, abajo, el campo para pegar un enlace */
+.foto { display: grid; gap: var(--space-4); }
 .etiqueta { display: block; margin-bottom: var(--space-3); font-size: var(--text-small); font-weight: 600; }
 .filas { display: grid; gap: var(--space-3); }
 .fila { display: grid; grid-template-columns: minmax(0, 1fr) 11rem; gap: var(--space-4); align-items: center; }

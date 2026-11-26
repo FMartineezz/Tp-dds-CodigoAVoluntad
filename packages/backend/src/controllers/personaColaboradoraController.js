@@ -1,4 +1,5 @@
 import { respuestaPaginada } from "../utils/paginacion.js";
+import { TIPOS_DE_FOTO } from "../middlewares/validations/fotoValidation.js";
 /** Endpoints de personas colaboradoras, bajo /colaboradoras (routes/personaColaboradoraRoutes.js). */
 export class PersonaColaboradoraController {
   /**
@@ -120,6 +121,46 @@ export class PersonaColaboradoraController {
 
     await this.personaColaboradoraService.eliminarPersonaColaboradora(id);
 
+    res.status(204).send();
+  };
+
+  // ───── Foto de perfil subida ─────
+
+  /**
+   * PUT /colaboradoras/:id/foto (cuerpo: los bytes de la imagen) → 200 con { fotoSubida }.
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
+  subirFoto = async (req, res) => {
+    // req.is devuelve el tipo sin «; charset…» (ya se validó en recibirFoto)
+    const foto = { datos: req.body, tipo: req.is(TIPOS_DE_FOTO) };
+    const respuesta = await this.personaColaboradoraService.subirFoto(req.params.id, foto);
+    res.status(200).json(respuesta);
+  };
+
+  /**
+   * GET /colaboradoras/:id/foto → 200 con la imagen (no JSON).
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
+  obtenerFoto = async (req, res) => {
+    const foto = await this.personaColaboradoraService.obtenerFoto(req.params.id);
+    res.set({
+      "Content-Type": foto.tipo,
+      // El front pide …/foto?v=<fotoSubida>: si cambia la foto, cambia la URL
+      "Cache-Control": "public, max-age=86400",
+      "X-Content-Type-Options": "nosniff",
+    });
+    res.status(200).send(foto.datos);
+  };
+
+  /**
+   * DELETE /colaboradoras/:id/foto → 204 (sin cuerpo).
+   * @param {import("../types.js").RequestConParams} req
+   * @param {import("express").Response} res
+   */
+  borrarFoto = async (req, res) => {
+    await this.personaColaboradoraService.borrarFoto(req.params.id);
     res.status(204).send();
   };
 }

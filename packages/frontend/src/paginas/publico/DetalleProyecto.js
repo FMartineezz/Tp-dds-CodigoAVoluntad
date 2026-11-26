@@ -34,7 +34,7 @@ import { Avatar, Button, Heading, Icon, Progress, StatusBadge, Tag, Text } from 
 import { Alert, Crumbs, RowsSkeleton } from '../../moleculas';
 import { DenunciaDialog, PostularDialog } from '../../organismos';
 import { useAuth } from '../../contexto';
-import { usePedido } from '../../hooks';
+import { useFichaPegajosa, usePedido } from '../../hooks';
 import { obtenerOcupantesDelProyecto, obtenerProyecto, postularmeAPerfil } from '../../api/proyectos.js';
 import { obtenerColectivo } from '../../api/colectivos.js';
 import { obtenerPostulaciones } from '../../api/colaboradora.js';
@@ -72,7 +72,12 @@ async function cargarProyecto(id) {
   ]);
   return {
     // GET /proyectos/:id trae el colectivo solo como id: se completa el nombre.
-    proyecto: { ...proyecto, colectivo: proyecto.colectivo || colectivo?.nombre || 'Colectivo' },
+    // También su logo subido, si tiene (null si no).
+    proyecto: {
+      ...proyecto,
+      colectivo: proyecto.colectivo || colectivo?.nombre || 'Colectivo',
+      colectivoFoto: colectivo?.foto ?? null,
+    },
     // null = no se pudo saber el equipo (se avisa en la tabla); {} = nadie todavía.
     ocupantes,
   };
@@ -116,6 +121,8 @@ export default function DetalleProyecto() {
   const [denunciaAbierta, setDenunciaAbierta] = useState(false);
   // true si denunció en ESTA visita (las de antes vienen marcadas desde el backend).
   const [denuncioRecien, setDenuncioRecien] = useState(false);
+  // Para que la ficha de la derecha termine alineada con la última tarjeta (ver el hook).
+  const fichaRef = useFichaPegajosa();
 
   // ───── ESPERA Y ERRORES ─────
   // Cada caso dibuja otra cosa y corta acá con `return`.
@@ -393,7 +400,7 @@ export default function DetalleProyecto() {
             <Text variant="prose">{proyecto.descripcion}</Text>
             <div className={s.row}>
               <Link to={`/colectivos/${proyecto.colectivoId}`} className={s.colectivo}>
-                <Avatar nombre={proyecto.colectivo} size={32} square foto={fotoDe(proyecto.colectivoId)} />
+                <Avatar nombre={proyecto.colectivo} size={32} square foto={proyecto.colectivoFoto || fotoDe(proyecto.colectivoId)} />
                 {proyecto.colectivo}
               </Link>
               {/* «Denunciar al colectivo» aparece solo si es una colaboradora que participa */}
@@ -421,7 +428,7 @@ export default function DetalleProyecto() {
           </section>
         </div>
 
-        <aside className={s.ficha} aria-label="Ficha del proyecto">
+        <aside ref={fichaRef} className={s.ficha} aria-label="Ficha del proyecto">
           {/* Creado: fecha grande y, abajo, en qué anda la búsqueda */}
           <section aria-labelledby="h-creado">
             <div className={s.fichaFila}>

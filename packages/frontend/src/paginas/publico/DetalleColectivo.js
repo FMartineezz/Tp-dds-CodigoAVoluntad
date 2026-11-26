@@ -207,7 +207,7 @@ export default function DetalleColectivo() {
             </div>
           )}
         </div>
-        <Avatar nombre={colectivo.nombre} size={120} square foto={fotoDe(colectivo.id)} />
+        <Avatar nombre={colectivo.nombre} size={120} square foto={colectivo.foto || fotoDe(colectivo.id)} />
       </header>
 
       {/* BLOQUE: Sus proyectos — tarjetas de los proyectos del colectivo */}

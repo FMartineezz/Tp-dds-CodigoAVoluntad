@@ -51,6 +51,7 @@ import ProblemasAdm from './paginas/admin/ProblemasAdm.js';
 import ColectivosAdm from './paginas/admin/ColectivosAdm.js';
 import ProyectosAdm from './paginas/admin/ProyectosAdm.js';
 import ColaboradorasAdm from './paginas/admin/ColaboradorasAdm.js';
+import PerfilColaboradoraAdm from './paginas/admin/PerfilColaboradoraAdm.js';
 
 export default function App() {
   return (
@@ -89,6 +90,7 @@ export default function App() {
           <Route path="admin/colectivos"                element={<Privada rol="adm"><ColectivosAdm /></Privada>} />
           <Route path="admin/proyectos"                 element={<Privada rol="adm"><ProyectosAdm /></Privada>} />
           <Route path="admin/colaboradoras"             element={<Privada rol="adm"><ColaboradorasAdm /></Privada>} />
+          <Route path="admin/colaboradoras/:id"         element={<Privada rol="adm"><PerfilColaboradoraAdm /></Privada>} />
 
           {/* Colaboradora (privadas) */}
           <Route path="panel"                       element={<Privada rol="col"><PanelCol /></Privada>} />

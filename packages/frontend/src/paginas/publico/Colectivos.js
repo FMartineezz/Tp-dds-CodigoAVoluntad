@@ -97,7 +97,7 @@ export default function Colectivos() {
               <li key={colectivo.id}>
                 {/* Cada colectivo es un enlace a su pantalla de detalle */}
                 <Link to={`/colectivos/${colectivo.id}`} className={s.row}>
-                  <Avatar nombre={colectivo.nombre} size={56} square foto={fotoDe(colectivo.id)} />
+                  <Avatar nombre={colectivo.nombre} size={56} square foto={colectivo.foto || fotoDe(colectivo.id)} />
                   <span className={s.info}>
                     <b>{colectivo.nombre}</b>
                     <small>

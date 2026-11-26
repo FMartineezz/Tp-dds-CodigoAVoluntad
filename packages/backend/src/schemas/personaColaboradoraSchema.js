@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { PersonaColaboradora, TipoMedioDeContacto } from "../models/personaColaboradora.js";
 import { TipoRedSocial, esUrlValida } from "../models/redSocial.js";
+import { fotoSchema } from "./fotoSchema.js";
 
 // Mongoose corre el validador también con null, que acá significa «sin cargar»
 const esUrlOVacio = (valor) => valor == null || esUrlValida(valor);
@@ -49,7 +50,7 @@ export const personaColaboradoraSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    // URL de la imagen (el backend no sube archivos, guarda el enlace). Vacío = null.
+    // URL de una imagen publicada en otro lado (alternativa a subir la foto). Vacío = null.
     foto: {
       type: String,
       required: false,
@@ -129,6 +130,10 @@ export const personaColaboradoraSchema = new mongoose.Schema(
       default: true,
       select: false
     },
+    // Foto subida (los bytes). No se lee por defecto: solo la pide GET …/foto
+    fotoArchivo: { type: fotoSchema, select: false },
+    // Cuándo se subió la foto (null = no tiene). El front la usa para armar la URL de la imagen
+    fotoSubida: { type: Date, default: null },
     createdAt: { type: Date, select: false },
     updatedAt: { type: Date, select: false },
     __v: { type: Number, select: false },

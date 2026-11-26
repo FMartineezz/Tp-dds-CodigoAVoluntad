@@ -171,7 +171,7 @@ export default function BuscarColaboradoras() {
             <tr key={colaboradora.id}>
               <td data-l="Persona">
                 <Link to={`/org/colaboradoras/${colaboradora.id}`} className={sh.person}>
-                  <Avatar nombre={colaboradora.nombre} size={36} foto={fotoDe(colaboradora.id)} />
+                  <Avatar nombre={colaboradora.nombre} size={36} foto={colaboradora.foto || fotoDe(colaboradora.id)} />
                   {colaboradora.nombre}
                 </Link>
               </td>

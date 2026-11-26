@@ -2,27 +2,31 @@
  * PANTALLA ColectivosAdm
  * Ruta: /admin/colectivos   ·   Quién la ve: Equipo administrativo
  * Qué muestra: Los colectivos activos con cuántas denuncias tiene cada uno; desde acá se
- *   ven sus denuncias o se lo da de baja (con confirmación).
+ *   ven sus denuncias o se lo da de baja (con confirmación). El botón «Ver dados de baja»
+ *   cambia a la lista de los que ya se dieron de baja (y «Ver activos» vuelve).
  * De dónde salen los datos: GET /colectivos (api/colectivos.js) y GET /admin/denuncias para
  *   contar; la baja hace DELETE /colectivos/:id (api/admin.js): deja de listarse y se
- *   borran sus contactos, pero su historia queda.
+ *   borran sus contactos, pero su historia queda. Los dados de baja salen de
+ *   GET /admin/colectivos/bajas.
  * Para modificarla: COLUMNA NUEVA: <th> en <thead> + <td data-l="…"> por fila.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: la página de colectivos y las denuncias (del backend), la página
- *      elegida, cuál se quiere dar de baja y los avisos.
+ *   · ColectivosDadosDeBaja (componente chico) → la lista de los dados de baja.
+ *   1. DATOS Y ESTADO: qué lista se ve, la página de colectivos y las denuncias (del
+ *      backend), la página elegida, cuál se quiere dar de baja y los avisos.
  *      ESPERA Y ERRORES: cargando o aviso de error.
  *   2. CÁLCULOS: denuncias por colectivo.
  *   3. ACCIONES: confirmar la baja.
- *   4. LO QUE SE DIBUJA: avisos, tabla, paginación y diálogo de confirmación.
+ *   4. LO QUE SE DIBUJA: título con el botón «Ver dados de baja», avisos, tabla, paginación
+ *      y diálogo de confirmación.
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, Button, Heading, Text } from '../../atomos';
-import { Alert, ConfirmDialog, Pager } from '../../moleculas';
+import { Alert, ConfirmDialog, Pager, RowsSkeleton } from '../../moleculas';
 import { usePedido } from '../../hooks';
 import { obtenerColectivos } from '../../api/colectivos.js';
-import { darDeBajaColectivo, obtenerDenuncias } from '../../api/admin.js';
+import { darDeBajaColectivo, fechaCorta, obtenerColectivosDadosDeBaja, obtenerDenuncias } from '../../api/admin.js';
 import { mensajeDeError } from '../../api/errores.js';
 import { fotoDe } from '../../datos/fotos.js';
 import { PantallaCargando, PantallaDeError } from './auxiliares.js';
@@ -38,8 +42,66 @@ async function cargarColectivos(pagina) {
   return { paginaDeColectivos, denuncias };
 }
 
+// ═════ COMPONENTE: lista de colectivos dados de baja ═════
+function ColectivosDadosDeBaja({ alVolver }) {
+  const { cargando, datos: colectivos, error } = usePedido(obtenerColectivosDadosDeBaja, []);
+
+  let contenido;
+  if (cargando) {
+    contenido = <RowsSkeleton n={4} />;
+  } else if (error) {
+    contenido = <Alert kind="error" title="No pudimos cargar los dados de baja">{mensajeDeError(error)}</Alert>;
+  } else if (colectivos.length === 0) {
+    contenido = (
+      <div className={sh.empty}>
+        <Text>Todavía no se dio de baja ningún colectivo.</Text>
+      </div>
+    );
+  } else {
+    contenido = (
+      <table className={sh.table}>
+        <thead>
+          <tr><th>Colectivo</th><th>Tipo</th><th>Ubicación</th><th>Dado de baja</th><th>Denuncias</th></tr>
+        </thead>
+        <tbody>
+          {colectivos.map((colectivo) => (
+            <tr key={colectivo.id}>
+              {/* Sin enlace: su página pública ya no se muestra en el sitio */}
+              <td data-l="Colectivo">
+                <span className={sh.person}>
+                  <Avatar nombre={colectivo.nombre} size={36} square foto={colectivo.foto || fotoDe(colectivo.id)} />
+                  {colectivo.nombre}
+                </span>
+              </td>
+              <td data-l="Tipo">{colectivo.tipo}</td>
+              <td data-l="Ubicación">{colectivo.ubicacionTexto}</td>
+              <td data-l="Dado de baja">{fechaCorta(colectivo.fechaDeBaja)}</td>
+              <td data-l="Denuncias">
+                <Link to={`/admin/denuncias?colectivo=${colectivo.id}`}>Ver sus denuncias</Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
+  return (
+    <div className={`container ${sh.page}`}>
+      <div className={`${sh.row} ${sh.spaceBetween}`}>
+        <Heading level={1}>Colectivos dados de baja</Heading>
+        <Button variant="secondary" onClick={alVolver}>Ver activos</Button>
+      </div>
+      {contenido}
+    </div>
+  );
+}
+
+// ═════ PANTALLA ═════
 export default function ColectivosAdm() {
   // ───── 1. DATOS Y ESTADO ─────
+  // true = se ve la lista de los dados de baja en vez de la de activos.
+  const [verBajas, setVerBajas] = useState(false);
   const [pagina, setPagina] = useState(1);
   // Sumarle 1 vuelve a pedir la lista (después de una baja).
   const [version, setVersion] = useState(0);
@@ -52,6 +114,7 @@ export default function ColectivosAdm() {
   const [errorAccion, setErrorAccion] = useState(null);
 
   // ───── ESPERA Y ERRORES ─────
+  if (verBajas) return <ColectivosDadosDeBaja alVolver={() => setVerBajas(false)} />;
   if (cargando) return <PantallaCargando />;
   if (error) return <PantallaDeError titulo="No pudimos cargar los colectivos" error={error} />;
 
@@ -82,7 +145,10 @@ export default function ColectivosAdm() {
   // ───── 4. LO QUE SE DIBUJA ─────
   return (
     <div className={`container ${sh.page}`}>
-      <Heading level={1}>Colectivos</Heading>
+      <div className={`${sh.row} ${sh.spaceBetween}`}>
+        <Heading level={1}>Colectivos</Heading>
+        <Button variant="secondary" onClick={() => setVerBajas(true)}>Ver dados de baja</Button>
+      </div>
 
       {aviso && <Alert kind="success" onClose={() => setAviso('')}>{aviso}</Alert>}
       {errorAccion && <Alert kind="error">{mensajeDeError(errorAccion)}</Alert>}
@@ -103,7 +169,7 @@ export default function ColectivosAdm() {
                 <tr key={colectivo.id}>
                   <td data-l="Colectivo">
                     <Link to={`/colectivos/${colectivo.id}`} className={sh.person}>
-                      <Avatar nombre={colectivo.nombre} size={36} square foto={fotoDe(colectivo.id)} />
+                      <Avatar nombre={colectivo.nombre} size={36} square foto={colectivo.foto || fotoDe(colectivo.id)} />
                       {colectivo.nombre}
                     </Link>
                   </td>

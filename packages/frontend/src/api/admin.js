@@ -7,12 +7,14 @@
  *   await cambiarEstadoDenuncia(id, 'resuelta');
  *   const reportes = await obtenerReportes('nuevo');
  *   await cambiarEstadoReporte(id, 'resuelto');
- *   await darDeBajaColectivo(id);   await eliminarColaboradora(id);
+ *   await darDeBajaColectivo(id);   const bajas = await obtenerColectivosDadosDeBaja();
+ *   await eliminarColaboradora(id);
  * Las listas de colectivos, proyectos y colaboradoras salen de las mismas funciones que usa
  * el resto del sitio (api/colectivos.js, api/proyectos.js, api/organizacion.js).
  * PENDIENTE (login): las rutas /admin/… todavía no están protegidas en el backend.
  */
 import { api, sinVacios } from './cliente.js';
+import { aColectivoDeLaVista } from './colectivos.js';
 
 // Estados de una denuncia: valor del backend → texto que se ve.
 export const ESTADOS_DE_DENUNCIA = {
@@ -49,7 +51,8 @@ export async function obtenerDenuncias({ estado, colectivoId } = {}) {
   return data.map(aDenunciaDeLaVista);
 }
 
-// GET /admin/denuncias/:id → la denuncia con quién la hizo y desde qué proyecto.
+// GET /admin/denuncias/:id → la denuncia con quién la hizo, desde qué proyecto y si el
+// colectivo sigue activo.
 // La persona puede venir null (la colaboración se borró) y su nombre puede ser el alias.
 export async function obtenerDenuncia(id) {
   const { data } = await api.get(`/admin/denuncias/${id}`);
@@ -57,6 +60,8 @@ export async function obtenerDenuncia(id) {
   const proyecto = data.colaboracion?.proyecto;
   return {
     ...aDenunciaDeLaVista(data),
+    // false si el colectivo ya está dado de baja
+    colectivoActivo: data.colectivoActivo !== false,
     persona: persona
       ? {
           id: persona._id,
@@ -100,6 +105,13 @@ export async function cambiarEstadoReporte(id, estado) {
 // DELETE /colectivos/:id → baja lógica: deja de listarse y se borran sus contactos.
 export async function darDeBajaColectivo(id) {
   await api.delete(`/colectivos/${id}`);
+}
+
+// GET /admin/colectivos/bajas → los colectivos dados de baja, el último primero.
+// fechaDeBaja sale de `updatedAt`: después de la baja el colectivo ya no se modifica.
+export async function obtenerColectivosDadosDeBaja() {
+  const { data } = await api.get('/admin/colectivos/bajas');
+  return data.map((c) => ({ ...aColectivoDeLaVista(c), fechaDeBaja: new Date(c.updatedAt) }));
 }
 
 // DELETE /colaboradoras/:id → la cuenta se anonimiza (sus datos públicos se borran).

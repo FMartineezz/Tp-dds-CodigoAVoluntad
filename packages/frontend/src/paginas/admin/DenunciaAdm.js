@@ -2,23 +2,28 @@
  * PANTALLA DenunciaAdm
  * Ruta: /admin/denuncias/:id   ·   Quién la ve: Equipo administrativo
  * Qué muestra: Una denuncia: qué pasó, a qué colectivo, desde qué proyecto, quién la hizo
- *   (con sus contactos, por si hay que hablarle) y los botones para cambiarle el estado.
+ *   (con sus contactos, por si hay que hablarle), los botones para cambiarle el estado y la
+ *   medida sobre el colectivo: darlo de baja (con confirmación).
  * De dónde salen los datos: GET /admin/denuncias/:id; el cambio de estado hace
- *   PATCH /admin/denuncias/:id/estado (api/admin.js).
+ *   PATCH /admin/denuncias/:id/estado y la baja DELETE /colectivos/:id (api/admin.js).
+ *   Dar de baja también marca la denuncia como resuelta.
+ * PENDIENTE (backend): no hay bloqueo temporal ni forma de reactivar un colectivo dado de baja.
  *
  * ANATOMÍA DE ESTE ARCHIVO:
- *   1. DATOS Y ESTADO: la denuncia (del backend), si se está guardando y los avisos.
+ *   1. DATOS Y ESTADO: la denuncia (del backend), si se está guardando, si está abierto el
+ *      diálogo de baja y los avisos.
  *      ESPERA Y ERRORES: cargando, «no existe» (404) o aviso de error.
  *   2. CÁLCULOS: a qué estados se puede pasar desde el actual.
- *   3. ACCIONES: cambiar el estado.
- *   4. LO QUE SE DIBUJA: migas, avisos, texto de la denuncia, datos y botones.
+ *   3. ACCIONES: cambiar el estado y dar de baja al colectivo.
+ *   4. LO QUE SE DIBUJA: migas, avisos, texto de la denuncia, datos, botones de estado,
+ *      medida sobre el colectivo y diálogo de confirmación.
  */
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Heading, Text } from '../../atomos';
-import { Alert, Crumbs } from '../../moleculas';
+import { Alert, ConfirmDialog, Crumbs } from '../../moleculas';
 import { usePedido } from '../../hooks';
-import { cambiarEstadoDenuncia, fechaCorta, obtenerDenuncia } from '../../api/admin.js';
+import { cambiarEstadoDenuncia, darDeBajaColectivo, fechaCorta, obtenerDenuncia } from '../../api/admin.js';
 import { esError, mensajeDeError } from '../../api/errores.js';
 import { NOMBRES_DE_CONTACTO } from '../../api/colaboradora.js';
 import { NoEncontrado } from '../sistema/Errores.js';
@@ -44,6 +49,9 @@ export default function DenunciaAdm() {
 
   // Estado al que se está pasando (su botón muestra espera), o null.
   const [guardando, setGuardando] = useState(null);
+  // true = el diálogo «¿Dar de baja?» está abierto.
+  const [bajaAbierta, setBajaAbierta] = useState(false);
+  const [dandoDeBaja, setDandoDeBaja] = useState(false);
   const [aviso, setAviso] = useState('');
   const [errorAccion, setErrorAccion] = useState(null);
 
@@ -57,6 +65,8 @@ export default function DenunciaAdm() {
   // ───── 2. CÁLCULOS ─────
   // Se ofrecen todos los estados menos el que ya tiene.
   const estadosPosibles = Object.keys(BOTONES).filter((estado) => estado !== denuncia.estado);
+  // Abierta = todavía no se resolvió ni se descartó. Si se da de baja al colectivo, queda resuelta.
+  const denunciaAbierta = denuncia.estado === 'pendiente' || denuncia.estado === 'en_revision';
 
   // ───── 3. ACCIONES ─────
   async function alCambiarEstado(estado) {
@@ -71,6 +81,29 @@ export default function DenunciaAdm() {
       setErrorAccion(e);
     } finally {
       setGuardando(null);
+    }
+  }
+
+  // Baja del colectivo denunciado. Si la denuncia seguía abierta, queda resuelta:
+  // la baja es la respuesta a la denuncia.
+  async function alConfirmarBaja() {
+    setDandoDeBaja(true);
+    setAviso('');
+    setErrorAccion(null);
+    try {
+      await darDeBajaColectivo(denuncia.colectivoId);
+      if (denunciaAbierta) await cambiarEstadoDenuncia(denuncia.id, 'resuelta');
+      setAviso(
+        denunciaAbierta
+          ? `${denuncia.colectivo} quedó dado de baja y la denuncia, resuelta.`
+          : `${denuncia.colectivo} quedó dado de baja.`
+      );
+      setVersion((v) => v + 1);
+    } catch (e) {
+      setErrorAccion(e);
+    } finally {
+      setDandoDeBaja(false);
+      setBajaAbierta(false);
     }
   }
 
@@ -137,6 +170,40 @@ export default function DenunciaAdm() {
           </Button>
         ))}
       </div>
+
+      {/* BLOQUE: medida sobre el colectivo — darlo de baja, o aviso si ya lo está */}
+      <section className={s.medidas} aria-labelledby="h-medidas">
+        <Heading level={2} size="h4" id="h-medidas">Medidas sobre el colectivo</Heading>
+        {denuncia.colectivoActivo ? (
+          <>
+            <Text variant="small">
+              Si la denuncia es grave, podés dar de baja a {denuncia.colectivo}: deja de aparecer
+              en la plataforma y no puede seguir buscando gente.
+            </Text>
+            <div>
+              <Button variant="danger" disabled={guardando !== null} onClick={() => setBajaAbierta(true)}>
+                Dar de baja al colectivo
+              </Button>
+            </div>
+          </>
+        ) : (
+          <Alert kind="info">{denuncia.colectivo} ya está dado de baja.</Alert>
+        )}
+      </section>
+
+      <ConfirmDialog
+        open={bajaAbierta}
+        title={`¿Dar de baja a ${denuncia.colectivo}?`}
+        confirmLabel="Sí, dar de baja"
+        danger
+        loading={dandoDeBaja}
+        onConfirm={alConfirmarBaja}
+        onCancel={() => setBajaAbierta(false)}
+      >
+        Deja de aparecer en la plataforma y se borran sus datos de contacto. Sus proyectos y
+        colaboraciones pasadas quedan en el historial.{denunciaAbierta && ' La denuncia queda resuelta.'}{' '}
+        No se puede deshacer.
+      </ConfirmDialog>
     </div>
   );
 }

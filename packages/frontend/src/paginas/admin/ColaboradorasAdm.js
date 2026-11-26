@@ -1,8 +1,8 @@
 /**
  * PANTALLA ColaboradorasAdm
  * Ruta: /admin/colaboradoras   ·   Quién la ve: Equipo administrativo
- * Qué muestra: Las personas colaboradoras, con búsqueda; desde acá se elimina una cuenta
- *   (con confirmación).
+ * Qué muestra: Las personas colaboradoras, con búsqueda. Cada nombre lleva a su perfil
+ *   (/admin/colaboradoras/:id); desde acá se elimina una cuenta (con confirmación).
  * De dónde salen los datos: GET /colaboradoras?busqueda= (api/organizacion.js); eliminar
  *   hace DELETE /colaboradoras/:id (api/admin.js): sus datos públicos quedan anonimizados.
  *
@@ -15,6 +15,7 @@
  *   4. LO QUE SE DIBUJA: búsqueda, tabla, paginación y diálogo de confirmación.
  */
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Avatar, Button, Field, Heading, Tag, Text } from '../../atomos';
 import { Alert, ConfirmDialog, Pager, RowsSkeleton } from '../../moleculas';
 import { useDemorado, usePedido } from '../../hooks';
@@ -90,10 +91,10 @@ export default function ColaboradorasAdm() {
             {datos.resultados.map((persona) => (
               <tr key={persona.id}>
                 <td data-l="Persona">
-                  <span className={sh.person}>
+                  <Link to={`/admin/colaboradoras/${persona.id}`} className={sh.person}>
                     <Avatar nombre={persona.nombre} size={36} foto={persona.foto || fotoDe(persona.id)} />
                     {persona.nombre}
-                  </span>
+                  </Link>
                 </td>
                 <td data-l="Alias">{persona.alias}</td>
                 <td data-l="Habilidades">
