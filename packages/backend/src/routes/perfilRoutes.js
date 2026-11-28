@@ -1,8 +1,11 @@
 import { Router } from "express";
 import { validarPaginacion } from "../middlewares/validations/paginacionValidation.js";
 import { perfilController } from "../container.js";
-import { validarPerfil, validarActualizacionPerfil } from "../middlewares/validations/perfilValidation.js";
-import { checkRole, verifyToken } from "../middlewares/auth.js";
+import {
+  validarPerfil,
+  validarActualizacionPerfil,
+} from "../middlewares/validations/perfilValidation.js";
+import { verifyToken, exigirRol } from "../middlewares/auth.js";
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
