@@ -9,7 +9,7 @@ import { verifyToken, exigirRol } from "../middlewares/auth.js";
 import { cargarCuenta } from "../container.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
 
-const soloAdmin = [verifyToken, exigirRol("adm"), cargarCuenta];
+const soloAdmin = [verifyToken, cargarCuenta, exigirRol("adm")];
 
 /**
  * Rutas de denuncias: alta desde una colaboración y gestión en /admin/denuncias.
