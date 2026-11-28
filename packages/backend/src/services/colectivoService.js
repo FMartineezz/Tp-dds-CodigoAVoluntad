@@ -206,7 +206,7 @@ export class ColectivoService {
    * @returns {Promise<void>}
    * @throws {AppError} 404 si el colectivo no existe o está dado/a de baja.
    */
-  async borrarFoto(id) {
+  async borrarFoto(id, cuenta) {
     this.exigirPermiso(id, cuenta);
     const resultado = await this.repository.borrarFoto(id);
     if (!resultado) throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
@@ -218,7 +218,7 @@ export class ColectivoService {
    * @returns {Promise<void>}
    * @throws {AppError} 404 si no existe; 409 si ya estaba dado de baja.
    */
-  async eliminarColectivo(id) {
+  async eliminarColectivo(id, cuenta) {
     this.exigirPermiso(id, cuenta, { permitirAdmin: true });
     const colectivo = await this.repository.obtenerPorIdConEstado(id);
 
