@@ -5,7 +5,11 @@ import {
   validarEstadoDenuncia,
 } from "../middlewares/validations/denunciaValidation.js";
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
+import { verifyToken, exigirRol } from "../middlewares/auth.js";
+import { cargarCuenta } from "../container.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
+
+const soloAdmin = [verifyToken, exigirRol("adm"), cargarCuenta];
 
 /**
  * Rutas de denuncias: alta desde una colaboración y gestión en /admin/denuncias.
@@ -18,17 +22,14 @@ export default function denunciaRoutes() {
   });
 
   // Ruta operativa para denunciar desde una colaboración existente
-  router.post(
-    "/colaboraciones/:id/denuncia",
-    validarDenuncia,
-    denunciaController.crearDenuncia,
-  );
+  router.post("/colaboraciones/:id/denuncia", validarDenuncia, denunciaController.crearDenuncia);
 
   // Rutas administrativas (gestión y consulta de denuncias)
-  router.get("/admin/denuncias", denunciaController.obtenerDenuncias);
-  router.get("/admin/denuncias/:id", denunciaController.obtenerDenunciaPorId);
+  router.get("/admin/denuncias", ...soloAdmin, denunciaController.obtenerDenuncias);
+  router.get("/admin/denuncias/:id", ...soloAdmin, denunciaController.obtenerDenunciaPorId);
   router.patch(
     "/admin/denuncias/:id/estado",
+    ...soloAdmin,
     validarEstadoDenuncia,
     denunciaController.actualizarEstado,
   );

@@ -56,7 +56,7 @@ export class ColectivoService {
       ubicacion,
       tipoDeColectivo,
       keycloackId,
-      redesValidadas
+      redesValidadas,
     );
 
     const colectivoGuardado = await this.repository.guardar(nuevoColectivo);
@@ -66,6 +66,14 @@ export class ColectivoService {
 
     return nuevoColectivo;
   }
+  //No se permite admin a no ser que se diga lo contrario
+  exigirPermiso(id, cuenta, { permitirAdmin = false } = {}) {
+    if (!cuenta) return;
+    if (permitirAdmin && cuenta.tipo == "adm") return;
+    if (String(cuenta.id) !== String(id)) {
+      throw new AppError("Acceso denegado: no sos dueño de este colectivo", 403);
+    }
+  }
 
   /**
    * Aplica cambios parciales a un colectivo (las redes sociales se revalidan).
@@ -74,7 +82,8 @@ export class ColectivoService {
    * @returns {Promise<ColectivoGuardado>} El colectivo actualizado.
    * @throws {AppError} 400 si no hay cambios o alguna red es inválida; 404 si no existe.
    */
-  async actualizarColectivo(id, cambios = {}) {
+  async actualizarColectivo(id, cambios = {}, cuenta) {
+    this.exigirPermiso(id, cuenta);
     if (!cambios || Object.keys(cambios).length === 0) {
       throw new AppError(ErrorCatalog.ARGUMENTO_INVALIDO, 400);
     }
@@ -172,7 +181,8 @@ export class ColectivoService {
    * @returns {Promise<{ fotoSubida: Date }>}
    * @throws {AppError} 404 si el colectivo no existe o está dado/a de baja.
    */
-  async subirFoto(id, foto) {
+  async subirFoto(id, foto, cuenta) {
+    this.exigirPermiso(id, cuenta);
     const resultado = await this.repository.guardarFoto(id, foto);
     if (!resultado) throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
     return { fotoSubida: resultado.fotoSubida };
@@ -197,6 +207,7 @@ export class ColectivoService {
    * @throws {AppError} 404 si el colectivo no existe o está dado/a de baja.
    */
   async borrarFoto(id) {
+    this.exigirPermiso(id, cuenta);
     const resultado = await this.repository.borrarFoto(id);
     if (!resultado) throw new AppError(ErrorCatalog.COLECTIVO_NO_ENCONTRADO, 404, id);
   }
@@ -208,6 +219,7 @@ export class ColectivoService {
    * @throws {AppError} 404 si no existe; 409 si ya estaba dado de baja.
    */
   async eliminarColectivo(id) {
+    this.exigirPermiso(id, cuenta, { permitirAdmin: true });
     const colectivo = await this.repository.obtenerPorIdConEstado(id);
 
     if (!colectivo) {

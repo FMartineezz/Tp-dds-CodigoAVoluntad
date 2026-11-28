@@ -87,7 +87,11 @@ export class PersonaColaboradoraRepository {
   }
 
   async obtenerPorKeycloack(id) {
-    return await this.model.findOne({ keycloackId: id }).lean().select('+contactos').populate("habilidades");
+    return await this.model
+      .findOne({ keycloackId: id, activo: true })
+      .lean()
+      .select("+contactos")
+      .populate("habilidades");
   }
 
   /**
@@ -155,7 +159,9 @@ export class PersonaColaboradoraRepository {
    *   o está dado/a de baja; sin `fotoArchivo` si nunca subió una.
    */
   async obtenerFoto(id) {
-    return await this.model.findOne({ _id: id, activo: true }, { fotoArchivo: 1 }).select("+fotoArchivo");
+    return await this.model
+      .findOne({ _id: id, activo: true }, { fotoArchivo: 1 })
+      .select("+fotoArchivo");
   }
 
   /**

@@ -48,6 +48,7 @@ export class PersonaColaboradoraController {
     const persona = await this.personaColaboradoraService.actualizarPersonaColaboradora(
       id,
       req.body,
+      req.cuenta,
     );
 
     res.status(200).json(persona);
@@ -90,10 +91,14 @@ export class PersonaColaboradoraController {
    * @param {import("express").Response} res
    */
   obtenerContactos = async (req, res) => {
-    const contactos = await this.personaColaboradoraService.obtenerContactos(req.params.id, {
-      colaboradoraId: req.query.colaboradoraId,
-      colectivoId: req.query.colectivoId,
-    });
+    const contactos = await this.personaColaboradoraService.obtenerContactos(
+      req.params.id,
+      {
+        colaboradoraId: req.query.colaboradoraId,
+        colectivoId: req.query.colectivoId,
+      },
+      req.cuenta,
+    );
 
     res.status(200).json(contactos);
   };
@@ -106,6 +111,10 @@ export class PersonaColaboradoraController {
    */
   obtenerProyectosAcordes = async (req, res) => {
     const id = req.params.id;
+
+    if (String(req.cuenta.id) !== String(req.params.id)) {
+      return res.status(403).json({ message: "Acceso denegado" });
+    }
 
     const pagina = await this.busquedaService.buscarProyectosParaColaboradora(id, req.paginacion);
 
@@ -120,7 +129,7 @@ export class PersonaColaboradoraController {
   eliminarPersonaColaboradora = async (req, res) => {
     const id = req.params.id;
 
-    await this.personaColaboradoraService.eliminarPersonaColaboradora(id);
+    await this.personaColaboradoraService.eliminarPersonaColaboradora(id, req.cuenta);
 
     res.status(204).send();
   };
@@ -135,7 +144,11 @@ export class PersonaColaboradoraController {
   subirFoto = async (req, res) => {
     // req.is devuelve el tipo sin «; charset…» (ya se validó en recibirFoto)
     const foto = { datos: req.body, tipo: req.is(TIPOS_DE_FOTO) };
-    const respuesta = await this.personaColaboradoraService.subirFoto(req.params.id, foto);
+    const respuesta = await this.personaColaboradoraService.subirFoto(
+      req.params.id,
+      foto,
+      req.cuenta,
+    );
     res.status(200).json(respuesta);
   };
 
@@ -161,7 +174,7 @@ export class PersonaColaboradoraController {
    * @param {import("express").Response} res
    */
   borrarFoto = async (req, res) => {
-    await this.personaColaboradoraService.borrarFoto(req.params.id);
+    await this.personaColaboradoraService.borrarFoto(req.params.id, req.cuenta);
     res.status(204).send();
   };
 }

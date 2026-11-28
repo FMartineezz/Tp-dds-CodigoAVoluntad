@@ -53,7 +53,11 @@ export class ColectivoRepository {
    * @returns {Promise<ColectivoGuardado[]>}
    */
   async obtenerDadosDeBaja() {
-    return await this.model.find({ activo: false }).select("+updatedAt").sort({ updatedAt: -1, _id: -1 }).lean();
+    return await this.model
+      .find({ activo: false })
+      .select("+updatedAt")
+      .sort({ updatedAt: -1, _id: -1 })
+      .lean();
   }
 
   /**
@@ -73,8 +77,9 @@ export class ColectivoRepository {
     return await this.model.findById(id).lean();
   }
 
+  //Solo trae los activos para que no inicie sesion en una cuenta eliminada
   async obtenerPorKeycloack(id) {
-    return await this.model.findOne({ keycloackId: id }).lean();
+    return await this.model.findOne({ keycloackId: id, activo: true }).lean();
   }
 
   // Igual que obtenerPorId pero trae `activo` (que por defecto no se lee: select false)
@@ -135,7 +140,9 @@ export class ColectivoRepository {
    *   o está dado/a de baja; sin `fotoArchivo` si nunca subió una.
    */
   async obtenerFoto(id) {
-    return await this.model.findOne({ _id: id, activo: true }, { fotoArchivo: 1 }).select("+fotoArchivo");
+    return await this.model
+      .findOne({ _id: id, activo: true }, { fotoArchivo: 1 })
+      .select("+fotoArchivo");
   }
 
   /**

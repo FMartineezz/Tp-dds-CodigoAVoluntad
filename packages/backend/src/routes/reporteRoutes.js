@@ -3,7 +3,11 @@ import validarReporte from "../middlewares/validations/reporteValidation.js";
 import { limiteDeReportes } from "../middlewares/validations/rateLimit.js";
 import { reporteController } from "../container.js";
 import { exigirIdsValidos } from "../middlewares/validations/idValidation.js";
+import { verifyToken, exigirRol } from "../middlewares/auth.js";
+import { cargarCuenta } from "../container.js";
 import ErrorCatalog from "../errors/errorCatalog.js";
+
+const soloAdmin = [verifyToken, exigirRol("adm"), cargarCuenta];
 
 /**
  * Rutas de reportes de problemas: por ahora solo el alta, pública (sin cuenta).
@@ -17,9 +21,9 @@ export default function reporteRoutes() {
   router.post("/reportes", limiteDeReportes, validarReporte, reporteController.crearReporte);
 
   // Equipo administrativo (sin protección hasta que exista el login, como /admin/denuncias)
-  router.get("/admin/reportes", reporteController.obtenerReportes);
-  router.get("/admin/reportes/:id", reporteController.obtenerReportePorId);
-  router.patch("/admin/reportes/:id/estado", reporteController.actualizarEstado);
+  router.get("/admin/reportes", ...soloAdmin, reporteController.obtenerReportes);
+  router.get("/admin/reportes/:id", ...soloAdmin, reporteController.obtenerReportePorId);
+  router.patch("/admin/reportes/:id/estado", ...soloAdmin, reporteController.actualizarEstado);
 
   return router;
 }

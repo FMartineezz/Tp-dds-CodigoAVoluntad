@@ -23,7 +23,7 @@ export class ColectivoController {
       req.body.ubicacion,
       req.body.tipoDeColectivo,
       req.user.id,
-      req.body.redesSociales
+      req.body.redesSociales,
     );
     delete respuesta.denuncias;
     res.status(201).location(`/colectivos/${respuesta.id}`).json(respuesta);
@@ -37,7 +37,7 @@ export class ColectivoController {
   actualizarColectivo = async (req, res) => {
     const id = req.params.id;
 
-    const respuesta = await this.service.actualizarColectivo(id, req.body);
+    const respuesta = await this.service.actualizarColectivo(id, req.body, req.cuenta);
     res.status(200).json(respuesta);
   };
 
@@ -81,7 +81,7 @@ export class ColectivoController {
   eliminarColectivo = async (req, res) => {
     const id = req.params.id;
 
-    const respuesta = await this.service.eliminarColectivo(id);
+    const respuesta = await this.service.eliminarColectivo(id, req.cuenta);
     res.status(204).json(respuesta);
   };
 
@@ -95,7 +95,7 @@ export class ColectivoController {
   subirFoto = async (req, res) => {
     // req.is devuelve el tipo sin «; charset…» (ya se validó en recibirFoto)
     const foto = { datos: req.body, tipo: req.is(TIPOS_DE_FOTO) };
-    const respuesta = await this.service.subirFoto(req.params.id, foto);
+    const respuesta = await this.service.subirFoto(req.params.id, foto, req.cuenta);
     res.status(200).json(respuesta);
   };
 
@@ -121,7 +121,7 @@ export class ColectivoController {
    * @param {import("express").Response} res
    */
   borrarFoto = async (req, res) => {
-    await this.service.borrarFoto(req.params.id);
+    await this.service.borrarFoto(req.params.id, req.cuenta);
     res.status(204).send();
   };
 }

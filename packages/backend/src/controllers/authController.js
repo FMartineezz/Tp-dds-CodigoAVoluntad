@@ -4,10 +4,9 @@ export class AuthController {
   }
 
   verificarUsuario = async (req, res) => {
-    const keycloakId = req.user.id;
+    const user = req.user;
 
-    const estado = await this.authService.verificarUsuario(keycloakId);
-    console.log(estado)
+    const estado = await this.authService.verificarUsuario(user);
     return res.status(200).json(estado);
   };
 }

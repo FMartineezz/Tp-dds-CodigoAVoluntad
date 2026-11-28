@@ -113,6 +113,14 @@ export class PersonaColaboradoraService {
     return personaColaboradora;
   }
 
+  exigirPermiso(id, cuenta, { permitirAdmin = false } = {}) {
+    if (!actor) return;
+    if (permitirAdmin && actor.tipo === "adm") return;
+    if (String(cuenta.id) !== String(id)) {
+      throw new AppError("Acceso denegado: no sos dueño de este recurso", 403);
+    }
+  }
+
   /**
    * Aplica un PATCH a una persona, traduciendo habilidades y validando redes sociales.
    * @param {Id} id
@@ -242,13 +250,13 @@ export class PersonaColaboradoraService {
    * @returns {Promise<MedioDeContacto[]>}
    * @throws {AppError} 404 si la persona no existe; 403 si quien pide no tiene acceso.
    */
-  async obtenerContactos(id, { colaboradoraId, colectivoId } = {}) {
+  async obtenerContactos(id, actor) {
     const persona = await this.obtenerPersonaColaboradoraPorIdConContactos(id);
 
-    const esLaDuena = colaboradoraId != null && String(colaboradoraId) === String(id);
+    const esLaDuena = actor?.tipo === "col" && String(actor.id) === String(id);
     const esSuColectivo =
-      colectivoId != null &&
-      (await this.colaboracionRepository.existeActivaConColectivo(id, colectivoId));
+      actor?.tipo === "org" &&
+      (await this.colaboracionRepository.existeActivaConColectivo(id, actor.id));
 
     if (!esLaDuena && !esSuColectivo) {
       throw new AppError(ErrorCatalog.COLABORADORA_CONTACTOS_SIN_ACCESO, 403, id);

@@ -73,6 +73,6 @@ export class ColaboracionController {
     const id = req.params.id;
 
     await this.colaboracionService.desactivarColaboracion(id, req.query.por);
-    res.status(200).json( { message: "Colaboración desactivada correctamente" });
-  }
+    res.status(200).json({ message: "Colaboración desactivada correctamente" });
+  };
 }

@@ -83,7 +83,8 @@ const colectivoSchema = new mongoose.Schema(
     },
     keycloackId: {
       type: String,
-      unique: true
+      unique: true,
+      select: false,
     },
     denuncias: {
       type: [denunciaSchema],

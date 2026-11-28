@@ -2,17 +2,18 @@ import jwt from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
 
 const client = jwksClient({
-  // En producción viene del compose (red interna de Docker); en local usa el Keycloak de desarrollo.
   jwksUri:
     process.env.KEYCLOAK_JWKS_URI ||
     "http://localhost:8080/realms/CodigoAVoluntad/protocol/openid-connect/certs",
 });
 
+const KEYCLOAK_ISSUER =
+  process.env.KEYCLOAK_ISSUER || "http://localhost:8080/realms/CodigoAVoluntad";
+
 function getKey(header, callback) {
   client.getSigningKey(header.kid, (err, key) => {
     if (err) return callback(err, null);
-    const signingKey = key.getPublicKey();
-    callback(null, signingKey);
+    callback(null, key.getPublicKey());
   });
 }
 
@@ -24,10 +25,11 @@ export const verifyToken = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, getKey, { algorithms: ["RS256"] }, (err, decoded) => {
+  jwt.verify(token, getKey, { algorithms: ["RS256"], issuer: KEYCLOAK_ISSUER }, (err, decoded) => {
     if (err) {
-      console.error("Error real de jwt.verify:", err);
-      return res.status(403).json({ message: "Token inválido o expirado" });
+      // Solo logueamos el tipo de error, no el stack/objeto completo
+      console.warn("Token rechazado:", err.name);
+      return res.status(401).json({ message: "Token inválido o expirado" });
     }
 
     req.user = {
@@ -40,18 +42,45 @@ export const verifyToken = (req, res, next) => {
   });
 };
 
-export const checkRole = (allowedRoles) => {
-  return (req, res, next) => {
-    const userRoles = req.user?.roles || [];
+// Resuelve la identidad real desde la BD (fuente de verdad)
+export const crearCargarCuenta = ({ personaColaboradoraRepository, colectivoRepository }) => {
+  return async (req, res, next) => {
+    try {
+      if (req.user?.roles?.includes("admin")) {
+        req.cuenta = { tipo: "adm", id: null };
+        return next();
+      }
 
-    const hasRole = allowedRoles.some((role) => userRoles.includes(role));
-    if (!hasRole) {
-      return res.status(403).json({
-        message: "Acceso denegado: permisos insuficientes",
-        rolesDelUsuario: userRoles,
-      });
+      const keycloakId = req.user?.id;
+      if (!keycloakId) {
+        return res.status(401).json({ message: "Usuario no autenticado" });
+      }
+
+      const colaboradora = await personaColaboradoraRepository.obtenerPorKeycloack(keycloakId);
+      if (colaboradora) {
+        req.cuenta = { tipo: "col", id: colaboradora._id.toString() };
+        return next();
+      }
+
+      const colectivo = await colectivoRepository.obtenerPorKeycloack(keycloakId);
+      if (colectivo) {
+        req.cuenta = { tipo: "org", id: colectivo._id.toString() };
+        return next();
+      }
+
+      return res.status(403).json({ message: "Cuenta inexistente o dada de baja" });
+    } catch (error) {
+      next(error);
     }
+  };
+};
 
+// Reemplaza a checkRole: valida contra req.cuenta.tipo y no filtra roles en la respuesta
+export const exigirRol = (...rolesPermitidos) => {
+  return (req, res, next) => {
+    if (!req.cuenta || !rolesPermitidos.includes(req.cuenta.tipo)) {
+      return res.status(403).json({ message: "Acceso denegado: permisos insuficientes" });
+    }
     next();
   };
 };

@@ -126,13 +126,14 @@ export const personaColaboradoraSchema = new mongoose.Schema(
     },
     keycloackId: {
       type: String,
-      unique: true
+      unique: true,
+      select: false,
     },
-    activo:{
+    activo: {
       type: Boolean,
       required: false,
       default: true,
-      select: false
+      select: false,
     },
     // Foto subida (los bytes). No se lee por defecto: solo la pide GET …/foto
     fotoArchivo: { type: fotoSchema, select: false },

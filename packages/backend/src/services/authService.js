@@ -1,15 +1,25 @@
-import { AppError } from "../errors/appError.js";
-import ErrorCatalog from "../errors/errorCatalog.js";
-
 export class AuthService {
-  constructor({ personaColaboradoraRepository, colectivoRepository, postulacionRepository, mensajeRepository }) {
+  constructor({
+    personaColaboradoraRepository,
+    colectivoRepository,
+    postulacionRepository,
+    mensajeRepository,
+  }) {
     this.colaboradoraRepository = personaColaboradoraRepository;
     this.colectivoRepository = colectivoRepository;
     this.postulacionRepository = postulacionRepository;
-    this.mensajeRepository = mensajeRepository
+    this.mensajeRepository = mensajeRepository;
   }
 
-  async verificarUsuario(keycloakId) {
+  // AuthService (solo el método verificarUsuario)
+  async verificarUsuario({ id: keycloakId, roles = [] }) {
+    if (roles.includes("admin")) {
+      return {
+        perfilCompletado: true,
+        rol: "adm",
+      };
+    }
+
     const colaboradora = await this.colaboradoraRepository.obtenerPorKeycloack(keycloakId);
     if (colaboradora) {
       const postulaciones = await this.postulacionRepository.obtenerPorPersona(colaboradora._id);
@@ -20,8 +30,8 @@ export class AuthService {
         datos: {
           ...colaboradora,
           postulaciones,
-          mensajes
-        }
+          mensajes,
+        },
       };
     }
 

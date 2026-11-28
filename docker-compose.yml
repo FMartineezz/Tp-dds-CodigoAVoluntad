@@ -70,6 +70,8 @@ services:
       - SECRET_KEY=${HCAPTCHA_SECRET}
       # Claves públicas de Keycloak para validar tokens (por la red interna de Docker, sin salir a internet)
       - KEYCLOAK_JWKS_URI=http://keycloak:8080/auth/realms/CodigoAVoluntad/protocol/openid-connect/certs
+      # Issuer público que Keycloak estampa en el campo "iss" del JWT (coincide con KC_HOSTNAME)
+      - KEYCLOAK_ISSUER=https://${DOMAIN}/auth/realms/CodigoAVoluntad
     volumes:
       # Swagger busca /docs/api-docs.json dentro del contenedor
       - ./docs:/docs:ro

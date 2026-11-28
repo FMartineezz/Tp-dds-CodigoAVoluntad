@@ -49,6 +49,7 @@ import { NotificacionController } from "./controllers/notificacionController.js"
 import { AuthService } from "./services/authService.js";
 import { AuthController } from "./controllers/authController.js";
 import { cierreProyectosJob } from "./cronTasks/cierreProyectoJob.js";
+import { crearCargarCuenta } from "./middlewares/auth.js";
 
 // Repositorios: no tienen dependencias.
 const proyectoRepository = new ProyectoRepository();
@@ -128,8 +129,11 @@ const postulacionService = new PostulacionService({
   colaboracionService,
 });
 const authService = new AuthService({
-  personaColaboradoraRepository, colectivoRepository, postulacionRepository, mensajeRepository
-})
+  personaColaboradoraRepository,
+  colectivoRepository,
+  postulacionRepository,
+  mensajeRepository,
+});
 
 const denunciaService = new DenunciaService({
   colectivoRepository,
@@ -201,3 +205,8 @@ export const reporteController = new ReporteController({ reporteService });
 
 //Job task
 export const cierreProyectos = new cierreProyectosJob({ proyectoService });
+//Middlewar
+export const cargarCuenta = crearCargarCuenta({
+  personaColaboradoraRepository,
+  colectivoRepository,
+});
