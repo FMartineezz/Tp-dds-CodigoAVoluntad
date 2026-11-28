@@ -93,10 +93,6 @@ export class PersonaColaboradoraController {
   obtenerContactos = async (req, res) => {
     const contactos = await this.personaColaboradoraService.obtenerContactos(
       req.params.id,
-      {
-        colaboradoraId: req.query.colaboradoraId,
-        colectivoId: req.query.colectivoId,
-      },
       req.cuenta,
     );
 
