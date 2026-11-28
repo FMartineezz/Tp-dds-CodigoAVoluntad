@@ -11,51 +11,51 @@
  * Cada función devuelve los datos YA TRADUCIDOS a la forma que usan los componentes
  * (ver aColectivoDeLaVista). Si el backend cambia un nombre, se arregla solo acá.
  */
-import { urlDeFotoSubida } from './fotos.js';
-import { api } from './cliente.js';
+import { urlDeFotoSubida } from "./fotos.js";
+import { api } from "./cliente.js";
 
 // El backend guarda el tipo en minúsculas y sin tildes; la pantalla lo muestra lindo.
 // La clave es el valor que acepta el backend (enum TipoColectivo); el valor, el texto lindo.
 export const TIPOS = {
-  fundacion: 'Fundación',
-  ong: 'ONG',
-  'asociacion barrial': 'Asociación barrial',
-  asamblea: 'Asamblea',
+  fundacion: "Fundación",
+  ong: "ONG",
+  "asociacion barrial": "Asociación barrial",
+  asamblea: "Asamblea",
 };
 
 // Lo mismo con la ubicación: el backend acepta solo estos valores (enum Ubicacion, en
 // minúsculas y sin tildes) y la pantalla muestra el nombre con mayúsculas y tildes.
 export const UBICACIONES = {
-  argentina: 'Argentina',
-  caba: 'CABA',
-  'buenos aires': 'Buenos Aires',
-  catamarca: 'Catamarca',
-  chaco: 'Chaco',
-  chubut: 'Chubut',
-  cordoba: 'Córdoba',
-  corrientes: 'Corrientes',
-  'entre rios': 'Entre Ríos',
-  formosa: 'Formosa',
-  jujuy: 'Jujuy',
-  'la pampa': 'La Pampa',
-  'la rioja': 'La Rioja',
-  mendoza: 'Mendoza',
-  misiones: 'Misiones',
-  neuquen: 'Neuquén',
-  'rio negro': 'Río Negro',
-  salta: 'Salta',
-  'san juan': 'San Juan',
-  'san luis': 'San Luis',
-  'santa cruz': 'Santa Cruz',
-  'santa fe': 'Santa Fe',
-  'santiago del estero': 'Santiago del Estero',
-  'tierra del fuego': 'Tierra del Fuego',
-  tucuman: 'Tucumán',
+  argentina: "Argentina",
+  caba: "CABA",
+  "buenos aires": "Buenos Aires",
+  catamarca: "Catamarca",
+  chaco: "Chaco",
+  chubut: "Chubut",
+  cordoba: "Córdoba",
+  corrientes: "Corrientes",
+  "entre rios": "Entre Ríos",
+  formosa: "Formosa",
+  jujuy: "Jujuy",
+  "la pampa": "La Pampa",
+  "la rioja": "La Rioja",
+  mendoza: "Mendoza",
+  misiones: "Misiones",
+  neuquen: "Neuquén",
+  "rio negro": "Río Negro",
+  salta: "Salta",
+  "san juan": "San Juan",
+  "san luis": "San Luis",
+  "santa cruz": "Santa Cruz",
+  "santa fe": "Santa Fe",
+  "santiago del estero": "Santiago del Estero",
+  "tierra del fuego": "Tierra del Fuego",
+  tucuman: "Tucumán",
 };
 
 // 'entre rios' → 'Entre Ríos'. Si llega un valor que no está en la tabla, se muestra tal cual.
 export function textoDeUbicacion(ubicacion) {
-  return UBICACIONES[ubicacion] ?? ubicacion ?? '';
+  return UBICACIONES[ubicacion] ?? ubicacion ?? "";
 }
 
 // ADAPTADOR: colectivo como lo manda el backend → colectivo como lo esperan los componentes.
@@ -66,7 +66,7 @@ export function aColectivoDeLaVista(c) {
     id: c._id ?? c.id,
     nombre: c.nombre,
     // URL de la foto que subió (null si no subió: se usa la del seed o la inicial).
-    foto: urlDeFotoSubida('colectivos', c._id ?? c.id, c.fotoSubida),
+    foto: urlDeFotoSubida("colectivos", c._id ?? c.id, c.fotoSubida),
     descripcion: c.descripcion,
     tipo: TIPOS[c.tipoDeColectivo] ?? c.tipoDeColectivo,
     // Valor del backend ('entre rios'), por si una pantalla lo necesita para editar.
@@ -84,7 +84,7 @@ export function aColectivoDeLaVista(c) {
 
 // GET /colectivos?pagina=&limite= → una página de colectivos (del más nuevo al más viejo).
 export async function obtenerColectivos({ pagina = 1, limite = 20 } = {}) {
-  const { data } = await api.get('/colectivos', { params: { pagina, limite } });
+  const { data } = await api.get("/colectivos", { params: { pagina, limite } });
   return { ...data, resultados: data.resultados.map(aColectivoDeLaVista) };
 }
 
@@ -101,7 +101,7 @@ export async function obtenerValoracionesDelColectivo(id) {
   return data.map((v) => ({
     id: v._id,
     puntaje: v.puntaje,
-    comentario: v.comentario ?? '',
+    comentario: v.comentario ?? "",
     fecha: v.createdAt ? new Date(v.createdAt) : null,
   }));
 }
@@ -110,6 +110,10 @@ export async function obtenerValoracionesDelColectivo(id) {
 // acepta el backend (tipoDeColectivo y ubicacion en minúsculas y sin tildes).
 // Si algo no valida, Axios lanza el error con { code, message } del backend.
 export async function crearColectivo(datos) {
-  const { data } = await api.post('/colectivos', datos);
+  const { data } = await api.post("/colectivos", datos);
   return aColectivoDeLaVista(data);
+}
+
+export async function eliminarColectivo(id) {
+  await api.delete(`/colectivos/${id}`);
 }

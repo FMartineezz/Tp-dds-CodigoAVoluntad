@@ -21,25 +21,26 @@
  * ¿Por qué dos componentes? El estado del formulario (useState) se arma con los datos del
  * backend; separándolo, FormularioOrg recién se crea cuando esos datos ya llegaron.
  */
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button, Field, Heading, Text } from '../../atomos';
-import { Alert, ConfirmDialog, RowsSkeleton } from '../../moleculas';
-import { SubirFoto } from '../../organismos';
-import { useAuth } from '../../contexto';
-import { usePedido } from '../../hooks';
-import { mensajeDeError } from '../../api/errores.js';
-import { llevarAlPrimerError } from '../../utilidades/llevarAlPrimerError.js';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button, Field, Heading, Text } from "../../atomos";
+import { Alert, ConfirmDialog, RowsSkeleton } from "../../moleculas";
+import { SubirFoto } from "../../organismos";
+import { useAuth } from "../../contexto";
+import { usePedido } from "../../hooks";
+import { mensajeDeError } from "../../api/errores.js";
+import { eliminarColectivo } from "../../api/colectivos.js";
+import { llevarAlPrimerError } from "../../utilidades/llevarAlPrimerError.js";
 import {
   REDES_SOCIALES,
   TIPOS_DE_COLECTIVO,
   UBICACIONES,
   actualizarColectivo,
   obtenerMiColectivo,
-} from '../../api/organizacion.js';
-import s from './Organizacion.module.css';
-import sh from '../../plantillas/disposicion.module.css';
-import { fotoDe } from '../../datos/fotos.js';
+} from "../../api/organizacion.js";
+import s from "./Organizacion.module.css";
+import sh from "../../plantillas/disposicion.module.css";
+import { fotoDe } from "../../datos/fotos.js";
 
 // ───── A. PerfilOrg ─────
 export default function PerfilOrg() {
@@ -58,7 +59,9 @@ export default function PerfilOrg() {
   if (error) {
     return (
       <div className={`container ${sh.page}`}>
-        <Alert kind="error" title="No pudimos cargar los datos">{mensajeDeError(error)}</Alert>
+        <Alert kind="error" title="No pudimos cargar los datos">
+          {mensajeDeError(error)}
+        </Alert>
       </div>
     );
   }
@@ -70,7 +73,7 @@ export default function PerfilOrg() {
 function redesComoObjeto(redes) {
   const objeto = {};
   REDES_SOCIALES.forEach((red) => {
-    objeto[red.valor] = redes.find((r) => r.tipo === red.valor)?.url ?? '';
+    objeto[red.valor] = redes.find((r) => r.tipo === red.valor)?.url ?? "";
   });
   return objeto;
 }
@@ -105,7 +108,7 @@ function FormularioOrg({ colectivo }) {
   const [errores, setErrores] = useState({});
 
   // Error que devolvió el backend al guardar ('' = ninguno).
-  const [errorGuardado, setErrorGuardado] = useState('');
+  const [errorGuardado, setErrorGuardado] = useState("");
 
   // true mientras se espera la respuesta del PATCH (el botón muestra que está cargando).
   const [guardando, setGuardando] = useState(false);
@@ -117,7 +120,7 @@ function FormularioOrg({ colectivo }) {
   const [dialogoEliminarAbierto, setDialogoEliminarAbierto] = useState(false);
 
   // Texto que la persona escribe en el diálogo para confirmar la eliminación.
-  const [nombreEscrito, setNombreEscrito] = useState('');
+  const [nombreEscrito, setNombreEscrito] = useState("");
 
   // ───── 2. CÁLCULOS ─────
 
@@ -127,7 +130,7 @@ function FormularioOrg({ colectivo }) {
   // Mensaje de error del campo de confirmación: aparece solo si ya se escribió algo y no
   // coincide (`&&` y `? :` → packages/frontend/docs/GLOSARIO.md → Operadores). Vacío = sin error.
   const errorDeConfirmacion =
-    nombreEscrito && nombreNoCoincide ? 'El nombre no coincide.' : undefined;
+    nombreEscrito && nombreNoCoincide ? "El nombre no coincide." : undefined;
 
   // ───── 3. ACCIONES ─────
 
@@ -152,16 +155,17 @@ function FormularioOrg({ colectivo }) {
     e.preventDefault(); // evita que el navegador recargue la página al enviar
 
     const erroresNuevos = {};
-    if (!datos.nombre.trim()) erroresNuevos.nombre = 'Ingresá el nombre del colectivo.';
-    if (!datos.desc.trim()) erroresNuevos.desc = 'Ingresá una descripción.';
+    if (!datos.nombre.trim()) erroresNuevos.nombre = "Ingresá el nombre del colectivo.";
+    if (!datos.desc.trim()) erroresNuevos.desc = "Ingresá una descripción.";
     // Cada red cargada tiene que ser un enlace http(s).
     REDES_SOCIALES.forEach((red) => {
       const url = redes[red.valor].trim();
-      if (url && !/^https?:\/\//.test(url)) erroresNuevos[red.valor] = 'El enlace debe empezar con https://';
+      if (url && !/^https?:\/\//.test(url))
+        erroresNuevos[red.valor] = "El enlace debe empezar con https://";
     });
     setErrores(erroresNuevos);
     setSeGuardo(false);
-    setErrorGuardado('');
+    setErrorGuardado("");
     if (Object.keys(erroresNuevos).length) {
       llevarAlPrimerError(e.currentTarget);
       return;
@@ -196,17 +200,24 @@ function FormularioOrg({ colectivo }) {
   // Se ejecuta al cancelar el diálogo de eliminar: lo cierra y borra lo que se había escrito.
   function alCancelarEliminacion() {
     setDialogoEliminarAbierto(false);
-    setNombreEscrito('');
+    setNombreEscrito("");
   }
 
   // Se ejecuta al tocar «Sí, eliminar». Solo avanza si el nombre escrito coincide.
   // PENDIENTE (front): DELETE /colectivos/:id ya da de baja al colectivo (activo: false),
   // pero esta pantalla todavía no lo llama: por ahora solo se cierra la sesión.
-  function alConfirmarEliminacion() {
+  async function alConfirmarEliminacion() {
     if (nombreNoCoincide) return;
-    setDialogoEliminarAbierto(false);
-    salir(); // cierra la sesión
-    navegar('/'); // vuelve al inicio público
+    setErrorGuardado("");
+    try {
+      await eliminarColectivo(id);
+      setDialogoEliminarAbierto(false);
+      salir(); // cierra la sesión recién cuando el back confirmó la baja (204)
+      navegar("/"); // vuelve al inicio público
+    } catch (error) {
+      setDialogoEliminarAbierto(false);
+      setErrorGuardado(mensajeDeError(error));
+    }
   }
 
   // ───── 4. LO QUE SE DIBUJA ─────
@@ -218,10 +229,14 @@ function FormularioOrg({ colectivo }) {
 
         {/* Avisos: guardado con éxito, o el error que devolvió el backend. */}
         {seGuardo && (
-          <Alert kind="success" onClose={() => setSeGuardo(false)}>Cambios guardados.</Alert>
+          <Alert kind="success" onClose={() => setSeGuardo(false)}>
+            Cambios guardados.
+          </Alert>
         )}
         {errorGuardado && (
-          <Alert kind="error" onClose={() => setErrorGuardado('')}>{errorGuardado}</Alert>
+          <Alert kind="error" onClose={() => setErrorGuardado("")}>
+            {errorGuardado}
+          </Alert>
         )}
 
         <div className={sh.form}>
@@ -231,7 +246,7 @@ function FormularioOrg({ colectivo }) {
             <SubirFoto
               recurso="colectivos"
               id={id}
-              nombre={datos.nombre || 'O'}
+              nombre={datos.nombre || "O"}
               square
               foto={logo}
               fotoDeRespaldo={fotoDe(id)}
@@ -244,35 +259,39 @@ function FormularioOrg({ colectivo }) {
             label="Descripción"
             placeholder="Qué hace la organización y a quién ayuda…"
             value={datos.desc}
-            onChange={alCambiarCampo('desc')}
+            onChange={alCambiarCampo("desc")}
             error={errores.desc}
           />
           <Field
             label="Nombre"
             value={datos.nombre}
-            onChange={alCambiarCampo('nombre')}
+            onChange={alCambiarCampo("nombre")}
             error={errores.nombre}
           />
           <Field
             as="select"
             label="Tipo de colectivo"
             value={datos.tipo}
-            onChange={alCambiarCampo('tipo')}
+            onChange={alCambiarCampo("tipo")}
           >
             {TIPOS_DE_COLECTIVO.map((tipo) => (
-              <option key={tipo.valor} value={tipo.valor}>{tipo.texto}</option>
+              <option key={tipo.valor} value={tipo.valor}>
+                {tipo.texto}
+              </option>
             ))}
           </Field>
           <Field
             as="select"
             label="Ubicación"
             value={datos.ubicacion}
-            onChange={alCambiarCampo('ubicacion')}
+            onChange={alCambiarCampo("ubicacion")}
           >
             {/* «Sin indicar» solo aparece si todavía no tiene ubicación. */}
             {!colectivo.ubicacion && <option value="">Sin indicar</option>}
             {UBICACIONES.map((ubicacion) => (
-              <option key={ubicacion.valor} value={ubicacion.valor}>{ubicacion.texto}</option>
+              <option key={ubicacion.valor} value={ubicacion.valor}>
+                {ubicacion.texto}
+              </option>
             ))}
           </Field>
           {/* Un campo por cada red social que acepta el backend. */}
@@ -291,18 +310,24 @@ function FormularioOrg({ colectivo }) {
 
         {/* BLOQUE: Botones — guardar (con indicador de carga) o cancelar */}
         <div className={sh.formActions}>
-          <Button type="submit" loading={guardando}>Guardar</Button>
-          <Button as={Link} to="/org" variant="secondary">Cancelar</Button>
+          <Button type="submit" loading={guardando}>
+            Guardar
+          </Button>
+          <Button as={Link} to="/org" variant="secondary">
+            Cancelar
+          </Button>
         </div>
       </form>
 
       {/* BLOQUE: Zona de riesgo — eliminar la cuenta del colectivo (acción permanente).
           PENDIENTE (front): la baja todavía no se pide al backend (ver alConfirmarEliminacion). */}
       <section className={s.riesgo} aria-labelledby="riesgo">
-        <Heading level={2} size="h3" id="riesgo">Zona de riesgo</Heading>
+        <Heading level={2} size="h3" id="riesgo">
+          Zona de riesgo
+        </Heading>
         <Text>
-          Si eliminás la cuenta se borran tus datos de contacto de la plataforma. La
-          información histórica del colectivo (proyectos y colaboraciones) se conserva.
+          Si eliminás la cuenta se borran tus datos de contacto de la plataforma. La información
+          histórica del colectivo (proyectos y colaboraciones) se conserva.
         </Text>
         <div>
           <Button variant="danger" onClick={() => setDialogoEliminarAbierto(true)}>
